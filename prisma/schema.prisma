@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SALES_REP
+  PHYSICIAN
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SalesRepresentative {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  firstName         String
+  lastName          String
+  email             String   @unique
+  website           String?
+  password          String
+  phone             String?
+  ordersCount       Int      @default(0)
+  commission        Float    @default(0)
+  walletBalance     Float    @default(0)
+  billingAddress    String?
+  shippingAddress   String?
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  physicians         PartneringPhysician[]
+  orderItems         Order[]
+  walletTransactions WalletTransaction[]
+  withdrawRequests   WithdrawRequest[]
+}
+
+model Category {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String        @unique
+  description   String?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  subCategories SubCategory[]
+  products      Product[]
+}
+
+model SubCategory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  categoryId  String    @db.ObjectId
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  slug           String        @unique
+  description    String?
+  image          String?
+  imageGallery   String[]
+  salePrice      Float
+  costPrice      Float
+  compareAtPrice Float?
+  quantity       Int           @default(0)
+  discount       Float         @default(0)
+  sku            String        @unique
+  gtin           String?
+  weight         Float?
+  weightUnit     String        @default("kg")
+  tags           String[]
+  variants       Json[]
+  status         ProductStatus @default(ACTIVE)
+  categoryId     String?       @db.ObjectId
+  subCategoryId  String?       @db.ObjectId
+  category       Category?     @relation(fields: [categoryId], references: [id])
+  subCategory    SubCategory?  @relation(fields: [subCategoryId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model PartneringPhysician {
+  id                  String         @id @default(auto()) @map("_id") @db.ObjectId
+  isApproved          ApprovalStatus @default(PENDING)
+  firstName           String
+  lastName            String
+  email               String         @unique
+  password            String
+  aictherapy          String?
+  license             String?
+  websiteLink         String?
+  addressOne          String?
+  addressTwo          String?
+  city                String?
+  state               String?
+  zipCode             String?
+  phone               String?
+  officeContactNumber String?
+  fax                 String?
+  nameOfPractice      String?
+  yearsInPractice     Int?
+  fieldsOfSpeciality  String[]
+  commission          Float          @default(0)
+  uplineCommission    Float          @default(0)
+  bankName            String?
+  bankAccountNumber   String?
+  bankAccountName     String?
+  ordersCount         Int            @default(0)
+  addedByRole         Role
+  addedByAdminId      String?        @db.ObjectId
+  salesRepId          String?        @db.ObjectId
+  salesRep            SalesRepresentative? @relation(fields: [salesRepId], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  orderItems          Order[]
+}
+
+model CatalogDocument {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  fileName   String
+  fileUrl    String
+  fileSize   Int
+  uploadedBy String   @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id                        String               @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber               String               @unique
+
+  physicianId               String?              @db.ObjectId
+  physician                 PartneringPhysician? @relation(fields: [physicianId], references: [id])
+
+  salesRepId                String?              @db.ObjectId
+  salesRep                  SalesRepresentative? @relation(fields: [salesRepId], references: [id])
+
+  items                     Json[]
+
+  subtotal                  Float
+  total                     Float
+
+  // Rates snapshotted at order creation — never recalculated on rate changes
+  salesRepCommissionRate    Float                @default(0)
+  salesRepCommissionAmount  Float                @default(0)
+  physicianCommissionRate   Float                @default(0)
+  physicianCommissionAmount Float                @default(0)
+
+  status                    OrderStatus          @default(PENDING)
+  commissionPaid            Boolean              @default(false)
+  shippingAddress           String?
+  shippingRate              Float                @default(0)
+  estimatedDelivery         DateTime?
+  paymentMethod             String?
+  paymentStatus             String?
+  transactionId             String?
+  stripePaymentIntentId     String?
+  notes                     String?
+
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+}
+
+model WalletTransaction {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  salesRepId  String              @db.ObjectId
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id])
+  amount      Float
+  type        String
+  description String?
+  orderId     String?             @db.ObjectId
+  balance     Float
+  createdAt   DateTime            @default(now())
+}
+
+enum WithdrawStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model WithdrawRequest {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  salesRepId  String              @db.ObjectId
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id])
+  amount      Float
+  status      WithdrawStatus      @default(PENDING)
+  note        String?
+  adminNote   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
