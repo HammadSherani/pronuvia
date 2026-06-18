@@ -38,16 +38,22 @@ function buildNav(role: Role): NavItem[] {
       ...base,
       { label: "Account Application", href: "/admin/applications" },
       {
-        label: "Manage",
+        label: "Account Management",
         children: [
           { label: "Sales Representatives", href: "/admin/sales-reps" },
           { label: "Partnering Physicians", href: "/admin/physicians" },
-          { label: "Pending Approvals", href: "/admin/approvals" },
+          { label: "Partnering Physicians Requests", href: "/admin/approvals" },
+        ],
+      },
+         {
+        label: "Product Management",
+        children: [
           { label: "Products", href: "/admin/products" },
           { label: "Categories", href: "/admin/categories" },
           { label: "Sub-Categories", href: "/admin/sub-categories" },
         ],
       },
+      
       { label: "Contact Us", href: "/contact" },
       {
         label: "Withdrawal Request",

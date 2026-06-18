@@ -245,8 +245,19 @@ export async function getOrderById(id: string) {
   return prisma.order.findUnique({
     where: { id },
     include: {
-      physician: { select: { id: true, firstName: true, lastName: true, email: true, nameOfPractice: true, commission: true } },
-      salesRep:  { select: { id: true, name: true, email: true, commission: true } },
+      physician: {
+        select: {
+          id: true, firstName: true, lastName: true, email: true,
+          nameOfPractice: true, commission: true,
+          phone: true, addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
+        },
+      },
+      salesRep: {
+        select: {
+          id: true, name: true, firstName: true, lastName: true, email: true,
+          phone: true, commission: true, billingAddress: true,
+        },
+      },
     },
   });
 }

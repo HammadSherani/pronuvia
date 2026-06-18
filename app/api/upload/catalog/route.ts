@@ -23,7 +23,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File exceeds 20 MB limit" }, { status: 400 });
   }
 
-  const dir = path.join(process.cwd(), "public", "catalogs");
+  // On Vercel only /tmp is writable; for local dev we use public/catalogs
+  const isVercel = !!process.env.VERCEL;
+  const dir = isVercel
+    ? path.join("/tmp", "catalogs")
+    : path.join(process.cwd(), "public", "catalogs");
+
   await mkdir(dir, { recursive: true });
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -33,8 +38,11 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(filePath, buffer);
 
+  // On Vercel, /tmp files are ephemeral per-function; use the DB record as the source of truth
+  const publicUrl = isVercel ? null : `/catalogs/${unique}`;
+
   return NextResponse.json({
-    url:      `/catalogs/${unique}`,
+    url:      publicUrl,
     fileName: file.name,
     fileSize: file.size,
   });
