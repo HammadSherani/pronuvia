@@ -38,44 +38,50 @@ export async function login(
 
   const { email, password } = validated.data;
 
-  // Check admin
-  const admin = await prisma.admin.findUnique({ where: { email } });
-  if (admin) {
-    const valid = await verifyPassword(password, admin.password);
-    if (!valid) return { message: "Invalid email or password." };
-    await createSession(admin.id, Role.ADMIN, admin.email);
-    redirect(DASHBOARD_ROUTES[Role.ADMIN]);
-  }
-
-  // Check sales rep
-  const salesRep = await prisma.salesRepresentative.findUnique({
-    where: { email },
-  });
-  if (salesRep) {
-    const valid = await verifyPassword(password, salesRep.password);
-    if (!valid) return { message: "Invalid email or password." };
-    await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
-    redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
-  }
-
-  // Check physician
-  const physician = await prisma.partneringPhysician.findUnique({
-    where: { email },
-  });
-  if (physician) {
-    if (physician.isApproved !== "APPROVED") {
-      return {
-        message:
-          physician.isApproved === "PENDING"
-            ? "Your account is pending admin approval."
-            : "Your account has been rejected.",
-      };
+  try {
+    // Check admin
+    const admin = await prisma.admin.findUnique({ where: { email } });
+    if (admin) {
+      const valid = await verifyPassword(password, admin.password);
+      if (!valid) return { message: "Invalid email or password." };
+      await createSession(admin.id, Role.ADMIN, admin.email);
+      redirect(DASHBOARD_ROUTES[Role.ADMIN]);
     }
-    const valid = await verifyPassword(password, physician.password);
-    if (!valid) return { message: "Invalid email or password." };
-    await createSession(physician.id, Role.PHYSICIAN, physician.email);
-    redirect(DASHBOARD_ROUTES[Role.PHYSICIAN]);
-  }
 
-  return { message: "Invalid email or password." };
+    // Check sales rep
+    const salesRep = await prisma.salesRepresentative.findUnique({ where: { email } });
+    if (salesRep) {
+      const valid = await verifyPassword(password, salesRep.password);
+      if (!valid) return { message: "Invalid email or password." };
+      await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
+      redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
+    }
+
+    // Check physician
+    const physician = await prisma.partneringPhysician.findUnique({ where: { email } });
+    if (physician) {
+      if (physician.isApproved !== "APPROVED") {
+        return {
+          message:
+            physician.isApproved === "PENDING"
+              ? "Your account is pending admin approval."
+              : "Your account has been rejected.",
+        };
+      }
+      const valid = await verifyPassword(password, physician.password);
+      if (!valid) return { message: "Invalid email or password." };
+      await createSession(physician.id, Role.PHYSICIAN, physician.email);
+      redirect(DASHBOARD_ROUTES[Role.PHYSICIAN]);
+    }
+
+    return { message: "Invalid email or password." };
+  } catch (err) {
+    // next/navigation redirect() throws internally — let it propagate
+    if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
+    console.error("[login]", err);
+    if (err instanceof Error && err.message.includes("SESSION_SECRET")) {
+      return { message: "Server configuration error. Please contact support." };
+    }
+    return { message: "Unable to connect. Please check your connection and try again." };
+  }
 }

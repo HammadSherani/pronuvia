@@ -39,21 +39,27 @@ export async function adminRegister(
     return { message: "Invalid setup token." };
   }
 
-  const existingAdmin = await prisma.admin.findFirst();
-  if (existingAdmin) {
-    return { message: "An admin account already exists." };
+  try {
+    const existingAdmin = await prisma.admin.findFirst();
+    if (existingAdmin) {
+      return { message: "An admin account already exists." };
+    }
+
+    const existingEmail = await prisma.admin.findUnique({ where: { email } });
+    if (existingEmail) {
+      return { errors: { email: ["This email is already in use."] } };
+    }
+
+    const hashed = await hashPassword(password);
+    const admin = await prisma.admin.create({
+      data: { email, password: hashed },
+    });
+
+    await createSession(admin.id, Role.ADMIN, admin.email);
+    redirect("/admin/dashboard");
+  } catch (err) {
+    if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
+    console.error("[adminRegister]", err);
+    return { message: "Unable to connect to database. Please try again." };
   }
-
-  const existingEmail = await prisma.admin.findUnique({ where: { email } });
-  if (existingEmail) {
-    return { errors: { email: ["This email is already in use."] } };
-  }
-
-  const hashed = await hashPassword(password);
-  const admin = await prisma.admin.create({
-    data: { email, password: hashed },
-  });
-
-  await createSession(admin.id, Role.ADMIN, admin.email);
-  redirect("/admin/dashboard");
 }
