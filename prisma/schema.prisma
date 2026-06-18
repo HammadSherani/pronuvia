@@ -203,6 +203,14 @@ model Order {
   stripePaymentIntentId     String?
   notes                     String?
 
+  // Return / clawback fields
+  returnedAt                DateTime?
+  returnReason              String?
+  returnedItems             Json?                // null = full return, array of item indexes = partial
+  returnedTotal             Float?               // $ value of returned items
+  salesRepClawback          Float?               // deducted from sales rep wallet
+  physicianClawback         Float?               // informational — physician has no wallet
+
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime             @updatedAt
 }

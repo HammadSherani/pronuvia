@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireSalesRep } from "@/lib/auth/dal";
+import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
@@ -48,7 +49,7 @@ export async function salesRepAddPhysician(
 
   const validated = CreatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({

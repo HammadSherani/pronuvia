@@ -111,7 +111,7 @@ export async function createProduct(
   const validated = ProductSchema.safeParse(raw);
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const data    = validated.data;
@@ -157,7 +157,7 @@ export async function updateProduct(
   const validated = ProductSchema.safeParse(raw);
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const data    = validated.data;

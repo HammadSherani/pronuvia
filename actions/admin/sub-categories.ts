@@ -31,7 +31,7 @@ export async function createSubCategory(
   });
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { name, categoryId, description } = validated.data;
@@ -69,7 +69,7 @@ export async function updateSubCategory(
   });
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { name, categoryId, description } = validated.data;

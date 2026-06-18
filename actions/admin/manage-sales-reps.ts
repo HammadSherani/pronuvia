@@ -7,6 +7,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { CreateSalesRepSchema, UpdateSalesRepSchema } from "@/lib/validations/sales-rep";
 import { sendMail } from "@/lib/email/mailer";
 import { salesRepWelcomeEmail } from "@/lib/email/templates";
+import { z } from "zod";
 
 export type SalesRepActionState = {
   errors?: Record<string, string[]>;
@@ -54,7 +55,7 @@ export async function createSalesRep(
   await requireAdmin();
 
   const validated = CreateSalesRepSchema.safeParse(parseCreate(formData));
-  if (!validated.success) return { errors: validated.error.flatten().fieldErrors };
+  if (!validated.success) return { errors: z.flattenError(validated.error).fieldErrors };
 
   const { confirmPassword, password, ...data } = validated.data;
   void confirmPassword;
@@ -95,7 +96,7 @@ export async function updateSalesRep(
   await requireAdmin();
 
   const validated = UpdateSalesRepSchema.safeParse(parseUpdate(formData));
-  if (!validated.success) return { errors: validated.error.flatten().fieldErrors };
+  if (!validated.success) return { errors: z.flattenError(validated.error).fieldErrors };
 
   const existing = await prisma.salesRepresentative.findUnique({ where: { id } });
   if (!existing) return { message: "Sales representative not found." };
@@ -118,6 +119,27 @@ export async function updateSalesRep(
   revalidatePath("/admin/sales-reps");
   revalidatePath(`/admin/sales-reps/${id}`);
   return { success: true, message: "Sales representative updated successfully." };
+}
+
+export async function updateSalesRepCommission(
+  id: string,
+  commission: number,
+): Promise<SalesRepActionState> {
+  await requireAdmin();
+
+  if (commission < 0 || commission > 100) {
+    return { message: "Commission must be between 0 and 100." };
+  }
+
+  const existing = await prisma.salesRepresentative.findUnique({ where: { id } });
+  if (!existing) return { message: "Sales representative not found." };
+
+  await prisma.salesRepresentative.update({ where: { id }, data: { commission } });
+
+  revalidatePath("/admin/physicians");
+  revalidatePath("/admin/sales-reps");
+  revalidatePath(`/admin/sales-reps/${id}`);
+  return { success: true, message: "Commission updated." };
 }
 
 export async function deleteSalesRep(id: string): Promise<SalesRepActionState> {

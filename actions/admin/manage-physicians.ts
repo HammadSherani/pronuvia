@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
+import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
@@ -55,7 +56,7 @@ export async function adminCreatePhysician(
 
   const validated = CreatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -156,7 +157,7 @@ export async function updatePhysician(
 
   const validated = UpdatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const physician = await prisma.partneringPhysician.findUnique({ where: { id } });

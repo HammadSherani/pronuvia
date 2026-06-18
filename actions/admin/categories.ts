@@ -29,7 +29,7 @@ export async function createCategory(
   });
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { name, description } = validated.data;
@@ -61,7 +61,7 @@ export async function updateCategory(
   });
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { name, description } = validated.data;

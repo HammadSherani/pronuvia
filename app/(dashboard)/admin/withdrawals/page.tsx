@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { WithdrawalActions } from "@/components/admin/withdrawal-actions";
+import { RepWalletModal } from "@/components/admin/rep-wallet-modal";
 import { WithdrawStatus } from "@/app/generated/prisma/enums";
 
 export const metadata = { title: "Withdrawal Requests – Pronuvia Admin" };
@@ -83,6 +84,7 @@ export default async function WithdrawalsPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet</th>
                 <th className="px-5 py-3.5" />
               </tr>
             </thead>
@@ -110,11 +112,11 @@ export default async function WithdrawalsPage() {
                   <td className="px-5 py-4">
                     {r.salesRep.bankName ? (
                       <div>
-                        <p className="text-xs font-semibold text-gray-700">{r.salesRep.bankAccountName}</p>
-                        <p className="text-xs text-gray-400">{r.salesRep.bankName}</p>
+                        <p className="text-xs font-semibold text-gray-800">{r.salesRep.bankAccountName}</p>
+                        <p className="text-xs text-gray-500">{r.salesRep.bankName}</p>
                         {r.salesRep.bankAccountNumber && (
-                          <p className="text-xs text-gray-400 font-mono">
-                            ••••&nbsp;{r.salesRep.bankAccountNumber.slice(-4)}
+                          <p className="text-xs font-mono font-semibold text-gray-700 mt-0.5">
+                            {r.salesRep.bankAccountNumber}
                           </p>
                         )}
                       </div>
@@ -170,6 +172,14 @@ export default async function WithdrawalsPage() {
                     <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${statusStyle[r.status]}`}>
                       {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
                     </span>
+                  </td>
+
+                  {/* Wallet details modal */}
+                  <td className="px-5 py-4">
+                    <RepWalletModal
+                      salesRepId={r.salesRepId}
+                      repName={`${r.salesRep.firstName} ${r.salesRep.lastName}`}
+                    />
                   </td>
 
                   {/* Actions */}

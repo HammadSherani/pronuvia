@@ -59,7 +59,7 @@ export async function createOrder(
   };
 
   const validated = CreateOrderSchema.safeParse(raw);
-  if (!validated.success) return { errors: validated.error.flatten().fieldErrors as Record<string, string[]> };
+  if (!validated.success) return { errors: z.flattenError(validated.error).fieldErrors as Record<string, string[]> };
 
   const { physicianId, items, notes } = validated.data;
 
@@ -230,6 +230,8 @@ export async function listOrders() {
       salesRepCommissionRate: true, salesRepCommissionAmount: true,
       physicianCommissionRate: true, physicianCommissionAmount: true,
       paymentMethod: true, paymentStatus: true, transactionId: true,
+      returnedAt: true, returnedTotal: true,
+      salesRepClawback: true, physicianClawback: true,
       physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
       salesRep:  { select: { name: true } },
       createdAt: true,
@@ -247,6 +249,114 @@ export async function getOrderById(id: string) {
       salesRep:  { select: { id: true, name: true, email: true, commission: true } },
     },
   });
+}
+
+export async function getOrderByNumber(orderNumber: string) {
+  await requireAdmin();
+  return prisma.order.findUnique({
+    where: { orderNumber: orderNumber.trim().toUpperCase() },
+    select: {
+      id: true, orderNumber: true, status: true,
+      total: true, subtotal: true, items: true,
+      salesRepId: true, physicianId: true,
+      salesRepCommissionAmount: true, salesRepCommissionRate: true,
+      physicianCommissionAmount: true, physicianCommissionRate: true,
+      commissionPaid: true,
+      returnedAt: true,
+      salesRep: { select: { id: true, name: true, walletBalance: true } },
+      physician: { select: { id: true, firstName: true, lastName: true } },
+    },
+  });
+}
+
+export type ReturnActionState = {
+  success?: boolean;
+  message?: string;
+} | undefined;
+
+export async function processReturn(
+  orderId:             string,
+  returnedItemIndexes: number[] | null,   // null = full return
+  reason:              string,
+): Promise<ReturnActionState> {
+  await requireAdmin();
+
+  const order = await prisma.order.findUnique({
+    where:  { id: orderId },
+    select: {
+      id: true, orderNumber: true, status: true, total: true, items: true,
+      salesRepId: true, physicianId: true,
+      salesRepCommissionAmount: true, physicianCommissionAmount: true,
+      commissionPaid: true,
+      returnedAt: true,
+      salesRep: { select: { walletBalance: true } },
+    },
+  });
+
+  if (!order)          return { message: "Order not found." };
+  if (order.returnedAt) return { message: "This order has already been returned." };
+
+  const items      = order.items as unknown as OrderItem[];
+  const isFullReturn = returnedItemIndexes === null;
+
+  // Calculate the $ value of what's being returned
+  const returnedTotal = isFullReturn
+    ? order.total
+    : (returnedItemIndexes ?? []).reduce((sum, idx) => {
+        const item = items[idx];
+        return sum + (item?.lineTotal ?? 0);
+      }, 0);
+
+  if (returnedTotal <= 0) return { message: "No items selected for return." };
+
+  // Proportional commission clawback
+  const ratio = order.total > 0 ? returnedTotal / order.total : 0;
+  const salesRepClawback   = parseFloat((order.salesRepCommissionAmount  * ratio).toFixed(2));
+  const physicianClawback  = parseFloat((order.physicianCommissionAmount * ratio).toFixed(2));
+
+  // Deduct from sales rep wallet only if commission was already paid
+  if (order.commissionPaid && order.salesRepId && salesRepClawback > 0) {
+    const currentBalance = order.salesRep?.walletBalance ?? 0;
+    const newBalance     = Math.max(0, currentBalance - salesRepClawback);
+
+    await prisma.salesRepresentative.update({
+      where: { id: order.salesRepId },
+      data:  { walletBalance: newBalance },
+    });
+
+    await prisma.walletTransaction.create({
+      data: {
+        salesRepId:  order.salesRepId,
+        amount:      salesRepClawback,
+        type:        "DEBIT",
+        description: `Commission clawback — return on order #${order.orderNumber}`,
+        orderId,
+        balance:     newBalance,
+      },
+    });
+  }
+
+  const newStatus = isFullReturn ? "REFUNDED" : order.status;
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data:  {
+      status:           newStatus as OrderStatus,
+      returnedAt:       new Date(),
+      returnReason:     reason.trim() || null,
+      returnedItems:    isFullReturn ? null : returnedItemIndexes,
+      returnedTotal,
+      salesRepClawback,
+      physicianClawback,
+      // Reverse commissionPaid flag on full return so it won't re-credit
+      ...(isFullReturn && { commissionPaid: false }),
+    },
+  });
+
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/sales/wallet");
+  return { success: true, message: `Return processed. ${order.commissionPaid ? `$${salesRepClawback.toFixed(2)} clawed back from sales rep wallet.` : "No commission was paid — no clawback needed."}` };
 }
 
 export async function getCommissionSummary(opts?: { salesRepId?: string; physicianId?: string }) {

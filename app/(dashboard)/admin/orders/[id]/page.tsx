@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { getOrderById } from "@/actions/admin/manage-orders";
 import { OrderStatus } from "@/app/generated/prisma/enums";
 import { OrderStatusSelector } from "@/components/admin/order-status-selector";
+import { ReturnRowButton } from "@/components/admin/return-order-modal";
 import type { OrderItem } from "@/actions/admin/manage-orders";
 
 type Props = { params: Promise<{ id: string }> };
@@ -19,7 +20,7 @@ const statusStyle: Record<OrderStatus, string> = {
   DELIVERED:  "bg-emerald-50 text-emerald-700 border-emerald-200",
   COMPLETED:  "bg-teal-50 text-teal-700 border-teal-200",
   CANCELLED:  "bg-red-50 text-red-700 border-red-200",
-  REFUNDED:   "bg-gray-100 text-gray-600 border-gray-200",
+  REFUNDED:   "bg-orange-50 text-orange-700 border-orange-200",
 };
 
 export default async function OrderViewPage({ params }: Props) {
@@ -30,6 +31,8 @@ export default async function OrderViewPage({ params }: Props) {
   if (!order) notFound();
 
   const items = order.items as unknown as OrderItem[];
+
+  const isReturned = !!order.returnedAt;
 
   return (
     <div className="max-w-4xl">
@@ -47,8 +50,41 @@ export default async function OrderViewPage({ params }: Props) {
             {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
           </span>
           <OrderStatusSelector orderId={id} current={order.status} />
+          <ReturnRowButton
+            orderId={order.id}
+            orderNumber={order.orderNumber}
+            alreadyReturned={isReturned}
+          />
         </div>
       </div>
+
+      {/* Return info banner */}
+      {isReturned && (
+        <div className="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+          <svg className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+          </svg>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-orange-700">
+              Return processed on {new Date(order.returnedAt!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </p>
+            <div className="mt-1 flex flex-wrap gap-x-6 gap-y-0.5 text-xs text-orange-600">
+              {order.returnedTotal != null && (
+                <span>Returned value: <span className="font-semibold">{fmt(order.returnedTotal)}</span></span>
+              )}
+              {order.salesRepClawback != null && order.salesRepClawback > 0 && (
+                <span>Rep clawback: <span className="font-semibold">−{fmt(order.salesRepClawback)}</span></span>
+              )}
+              {order.physicianClawback != null && order.physicianClawback > 0 && (
+                <span>Dr. commission noted: <span className="font-semibold">−{fmt(order.physicianClawback)}</span></span>
+              )}
+            </div>
+            {order.returnReason && (
+              <p className="mt-1 text-xs text-orange-500 italic">"{order.returnReason}"</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-6">

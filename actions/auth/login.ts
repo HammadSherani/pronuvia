@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { verifyPassword } from "@/lib/auth/password";
+import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { LoginSchema } from "@/lib/validations/auth";
 import { Role } from "@/app/generated/prisma/enums";
@@ -32,7 +33,7 @@ export async function login(
 
   const validated = LoginSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { email, password } = validated.data;

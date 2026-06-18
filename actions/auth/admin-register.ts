@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { hashPassword } from "@/lib/auth/password";
+import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { AdminRegisterSchema } from "@/lib/validations/auth";
 import { Role } from "@/app/generated/prisma/enums";
@@ -28,7 +29,7 @@ export async function adminRegister(
 
   const validated = AdminRegisterSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
 
   const { email, password, setupToken } = validated.data;

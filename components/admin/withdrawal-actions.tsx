@@ -13,6 +13,8 @@ export function WithdrawalActions({ requestId }: { requestId: string }) {
   const handle = (action: "APPROVED" | "REJECTED") => {
     startTransition(async () => {
       const res = await updateWithdrawRequest(requestId, action, adminNote);
+
+      console.log("updateWithdrawRequest res", res);
       if (res?.success) {
         toast.success(res.message ?? "Done");
         setOpen(false);
