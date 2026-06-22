@@ -1,6 +1,6 @@
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { ProductStatus } from "@/app/generated/prisma/enums";
+import { ProductStatus } from "@/generated/prisma/enums";
 import { ShopProducts } from "@/components/sales/shop-products";
 
 export const metadata = { title: "Shop – Pronuvia" };

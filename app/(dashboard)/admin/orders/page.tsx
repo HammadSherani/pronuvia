@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
 import { listOrders } from "@/actions/admin/manage-orders";
-import { OrderStatus } from "@/app/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { OrderStatusSelector } from "@/components/admin/order-status-selector";
 import { ReturnOrderModal, ReturnRowButton } from "@/components/admin/return-order-modal";
 

@@ -6,7 +6,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { AdminRegisterSchema } from "@/lib/validations/auth";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 export type AdminRegisterState = {
   errors?: {

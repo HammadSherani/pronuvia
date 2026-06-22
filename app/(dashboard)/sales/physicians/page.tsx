@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { ApprovalStatus } from "@/app/generated/prisma/enums";
+import { ApprovalStatus } from "@/generated/prisma/enums";
 
 export const metadata = { title: "My Physicians – Pronuvia" };
 

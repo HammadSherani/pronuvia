@@ -1,7 +1,7 @@
 ﻿import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 export type SessionPayload = {
   userId: string;

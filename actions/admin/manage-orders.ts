@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { z } from "zod";
-import { OrderStatus } from "@/app/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 
 export type OrderActionState = {
   errors?: Record<string, string[]>;

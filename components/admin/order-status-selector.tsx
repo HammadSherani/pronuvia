@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import toast from "react-hot-toast";
 import { updateOrderStatus } from "@/actions/admin/manage-orders";
-import { OrderStatus } from "@/app/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { useRouter } from "next/navigation";
 
 const STATUSES: OrderStatus[] = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "COMPLETED", "CANCELLED", "REFUNDED"];

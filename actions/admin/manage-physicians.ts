@@ -7,7 +7,7 @@ import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { generateResetToken, randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
-import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
+import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
 import { passwordSetupEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getOrderById } from "@/actions/admin/manage-orders";
-import { OrderStatus } from "@/app/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { OrderStatusSelector } from "@/components/admin/order-status-selector";
 import { ReturnRowButton } from "@/components/admin/return-order-modal";
 import { PrintButton } from "@/components/sales/print-button";

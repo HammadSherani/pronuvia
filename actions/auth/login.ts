@@ -6,7 +6,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { LoginSchema } from "@/lib/validations/auth";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 // redirect() / notFound() throw objects with a `digest` field — must be re-thrown
 function isNextInternalError(err: unknown): boolean {

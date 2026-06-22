@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { ProductStatus } from "@/app/generated/prisma/enums";
+import { ProductStatus } from "@/generated/prisma/enums";
 import { ProductDetailClient } from "@/components/sales/product-detail-client";
 
 type Props = { params: Promise<{ slug: string }> };

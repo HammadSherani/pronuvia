@@ -2,7 +2,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { getCurrentSession } from "@/lib/auth/dal";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
 

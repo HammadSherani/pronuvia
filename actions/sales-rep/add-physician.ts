@@ -7,7 +7,7 @@ import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
-import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
+import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 
 export type AddPhysicianState = {
   errors?: Record<string, string[]>;

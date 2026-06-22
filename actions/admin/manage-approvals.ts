@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
-import { ApprovalStatus } from "@/app/generated/prisma/enums";
+import { ApprovalStatus } from "@/generated/prisma/enums";
 import { generateResetToken } from "@/lib/auth/reset-token";
 import { sendMail } from "@/lib/email/mailer";
 import { passwordSetupEmail } from "@/lib/email/templates";

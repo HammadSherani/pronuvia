@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getSession, type SessionPayload } from "./session";
 import { prisma } from "@/lib/db/prisma";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 export const getCurrentSession = cache(async (): Promise<SessionPayload | null> => {
   return getSession();

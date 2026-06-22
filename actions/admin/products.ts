@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { toSlug } from "@/lib/utils/slug";
-import { ProductStatus } from "@/app/generated/prisma/enums";
+import { ProductStatus } from "@/generated/prisma/enums";
 
 const SizeSchema = z.object({
   size:      z.string().min(1),

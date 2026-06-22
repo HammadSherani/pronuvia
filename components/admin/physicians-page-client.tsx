@@ -8,7 +8,7 @@ import { updateSalesRepCommission } from "@/actions/admin/manage-sales-reps";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { CommissionEditor } from "@/components/admin/commission-editor";
 import { SalesRepAccordionList } from "@/components/admin/sales-rep-accordion";
-import { ApprovalStatus } from "@/app/generated/prisma/enums";
+import { ApprovalStatus } from "@/generated/prisma/enums";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

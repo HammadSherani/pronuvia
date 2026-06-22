@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    "/**": ["./app/generated/prisma/**"],
+    "/**": ["./generated/prisma/**"],
   },
   images: {
     // Allow images served from the same origin (public folder uploads)

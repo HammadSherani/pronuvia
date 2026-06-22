@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
+import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 
 export async function GET() {
   const session = await getCurrentSession();

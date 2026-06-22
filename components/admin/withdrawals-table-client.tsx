@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { WithdrawalActions } from "@/components/admin/withdrawal-actions";
 import { RepWalletModal }    from "@/components/admin/rep-wallet-modal";
 import { bulkUpdateWithdrawals } from "@/actions/admin/manage-withdrawals";
-import { WithdrawStatus }    from "@/app/generated/prisma/enums";
+import { WithdrawStatus }    from "@/generated/prisma/enums";
 
 type Request = {
   id:         string;

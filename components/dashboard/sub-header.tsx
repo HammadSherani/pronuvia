@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth/logout";
-import type { Role } from "@/app/generated/prisma/enums";
+import type { Role } from "@/generated/prisma/enums";
 
 type SubNavItem =
   | { label: string; href: string; action?: never }

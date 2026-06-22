@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { ApprovalStatus, ProductStatus } from "@/app/generated/prisma/enums";
+import { ApprovalStatus, ProductStatus } from "@/generated/prisma/enums";
 import { CreateOrderForm } from "@/components/admin/create-order-form";
 
 export const metadata = { title: "Create Order – Pronuvia Admin" };

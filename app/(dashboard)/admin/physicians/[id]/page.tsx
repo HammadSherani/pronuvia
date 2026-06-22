@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById } from "@/actions/admin/manage-physicians";
-import { ApprovalStatus } from "@/app/generated/prisma/enums";
+import { ApprovalStatus } from "@/generated/prisma/enums";
 
 type Props = { params: Promise<{ id: string }> };
 

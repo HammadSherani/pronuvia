@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { PronuviaLogoDark } from "./pronuvia-logo-dark";
 import { useCart } from "@/lib/cart/cart-context";
-import type { Role } from "@/app/generated/prisma/enums";
+import type { Role } from "@/generated/prisma/enums";
 
 function CartIcon() {
   const { totalItems } = useCart();

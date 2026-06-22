@@ -1,5 +1,5 @@
 ﻿import { requireRole } from "@/lib/auth/dal";
-import { Role } from "@/app/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 
 export const metadata = { title: "Dashboard – Pronuvia" };
 
