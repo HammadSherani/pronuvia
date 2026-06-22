@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "@/lib/auth/session";
-import { Role } from "@/app/generated/prisma/enums";
+import { decryptEdge } from "@/lib/auth/session-edge";
 
-const DASHBOARD_ROUTES: Record<Role, string> = {
-  [Role.ADMIN]:      "/admin/dashboard",
-  [Role.SALES_REP]:  "/sales/shop",
-  [Role.PHYSICIAN]:  "/physician/dashboard",
+// Plain string literals — NO Prisma imports allowed in Edge Runtime
+const DASHBOARD_ROUTES: Record<string, string> = {
+  ADMIN:      "/admin/dashboard",
+  SALES_REP:  "/sales/shop",
+  PHYSICIAN:  "/physician/dashboard",
 };
 
 const ADMIN_SETUP_ROUTE = "/admin-setup";
 
-const ROLE_ROUTES: Record<Role, string[]> = {
-  [Role.ADMIN]: ["/admin"],
-  [Role.SALES_REP]: ["/sales"],
-  [Role.PHYSICIAN]: ["/physician"],
+const ROLE_ROUTES: Record<string, string[]> = {
+  ADMIN:     ["/admin"],
+  SALES_REP: ["/sales"],
+  PHYSICIAN: ["/physician"],
 };
 
 export async function proxy(request: NextRequest) {
@@ -22,15 +22,20 @@ export async function proxy(request: NextRequest) {
   // Redirect already-authenticated users away from /login
   if (pathname.startsWith("/login")) {
     const cookie = request.cookies.get("pronuvia_session")?.value;
-    const session = cookie ? await decrypt(cookie) : null;
+    const session = cookie ? await decryptEdge(cookie) : null;
     if (session) {
-      return NextResponse.redirect(new URL(DASHBOARD_ROUTES[session.role], request.url));
+      const dest = DASHBOARD_ROUTES[session.role] ?? "/";
+      return NextResponse.redirect(new URL(dest, request.url));
     }
     return NextResponse.next();
   }
 
-  // Allow other public routes without a session check
-  if (pathname.startsWith("/unauthorized") || pathname.startsWith("/logout")) {
+  // Allow public routes without a session check
+  if (
+    pathname.startsWith("/unauthorized") ||
+    pathname.startsWith("/logout") ||
+    pathname.startsWith("/api/")
+  ) {
     return NextResponse.next();
   }
 
@@ -46,7 +51,7 @@ export async function proxy(request: NextRequest) {
 
   // Validate session
   const cookie = request.cookies.get("pronuvia_session")?.value;
-  const session = cookie ? await decrypt(cookie) : null;
+  const session = cookie ? await decryptEdge(cookie) : null;
 
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -69,8 +74,8 @@ export async function proxy(request: NextRequest) {
   const secret = new TextEncoder().encode(process.env.SESSION_SECRET ?? "");
   const refreshed = await new SignJWT({
     userId: session.userId,
-    role: session.role,
-    email: session.email,
+    role:   session.role,
+    email:  session.email,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -79,10 +84,10 @@ export async function proxy(request: NextRequest) {
 
   response.cookies.set("pronuvia_session", refreshed, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure:   process.env.NODE_ENV === "production",
     sameSite: "lax",
-    expires: expiresAt,
-    path: "/",
+    expires:  expiresAt,
+    path:     "/",
   });
 
   return response;

@@ -48,6 +48,9 @@ model SalesRepresentative {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  passwordResetToken  String?
+  passwordResetExpiry DateTime?
+
   physicians         PartneringPhysician[]
   orderItems         Order[]
   walletTransactions WalletTransaction[]
@@ -137,6 +140,9 @@ model PartneringPhysician {
   fieldsOfSpeciality  String[]
   commission          Float          @default(0)
   uplineCommission    Float          @default(0)
+  salesRepNote        String?
+  passwordResetToken  String?
+  passwordResetExpiry DateTime?
   bankName            String?
   bankAccountNumber   String?
   bankAccountName     String?

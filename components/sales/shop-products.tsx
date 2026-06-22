@@ -13,7 +13,7 @@ type Category = { id: string; name: string };
 // ──────────────────────────────────────────────────────────
 // Single product card
 // ──────────────────────────────────────────────────────────
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
   const variants = product.variants as Variant[];
   const [selectedIdx, setSelectedIdx] = useState<number>(() => variants.length === 1 ? 0 : -1);
   const [qty,         setQty]         = useState(1);
@@ -42,7 +42,7 @@ function ProductCard({ product }: { product: Product }) {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col overflow-hidden">
 
         {/* Image */}
-        <Link href={`/sales/shop/${product.slug}`} className="block">
+        <Link href={`${basePath}/${product.slug}`} className="block">
           <div className="aspect-square bg-[#f8f9fa] flex items-center justify-center overflow-hidden">
             {product.image ? (
               <img src={product.image} alt={product.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -80,7 +80,7 @@ function ProductCard({ product }: { product: Product }) {
           {product.category && (
             <p className="text-[9px] tracking-[0.15em] uppercase text-gray-400 font-medium mb-1">{product.category.name}</p>
           )}
-          <Link href={`/sales/shop/${product.slug}`}>
+          <Link href={`${basePath}/${product.slug}`}>
             <p className="text-base font-bold text-gray-900 leading-snug hover:text-[#3DBFA4] transition-colors mb-1">
               {product.title}
             </p>
@@ -165,9 +165,11 @@ function ProductCard({ product }: { product: Product }) {
 export function ShopProducts({
   products,
   categories,
+  basePath = "/sales/shop",
 }: {
   products: Product[];
   categories: Category[];
+  basePath?: string;
 }) {
   const [search, setSearch] = useState("");
   const [catId,  setCatId]  = useState<string>("all");
@@ -219,7 +221,7 @@ export function ShopProducts({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} basePath={basePath} />
           ))}
         </div>
       )}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus, ProductStatus } from "@/app/generated/prisma/enums";
@@ -41,3 +41,4 @@ export default async function NewOrderPage() {
     </div>
   );
 }
+

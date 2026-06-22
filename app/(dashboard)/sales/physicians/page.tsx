@@ -1,7 +1,7 @@
+﻿import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/app/generated/prisma/enums";
-import { EditCommissionButton } from "@/components/sales/edit-commission-button";
 
 export const metadata = { title: "My Physicians – Pronuvia" };
 
@@ -38,6 +38,15 @@ export default async function SalesPhysiciansPage() {
             Doctors added under your account
           </p>
         </div>
+        <Link
+          href="/sales/physicians/new"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Doctor
+        </Link>
       </div>
 
       {/* Summary chips */}
@@ -156,13 +165,11 @@ export default async function SalesPhysiciansPage() {
                       )}
                     </td>
 
-                    {/* Commission — inline editable */}
+                    {/* Commission — read-only (only admin can change) */}
                     <td className="px-5 py-4">
-                      <EditCommissionButton
-                        physicianId={p.id}
-                        currentCommission={p.commission}
-                        physicianName={`Dr. ${p.firstName} ${p.lastName}`}
-                      />
+                      <span className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">
+                        {p.commission}%
+                      </span>
                     </td>
 
                     {/* Approval status */}
@@ -188,3 +195,4 @@ export default async function SalesPhysiciansPage() {
     </div>
   );
 }
+

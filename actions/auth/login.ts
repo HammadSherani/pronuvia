@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
@@ -7,6 +7,11 @@ import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { LoginSchema } from "@/lib/validations/auth";
 import { Role } from "@/app/generated/prisma/enums";
+
+// redirect() / notFound() throw objects with a `digest` field — must be re-thrown
+function isNextInternalError(err: unknown): boolean {
+  return err != null && typeof err === "object" && "digest" in err;
+}
 
 export type LoginState = {
   errors?: {
@@ -76,12 +81,13 @@ export async function login(
 
     return { message: "Invalid email or password." };
   } catch (err) {
-    // next/navigation redirect() throws internally — let it propagate
-    if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
+    // redirect() and notFound() in Next.js throw special objects with a `digest` — always re-throw
+    if (isNextInternalError(err)) throw err;
     console.error("[login]", err);
     if (err instanceof Error && err.message.includes("SESSION_SECRET")) {
       return { message: "Server configuration error. Please contact support." };
     }
-    return { message: "Unable to connect. Please check your connection and try again." };
+    return { message: "Unable to connect to the server. Please try again." };
   }
 }
+

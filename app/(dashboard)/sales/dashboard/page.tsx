@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/app/generated/prisma/enums";
@@ -67,3 +67,4 @@ export default async function SalesDashboardPage() {
     </div>
   );
 }
+

@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useActionState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -12,38 +20,99 @@ import {
 } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
-import { calculateShipping, estimatedDeliveryDate } from "@/lib/utils/shipping";
+import { calculateShipping } from "@/lib/utils/shipping";
 import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
+import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
+import type { AddressData } from "@/actions/sales-rep/save-address";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 
-type Props = {
-  repName:              string;
-  repEmail:             string;
-  repPhone:             string;
-  savedShippingAddress: string;
-  walletBalance:        number;
+type FedExRate = {
+  serviceType:  string;
+  serviceName:  string;
+  rate:         number;
+  currency:     string;
+  deliveryInfo: string | null;
 };
 
-// ── Shipping badge ─────────────────────────────────────────────────────────────
+// ── Address helpers ─────────────────────────────────────────────────────────
 
-function ShippingBadge({ rate }: { rate: number }) {
-  if (rate === 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#3DBFA4]">
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-        Free
-      </span>
-    );
-  }
-  return <span className="text-sm text-gray-700">${rate.toFixed(2)}</span>;
+const EMPTY: AddressData = {
+  firstName: "", lastName: "",  address1: "", address2: "",
+  city:      "", state:    "",  zip:      "", country:  "United States",
+};
+
+function parseAddr(raw: string): AddressData {
+  if (!raw) return EMPTY;
+  try {
+    const p = JSON.parse(raw);
+    if (p && typeof p.firstName === "string") return p as AddressData;
+  } catch { /* plain text — ignore */ }
+  return EMPTY;
 }
 
-// ── Stripe card form (must live inside <Elements>) ────────────────────────────
+function hasAddr(a: AddressData) {
+  return !!(a.firstName || a.address1 || a.city);
+}
 
+function displayAddr(a: AddressData) {
+  const name   = `${a.firstName} ${a.lastName}`.trim();
+  const street = [a.address1, a.address2].filter(Boolean).join(", ");
+  const city   = [a.city, a.state, a.zip].filter(Boolean).join(", ");
+  const line2  = [street, city, a.country].filter(Boolean).join(", ");
+  return { name, line2 };
+}
+
+function addrToString(a: AddressData): string {
+  return [
+    `${a.firstName} ${a.lastName}`.trim(),
+    a.address1,
+    a.address2,
+    [a.city, a.state, a.zip].filter(Boolean).join(", "),
+    a.country,
+  ].filter(Boolean).join("\n");
+}
+
+// ── Shared input class ──────────────────────────────────────────────────────
+
+const inp =
+  "w-full px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors bg-white placeholder:text-gray-400";
+
+// ── Address field group ─────────────────────────────────────────────────────
+
+function AddressFields({
+  value,
+  onChange,
+}: {
+  value: AddressData;
+  onChange: (v: AddressData) => void;
+}) {
+  const set =
+    (k: keyof AddressData) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      onChange({ ...value, [k]: e.target.value });
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <input className={inp} placeholder="First name" value={value.firstName} onChange={set("firstName")} />
+        <input className={inp} placeholder="Last name"  value={value.lastName}  onChange={set("lastName")} />
+      </div>
+      <input className={inp} placeholder="Address" value={value.address1} onChange={set("address1")} />
+      <input className={inp} placeholder="Apartment, suite, etc. (optional)" value={value.address2} onChange={set("address2")} />
+      <div className="grid grid-cols-5 gap-3">
+        <input className={inp + " col-span-2"} placeholder="City"     value={value.city}  onChange={set("city")} />
+        <input className={inp}                  placeholder="State"    value={value.state} onChange={set("state")} />
+        <input className={inp + " col-span-2"} placeholder="ZIP code" value={value.zip}   onChange={set("zip")} />
+      </div>
+      <input className={inp} placeholder="Country" value={value.country} onChange={set("country")} />
+    </div>
+  );
+}
+
+// ── Stripe inner form (must live inside <Elements>) ─────────────────────────
+
+type StripeHandle = { submit: () => void };
 type StripeFormProps = {
   itemsJson:       string;
   shippingAddress: string;
@@ -51,144 +120,186 @@ type StripeFormProps = {
   shippingRate:    number;
   total:           number;
   onSuccess:       (orderNumber: string) => void;
+  onProcessing:    (v: boolean) => void;
+  onError:         (msg: string) => void;
 };
 
-function StripePaymentForm({
-  itemsJson,
-  shippingAddress,
-  notes,
-  shippingRate,
-  total,
-  onSuccess,
-}: StripeFormProps) {
-  const stripe   = useStripe();
-  const elements = useElements();
-  const [paying, setPaying] = useState(false);
-  const [error,  setError]  = useState("");
+const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
+  function StripeInnerForm(
+    { itemsJson, shippingAddress, notes, shippingRate, total, onSuccess, onProcessing, onError },
+    ref
+  ) {
+    const stripe   = useStripe();
+    const elements = useElements();
 
-  const handlePay = async () => {
-    if (!stripe || !elements) return;
-    setError("");
-    setPaying(true);
+    const handlePay = async () => {
+      if (!stripe || !elements) return;
+      onProcessing(true);
+      onError("");
 
-    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
-    });
-
-    if (stripeError) {
-      setError(stripeError.message ?? "Payment failed.");
-      setPaying(false);
-      return;
-    }
-
-    if (paymentIntent?.status === "succeeded") {
-      const result = await confirmCardOrder({
-        paymentIntentId: paymentIntent.id,
-        itemsJson,
-        shippingAddress,
-        notes,
-        shippingRate,
-        total,
+      const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
       });
 
-      if (result.success && result.orderNumber) {
-        onSuccess(result.orderNumber);
-      } else {
-        setError(result.message ?? "Order creation failed. Contact support.");
-        setPaying(false);
+      if (stripeError) {
+        onError(stripeError.message ?? "Payment failed.");
+        onProcessing(false);
+        return;
       }
-    } else {
-      setError("Unexpected payment status. Please try again.");
-      setPaying(false);
-    }
-  };
 
-  return (
-    <div className="space-y-4">
-      <PaymentElement options={{ layout: "tabs" }} />
-      {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
-          {error}
-        </p>
-      )}
-      <button
-        type="button"
-        onClick={handlePay}
-        disabled={!stripe || !elements || paying}
-        className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#3DBFA4] text-white text-sm font-bold rounded-xl hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-      >
-        {paying ? (
-          <>
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Processing…
-          </>
-        ) : (
-          <>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Pay ${total.toFixed(2)} securely
-          </>
-        )}
-      </button>
-      <p className="flex items-center justify-center gap-1.5 text-xs text-gray-400">
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-        Secured by Stripe · 256-bit encryption
-      </p>
-    </div>
-  );
-}
+      if (paymentIntent?.status === "succeeded") {
+        const result = await confirmCardOrder({
+          paymentIntentId: paymentIntent.id,
+          itemsJson,
+          shippingAddress,
+          notes,
+          shippingRate,
+          total,
+        });
+        if (result.success && result.orderNumber) {
+          onSuccess(result.orderNumber);
+        } else {
+          onError(result.message ?? "Order creation failed. Contact support.");
+          onProcessing(false);
+        }
+      } else {
+        onError("Unexpected payment status. Please try again.");
+        onProcessing(false);
+      }
+    };
 
-// ── Main checkout component ───────────────────────────────────────────────────
+    useImperativeHandle(ref, () => ({ submit: handlePay }));
+
+    return <PaymentElement options={{ layout: "tabs" }} />;
+  }
+);
+
+// ── Main component ──────────────────────────────────────────────────────────
+
+type Props = {
+  repEmail:             string;
+  savedShippingAddress: string;
+  savedBillingAddress:  string;
+  walletBalance:        number;
+  commission:           number;
+};
 
 export function CheckoutClient({
-  repName,
   repEmail,
-  repPhone,
   savedShippingAddress,
+  savedBillingAddress,
   walletBalance,
+  commission,
 }: Props) {
   const { items, clearCart } = useCart();
   const router = useRouter();
 
-  const [paymentMethod,    setPaymentMethod]    = useState<"CARD" | "WALLET">("CARD");
-  const [shippingAddress,  setShippingAddress]  = useState(savedShippingAddress);
-  const [notes,            setNotes]            = useState("");
-  const [clientSecret,     setClientSecret]     = useState("");
-  const [fetchingIntent,   setFetchingIntent]   = useState(false);
-
-  // Cart-derived values
-  const subtotal = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
-  const shipping = calculateShipping(subtotal);
-  const total    = parseFloat((subtotal + shipping.rate).toFixed(2));
-  const canWallet = walletBalance >= total;
-
-  const itemsJson = JSON.stringify(
-    items.map((i) => ({
-      productId:   i.productId,
-      title:       i.productTitle,
-      variantSize: i.variantSize,
-      sku:         i.variantSku,
-      unitPrice:   i.unitPrice,
-      quantity:    i.quantity,
-      lineTotal:   parseFloat((i.unitPrice * i.quantity).toFixed(2)),
-    }))
-  );
-
-  const estDelivery = estimatedDeliveryDate(shipping.estimatedDays);
-  const estDeliveryStr = estDelivery.toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric",
+  // address
+  const [shipping,      setShipping]      = useState<AddressData>(() => parseAddr(savedShippingAddress));
+  const [billing,       setBilling]       = useState<AddressData>(() => {
+    const b = parseAddr(savedBillingAddress);
+    return hasAddr(b) ? b : parseAddr(savedShippingAddress);
   });
+  const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [editShip,      setEditShip]      = useState(!hasAddr(parseAddr(savedShippingAddress)));
+  const [editBill,      setEditBill]      = useState(false);
+  const [savingAddr,    setSavingAddr]    = useState(false);
 
-  // Fetch PaymentIntent when Card tab active and items exist
+  // shipping rates (FedEx)
+  const [fedexRates,    setFedexRates]    = useState<FedExRate[]>([]);
+  const [selectedRate,  setSelectedRate]  = useState<FedExRate | null>(null);
+  const [fetchingRates, setFetchingRates] = useState(false);
+  const [isSandbox,     setIsSandbox]     = useState(false);
+
+  // payment
+  const [payMethod,      setPayMethod]      = useState<"CARD" | "WALLET">("CARD");
+  const [notes,          setNotes]          = useState("");
+  const [showNotes,      setShowNotes]      = useState(false);
+  const [clientSecret,   setClientSecret]   = useState("");
+  const [fetchingIntent, setFetchingIntent] = useState(false);
+  const [stripeError,    setStripeError]    = useState("");
+  const [cardProcessing, setCardProcessing] = useState(false);
+
+  const stripeRef    = useRef<StripeHandle>(null);
+  const walletSubmit = useRef<HTMLButtonElement>(null);
+
+  // cart math
+  const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
+  const staticShipping = calculateShipping(subtotal);
+  const activeRate     = selectedRate?.rate ?? staticShipping.rate;
+  const shippingRate   = activeRate;
+  const total          = parseFloat((subtotal + activeRate).toFixed(2));
+  const cashback       = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
+  const canWallet      = walletBalance >= total;
+
+  // FedEx rate fetch
+  const fetchRates = useCallback(async (addr: AddressData) => {
+    if (!hasAddr(addr) || !addr.zip) return;
+    setFetchingRates(true);
+    try {
+      const totalWeightLb = items.reduce((s, i) => s + i.quantity, 0);
+      const res = await fetch("/api/shipping/rates", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ destination: addr, totalWeightLb }),
+      });
+      const data = await res.json();
+      if (data.rates?.length > 0) {
+        setFedexRates(data.rates);
+        setIsSandbox(!!data.sandbox);
+        // In sandbox all rates are $0 — keep selectedRate null so static fallback is used for total
+        setSelectedRate(data.sandbox ? null : data.rates[0]);
+      } else {
+        setFedexRates([]);
+        setIsSandbox(false);
+        setSelectedRate(null);
+      }
+    } catch {
+      setFedexRates([]);
+      setSelectedRate(null);
+    } finally {
+      setFetchingRates(false);
+    }
+  }, [items]);
+
+  // Fetch on mount if address already saved
   useEffect(() => {
-    if (paymentMethod !== "CARD" || !items.length || total <= 0) return;
+    if (hasAddr(shipping)) fetchRates(shipping);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const itemsJson       = JSON.stringify(items.map((i) => ({
+    productId:   i.productId,
+    title:       i.productTitle,
+    variantSize: i.variantSize,
+    sku:         i.variantSku,
+    unitPrice:   i.unitPrice,
+    quantity:    i.quantity,
+    lineTotal:   parseFloat((i.unitPrice * i.quantity).toFixed(2)),
+  })));
+  const shipStr = addrToString(shipping);
+
+  // save address + re-fetch rates
+  const handleSaveAddress = async () => {
+    setSavingAddr(true);
+    const billingToSave = sameAsBilling ? shipping : billing;
+    const res = await saveCheckoutAddress({ shipping, billing: billingToSave });
+    setSavingAddr(false);
+    if (res.success) {
+      toast.success("Address saved.");
+      setEditShip(false);
+      fetchRates(shipping);
+    } else {
+      toast.error(res.message ?? "Failed to save address.");
+    }
+  };
+
+  // fetch stripe payment intent
+  useEffect(() => {
+    if (payMethod !== "CARD" || !items.length || total <= 0) return;
     setClientSecret("");
     setFetchingIntent(true);
-
     fetch("/api/checkout/create-payment-intent", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
@@ -199,15 +310,14 @@ export function CheckoutClient({
       .catch(() => toast.error("Could not initialize card payment."))
       .finally(() => setFetchingIntent(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentMethod, total]);
+  }, [payMethod, total]);
 
-  // Wallet payment action state
+  // wallet action
   const [walletState, walletAction, walletPending] = useActionState(payWithWallet, undefined);
-
   useEffect(() => {
     if (!walletState) return;
     if (walletState.success && walletState.orderNumber) {
-      toast.success("Payment successful!");
+      toast.success("Order placed successfully!");
       clearCart();
       router.push(`/sales/invoice/${walletState.orderNumber}`);
     } else if (walletState.message) {
@@ -216,380 +326,479 @@ export function CheckoutClient({
   }, [walletState, clearCart, router]);
 
   const handleCardSuccess = (orderNumber: string) => {
-    toast.success("Payment successful!");
+    toast.success("Order placed successfully!");
     clearCart();
     router.push(`/sales/invoice/${orderNumber}`);
   };
 
-  // ── Empty cart ───────────────────────────────────────────────────────────────
+  // place order
+  const handlePlaceOrder = () => {
+    if (!hasAddr(shipping)) {
+      toast.error("Please enter a shipping address.");
+      return;
+    }
+    if (payMethod === "CARD") {
+      stripeRef.current?.submit();
+    } else {
+      walletSubmit.current?.click();
+    }
+  };
+
+  const isDisabled =
+    cardProcessing ||
+    walletPending  ||
+    (payMethod === "WALLET" && !canWallet) ||
+    !hasAddr(shipping);
+
+  // empty cart
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-24">
-        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-        </div>
+      <div className="max-w-lg mx-auto text-center py-24">
         <p className="text-lg font-semibold text-gray-700 mb-2">Nothing to checkout</p>
         <p className="text-sm text-gray-400 mb-6">Add products to your cart first.</p>
-        <Link href="/sales/cart" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors">
-          Back to Cart
+        <Link href="/sales/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] transition-colors">
+          Go to Shop
         </Link>
       </div>
     );
   }
 
-  // ── Stripe not configured ────────────────────────────────────────────────────
-  const stripeConfigured = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const stripeReady = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const shipDsp     = displayAddr(shipping);
+  const billDsp     = displayAddr(billing);
 
   return (
     <div className="max-w-5xl">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-6 text-sm">
-        <Link href="/sales/cart" className="text-gray-500 hover:text-gray-700 transition-colors">Cart</Link>
-        <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-        <span className="text-gray-800 font-medium">Checkout</span>
-      </div>
+      {/* Title */}
+      <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
+      <div className="h-0.5 bg-blue-500 mb-6" />
 
-      <h1 className="text-xl font-bold text-gray-800 mb-7">Checkout</h1>
+      {/* Cashback banner */}
+      {cashback > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded mb-6 text-sm text-gray-700">
+          <svg className="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Upon placing this order a cashback of{" "}
+          <strong className="text-gray-900">${cashback.toFixed(2)}</strong>{" "}
+          will be credited to your wallet.
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
-        {/* ── LEFT column ─────────────────────────────────────── */}
-        <div className="lg:col-span-3 space-y-5">
+        {/* ── LEFT COLUMN ───────────────────────────────────────── */}
+        <div className="lg:col-span-3 space-y-8">
 
-          {/* 1. Contact info */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <StepHeader n={1} label="Contact Information" />
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Name"  value={repName  || "—"} />
-              <Field label="Email" value={repEmail || "—"} mono />
-              {repPhone && <Field label="Phone" value={repPhone} />}
+          {/* 1. Contact information */}
+          <section>
+            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
+            <div className="border border-gray-300 rounded">
+              <div className="px-4 py-3">
+                <p className="text-xs text-gray-400 mb-0.5">Email address</p>
+                <p className="text-sm text-gray-800">{repEmail}</p>
+              </div>
             </div>
           </section>
 
           {/* 2. Shipping address */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <StepHeader n={2} label="Shipping Address" />
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Delivery address</label>
-            <textarea
-              rows={4}
-              value={shippingAddress}
-              onChange={(e) => setShippingAddress(e.target.value)}
-              placeholder="Street address, City, State, ZIP"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors"
-            />
-            {savedShippingAddress && (
-              <p className="text-xs text-gray-400 mt-1.5">Pre-filled from your profile — edit if needed.</p>
-            )}
-            <div className="mt-3 flex items-start gap-2 bg-[#3DBFA4]/5 border border-[#3DBFA4]/20 rounded-xl p-3">
-              <svg className="w-4 h-4 text-[#3DBFA4] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-xs text-gray-600">
-                <span className="font-semibold text-[#3DBFA4]">{shipping.label}</span>
-                {shipping.rate > 0 ? ` · $${shipping.rate.toFixed(2)}` : " · Free"} — estimated delivery by{" "}
-                <span className="font-medium">{estDeliveryStr}</span>.
-              </p>
-            </div>
-          </section>
+          <section>
+            <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
 
-          {/* 3. Order items */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <StepHeader n={3} label={`Order Items (${items.length})`} />
-            <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item.cartId} className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
-                    {item.productImage
-                      ? <img src={item.productImage} alt={item.productTitle} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center">
-                          <svg className="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                    }
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{item.productTitle}</p>
-                    <p className="text-xs text-gray-400">
-                      {item.variantSize && <span>Size: {item.variantSize} · </span>}
-                      Qty: {item.quantity} · ${item.unitPrice.toFixed(2)} each
-                    </p>
-                  </div>
-                  <p className="text-sm font-bold text-gray-900 shrink-0">
-                    ${(item.unitPrice * item.quantity).toFixed(2)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* 4. Notes */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <StepHeader n={4} label="Order Notes" />
-            <textarea
-              rows={3}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special instructions…"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors"
-            />
-          </section>
-
-          {/* 5. Payment method */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <StepHeader n={5} label="Payment Method" />
-
-            {/* Tabs */}
-            <div className="flex gap-3 mb-5">
-              <PaymentTab
-                id="CARD"
-                active={paymentMethod === "CARD"}
-                onClick={() => setPaymentMethod("CARD")}
-                icon={
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                }
-                label="Credit / Debit Card"
-                sub="Visa, Mastercard, Amex"
-              />
-              <PaymentTab
-                id="WALLET"
-                active={paymentMethod === "WALLET"}
-                onClick={() => setPaymentMethod("WALLET")}
-                icon={
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                }
-                label="Wallet Balance"
-                sub={`Available: $${walletBalance.toFixed(2)}`}
-                badge={canWallet ? undefined : "low"}
-              />
-            </div>
-
-            {/* Card payment */}
-            {paymentMethod === "CARD" && (
-              !stripeConfigured ? (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
-                  Stripe is not configured. Add <code className="font-mono bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> and <code className="font-mono bg-amber-100 px-1 rounded">STRIPE_SECRET_KEY</code> to your <code className="font-mono">.env</code> file.
-                </div>
-              ) : fetchingIntent ? (
-                <div className="flex items-center justify-center py-10 gap-3 text-sm text-gray-400">
-                  <span className="w-5 h-5 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
-                  Initializing secure payment…
-                </div>
-              ) : clientSecret ? (
-                <Elements
-                  stripe={stripePromise}
-                  options={{
-                    clientSecret,
-                    appearance: {
-                      theme: "stripe",
-                      variables: {
-                        colorPrimary:     "#3DBFA4",
-                        borderRadius:     "12px",
-                        fontFamily:       "inherit",
-                      },
-                    },
-                  }}
-                >
-                  <StripePaymentForm
-                    itemsJson={itemsJson}
-                    shippingAddress={shippingAddress}
-                    notes={notes}
-                    shippingRate={shipping.rate}
-                    total={total}
-                    onSuccess={handleCardSuccess}
-                  />
-                </Elements>
-              ) : (
-                <div className="text-sm text-red-500 text-center py-6">
-                  Could not initialize payment. Please refresh and try again.
-                </div>
-              )
-            )}
-
-            {/* Wallet payment */}
-            {paymentMethod === "WALLET" && (
-              <div className="space-y-4">
-                {/* Balance display */}
-                <div className={`rounded-xl border p-4 flex items-center justify-between ${canWallet ? "bg-[#3DBFA4]/5 border-[#3DBFA4]/30" : "bg-red-50 border-red-200"}`}>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500">Wallet Balance</p>
-                    <p className={`text-2xl font-bold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
-                      ${walletBalance.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-gray-500">Order Total</p>
-                    <p className="text-2xl font-bold text-gray-800">${total.toFixed(2)}</p>
-                  </div>
-                </div>
-
-                {canWallet ? (
-                  <form action={walletAction}>
-                    <input type="hidden" name="items"           value={itemsJson} />
-                    <input type="hidden" name="shippingAddress" value={shippingAddress} />
-                    <input type="hidden" name="shippingRate"    value={shipping.rate} />
-                    <input type="hidden" name="total"           value={total} />
-                    <input type="hidden" name="notes"           value={notes} />
+            {editShip ? (
+              <div className="border border-gray-300 rounded p-4 space-y-4">
+                <AddressFields value={shipping} onChange={setShipping} />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveAddress}
+                    disabled={savingAddr}
+                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] disabled:opacity-50 transition-colors"
+                  >
+                    {savingAddr ? "Saving…" : "Save"}
+                  </button>
+                  {hasAddr(shipping) && (
                     <button
-                      type="submit"
-                      disabled={walletPending}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#3DBFA4] text-white text-sm font-bold rounded-xl hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                      onClick={() => setEditShip(false)}
+                      className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded hover:border-gray-300 transition-colors"
                     >
-                      {walletPending ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Processing…
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          Pay ${total.toFixed(2)} with Wallet
-                        </>
-                      )}
+                      Cancel
                     </button>
-                  </form>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
+                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
+                </div>
+                <button
+                  onClick={() => setEditShip(true)}
+                  className="text-sm text-[#3DBFA4] hover:underline shrink-0"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+
+            {/* Same as billing */}
+            <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={sameAsBilling}
+                onChange={(e) => {
+                  setSameAsBilling(e.target.checked);
+                  if (!e.target.checked && !hasAddr(billing)) {
+                    setBilling({ ...shipping });
+                  }
+                }}
+                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]"
+              />
+              <span className="text-sm text-gray-700">Use same address for billing</span>
+            </label>
+
+            {/* Billing address */}
+            {!sameAsBilling && (
+              <div className="mt-4">
+                <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
+                {editBill ? (
+                  <div className="border border-gray-300 rounded p-4 space-y-3">
+                    <AddressFields value={billing} onChange={setBilling} />
+                    <button
+                      onClick={() => setEditBill(false)}
+                      className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
                 ) : (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 text-center">
-                    Insufficient balance. Your wallet has <strong>${walletBalance.toFixed(2)}</strong> but this order costs <strong>${total.toFixed(2)}</strong>.
-                    Please use card payment or top up your wallet.
+                  <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-gray-800">{billDsp.name}</p>
+                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
+                    </div>
+                    <button
+                      onClick={() => setEditBill(true)}
+                      className="text-sm text-[#3DBFA4] hover:underline shrink-0"
+                    >
+                      Edit
+                    </button>
                   </div>
                 )}
               </div>
             )}
           </section>
+
+          {/* 3. Payment options */}
+          <section>
+            <h2 className="text-base font-semibold text-gray-800 mb-3">Payment options</h2>
+            <div className="border border-gray-300 rounded divide-y divide-gray-200">
+
+              {/* Card */}
+              <div>
+                <label className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payMethod"
+                    checked={payMethod === "CARD"}
+                    onChange={() => setPayMethod("CARD")}
+                    className="accent-[#3DBFA4]"
+                  />
+                  <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
+                  <div className="ml-auto flex items-center gap-1">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
+                  </div>
+                </label>
+
+                {payMethod === "CARD" && (
+                  <div className="px-4 pb-4">
+                    {!stripeReady ? (
+                      <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
+                        Stripe is not configured — add <code className="font-mono text-xs bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>.
+                      </div>
+                    ) : fetchingIntent ? (
+                      <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
+                        <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                        Initializing secure payment…
+                      </div>
+                    ) : clientSecret ? (
+                      <Elements
+                        stripe={stripePromise}
+                        options={{
+                          clientSecret,
+                          appearance: {
+                            theme: "stripe",
+                            variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" },
+                          },
+                        }}
+                      >
+                        <StripeInnerForm
+                          ref={stripeRef}
+                          itemsJson={itemsJson}
+                          shippingAddress={shipStr}
+                          notes={notes}
+                          shippingRate={shippingRate}
+                          total={total}
+                          onSuccess={handleCardSuccess}
+                          onProcessing={setCardProcessing}
+                          onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+                        />
+                      </Elements>
+                    ) : (
+                      <p className="text-sm text-red-500 py-6 text-center">
+                        Could not initialize payment. Please refresh the page.
+                      </p>
+                    )}
+                    {stripeError && (
+                      <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
+                        {stripeError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Wallet */}
+              <div>
+                <label className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payMethod"
+                    checked={payMethod === "WALLET"}
+                    onChange={() => setPayMethod("WALLET")}
+                    className="accent-[#3DBFA4]"
+                  />
+                  <span className="text-sm text-gray-800 font-medium">Wallet Balance</span>
+                  <span className={`ml-auto text-xs font-semibold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
+                    ${walletBalance.toFixed(2)} available
+                  </span>
+                </label>
+                {payMethod === "WALLET" && !canWallet && (
+                  <p className="px-4 pb-3 text-xs text-red-600 bg-red-50 mx-4 mb-3 rounded p-2">
+                    Insufficient balance. You need <strong>${total.toFixed(2)}</strong> but have <strong>${walletBalance.toFixed(2)}</strong>.
+                    Please use card payment or top up your wallet.
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* 5. Notes */}
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showNotes}
+                onChange={(e) => setShowNotes(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]"
+              />
+              <span className="text-sm text-gray-700">Add a note to your order</span>
+            </label>
+            {showNotes && (
+              <textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Special instructions or notes…"
+                className="mt-3 w-full px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
+              />
+            )}
+          </div>
+
+          {/* Terms */}
+          <p className="text-xs text-gray-500">
+            By proceeding with your purchase you agree to our{" "}
+            <Link href="/terms"   className="underline hover:text-gray-700">Terms and Conditions</Link>
+            {" "}and{" "}
+            <Link href="/privacy" className="underline hover:text-gray-700">Privacy Policy</Link>.
+          </p>
+
+          {/* Hidden wallet form */}
+          <form action={walletAction} className="hidden">
+            <input type="hidden" name="items"           value={itemsJson} />
+            <input type="hidden" name="shippingAddress" value={shipStr} />
+            <input type="hidden" name="shippingRate"    value={shippingRate} />
+            <input type="hidden" name="total"           value={total} />
+            <input type="hidden" name="notes"           value={notes} />
+            <button ref={walletSubmit} type="submit" aria-hidden="true" />
+          </form>
+
+          {/* Place Order */}
+          <button
+            onClick={handlePlaceOrder}
+            disabled={isDisabled}
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded transition-colors"
+          >
+            {cardProcessing || walletPending ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Placing order…
+              </span>
+            ) : (
+              "Place Order"
+            )}
+          </button>
         </div>
 
-        {/* ── RIGHT column – Order Summary ──────────────────────── */}
+        {/* ── RIGHT COLUMN – Order Summary ──────────────────────── */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-24">
-            <h2 className="text-sm font-bold text-gray-800 mb-4 pb-3 border-b border-gray-100">Order Summary</h2>
+          <div className="sticky top-24 space-y-4">
+          <div className="border border-gray-200 rounded overflow-hidden">
 
-            {/* Line items */}
-            <div className="space-y-2.5 mb-4">
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-800">Order summary</h2>
+            </div>
+
+            {/* Items */}
+            <div className="px-4 py-4 space-y-4 border-b border-gray-200">
               {items.map((item) => (
-                <div key={item.cartId} className="flex justify-between text-xs">
-                  <span className="text-gray-500 truncate pr-2 max-w-[170px]">
-                    {item.productTitle}{item.variantSize ? ` (${item.variantSize})` : ""}
-                    <span className="text-gray-400"> × {item.quantity}</span>
-                  </span>
-                  <span className="font-medium text-gray-700 shrink-0">
+                <div key={item.cartId} className="flex gap-3 items-start">
+                  <div className="relative shrink-0">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
+                      {item.productImage ? (
+                        <img
+                          src={item.productImage}
+                          alt={item.productTitle}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                      {item.quantity}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-800 font-medium truncate">{item.productTitle}</p>
+                    {item.variantSize && (
+                      <p className="text-xs text-gray-400">Size: {item.variantSize}</p>
+                    )}
+                    <p className="text-[11px] text-orange-600 mt-1 leading-snug">
+                      This product is distributed only through participating medical practitioners and not to patients directly.
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 shrink-0">
                     ${(item.unitPrice * item.quantity).toFixed(2)}
-                  </span>
+                  </p>
                 </div>
               ))}
             </div>
 
             {/* Totals */}
-            <div className="space-y-2 pt-3 border-t border-gray-100">
-              <div className="flex justify-between text-sm text-gray-600">
+            <div className="px-4 py-4 space-y-3 border-b border-gray-200 text-sm text-gray-600">
+              <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Shipping</span>
-                <ShippingBadge rate={shipping.rate} />
-              </div>
-              {subtotal < 150 && (
-                <p className="text-xs text-gray-400">
-                  Add <strong>${(150 - subtotal).toFixed(2)}</strong> more for free shipping.
-                </p>
+              {walletBalance > 0 && (
+                <div className="flex items-center justify-between text-xs py-2 border-y border-gray-100">
+                  <span>
+                    You have{" "}
+                    <span className="text-blue-600 font-semibold">${walletBalance.toFixed(2)}</span>{" "}
+                    in your wallet to spend!
+                  </span>
+                  <svg className="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               )}
-              <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
+              <div className="flex justify-between">
+                <span>{selectedRate?.serviceName ?? staticShipping.label}</span>
+                <span className={shippingRate === 0 ? "font-semibold text-gray-800" : ""}>
+                  {shippingRate === 0 ? "FREE" : `$${shippingRate.toFixed(2)}`}
+                </span>
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="px-4 py-4">
+              <div className="flex justify-between text-base font-bold text-gray-900">
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
               </div>
             </div>
+          </div>
 
-            {/* Wallet balance indicator */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-500">Your wallet balance</span>
-                <span className={`font-semibold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
-                  ${walletBalance.toFixed(2)}
-                </span>
-              </div>
-              {canWallet && paymentMethod === "WALLET" && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Balance after payment: <strong>${(walletBalance - total).toFixed(2)}</strong>
+          {/* Shipping options — below order summary */}
+          <div className="border border-gray-200 rounded overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-800">Shipping options</h2>
+            </div>
+
+            <div className="px-4 py-3">
+              {!hasAddr(shipping) ? (
+                <p className="text-xs text-gray-400 py-1">
+                  Enter shipping address to see rates.
                 </p>
+              ) : fetchingRates ? (
+                <div className="flex items-center gap-2 py-2 text-xs text-gray-400">
+                  <span className="w-3.5 h-3.5 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                  Calculating FedEx rates…
+                </div>
+              ) : fedexRates.length > 0 ? (
+                <div className="space-y-1.5">
+                  {isSandbox && (
+                    <p className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-2">
+                      Sandbox mode — actual rates will show in production.
+                    </p>
+                  )}
+                  {fedexRates.map((r, idx) => (
+                    <label
+                      key={r.serviceType}
+                      className="flex items-center justify-between py-2 px-1 cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="shippingRate"
+                          checked={isSandbox ? idx === 0 : selectedRate?.serviceType === r.serviceType}
+                          onChange={() => !isSandbox && setSelectedRate(r)}
+                          className="accent-[#3DBFA4]"
+                          readOnly={isSandbox}
+                        />
+                        <div>
+                          <p className="text-xs text-gray-800">{r.serviceName}</p>
+                          {r.deliveryInfo && (
+                            <p className="text-[11px] text-gray-400">{r.deliveryInfo}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs font-semibold text-gray-700 shrink-0">
+                        {isSandbox
+                          ? "TBD"
+                          : r.rate === 0
+                          ? "FREE"
+                          : `$${r.rate.toFixed(2)}`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <label className="flex items-center justify-between py-2 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <input type="radio" checked readOnly className="accent-[#3DBFA4]" />
+                    <span className="text-xs text-gray-700">{staticShipping.label}</span>
+                  </div>
+                  <span className="text-xs font-semibold text-gray-700">
+                    {staticShipping.rate === 0 ? "FREE" : `$${staticShipping.rate.toFixed(2)}`}
+                  </span>
+                </label>
               )}
             </div>
-
-            {/* Estimated delivery */}
-            <div className="mt-4 pt-4 border-t border-gray-100 flex items-start gap-2">
-              <svg className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <div>
-                <p className="text-xs font-medium text-gray-600">Estimated Delivery</p>
-                <p className="text-xs text-gray-400">{estDeliveryStr}</p>
-              </div>
-            </div>
           </div>
+          </div>{/* end sticky wrapper */}
         </div>
+
       </div>
     </div>
-  );
-}
-
-// ── Small UI helpers ──────────────────────────────────────────────────────────
-
-function StepHeader({ n, label }: { n: number; label: string }) {
-  return (
-    <div className="flex items-center gap-2 mb-5">
-      <div className="w-6 h-6 rounded-full bg-[#3DBFA4] flex items-center justify-center shrink-0">
-        <span className="text-white text-xs font-bold">{n}</span>
-      </div>
-      <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">{label}</h2>
-    </div>
-  );
-}
-
-function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
-      <p className={`text-sm font-medium text-gray-800 bg-gray-50 rounded-xl px-3 py-2.5 ${mono ? "font-mono text-xs" : ""} truncate`}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function PaymentTab({
-  id, active, onClick, icon, label, sub, badge,
-}: {
-  id: string; active: boolean; onClick: () => void;
-  icon: React.ReactNode; label: string; sub: string;
-  badge?: "low";
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex-1 flex items-start gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
-        active
-          ? "border-[#3DBFA4] bg-[#3DBFA4]/5"
-          : "border-gray-200 bg-white hover:border-gray-300"
-      }`}
-    >
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${active ? "bg-[#3DBFA4] text-white" : "bg-gray-100 text-gray-500"}`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className={`text-sm font-semibold ${active ? "text-[#3DBFA4]" : "text-gray-700"}`}>{label}</p>
-        <p className={`text-xs ${badge === "low" ? "text-red-500" : "text-gray-400"}`}>{sub}</p>
-      </div>
-    </button>
   );
 }

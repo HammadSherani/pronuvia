@@ -1,19 +1,17 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import type { PhysicianActionState } from "@/actions/admin/manage-physicians";
-
-type SalesRepOption = { id: string; name: string; email: string };
 
 interface PhysicianFormProps {
   action: (state: PhysicianActionState, formData: FormData) => Promise<PhysicianActionState>;
   submitLabel: string;
   backHref: string;
   successRedirect?: string;
-  isEdit?: boolean;
-  salesReps?: SalesRepOption[];
+  hideCommission?: boolean;
+  showNoteField?: boolean;
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     officeContactNumber?: string; fax?: string;
@@ -21,7 +19,6 @@ interface PhysicianFormProps {
     addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string;
     nameOfPractice?: string; yearsInPractice?: number;
     fieldsOfSpeciality?: string[]; commission?: number;
-    uplineCommission?: number; salesRepId?: string;
     bankName?: string; bankAccountNumber?: string; bankAccountName?: string;
   };
 }
@@ -46,133 +43,15 @@ const SPECIALTIES = [
   "Pulmonology","Radiology","Rheumatology","Surgery","Urology",
 ];
 
-// ── Searchable Sales Rep dropdown ──────────────────────────────────
-function SalesRepSearch({
-  reps, selectedId, onChange,
-}: { reps: SalesRepOption[]; selectedId: string; onChange: (id: string) => void }) {
-  const [query, setQuery]   = useState("");
-  const [open, setOpen]     = useState(false);
-  const containerRef        = useRef<HTMLDivElement>(null);
-
-  const selected = reps.find((r) => r.id === selectedId);
-
-  // initialise display when default arrives
-  useEffect(() => {
-    if (selected && !query) setQuery("");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
-
-  const filtered = query.trim()
-    ? reps.filter(
-        (r) =>
-          r.name.toLowerCase().includes(query.toLowerCase()) ||
-          r.email.toLowerCase().includes(query.toLowerCase()) ||
-          r.id.toLowerCase().includes(query.toLowerCase()),
-      )
-    : reps;
-
-  function select(rep: SalesRepOption | null) {
-    onChange(rep?.id ?? "");
-    setQuery(rep ? rep.name : "");
-    setOpen(false);
-  }
-
-  // close on outside click
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-        // if nothing selected, reset display
-        if (!selectedId) setQuery("");
-      }
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [selectedId]);
-
-  return (
-    <div ref={containerRef} className="relative">
-      <div className="relative">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          placeholder="Search by name, email or ID…"
-          className={`${base} ${ok} pl-9 pr-9`}
-        />
-        {selectedId && (
-          <button type="button" onClick={() => select(null)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-            ×
-          </button>
-        )}
-      </div>
-
-      {/* Selected badge */}
-      {selected && !open && (
-        <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-[#3DBFA4]/8 border border-[#3DBFA4]/25 rounded-lg">
-          <div className="w-6 h-6 rounded-full bg-[#3DBFA4]/20 flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-[#3DBFA4]">{selected.name[0]}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800 truncate">{selected.name}</p>
-            <p className="text-xs text-gray-400 truncate">{selected.email}</p>
-          </div>
-          <span className="text-xs text-[#3DBFA4] font-medium shrink-0">Assigned</span>
-        </div>
-      )}
-
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-52 overflow-y-auto">
-          {/* Clear option */}
-          <button type="button" onClick={() => select(null)}
-            className="w-full text-left px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
-            — No sales rep —
-          </button>
-          {filtered.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-400">No matches found</p>
-          ) : (
-            filtered.map((r) => (
-              <button key={r.id} type="button" onClick={() => select(r)}
-                className={`w-full text-left px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors ${r.id === selectedId ? "bg-[#3DBFA4]/5" : ""}`}>
-                <div className="w-7 h-7 rounded-full bg-[#3DBFA4]/15 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-[#3DBFA4]">{r.name[0]}</span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{r.name}</p>
-                  <p className="text-xs text-gray-400 truncate">{r.email}</p>
-                </div>
-                {r.id === selectedId && (
-                  <svg className="w-4 h-4 text-[#3DBFA4] ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── Main form ──────────────────────────────────────────────────────
 export function PhysicianForm({
-  action, submitLabel, backHref, successRedirect, isEdit, salesReps = [], defaults,
+  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, defaults,
 }: PhysicianFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const router = useRouter();
 
-  const [showPass, setShowPass]       = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [specialties, setSpecialties] = useState<string[]>(defaults?.fieldsOfSpeciality ?? []);
   const [customSpecialty, setCustom]  = useState("");
-  const [selectedRepId, setSelectedRepId] = useState(defaults?.salesRepId ?? "");
 
   useEffect(() => {
     if (!state) return;
@@ -196,92 +75,9 @@ export function PhysicianForm({
     setCustom("");
   }
 
-  const eyeOff = (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-    </svg>
-  );
-  const eyeOn = (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-    </svg>
-  );
-
   return (
     <form action={formAction} noValidate>
       <input type="hidden" name="fieldsOfSpeciality" value={JSON.stringify(specialties)} />
-      <input type="hidden" name="salesRepId"          value={selectedRepId} />
-
-      {/* ── Hierarchy Settings ─────────────────────────────── */}
-      <div className={sec}>
-        <p className={head}>Hierarchy Settings</p>
-
-        {/* Searchable rep selector */}
-        <div className="mb-5">
-          <label className={lbl}>
-            Upline Sales Representative
-            <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
-          </label>
-          <SalesRepSearch
-            reps={salesReps}
-            selectedId={selectedRepId}
-            onChange={setSelectedRepId}
-          />
-          <p className="text-xs text-gray-400 mt-1.5">
-            Search by name, email, or ID. Commission from this doctor&apos;s orders will be credited to the selected rep.
-          </p>
-        </div>
-
-        {/* Commission fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={lbl}>
-              Doctor&apos;s Commission %
-              <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own sales</span>
-            </label>
-            <div className="relative">
-              <input name="commission" type="number" step="0.01" min="0" max="100"
-                className={icls(e.commission?.[0])} placeholder="0.00"
-                defaultValue={defaults?.commission ?? 0} />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-            </div>
-            <FE msg={e.commission?.[0]} />
-          </div>
-          <div>
-            <label className={lbl}>
-              Upline Commission %
-              <span className="ml-1.5 text-xs font-normal text-gray-400">sales rep earns per order</span>
-            </label>
-            <div className="relative">
-              <input name="uplineCommission" type="number" step="0.01" min="0" max="100"
-                className={icls(e.uplineCommission?.[0])} placeholder="0.00"
-                defaultValue={defaults?.uplineCommission ?? 0} />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-            </div>
-            <FE msg={e.uplineCommission?.[0]} />
-            <p className="text-xs text-gray-400 mt-1">
-              This rate is locked per-doctor — different from the rep&apos;s global commission.
-            </p>
-          </div>
-        </div>
-
-        {/* Live preview */}
-        {selectedRepId && (
-          <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-lg text-xs text-gray-500 flex gap-6">
-            <span>
-              On a <strong className="text-gray-700">$1,000</strong> order:
-            </span>
-            <span>
-              Doctor earns <strong className="text-[#8b5cf6]">commission %</strong>
-            </span>
-            <span>
-              Sales rep earns <strong className="text-[#5BB8D4]">upline commission %</strong>
-            </span>
-            <span className="ml-auto text-gray-400">Both rates snapshot at order time</span>
-          </div>
-        )}
-      </div>
 
       {/* ── Personal Info ─────────────────────────────────── */}
       <div className={sec}>
@@ -321,37 +117,45 @@ export function PhysicianForm({
         </div>
       </div>
 
-      {/* ── Security (create only) ────────────────────────── */}
-      {!isEdit && (
+      {/* ── Commission (admin only) ────────────────────────── */}
+      {!hideCommission && (
         <div className={sec}>
-          <p className={head}>Security</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={lbl}>Password<Req /></label>
-              <div className="relative">
-                <input name="password" type={showPass ? "text" : "password"}
-                  className={icls(e.password?.[0])} placeholder="Min 8 chars, letter, number, symbol" />
-                <button type="button" onClick={() => setShowPass((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
-                  {showPass ? eyeOff : eyeOn}
-                </button>
-              </div>
-              <FE msg={e.password?.[0]} />
+          <p className={head}>Commission Settings</p>
+          <div className="max-w-xs">
+            <label className={lbl}>
+              Doctor&apos;s Commission %
+              <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own sales</span>
+            </label>
+            <div className="relative">
+              <input name="commission" type="number" step="0.01" min="0" max="100"
+                className={icls(e.commission?.[0])} placeholder="0.00"
+                defaultValue={defaults?.commission ?? 0} />
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
             </div>
-            <div>
-              <label className={lbl}>Confirm Password<Req /></label>
-              <div className="relative">
-                <input name="confirmPassword" type={showConfirm ? "text" : "password"}
-                  className={icls(e.confirmPassword?.[0])} placeholder="Repeat password" />
-                <button type="button" onClick={() => setShowConfirm((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
-                  {showConfirm ? eyeOff : eyeOn}
-                </button>
-              </div>
-              <FE msg={e.confirmPassword?.[0]} />
-            </div>
+            <FE msg={e.commission?.[0]} />
           </div>
-          <p className="text-xs text-gray-400 mt-3">Min 8 characters · at least one letter, one number, and one special character.</p>
+        </div>
+      )}
+
+      {/* ── Commission Note (sales rep only) ──────────────── */}
+      {showNoteField && (
+        <div className={sec}>
+          <p className={head}>Commission Note</p>
+          <div>
+            <label className={lbl}>
+              Suggested Commission
+              <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
+            </label>
+            <textarea
+              name="salesRepNote"
+              rows={3}
+              className={`${base} ${ok} resize-none`}
+              placeholder="e.g. Please set 15% commission for this doctor"
+            />
+            <p className="text-xs text-gray-400 mt-1.5">
+              Admin will review your note and set the final commission when approving.
+            </p>
+          </div>
         </div>
       )}
 

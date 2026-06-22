@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { getSession } from "@/lib/auth/session";
 import { Role } from "@/app/generated/prisma/enums";
@@ -28,3 +28,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ clientSecret: paymentIntent.client_secret });
 }
+

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById, updatePhysician } from "@/actions/admin/manage-physicians";
 import { PhysicianForm } from "@/components/admin/physician-form";
-import { prisma } from "@/lib/db/prisma";
 
 export const metadata = { title: "Edit Physician – Pronuvia Admin" };
 
@@ -13,14 +12,7 @@ export default async function EditPhysicianPage({ params }: Props) {
   await requireAdmin();
   const { id } = await params;
 
-  const [p, salesReps] = await Promise.all([
-    getPhysicianById(id),
-    prisma.salesRepresentative.findMany({
-      select: { id: true, name: true, email: true },
-      orderBy: { name: "asc" },
-    }),
-  ]);
-
+  const p = await getPhysicianById(id);
   if (!p) notFound();
 
   const boundUpdate = updatePhysician.bind(null, id);
@@ -41,8 +33,6 @@ export default async function EditPhysicianPage({ params }: Props) {
         submitLabel="Save Changes"
         backHref="/admin/physicians"
         successRedirect="/admin/physicians"
-        isEdit
-        salesReps={salesReps}
         defaults={{
           firstName:           p.firstName,
           lastName:            p.lastName,
@@ -62,8 +52,6 @@ export default async function EditPhysicianPage({ params }: Props) {
           yearsInPractice:     p.yearsInPractice      ?? undefined,
           fieldsOfSpeciality:  p.fieldsOfSpeciality,
           commission:          p.commission,
-          uplineCommission:    p.uplineCommission,
-          salesRepId:          p.salesRepId ?? undefined,
           bankName:            p.bankName            ?? undefined,
           bankAccountNumber:   p.bankAccountNumber   ?? undefined,
           bankAccountName:     p.bankAccountName      ?? undefined,

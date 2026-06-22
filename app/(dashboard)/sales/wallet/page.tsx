@@ -17,7 +17,7 @@ const wdStatusStyle: Record<string, string> = {
 export default async function WalletPage() {
   const session = await requireSalesRep();
 
-  const [rep, earningOrders, withdrawRequests] = await Promise.all([
+  const [rep, earningOrders, withdrawRequests, adminTxns] = await Promise.all([
     prisma.salesRepresentative.findUnique({
       where:  { id: session.userId },
       select: {
@@ -51,6 +51,14 @@ export default async function WalletPage() {
       orderBy: { createdAt: "desc" },
       take:    10,
     }),
+
+    prisma.walletTransaction.findMany({
+      where: {
+        salesRepId:  session.userId,
+        description: { startsWith: "Admin adjustment:" },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
 
@@ -60,6 +68,16 @@ export default async function WalletPage() {
 
   const paidOrders       = earningOrders.filter((o) => o.commissionPaid);
   const pendingOrders    = earningOrders.filter((o) => !o.commissionPaid);
+
+  // Merge orders + admin adjustments sorted by date desc (newest first)
+  type EarningEntry =
+    | { kind: "order"; data: (typeof earningOrders)[number] }
+    | { kind: "txn";   data: (typeof adminTxns)[number] };
+
+  const allEntries: EarningEntry[] = [
+    ...earningOrders.map((o) => ({ kind: "order" as const, data: o })),
+    ...adminTxns.map((t)     => ({ kind: "txn"   as const, data: t })),
+  ].sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
 
   const totalPaid        = paidOrders.reduce((s, o) => s + (o.salesRepCommissionAmount ?? 0), 0);
   const totalPending     = pendingOrders.reduce((s, o) => s + (o.salesRepCommissionAmount ?? 0), 0);
@@ -102,7 +120,7 @@ export default async function WalletPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {earningOrders.length === 0 ? (
+          {earningOrders.length === 0 && adminTxns.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                 <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,84 +144,115 @@ export default async function WalletPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {earningOrders.map((o) => {
-                  const isDoctor   = !!o.physicianId;
-                  const doctorName = o.physician
-                    ? `Dr. ${o.physician.firstName} ${o.physician.lastName}`
-                    : "Doctor";
+                {allEntries.map((entry) => {
+                  if (entry.kind === "order") {
+                    const o          = entry.data;
+                    const isDoctor   = !!o.physicianId;
+                    const doctorName = o.physician
+                      ? `Dr. ${o.physician.firstName} ${o.physician.lastName}`
+                      : "Doctor";
+                    return (
+                      <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-5 py-4 text-gray-500 text-xs whitespace-nowrap">
+                          {new Date(o.createdAt).toLocaleDateString("en-US", {
+                            month: "short", day: "numeric", year: "numeric",
+                          })}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                            #{o.orderNumber}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          {isDoctor ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-[#5BB8D4]/15 flex items-center justify-center shrink-0">
+                                <svg className="w-3 h-3 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              </div>
+                              <span className="text-xs font-medium text-gray-700">{doctorName}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-[#3DBFA4]/15 flex items-center justify-center shrink-0">
+                                <svg className="w-3 h-3 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <span className="text-xs font-medium text-gray-700">Myself</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <span className="inline-flex px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-semibold">
+                            {o.salesRepCommissionRate}%
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <span className={`text-sm font-bold ${o.commissionPaid ? "text-emerald-600" : "text-gray-400"}`}>
+                            {fmt(o.salesRepCommissionAmount ?? 0)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          {o.commissionPaid ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-medium">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                              Paid to Wallet
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-medium">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Pending
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
 
+                  // Admin adjustment row
+                  const t        = entry.data;
+                  const isCredit = t.type === "CREDIT";
+                  const note     = t.description?.replace("Admin adjustment:", "").trim() ?? "";
                   return (
-                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                      {/* Date */}
+                    <tr key={t.id} className="hover:bg-gray-50/50 transition-colors bg-blue-50/20">
                       <td className="px-5 py-4 text-gray-500 text-xs whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
+                        {new Date(t.createdAt).toLocaleDateString("en-US", {
                           month: "short", day: "numeric", year: "numeric",
                         })}
                       </td>
-
-                      {/* Order Number */}
                       <td className="px-5 py-4">
-                        <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
-                          #{o.orderNumber}
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          Admin
                         </span>
                       </td>
-
-                      {/* Order Source */}
                       <td className="px-5 py-4">
-                        {isDoctor ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-[#5BB8D4]/15 flex items-center justify-center shrink-0">
-                              <svg className="w-3 h-3 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                            </div>
-                            <span className="text-xs font-medium text-gray-700">{doctorName}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-[#3DBFA4]/15 flex items-center justify-center shrink-0">
-                              <svg className="w-3 h-3 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                            </div>
-                            <span className="text-xs font-medium text-gray-700">Myself</span>
-                          </div>
-                        )}
+                        <span className="text-xs text-gray-500 italic">{note || "—"}</span>
                       </td>
-
-                      {/* Commission % */}
                       <td className="px-5 py-4 text-right">
-                        <span className="inline-flex px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-semibold">
-                          {o.salesRepCommissionRate}%
+                        <span className="text-xs text-gray-300">—</span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <span className={`text-sm font-bold ${isCredit ? "text-emerald-600" : "text-red-500"}`}>
+                          {isCredit ? "+" : "-"}{fmt(t.amount)}
                         </span>
                       </td>
-
-                      {/* Net Earnings */}
-                      <td className="px-5 py-4 text-right">
-                        <span className={`text-sm font-bold ${o.commissionPaid ? "text-emerald-600" : "text-gray-400"}`}>
-                          {fmt(o.salesRepCommissionAmount ?? 0)}
-                        </span>
-                      </td>
-
-                      {/* Commission Status */}
                       <td className="px-5 py-4 text-center">
-                        {o.commissionPaid ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-medium">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Paid to Wallet
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-medium">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Pending
-                          </span>
-                        )}
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded-full text-xs font-medium ${
+                          isCredit
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-red-50 text-red-600 border-red-200"
+                        }`}>
+                          {isCredit ? "Credited" : "Debited"}
+                        </span>
                       </td>
                     </tr>
                   );

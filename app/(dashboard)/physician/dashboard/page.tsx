@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/auth/dal";
+﻿import { requireRole } from "@/lib/auth/dal";
 import { Role } from "@/app/generated/prisma/enums";
 
 export const metadata = { title: "Dashboard – Pronuvia" };
@@ -32,3 +32,4 @@ export default async function PhysicianDashboardPage() {
     </div>
   );
 }
+

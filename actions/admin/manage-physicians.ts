@@ -1,14 +1,15 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
+import { generateResetToken, randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
-import { physicianWelcomeEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
+import { passwordSetupEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 
 export type PhysicianActionState = {
   errors?: Record<string, string[]>;
@@ -26,8 +27,6 @@ export async function adminCreatePhysician(
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    confirmPassword: formData.get("confirmPassword") as string,
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -66,38 +65,42 @@ export async function adminCreatePhysician(
     return { errors: { email: ["A physician with this email already exists."] } };
   }
 
-  const { password, confirmPassword: _cp, ...rest } = validated.data;
-  void _cp;
-  const hashed = await hashPassword(password);
+  const { salesRepId, ...rest } = validated.data;
+
+  const placeholder = randomPlaceholderPassword();
+  const hashed      = await hashPassword(placeholder);
+  const { token, expiry } = generateResetToken();
 
   // Admin-added physicians are auto-approved
   await prisma.partneringPhysician.create({
     data: {
       ...rest,
-      password: hashed,
-      isApproved: ApprovalStatus.APPROVED,
-      addedByRole: Role.ADMIN,
-      addedByAdminId: session.userId,
-      websiteLink: rest.websiteLink || null,
+      salesRepId:          salesRepId ?? null,
+      password:            hashed,
+      isApproved:          ApprovalStatus.APPROVED,
+      addedByRole:         Role.ADMIN,
+      addedByAdminId:      session.userId,
+      websiteLink:         rest.websiteLink || null,
+      passwordResetToken:  token,
+      passwordResetExpiry: expiry,
     },
   });
 
-  // 1) Welcome email to the physician with credentials
-  const drEmail = physicianWelcomeEmail({
-    firstName:      rest.firstName,
-    lastName:       rest.lastName,
-    email:          rest.email,
-    password,
-    nameOfPractice: rest.nameOfPractice,
+  // 1) Send password setup email to the physician
+  const drEmail = passwordSetupEmail({
+    firstName:  rest.firstName,
+    email:      rest.email,
+    resetToken: token,
+    role:       "physician",
   });
   sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
-    console.error("[email] physicianWelcome failed:", err)
+    console.error("[email] physicianSetupPassword failed:", err)
   );
 
   // 2) If assigned to a sales rep, notify them
-  if (rest.salesRepId) {
+  if (salesRepId) {
     const salesRep = await prisma.salesRepresentative.findUnique({
-      where: { id: rest.salesRepId },
+      where: { id: salesRepId },
       select: { firstName: true, email: true },
     });
     if (salesRep) {
@@ -279,3 +282,4 @@ export async function listPhysicians(filters?: {
     orderBy: { createdAt: "desc" },
   });
 }
+

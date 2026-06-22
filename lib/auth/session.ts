@@ -1,4 +1,4 @@
-import "server-only";
+﻿import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { Role } from "@/app/generated/prisma/enums";
@@ -90,3 +90,4 @@ export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
 }
+

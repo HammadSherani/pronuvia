@@ -12,64 +12,64 @@ type SubNavItem =
 function buildSubNav(role: Role): SubNavItem[] {
   if (role === "ADMIN") {
     return [
-      { label: "Partnering Physician", href: "/admin/physicians" },
-      { label: "Downloads", href: "/admin/downloads" },
-      { label: "Order History", href: "/admin/orders" },
-      { label: "Withdrawals", href: "/admin/withdrawals" },
-      { label: "Account Details", href: "/admin/account" },
-      { label: "Log out", action: async () => { await logout(); } },
+      { label: "Dashboard",         href: "/admin/dashboard" },
+      { label: "Orders",            href: "/admin/orders" },
+      { label: "Approvals",         href: "/admin/approvals" },
+      { label: "Withdrawals",       href: "/admin/withdrawals" },
+      { label: "Wallet Adjustment", href: "/admin/wallet-adjustment" },
+      { label: "Account",           href: "/admin/account" },
+      { label: "Log out",           action: async () => { await logout(); } },
     ];
   }
 
   if (role === "SALES_REP") {
     return [
-      { label: "Shop", href: "/sales/shop" },
-      { label: "Cart", href: "/sales/cart" },
-      { label: "Checkout", href: "/sales/checkout" },
-      { label: "Partnering Physician", href: "/sales/physicians" },
+      { label: "Dashbaord", href: "/sales/dashboard" },
+      { label: "Patnering Physicians", href: "/sales/physicians" },
+      {label:'Shop', href:"/sales/shop"},
       { label: "Wallet", href: "/sales/wallet" },
       { label: "Downloads", href: "/sales/downloads" },
-      { label: "Order History", href: "/sales/orders" },
-      { label: "Account Details", href: "/sales/account" },
+      { label: "Orders", href: "/sales/orders" },
+      { label: "Withdrawals", href: "/sales/withdrawals" },
       { label: "Log out", action: async () => { await logout(); } },
     ];
   }
 
   // PHYSICIAN
   return [
+    { label: "Shop",      href: "/physician/shop" },
+    { label: "Orders",    href: "/physician/orders" },
     { label: "Downloads", href: "/physician/downloads" },
-    { label: "Order History", href: "/physician/orders" },
-    { label: "Account Details", href: "/physician/account" },
-    { label: "Log out", action: async () => { await logout(); } },
+    { label: "Account",   href: "/physician/account" },
+    { label: "Log out",   action: async () => { await logout(); } },
   ];
 }
 
 export function SubHeader({ role }: { role: Role }) {
   const pathname = usePathname();
-  const subNavItems = buildSubNav(role);
+  const items = buildSubNav(role);
 
   return (
-    <nav className="bg-[#f3f4f5] border-b border-gray-200 sticky top-[70px] z-30">
-      <div className="max-w-7xl mx-auto px-6 h-11 flex items-center justify-center gap-10">
-        {subNavItems.map((item) => {
+    <nav className="bg-[#f3f4f5] border-b border-gray-200 sticky top-[70px] z-30 overflow-x-auto">
+      <div className="max-w-7xl mx-auto px-6 h-11 flex items-center gap-8 min-w-max mx-auto">
+        {items.map((item) => {
           if (item.action) {
             return (
               <button
                 key={item.label}
                 onClick={item.action}
-                className="text-[13px] text-[#6b7280] hover:text-[#374151] font-medium transition-colors cursor-pointer"
+                className="text-[13px] text-[#6b7280] hover:text-[#374151] font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
               >
                 {item.label}
               </button>
             );
           }
-
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-[13px] font-medium transition-colors ${
+              className={`text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                 isActive
                   ? "text-[#3DBFA4] border-b-2 border-[#3DBFA4] pb-0.5"
                   : "text-[#6b7280] hover:text-[#374151]"

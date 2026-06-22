@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { hashPassword } from "@/lib/auth/password";
+import { generateResetToken, randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreateSalesRepSchema, UpdateSalesRepSchema } from "@/lib/validations/sales-rep";
 import { sendMail } from "@/lib/email/mailer";
-import { salesRepWelcomeEmail } from "@/lib/email/templates";
+import { passwordSetupEmail } from "@/lib/email/templates";
 import { z } from "zod";
 
 export type SalesRepActionState = {
@@ -21,8 +22,6 @@ function parseCreate(formData: FormData) {
     lastName:          (formData.get("lastName")          as string)?.trim() || "",
     email:             (formData.get("email")             as string)?.trim() || "",
     phone:             (formData.get("phone")             as string) || undefined,
-    password:          (formData.get("password")          as string) || "",
-    confirmPassword:   (formData.get("confirmPassword")   as string) || "",
     commission:        Number(formData.get("commission") ?? 0),
     billingAddress:    (formData.get("billingAddress")    as string) || undefined,
     shippingAddress:   (formData.get("shippingAddress")   as string) || undefined,
@@ -57,31 +56,35 @@ export async function createSalesRep(
   const validated = CreateSalesRepSchema.safeParse(parseCreate(formData));
   if (!validated.success) return { errors: z.flattenError(validated.error).fieldErrors };
 
-  const { confirmPassword, password, ...data } = validated.data;
-  void confirmPassword;
+  const data = validated.data;
 
   const exists = await prisma.salesRepresentative.findUnique({ where: { email: data.email } });
   if (exists) return { errors: { email: ["A sales rep with this email already exists."] } };
 
-  const hashed = await hashPassword(password);
+  const placeholder = randomPlaceholderPassword();
+  const hashed      = await hashPassword(placeholder);
+  const { token, expiry } = generateResetToken();
+
   await prisma.salesRepresentative.create({
     data: {
       ...data,
-      name: `${data.firstName} ${data.lastName}`,
-      password: hashed,
-      commission: data.commission ?? 0,
+      name:               `${data.firstName} ${data.lastName}`,
+      password:           hashed,
+      commission:         data.commission ?? 0,
+      passwordResetToken: token,
+      passwordResetExpiry: expiry,
     },
   });
 
-  // Send welcome email — fire-and-forget (don't block on failure)
-  const { subject, html } = salesRepWelcomeEmail({
+  // Send password setup email
+  const { subject, html } = passwordSetupEmail({
     firstName: data.firstName,
-    lastName:  data.lastName,
     email:     data.email,
-    password,
+    resetToken: token,
+    role:      "salesRep",
   });
   sendMail({ to: data.email, subject, html }).catch((err) =>
-    console.error("[email] salesRepWelcome failed:", err)
+    console.error("[email] salesRepSetupPassword failed:", err)
   );
 
   revalidatePath("/admin/sales-reps");

@@ -10,22 +10,21 @@ export default async function CheckoutPage() {
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
     select: {
-      firstName:       true,
-      lastName:        true,
       email:           true,
-      phone:           true,
       shippingAddress: true,
+      billingAddress:  true,
       walletBalance:   true,
+      commission:      true,
     },
   });
 
   return (
     <CheckoutClient
-      repName={rep ? `${rep.firstName} ${rep.lastName}` : ""}
       repEmail={rep?.email ?? ""}
-      repPhone={rep?.phone ?? ""}
       savedShippingAddress={rep?.shippingAddress ?? ""}
+      savedBillingAddress={rep?.billingAddress ?? ""}
       walletBalance={rep?.walletBalance ?? 0}
+      commission={rep?.commission ?? 0}
     />
   );
 }

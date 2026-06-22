@@ -1,43 +1,29 @@
 import { z } from "zod";
 
-const passwordSchema = z
-  .string()
-  .min(8, "Password must be at least 8 characters")
-  .regex(/[a-zA-Z]/, "Password must contain at least one letter")
-  .regex(/[0-9]/, "Password must contain at least one number")
-  .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character");
-
-export const CreateSalesRepSchema = z
-  .object({
-    firstName:        z.string().min(1, "First name is required").trim(),
-    lastName:         z.string().min(1, "Last name is required").trim(),
-    email:            z.string().email("Invalid email address").trim().toLowerCase(),
-    phone:            z.string().optional(),
-    password:         passwordSchema,
-    confirmPassword:  z.string().min(1, "Please confirm your password"),
-    commission:       z.number().min(0, "Must be ≥ 0").max(100, "Must be ≤ 100").default(0),
-    billingAddress:   z.string().optional(),
-    shippingAddress:  z.string().optional(),
-    bankName:         z.string().optional(),
-    bankAccountNumber: z.string().optional(),
-    bankAccountName:  z.string().optional(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+export const CreateSalesRepSchema = z.object({
+  firstName:         z.string().min(1, "First name is required").trim(),
+  lastName:          z.string().min(1, "Last name is required").trim(),
+  email:             z.string().email("Invalid email address").trim().toLowerCase(),
+  phone:             z.string().optional(),
+  commission:        z.number().min(0, "Must be ≥ 0").max(100, "Must be ≤ 100").default(0),
+  billingAddress:    z.string().optional(),
+  shippingAddress:   z.string().optional(),
+  bankName:          z.string().optional(),
+  bankAccountNumber: z.string().optional(),
+  bankAccountName:   z.string().optional(),
+});
 
 export const UpdateSalesRepSchema = z.object({
-  firstName:        z.string().min(1, "First name is required").trim().optional(),
-  lastName:         z.string().min(1, "Last name is required").trim().optional(),
-  email:            z.string().email("Invalid email address").trim().toLowerCase().optional(),
-  phone:            z.string().optional(),
-  commission:       z.number().min(0).max(100).optional(),
-  billingAddress:   z.string().optional(),
-  shippingAddress:  z.string().optional(),
-  bankName:         z.string().optional(),
+  firstName:         z.string().min(1, "First name is required").trim().optional(),
+  lastName:          z.string().min(1, "Last name is required").trim().optional(),
+  email:             z.string().email("Invalid email address").trim().toLowerCase().optional(),
+  phone:             z.string().optional(),
+  commission:        z.number().min(0).max(100).optional(),
+  billingAddress:    z.string().optional(),
+  shippingAddress:   z.string().optional(),
+  bankName:          z.string().optional(),
   bankAccountNumber: z.string().optional(),
-  bankAccountName:  z.string().optional(),
+  bankAccountName:   z.string().optional(),
 });
 
 export type CreateSalesRepInput = z.infer<typeof CreateSalesRepSchema>;

@@ -48,7 +48,53 @@ const base = (content: string) => `
 </html>`;
 
 // ─────────────────────────────────────────────
-// Sales rep welcome email
+// Password setup email (new accounts — sales rep or physician)
+// ─────────────────────────────────────────────
+export function passwordSetupEmail(opts: {
+  firstName: string;
+  email: string;
+  resetToken: string;
+  role: "salesRep" | "physician";
+}) {
+  const resetLink = `${APP_URL}/reset-password/${opts.resetToken}`;
+  const roleLabel = opts.role === "salesRep" ? "Sales Representative" : "Partnering Physician";
+  const subject = "Welcome to Pronuvia — Set Your Password";
+  const html = base(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
+      Welcome, ${opts.firstName}!
+    </h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      Your Pronuvia ${roleLabel} account has been created.
+      Click the button below to set your password and activate your account.
+    </p>
+
+    <!-- Email box -->
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 24px;margin-bottom:28px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Your Login Email</p>
+      <p style="margin:8px 0 0;font-size:14px;font-weight:600;color:#111827;">${opts.email}</p>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <a href="${resetLink}"
+        style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;">
+        Set My Password
+      </a>
+    </div>
+
+    <p style="margin:0 0 12px;font-size:13px;color:#9ca3af;line-height:1.6;">
+      This link will expire in <strong style="color:#6b7280;">72 hours</strong>.
+      If you did not expect this email, please ignore it.
+    </p>
+    <p style="margin:0;font-size:12px;color:#d1d5db;word-break:break-all;">
+      ${resetLink}
+    </p>
+  `);
+  return { subject, html };
+}
+
+// ─────────────────────────────────────────────
+// Sales rep welcome email (kept for compatibility)
 // ─────────────────────────────────────────────
 export function salesRepWelcomeEmail(opts: {
   firstName: string;
@@ -65,8 +111,6 @@ export function salesRepWelcomeEmail(opts: {
       Your Pronuvia Sales Representative account has been created.
       You can now log in and start managing your partnering physicians.
     </p>
-
-    <!-- Credentials box -->
     <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Your Login Credentials</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
@@ -80,21 +124,16 @@ export function salesRepWelcomeEmail(opts: {
         </tr>
       </table>
     </div>
-
-    <!-- CTA -->
     <div style="text-align:center;margin-bottom:28px;">
       <a href="${APP_URL}/login"
         style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
         Log In to Your Account
       </a>
     </div>
-
     <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
       For security, please change your password after your first login.
-      If you have any questions, contact your administrator.
     </p>
   `);
-
   return { subject, html };
 }
 

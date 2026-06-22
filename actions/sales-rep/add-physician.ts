@@ -1,10 +1,11 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
+import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/app/generated/prisma/enums";
 
@@ -24,8 +25,6 @@ export async function salesRepAddPhysician(
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    confirmPassword: formData.get("confirmPassword") as string,
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -44,7 +43,7 @@ export async function salesRepAddPhysician(
     fieldsOfSpeciality: formData.get("fieldsOfSpeciality")
       ? JSON.parse(formData.get("fieldsOfSpeciality") as string)
       : [],
-    commission: Number(formData.get("commission") ?? 0),
+    commission: 0, // only admin can set commission
   };
 
   const validated = CreatePhysicianSchema.safeParse(raw);
@@ -59,23 +58,28 @@ export async function salesRepAddPhysician(
     return { errors: { email: ["A physician with this email already exists."] } };
   }
 
-  const { password, confirmPassword: _cp, ...rest } = validated.data;
-  void _cp;
-  const hashed = await hashPassword(password);
+  const salesRepNote = (formData.get("salesRepNote") as string)?.trim() || null;
 
-  // Sales rep-added physicians are PENDING until admin approves
+  const placeholder = randomPlaceholderPassword();
+  const hashed      = await hashPassword(placeholder);
+
+  const { ...rest } = validated.data;
+
+  // Sales rep-added physicians are PENDING until admin approves (no setup email until approval)
   await prisma.partneringPhysician.create({
     data: {
       ...rest,
-      password: hashed,
-      isApproved: ApprovalStatus.PENDING,
+      password:    hashed,
+      salesRepNote,
+      isApproved:  ApprovalStatus.PENDING,
       addedByRole: Role.SALES_REP,
-      salesRepId: session.userId,
+      salesRepId:  session.userId,
       websiteLink: rest.websiteLink || null,
     },
   });
 
   revalidatePath("/sales/physicians");
+  revalidatePath("/admin/approvals");
   return {
     success: true,
     message: "Physician submitted for admin approval.",
@@ -104,3 +108,4 @@ export async function listMyPhysicians(filters?: { approvalStatus?: ApprovalStat
     orderBy: { createdAt: "desc" },
   });
 }
+

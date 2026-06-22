@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
@@ -58,8 +58,9 @@ export async function adminRegister(
     await createSession(admin.id, Role.ADMIN, admin.email);
     redirect("/admin/dashboard");
   } catch (err) {
-    if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
+    if (err != null && typeof err === "object" && "digest" in err) throw err;
     console.error("[adminRegister]", err);
     return { message: "Unable to connect to database. Please try again." };
   }
 }
+

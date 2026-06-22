@@ -2,17 +2,11 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { adminCreatePhysician } from "@/actions/admin/manage-physicians";
 import { PhysicianForm } from "@/components/admin/physician-form";
-import { prisma } from "@/lib/db/prisma";
 
 export const metadata = { title: "Add Physician – Pronuvia Admin" };
 
 export default async function NewPhysicianPage() {
   await requireAdmin();
-
-  const salesReps = await prisma.salesRepresentative.findMany({
-    select: { id: true, name: true, email: true },
-    orderBy: { name: "asc" },
-  });
 
   return (
     <div className="max-w-3xl">
@@ -42,7 +36,6 @@ export default async function NewPhysicianPage() {
         submitLabel="Create & Approve"
         backHref="/admin/physicians"
         successRedirect="/admin/physicians"
-        salesReps={salesReps}
       />
     </div>
   );

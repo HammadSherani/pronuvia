@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { getCurrentSession } from "@/lib/auth/dal";
@@ -47,3 +47,4 @@ export async function POST(req: NextRequest) {
     fileSize: file.size,
   });
 }
+

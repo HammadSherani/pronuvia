@@ -60,3 +60,64 @@ export async function updateWithdrawRequest(
   revalidatePath("/sales/wallet");
   return { success: true, message: `Request ${action.toLowerCase()} successfully.` };
 }
+
+export async function bulkUpdateWithdrawals(
+  ids:    string[],
+  action: "APPROVED" | "REJECTED",
+): Promise<{ success: boolean; processed: number; failed: number; message: string }> {
+  await requireAdmin();
+
+  if (!ids.length) return { success: false, processed: 0, failed: 0, message: "No IDs provided." };
+
+  let processed = 0;
+  let failed    = 0;
+
+  for (const id of ids) {
+    const request = await prisma.withdrawRequest.findUnique({
+      where:  { id },
+      select: { id: true, status: true, amount: true, salesRepId: true },
+    });
+
+    if (!request || request.status !== "PENDING") { failed++; continue; }
+
+    await prisma.withdrawRequest.update({
+      where: { id },
+      data:  { status: action },
+    });
+
+    if (action === "APPROVED") {
+      const rep        = await prisma.salesRepresentative.findUnique({ where: { id: request.salesRepId }, select: { walletBalance: true } });
+      const newBalance = Math.max(0, (rep?.walletBalance ?? 0) - request.amount);
+
+      await prisma.salesRepresentative.update({
+        where: { id: request.salesRepId },
+        data:  { walletBalance: newBalance },
+      });
+
+      await prisma.walletTransaction.create({
+        data: {
+          salesRepId:  request.salesRepId,
+          amount:      request.amount,
+          type:        "DEBIT",
+          description: "Withdrawal approved by admin (bulk)",
+          balance:     newBalance,
+        },
+      });
+    }
+
+    processed++;
+  }
+
+  revalidatePath("/admin/withdrawals");
+  revalidatePath("/sales/wallet");
+
+  const verb = action === "APPROVED" ? "approved" : "rejected";
+  return {
+    success:   processed > 0,
+    processed,
+    failed,
+    message:   failed > 0
+      ? `${processed} ${verb}, ${failed} skipped (already processed).`
+      : `${processed} request${processed !== 1 ? "s" : ""} ${verb} successfully.`,
+  };
+}

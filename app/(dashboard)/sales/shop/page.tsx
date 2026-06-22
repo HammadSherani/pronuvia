@@ -1,4 +1,4 @@
-import { requireSalesRep } from "@/lib/auth/dal";
+﻿import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ProductStatus } from "@/app/generated/prisma/enums";
 import { ShopProducts } from "@/components/sales/shop-products";
@@ -36,3 +36,4 @@ export default async function SalesShopPage() {
     </div>
   );
 }
+

@@ -26,7 +26,7 @@ type Props = {
 };
 
 // ── Related product mini-card
-function RelatedCard({ p }: { p: RelatedProduct }) {
+function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
   const variants  = p.variants as Variant[];
   const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 ? 0 : -1);
   const [qty,     setQty]     = useState(1);
@@ -45,7 +45,7 @@ function RelatedCard({ p }: { p: RelatedProduct }) {
   return (
     <>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-        <Link href={`/sales/shop/${p.slug}`}>
+        <Link href={`${basePath}/${p.slug}`}>
           <div className="aspect-square bg-[#f8f9fa] flex items-center justify-center overflow-hidden">
             {p.image
               ? <img src={p.image} alt={p.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -69,7 +69,7 @@ function RelatedCard({ p }: { p: RelatedProduct }) {
         </div>
         <div className="px-3 pt-2 flex-1">
           {p.category && <p className="text-[9px] tracking-[0.15em] uppercase text-gray-400 mb-0.5">{p.category.name}</p>}
-          <Link href={`/sales/shop/${p.slug}`}>
+          <Link href={`${basePath}/${p.slug}`}>
             <p className="text-sm font-bold text-gray-900 hover:text-[#3DBFA4] transition-colors leading-snug">{p.title}</p>
           </Link>
           <p className="text-sm font-bold text-[#1a6b58] mt-0.5">
@@ -85,7 +85,7 @@ function RelatedCard({ p }: { p: RelatedProduct }) {
           </div>
         </div>
         <div className="px-3 py-3 flex gap-2">
-          <Link href={`/sales/shop/${p.slug}`}
+          <Link href={`${basePath}/${p.slug}`}
             className="flex-1 flex items-center justify-center gap-1 py-2 border border-gray-200 text-xs font-semibold text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             Add to Cart
@@ -112,7 +112,7 @@ function RelatedCard({ p }: { p: RelatedProduct }) {
 }
 
 // ── Main product detail client component
-export function ProductDetailClient({ product, related }: Props) {
+export function ProductDetailClient({ product, related, basePath = "/sales/shop" }: Props & { basePath?: string }) {
   const variants = product.variants as Variant[];
 
   const [activeImage, setActiveImage]   = useState(product.image ?? "");
@@ -148,9 +148,9 @@ export function ProductDetailClient({ product, related }: Props) {
   }
 
   const breadcrumb = [
-    { label: "Home", href: "/sales/shop" },
-    product.category    ? { label: product.category.name,    href: "/sales/shop" } : null,
-    product.subCategory ? { label: product.subCategory.name, href: "/sales/shop" } : null,
+    { label: "Home", href: basePath },
+    product.category    ? { label: product.category.name,    href: basePath } : null,
+    product.subCategory ? { label: product.subCategory.name, href: basePath } : null,
     { label: product.title, href: "#" },
   ].filter(Boolean) as { label: string; href: string }[];
 
@@ -330,7 +330,7 @@ export function ProductDetailClient({ product, related }: Props) {
           <h2 className="text-lg font-bold text-gray-800 mb-5">Related products</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {related.map((p) => (
-              <RelatedCard key={p.id} p={p} />
+              <RelatedCard key={p.id} p={p} basePath={basePath} />
             ))}
           </div>
         </div>
