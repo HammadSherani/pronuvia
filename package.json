@@ -2,13 +2,13 @@
   "name": "pronuvia",
   "version": "0.1.0",
   "private": true,
- "scripts": {
-  "dev": "next dev",
-  "build": "prisma generate && next build",
-  "start": "next start",
-  "lint": "eslint",
-  "postinstall": "prisma generate"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate"
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "@stripe/react-stripe-js": "^6.6.0",
@@ -24,6 +24,7 @@
     "recharts": "^3.8.1",
     "server-only": "^0.0.1",
     "stripe": "^22.2.1",
+    "swiper": "^12.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

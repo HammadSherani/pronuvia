@@ -17,6 +17,7 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Approvals",         href: "/admin/approvals" },
       { label: "Withdrawals",       href: "/admin/withdrawals" },
       { label: "Wallet Adjustment", href: "/admin/wallet-adjustment" },
+      { label: "Banners",           href: "/admin/banners" },
       { label: "Account",           href: "/admin/account" },
       { label: "Log out",           action: async () => { await logout(); } },
     ];

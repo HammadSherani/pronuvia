@@ -250,3 +250,14 @@ model WithdrawRequest {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
+
+model Banner {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  imageUrl    String
+  linkUrl     String?
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

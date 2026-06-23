@@ -1,13 +1,18 @@
 ﻿import { requireRole } from "@/lib/auth/dal";
 import { Role } from "@/generated/prisma/enums";
+import { BannerCarousel } from "@/components/dashboard/banner-carousel";
+import { getPublishedBanners } from "@/actions/admin/banners";
 
 export const metadata = { title: "Dashboard – Pronuvia" };
 
 export default async function PhysicianDashboardPage() {
   const session = await requireRole(Role.PHYSICIAN);
+  const banners = await getPublishedBanners();
 
   return (
     <div>
+      <BannerCarousel banners={banners} />
+
       <h1 className="text-2xl font-bold text-gray-800 mb-1">My Dashboard</h1>
       <p className="text-sm text-gray-500 mb-8">Welcome back, {session.email}</p>
 

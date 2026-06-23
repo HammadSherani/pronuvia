@@ -58,7 +58,8 @@ export const ModelName = {
   CatalogDocument: 'CatalogDocument',
   Order: 'Order',
   WalletTransaction: 'WalletTransaction',
-  WithdrawRequest: 'WithdrawRequest'
+  WithdrawRequest: 'WithdrawRequest',
+  Banner: 'Banner'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -273,6 +274,20 @@ export const WithdrawRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawRequestScalarFieldEnum = (typeof WithdrawRequestScalarFieldEnum)[keyof typeof WithdrawRequestScalarFieldEnum]
+
+
+export const BannerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  imageUrl: 'imageUrl',
+  linkUrl: 'linkUrl',
+  isPublished: 'isPublished',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
 export const SortOrder = {

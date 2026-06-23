@@ -2,15 +2,18 @@
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
+import { BannerCarousel } from "@/components/dashboard/banner-carousel";
+import { getPublishedBanners } from "@/actions/admin/banners";
 
 export const metadata = { title: "Dashboard – Pronuvia" };
 
 export default async function SalesDashboardPage() {
   const session = await requireSalesRep();
 
-  const [totalPhysicians, pendingPhysicians] = await Promise.all([
+  const [totalPhysicians, pendingPhysicians, banners] = await Promise.all([
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId } }),
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId, isApproved: ApprovalStatus.PENDING } }),
+    getPublishedBanners(),
   ]);
 
   const rep = await prisma.salesRepresentative.findUnique({
@@ -27,6 +30,8 @@ export default async function SalesDashboardPage() {
 
   return (
     <div>
+      <BannerCarousel banners={banners} />
+
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-1">
           Welcome back, {rep?.firstName ?? session.email} 👋
