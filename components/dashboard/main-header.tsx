@@ -6,11 +6,11 @@ import { PronuviaLogoDark } from "./pronuvia-logo-dark";
 import { useCart } from "@/lib/cart/cart-context";
 import type { Role } from "@/generated/prisma/enums";
 
-function CartIcon() {
+function CartIcon({ href }: { href: string }) {
   const { totalItems } = useCart();
   return (
     <Link
-      href="/sales/cart"
+      href={href}
       className="relative inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors"
     >
       <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -183,7 +183,8 @@ export function MainHeader({ role }: { role: Role }) {
     )
   )}
 
-  {role === "SALES_REP" && <CartIcon />}
+  {role === "SALES_REP" && <CartIcon href="/sales/cart" />}
+  {role === "PHYSICIAN"  && <CartIcon href="/physician/cart" />}
 </nav>
       </div>
     </header>

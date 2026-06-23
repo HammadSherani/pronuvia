@@ -400,6 +400,8 @@ export const ModelName = {
   Order: 'Order',
   WalletTransaction: 'WalletTransaction',
   WithdrawRequest: 'WithdrawRequest',
+  PhysicianWalletTransaction: 'PhysicianWalletTransaction',
+  PhysicianWithdrawRequest: 'PhysicianWithdrawRequest',
   Banner: 'Banner'
 } as const
 
@@ -416,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "admin" | "salesRepresentative" | "category" | "subCategory" | "product" | "partneringPhysician" | "catalogDocument" | "order" | "walletTransaction" | "withdrawRequest" | "banner"
+    modelProps: "admin" | "salesRepresentative" | "category" | "subCategory" | "product" | "partneringPhysician" | "catalogDocument" | "order" | "walletTransaction" | "withdrawRequest" | "physicianWalletTransaction" | "physicianWithdrawRequest" | "banner"
     txIsolationLevel: never
   }
   model: {
@@ -1160,6 +1162,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PhysicianWalletTransaction: {
+      payload: Prisma.$PhysicianWalletTransactionPayload<ExtArgs>
+      fields: Prisma.PhysicianWalletTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PhysicianWalletTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PhysicianWalletTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.PhysicianWalletTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PhysicianWalletTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.PhysicianWalletTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.PhysicianWalletTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.PhysicianWalletTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PhysicianWalletTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        update: {
+          args: Prisma.PhysicianWalletTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PhysicianWalletTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PhysicianWalletTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PhysicianWalletTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.PhysicianWalletTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePhysicianWalletTransaction>
+        }
+        groupBy: {
+          args: Prisma.PhysicianWalletTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhysicianWalletTransactionGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.PhysicianWalletTransactionFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.PhysicianWalletTransactionAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.PhysicianWalletTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhysicianWalletTransactionCountAggregateOutputType> | number
+        }
+      }
+    }
+    PhysicianWithdrawRequest: {
+      payload: Prisma.$PhysicianWithdrawRequestPayload<ExtArgs>
+      fields: Prisma.PhysicianWithdrawRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PhysicianWithdrawRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PhysicianWithdrawRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.PhysicianWithdrawRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PhysicianWithdrawRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        findMany: {
+          args: Prisma.PhysicianWithdrawRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>[]
+        }
+        create: {
+          args: Prisma.PhysicianWithdrawRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        createMany: {
+          args: Prisma.PhysicianWithdrawRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PhysicianWithdrawRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        update: {
+          args: Prisma.PhysicianWithdrawRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.PhysicianWithdrawRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PhysicianWithdrawRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PhysicianWithdrawRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.PhysicianWithdrawRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePhysicianWithdrawRequest>
+        }
+        groupBy: {
+          args: Prisma.PhysicianWithdrawRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhysicianWithdrawRequestGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.PhysicianWithdrawRequestFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.PhysicianWithdrawRequestAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.PhysicianWithdrawRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhysicianWithdrawRequestCountAggregateOutputType> | number
+        }
+      }
+    }
     Banner: {
       payload: Prisma.$BannerPayload<ExtArgs>
       fields: Prisma.BannerFieldRefs
@@ -1372,6 +1522,7 @@ export const PartneringPhysicianScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  walletBalance: 'walletBalance',
   ordersCount: 'ordersCount',
   addedByRole: 'addedByRole',
   addedByAdminId: 'addedByAdminId',
@@ -1410,8 +1561,11 @@ export const OrderScalarFieldEnum = {
   physicianCommissionAmount: 'physicianCommissionAmount',
   status: 'status',
   commissionPaid: 'commissionPaid',
+  billingAddress: 'billingAddress',
   shippingAddress: 'shippingAddress',
   shippingRate: 'shippingRate',
+  shippingCarrier: 'shippingCarrier',
+  trackingNumber: 'trackingNumber',
   estimatedDelivery: 'estimatedDelivery',
   paymentMethod: 'paymentMethod',
   paymentStatus: 'paymentStatus',
@@ -1457,6 +1611,34 @@ export const WithdrawRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawRequestScalarFieldEnum = (typeof WithdrawRequestScalarFieldEnum)[keyof typeof WithdrawRequestScalarFieldEnum]
+
+
+export const PhysicianWalletTransactionScalarFieldEnum = {
+  id: 'id',
+  physicianId: 'physicianId',
+  amount: 'amount',
+  type: 'type',
+  description: 'description',
+  orderId: 'orderId',
+  balance: 'balance',
+  createdAt: 'createdAt'
+} as const
+
+export type PhysicianWalletTransactionScalarFieldEnum = (typeof PhysicianWalletTransactionScalarFieldEnum)[keyof typeof PhysicianWalletTransactionScalarFieldEnum]
+
+
+export const PhysicianWithdrawRequestScalarFieldEnum = {
+  id: 'id',
+  physicianId: 'physicianId',
+  amount: 'amount',
+  status: 'status',
+  note: 'note',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PhysicianWithdrawRequestScalarFieldEnum = (typeof PhysicianWithdrawRequestScalarFieldEnum)[keyof typeof PhysicianWithdrawRequestScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {
@@ -1737,6 +1919,8 @@ export type GlobalOmitConfig = {
   order?: Prisma.OrderOmit
   walletTransaction?: Prisma.WalletTransactionOmit
   withdrawRequest?: Prisma.WithdrawRequestOmit
+  physicianWalletTransaction?: Prisma.PhysicianWalletTransactionOmit
+  physicianWithdrawRequest?: Prisma.PhysicianWithdrawRequestOmit
   banner?: Prisma.BannerOmit
 }
 

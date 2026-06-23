@@ -12,6 +12,7 @@ interface PhysicianFormProps {
   successRedirect?: string;
   hideCommission?: boolean;
   showNoteField?: boolean;
+  showDualCreate?: boolean;
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     officeContactNumber?: string; fax?: string;
@@ -45,7 +46,7 @@ const SPECIALTIES = [
 
 // ── Main form ──────────────────────────────────────────────────────
 export function PhysicianForm({
-  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, defaults,
+  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, showDualCreate, defaults,
 }: PhysicianFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const router = useRouter();
@@ -273,12 +274,37 @@ export function PhysicianForm({
       </div>
 
       {/* ── Actions ───────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <button type="submit" disabled={pending}
-          className="px-6 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
-          {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
-          {pending ? "Saving…" : submitLabel}
-        </button>
+      <div className="flex items-center gap-3 flex-wrap">
+        {showDualCreate ? (
+          <>
+            <button
+              type="submit"
+              name="approvalAction"
+              value="approve"
+              disabled={pending}
+              className="px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
+              Create &amp; Approve
+            </button>
+            <button
+              type="submit"
+              name="approvalAction"
+              value="pending"
+              disabled={pending}
+              className="px-5 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              {pending && <div className="w-3.5 h-3.5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />}
+              Create &amp; Pending Approval
+            </button>
+          </>
+        ) : (
+          <button type="submit" disabled={pending}
+            className="px-6 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
+            {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
+            {pending ? "Saving…" : submitLabel}
+          </button>
+        )}
         <a href={backHref} className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
           Cancel
         </a>

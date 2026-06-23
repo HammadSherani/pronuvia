@@ -67,17 +67,26 @@ export async function adminCreatePhysician(
 
   const { salesRepId, ...rest } = validated.data;
 
+  // Determine approval status from which submit button was clicked
+  const approvalAction = formData.get("approvalAction") as string;
+  const isApproved = approvalAction === "pending"
+    ? ApprovalStatus.PENDING
+    : ApprovalStatus.APPROVED;
+
   const placeholder = randomPlaceholderPassword();
   const hashed      = await hashPassword(placeholder);
-  const { token, expiry } = generateResetToken();
 
-  // Admin-added physicians are auto-approved
+  // Only generate a reset token if approving immediately
+  const { token, expiry } = isApproved === ApprovalStatus.APPROVED
+    ? generateResetToken()
+    : { token: null, expiry: null };
+
   await prisma.partneringPhysician.create({
     data: {
       ...rest,
       salesRepId:          salesRepId ?? null,
       password:            hashed,
-      isApproved:          ApprovalStatus.APPROVED,
+      isApproved,
       addedByRole:         Role.ADMIN,
       addedByAdminId:      session.userId,
       websiteLink:         rest.websiteLink || null,
@@ -86,16 +95,18 @@ export async function adminCreatePhysician(
     },
   });
 
-  // 1) Send password setup email to the physician
-  const drEmail = passwordSetupEmail({
-    firstName:  rest.firstName,
-    email:      rest.email,
-    resetToken: token,
-    role:       "physician",
-  });
-  sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
-    console.error("[email] physicianSetupPassword failed:", err)
-  );
+  // Send password setup email only when approving immediately
+  if (isApproved === ApprovalStatus.APPROVED && token) {
+    const drEmail = passwordSetupEmail({
+      firstName:  rest.firstName,
+      email:      rest.email,
+      resetToken: token,
+      role:       "physician",
+    });
+    sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
+      console.error("[email] physicianSetupPassword failed:", err)
+    );
+  }
 
   // 2) If assigned to a sales rep, notify them
   if (salesRepId) {
@@ -118,7 +129,12 @@ export async function adminCreatePhysician(
   }
 
   revalidatePath("/admin/physicians");
-  return { success: true, message: "Physician created and approved successfully." };
+  return {
+    success: true,
+    message: isApproved === ApprovalStatus.APPROVED
+      ? "Physician created and approved. Password setup email sent."
+      : "Physician created and placed in pending approval.",
+  };
 }
 
 export async function updatePhysician(

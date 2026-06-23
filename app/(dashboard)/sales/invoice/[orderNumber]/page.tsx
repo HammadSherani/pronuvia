@@ -43,6 +43,7 @@ export default async function InvoicePage({ params }: Props) {
       id: true, orderNumber: true, createdAt: true,
       paymentMethod: true, paymentStatus: true, transactionId: true,
       subtotal: true, total: true, shippingRate: true,
+      shippingCarrier: true, trackingNumber: true,
       shippingAddress: true, estimatedDelivery: true,
       notes: true, items: true,
       salesRepId: true,
@@ -159,12 +160,10 @@ export default async function InvoicePage({ params }: Props) {
             {/* Shipping parameters */}
             <div className="grid grid-cols-3 gap-4">
               <InfoBox
-                label="Shipping Method"
-                value={
-                  order.shippingRate === 0
-                    ? "Free Standard"
-                    : `Standard · ${fmtMoney(order.shippingRate ?? 0)}`
-                }
+                label="Shipping / Tracking"
+                value={order.trackingNumber
+                  ? `${order.shippingCarrier ?? ""} · ${order.trackingNumber}`
+                  : "Awaiting shipment"}
                 icon={
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />

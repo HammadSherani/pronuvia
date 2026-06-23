@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById } from "@/actions/admin/manage-physicians";
 import { ApprovalStatus } from "@/generated/prisma/enums";
+import { PhysicianApprovalActions } from "@/components/admin/physician-approval-actions";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -50,13 +51,22 @@ export default async function PhysicianViewPage({ params }: Props) {
           </svg>
           Back to Physicians
         </Link>
-        <Link href={`/admin/physicians/${id}/edit`}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] transition-colors">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Edit
-        </Link>
+        <div className="flex items-center gap-2">
+          {p.isApproved === ApprovalStatus.PENDING && (
+            <PhysicianApprovalActions
+              physicianId={id}
+              physicianName={`Dr. ${p.firstName} ${p.lastName}`}
+              existingCommission={p.commission}
+            />
+          )}
+          <Link href={`/admin/physicians/${id}/edit`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </Link>
+        </div>
       </div>
 
       {/* Avatar + name */}

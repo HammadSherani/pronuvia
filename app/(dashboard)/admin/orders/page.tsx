@@ -3,6 +3,7 @@ import { listOrders } from "@/actions/admin/manage-orders";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { OrderStatusSelector } from "@/components/admin/order-status-selector";
 import { ReturnOrderModal, ReturnRowButton } from "@/components/admin/return-order-modal";
+import { ShipOrderModal } from "@/components/admin/ship-order-modal";
 
 export const metadata = { title: "Order History – Pronuvia Admin" };
 
@@ -123,6 +124,7 @@ export default async function OrdersPage() {
                     "Order Value",
                     "Commissions",
                     "Status",
+                    "Tracking",
                     "Actions",
                   ].map((h) => (
                     <th
@@ -253,6 +255,21 @@ export default async function OrdersPage() {
                         </div>
                       </td>
 
+                      {/* ── Tracking ── */}
+                      <td className="px-5 py-4">
+                        {o.trackingNumber ? (
+                          <div>
+                            <p className="text-xs font-medium text-gray-700">{o.shippingCarrier}</p>
+                            <p className="text-xs font-mono text-indigo-600 mt-0.5">{o.trackingNumber}</p>
+                            {o.shippingRate > 0 && (
+                              <p className="text-[11px] text-gray-400 mt-0.5">{fmt(o.shippingRate)}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </td>
+
                       {/* ── Actions ── */}
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-2">
@@ -266,6 +283,12 @@ export default async function OrdersPage() {
                             </svg>
                             Invoice
                           </Link>
+                          {!isReturned && o.status !== "SHIPPED" && o.status !== "DELIVERED" && o.status !== "COMPLETED" && (
+                            <ShipOrderModal
+                              orderId={o.id}
+                              orderNumber={o.orderNumber}
+                            />
+                          )}
                           <ReturnRowButton
                             orderId={o.id}
                             orderNumber={o.orderNumber}

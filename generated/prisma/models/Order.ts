@@ -65,8 +65,11 @@ export type OrderMinAggregateOutputType = {
   physicianCommissionAmount: number | null
   status: $Enums.OrderStatus | null
   commissionPaid: boolean | null
+  billingAddress: string | null
   shippingAddress: string | null
   shippingRate: number | null
+  shippingCarrier: string | null
+  trackingNumber: string | null
   estimatedDelivery: Date | null
   paymentMethod: string | null
   paymentStatus: string | null
@@ -95,8 +98,11 @@ export type OrderMaxAggregateOutputType = {
   physicianCommissionAmount: number | null
   status: $Enums.OrderStatus | null
   commissionPaid: boolean | null
+  billingAddress: string | null
   shippingAddress: string | null
   shippingRate: number | null
+  shippingCarrier: string | null
+  trackingNumber: string | null
   estimatedDelivery: Date | null
   paymentMethod: string | null
   paymentStatus: string | null
@@ -126,8 +132,11 @@ export type OrderCountAggregateOutputType = {
   physicianCommissionAmount: number
   status: number
   commissionPaid: number
+  billingAddress: number
   shippingAddress: number
   shippingRate: number
+  shippingCarrier: number
+  trackingNumber: number
   estimatedDelivery: number
   paymentMethod: number
   paymentStatus: number
@@ -185,8 +194,11 @@ export type OrderMinAggregateInputType = {
   physicianCommissionAmount?: true
   status?: true
   commissionPaid?: true
+  billingAddress?: true
   shippingAddress?: true
   shippingRate?: true
+  shippingCarrier?: true
+  trackingNumber?: true
   estimatedDelivery?: true
   paymentMethod?: true
   paymentStatus?: true
@@ -215,8 +227,11 @@ export type OrderMaxAggregateInputType = {
   physicianCommissionAmount?: true
   status?: true
   commissionPaid?: true
+  billingAddress?: true
   shippingAddress?: true
   shippingRate?: true
+  shippingCarrier?: true
+  trackingNumber?: true
   estimatedDelivery?: true
   paymentMethod?: true
   paymentStatus?: true
@@ -246,8 +261,11 @@ export type OrderCountAggregateInputType = {
   physicianCommissionAmount?: true
   status?: true
   commissionPaid?: true
+  billingAddress?: true
   shippingAddress?: true
   shippingRate?: true
+  shippingCarrier?: true
+  trackingNumber?: true
   estimatedDelivery?: true
   paymentMethod?: true
   paymentStatus?: true
@@ -365,8 +383,11 @@ export type OrderGroupByOutputType = {
   physicianCommissionAmount: number
   status: $Enums.OrderStatus
   commissionPaid: boolean
+  billingAddress: string | null
   shippingAddress: string | null
   shippingRate: number
+  shippingCarrier: string | null
+  trackingNumber: string | null
   estimatedDelivery: Date | null
   paymentMethod: string | null
   paymentStatus: string | null
@@ -420,8 +441,11 @@ export type OrderWhereInput = {
   physicianCommissionAmount?: Prisma.FloatFilter<"Order"> | number
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFilter<"Order"> | boolean
+  billingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingRate?: Prisma.FloatFilter<"Order"> | number
+  shippingCarrier?: Prisma.StringNullableFilter<"Order"> | string | null
+  trackingNumber?: Prisma.StringNullableFilter<"Order"> | string | null
   estimatedDelivery?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   paymentMethod?: Prisma.StringNullableFilter<"Order"> | string | null
   paymentStatus?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -454,8 +478,11 @@ export type OrderOrderByWithRelationInput = {
   physicianCommissionAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commissionPaid?: Prisma.SortOrder
+  billingAddress?: Prisma.SortOrder
   shippingAddress?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  shippingCarrier?: Prisma.SortOrder
+  trackingNumber?: Prisma.SortOrder
   estimatedDelivery?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
@@ -491,8 +518,11 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   physicianCommissionAmount?: Prisma.FloatFilter<"Order"> | number
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFilter<"Order"> | boolean
+  billingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingRate?: Prisma.FloatFilter<"Order"> | number
+  shippingCarrier?: Prisma.StringNullableFilter<"Order"> | string | null
+  trackingNumber?: Prisma.StringNullableFilter<"Order"> | string | null
   estimatedDelivery?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   paymentMethod?: Prisma.StringNullableFilter<"Order"> | string | null
   paymentStatus?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -525,8 +555,11 @@ export type OrderOrderByWithAggregationInput = {
   physicianCommissionAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commissionPaid?: Prisma.SortOrder
+  billingAddress?: Prisma.SortOrder
   shippingAddress?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  shippingCarrier?: Prisma.SortOrder
+  trackingNumber?: Prisma.SortOrder
   estimatedDelivery?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
@@ -565,8 +598,11 @@ export type OrderScalarWhereWithAggregatesInput = {
   physicianCommissionAmount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
   status?: Prisma.EnumOrderStatusWithAggregatesFilter<"Order"> | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolWithAggregatesFilter<"Order"> | boolean
+  billingAddress?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   shippingAddress?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   shippingRate?: Prisma.FloatWithAggregatesFilter<"Order"> | number
+  shippingCarrier?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  trackingNumber?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   estimatedDelivery?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   paymentMethod?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   paymentStatus?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
@@ -595,8 +631,11 @@ export type OrderCreateInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -629,8 +668,11 @@ export type OrderUncheckedCreateInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -658,8 +700,11 @@ export type OrderUpdateInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -691,8 +736,11 @@ export type OrderUncheckedUpdateInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -723,8 +771,11 @@ export type OrderCreateManyInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -752,8 +803,11 @@ export type OrderUpdateManyMutationInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -783,8 +837,11 @@ export type OrderUncheckedUpdateManyInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -825,8 +882,11 @@ export type OrderCountOrderByAggregateInput = {
   physicianCommissionAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commissionPaid?: Prisma.SortOrder
+  billingAddress?: Prisma.SortOrder
   shippingAddress?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  shippingCarrier?: Prisma.SortOrder
+  trackingNumber?: Prisma.SortOrder
   estimatedDelivery?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
@@ -869,8 +929,11 @@ export type OrderMaxOrderByAggregateInput = {
   physicianCommissionAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commissionPaid?: Prisma.SortOrder
+  billingAddress?: Prisma.SortOrder
   shippingAddress?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  shippingCarrier?: Prisma.SortOrder
+  trackingNumber?: Prisma.SortOrder
   estimatedDelivery?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
@@ -899,8 +962,11 @@ export type OrderMinOrderByAggregateInput = {
   physicianCommissionAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commissionPaid?: Prisma.SortOrder
+  billingAddress?: Prisma.SortOrder
   shippingAddress?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  shippingCarrier?: Prisma.SortOrder
+  trackingNumber?: Prisma.SortOrder
   estimatedDelivery?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
@@ -1038,8 +1104,11 @@ export type OrderCreateWithoutSalesRepInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1070,8 +1139,11 @@ export type OrderUncheckedCreateWithoutSalesRepInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1130,8 +1202,11 @@ export type OrderScalarWhereInput = {
   physicianCommissionAmount?: Prisma.FloatFilter<"Order"> | number
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFilter<"Order"> | boolean
+  billingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingAddress?: Prisma.StringNullableFilter<"Order"> | string | null
   shippingRate?: Prisma.FloatFilter<"Order"> | number
+  shippingCarrier?: Prisma.StringNullableFilter<"Order"> | string | null
+  trackingNumber?: Prisma.StringNullableFilter<"Order"> | string | null
   estimatedDelivery?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   paymentMethod?: Prisma.StringNullableFilter<"Order"> | string | null
   paymentStatus?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -1160,8 +1235,11 @@ export type OrderCreateWithoutPhysicianInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1192,8 +1270,11 @@ export type OrderUncheckedCreateWithoutPhysicianInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1248,8 +1329,11 @@ export type OrderCreateManySalesRepInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1277,8 +1361,11 @@ export type OrderUpdateWithoutSalesRepInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1308,8 +1395,11 @@ export type OrderUncheckedUpdateWithoutSalesRepInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1338,8 +1428,11 @@ export type OrderUncheckedUpdateManyWithoutSalesRepInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1369,8 +1462,11 @@ export type OrderCreateManyPhysicianInput = {
   physicianCommissionAmount?: number
   status?: $Enums.OrderStatus
   commissionPaid?: boolean
+  billingAddress?: string | null
   shippingAddress?: string | null
   shippingRate?: number
+  shippingCarrier?: string | null
+  trackingNumber?: string | null
   estimatedDelivery?: Date | string | null
   paymentMethod?: string | null
   paymentStatus?: string | null
@@ -1398,8 +1494,11 @@ export type OrderUpdateWithoutPhysicianInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1429,8 +1528,11 @@ export type OrderUncheckedUpdateWithoutPhysicianInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1459,8 +1561,11 @@ export type OrderUncheckedUpdateManyWithoutPhysicianInput = {
   physicianCommissionAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   commissionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shippingRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estimatedDelivery?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1493,8 +1598,11 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   physicianCommissionAmount?: boolean
   status?: boolean
   commissionPaid?: boolean
+  billingAddress?: boolean
   shippingAddress?: boolean
   shippingRate?: boolean
+  shippingCarrier?: boolean
+  trackingNumber?: boolean
   estimatedDelivery?: boolean
   paymentMethod?: boolean
   paymentStatus?: boolean
@@ -1529,8 +1637,11 @@ export type OrderSelectScalar = {
   physicianCommissionAmount?: boolean
   status?: boolean
   commissionPaid?: boolean
+  billingAddress?: boolean
   shippingAddress?: boolean
   shippingRate?: boolean
+  shippingCarrier?: boolean
+  trackingNumber?: boolean
   estimatedDelivery?: boolean
   paymentMethod?: boolean
   paymentStatus?: boolean
@@ -1547,7 +1658,7 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "physicianId" | "salesRepId" | "items" | "subtotal" | "total" | "salesRepCommissionRate" | "salesRepCommissionAmount" | "physicianCommissionRate" | "physicianCommissionAmount" | "status" | "commissionPaid" | "shippingAddress" | "shippingRate" | "estimatedDelivery" | "paymentMethod" | "paymentStatus" | "transactionId" | "stripePaymentIntentId" | "notes" | "returnedAt" | "returnReason" | "returnedItems" | "returnedTotal" | "salesRepClawback" | "physicianClawback" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "physicianId" | "salesRepId" | "items" | "subtotal" | "total" | "salesRepCommissionRate" | "salesRepCommissionAmount" | "physicianCommissionRate" | "physicianCommissionAmount" | "status" | "commissionPaid" | "billingAddress" | "shippingAddress" | "shippingRate" | "shippingCarrier" | "trackingNumber" | "estimatedDelivery" | "paymentMethod" | "paymentStatus" | "transactionId" | "stripePaymentIntentId" | "notes" | "returnedAt" | "returnReason" | "returnedItems" | "returnedTotal" | "salesRepClawback" | "physicianClawback" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   physician?: boolean | Prisma.Order$physicianArgs<ExtArgs>
   salesRep?: boolean | Prisma.Order$salesRepArgs<ExtArgs>
@@ -1573,8 +1684,11 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     physicianCommissionAmount: number
     status: $Enums.OrderStatus
     commissionPaid: boolean
+    billingAddress: string | null
     shippingAddress: string | null
     shippingRate: number
+    shippingCarrier: string | null
+    trackingNumber: string | null
     estimatedDelivery: Date | null
     paymentMethod: string | null
     paymentStatus: string | null
@@ -1996,8 +2110,11 @@ export interface OrderFieldRefs {
   readonly physicianCommissionAmount: Prisma.FieldRef<"Order", 'Float'>
   readonly status: Prisma.FieldRef<"Order", 'OrderStatus'>
   readonly commissionPaid: Prisma.FieldRef<"Order", 'Boolean'>
+  readonly billingAddress: Prisma.FieldRef<"Order", 'String'>
   readonly shippingAddress: Prisma.FieldRef<"Order", 'String'>
   readonly shippingRate: Prisma.FieldRef<"Order", 'Float'>
+  readonly shippingCarrier: Prisma.FieldRef<"Order", 'String'>
+  readonly trackingNumber: Prisma.FieldRef<"Order", 'String'>
   readonly estimatedDelivery: Prisma.FieldRef<"Order", 'DateTime'>
   readonly paymentMethod: Prisma.FieldRef<"Order", 'String'>
   readonly paymentStatus: Prisma.FieldRef<"Order", 'String'>

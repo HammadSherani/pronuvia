@@ -8,6 +8,7 @@ import { updateSalesRepCommission } from "@/actions/admin/manage-sales-reps";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { CommissionEditor } from "@/components/admin/commission-editor";
 import { SalesRepAccordionList } from "@/components/admin/sales-rep-accordion";
+import { PhysicianApprovalActions } from "@/components/admin/physician-approval-actions";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -204,7 +205,14 @@ function DoctorTableRow({ p }: { p: Physician }) {
 
       {/* Actions */}
       <td className="px-5 py-3.5">
-        <div className="flex items-center gap-3 justify-end">
+        <div className="flex items-center gap-3 justify-end flex-wrap">
+          {p.isApproved === ApprovalStatus.PENDING && (
+            <PhysicianApprovalActions
+              physicianId={p.id}
+              physicianName={`Dr. ${p.firstName} ${p.lastName}`}
+              existingCommission={p.commission}
+            />
+          )}
           <Link href={`/admin/physicians/${p.id}`} className="text-xs font-medium text-gray-500 hover:text-gray-700">View</Link>
           <Link href={`/admin/physicians/${p.id}/edit`} className="text-xs font-medium text-[#5BB8D4] hover:text-[#3a9db8]">Edit</Link>
           <DeleteButton

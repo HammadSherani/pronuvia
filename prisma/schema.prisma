@@ -146,6 +146,7 @@ model PartneringPhysician {
   bankName            String?
   bankAccountNumber   String?
   bankAccountName     String?
+  walletBalance       Float          @default(0)
   ordersCount         Int            @default(0)
   addedByRole         Role
   addedByAdminId      String?        @db.ObjectId
@@ -155,6 +156,8 @@ model PartneringPhysician {
   updatedAt           DateTime       @updatedAt
 
   orderItems          Order[]
+  walletTransactions  PhysicianWalletTransaction[]
+  withdrawRequests    PhysicianWithdrawRequest[]
 }
 
 model CatalogDocument {
@@ -200,8 +203,11 @@ model Order {
 
   status                    OrderStatus          @default(PENDING)
   commissionPaid            Boolean              @default(false)
+  billingAddress            String?
   shippingAddress           String?
   shippingRate              Float                @default(0)
+  shippingCarrier           String?
+  trackingNumber            String?
   estimatedDelivery         DateTime?
   paymentMethod             String?
   paymentStatus             String?
@@ -243,6 +249,30 @@ model WithdrawRequest {
   id          String              @id @default(auto()) @map("_id") @db.ObjectId
   salesRepId  String              @db.ObjectId
   salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id])
+  amount      Float
+  status      WithdrawStatus      @default(PENDING)
+  note        String?
+  adminNote   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model PhysicianWalletTransaction {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  physicianId String              @db.ObjectId
+  physician   PartneringPhysician @relation(fields: [physicianId], references: [id])
+  amount      Float
+  type        String
+  description String?
+  orderId     String?             @db.ObjectId
+  balance     Float
+  createdAt   DateTime            @default(now())
+}
+
+model PhysicianWithdrawRequest {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  physicianId String              @db.ObjectId
+  physician   PartneringPhysician @relation(fields: [physicianId], references: [id])
   amount      Float
   status      WithdrawStatus      @default(PENDING)
   note        String?

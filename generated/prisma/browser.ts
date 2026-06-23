@@ -68,6 +68,16 @@ export type WalletTransaction = Prisma.WalletTransactionModel
  */
 export type WithdrawRequest = Prisma.WithdrawRequestModel
 /**
+ * Model PhysicianWalletTransaction
+ * 
+ */
+export type PhysicianWalletTransaction = Prisma.PhysicianWalletTransactionModel
+/**
+ * Model PhysicianWithdrawRequest
+ * 
+ */
+export type PhysicianWithdrawRequest = Prisma.PhysicianWithdrawRequestModel
+/**
  * Model Banner
  * 
  */

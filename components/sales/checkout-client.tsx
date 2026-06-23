@@ -3,7 +3,6 @@
 import {
   useState,
   useEffect,
-  useCallback,
   useActionState,
   forwardRef,
   useImperativeHandle,
@@ -20,21 +19,10 @@ import {
 } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
-import { calculateShipping } from "@/lib/utils/shipping";
 import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
 import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
 import type { AddressData } from "@/actions/sales-rep/save-address";
-
-// ── Types ───────────────────────────────────────────────────────────────────
-
-type FedExRate = {
-  serviceType:  string;
-  serviceName:  string;
-  rate:         number;
-  currency:     string;
-  deliveryInfo: string | null;
-};
 
 // ── Address helpers ─────────────────────────────────────────────────────────
 
@@ -206,12 +194,6 @@ export function CheckoutClient({
   const [editBill,      setEditBill]      = useState(false);
   const [savingAddr,    setSavingAddr]    = useState(false);
 
-  // shipping rates (FedEx)
-  const [fedexRates,    setFedexRates]    = useState<FedExRate[]>([]);
-  const [selectedRate,  setSelectedRate]  = useState<FedExRate | null>(null);
-  const [fetchingRates, setFetchingRates] = useState(false);
-  const [isSandbox,     setIsSandbox]     = useState(false);
-
   // payment
   const [payMethod,      setPayMethod]      = useState<"CARD" | "WALLET">("CARD");
   const [notes,          setNotes]          = useState("");
@@ -224,50 +206,12 @@ export function CheckoutClient({
   const stripeRef    = useRef<StripeHandle>(null);
   const walletSubmit = useRef<HTMLButtonElement>(null);
 
-  // cart math
-  const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
-  const staticShipping = calculateShipping(subtotal);
-  const activeRate     = selectedRate?.rate ?? staticShipping.rate;
-  const shippingRate   = activeRate;
-  const total          = parseFloat((subtotal + activeRate).toFixed(2));
-  const cashback       = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
-  const canWallet      = walletBalance >= total;
-
-  // FedEx rate fetch
-  const fetchRates = useCallback(async (addr: AddressData) => {
-    if (!hasAddr(addr) || !addr.zip) return;
-    setFetchingRates(true);
-    try {
-      const totalWeightLb = items.reduce((s, i) => s + i.quantity, 0);
-      const res = await fetch("/api/shipping/rates", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ destination: addr, totalWeightLb }),
-      });
-      const data = await res.json();
-      if (data.rates?.length > 0) {
-        setFedexRates(data.rates);
-        setIsSandbox(!!data.sandbox);
-        // In sandbox all rates are $0 — keep selectedRate null so static fallback is used for total
-        setSelectedRate(data.sandbox ? null : data.rates[0]);
-      } else {
-        setFedexRates([]);
-        setIsSandbox(false);
-        setSelectedRate(null);
-      }
-    } catch {
-      setFedexRates([]);
-      setSelectedRate(null);
-    } finally {
-      setFetchingRates(false);
-    }
-  }, [items]);
-
-  // Fetch on mount if address already saved
-  useEffect(() => {
-    if (hasAddr(shipping)) fetchRates(shipping);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // cart math — shipping is $0 at checkout; admin sets it at fulfillment
+  const subtotal   = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
+  const shippingRate = 0;
+  const total        = subtotal;
+  const cashback     = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
+  const canWallet    = walletBalance >= total;
 
   const itemsJson       = JSON.stringify(items.map((i) => ({
     productId:   i.productId,
@@ -289,7 +233,6 @@ export function CheckoutClient({
     if (res.success) {
       toast.success("Address saved.");
       setEditShip(false);
-      fetchRates(shipping);
     } else {
       toast.error(res.message ?? "Failed to save address.");
     }
@@ -711,11 +654,9 @@ export function CheckoutClient({
                   </svg>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span>{selectedRate?.serviceName ?? staticShipping.label}</span>
-                <span className={shippingRate === 0 ? "font-semibold text-gray-800" : ""}>
-                  {shippingRate === 0 ? "FREE" : `$${shippingRate.toFixed(2)}`}
-                </span>
+              <div className="flex justify-between text-gray-400">
+                <span>Shipping</span>
+                <span className="italic text-xs">Calculated at fulfillment</span>
               </div>
             </div>
 
@@ -728,72 +669,13 @@ export function CheckoutClient({
             </div>
           </div>
 
-          {/* Shipping options — below order summary */}
-          <div className="border border-gray-200 rounded overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-800">Shipping options</h2>
-            </div>
-
-            <div className="px-4 py-3">
-              {!hasAddr(shipping) ? (
-                <p className="text-xs text-gray-400 py-1">
-                  Enter shipping address to see rates.
-                </p>
-              ) : fetchingRates ? (
-                <div className="flex items-center gap-2 py-2 text-xs text-gray-400">
-                  <span className="w-3.5 h-3.5 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
-                  Calculating FedEx rates…
-                </div>
-              ) : fedexRates.length > 0 ? (
-                <div className="space-y-1.5">
-                  {isSandbox && (
-                    <p className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-2">
-                      Sandbox mode — actual rates will show in production.
-                    </p>
-                  )}
-                  {fedexRates.map((r, idx) => (
-                    <label
-                      key={r.serviceType}
-                      className="flex items-center justify-between py-2 px-1 cursor-pointer hover:bg-gray-50 rounded transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="shippingRate"
-                          checked={isSandbox ? idx === 0 : selectedRate?.serviceType === r.serviceType}
-                          onChange={() => !isSandbox && setSelectedRate(r)}
-                          className="accent-[#3DBFA4]"
-                          readOnly={isSandbox}
-                        />
-                        <div>
-                          <p className="text-xs text-gray-800">{r.serviceName}</p>
-                          {r.deliveryInfo && (
-                            <p className="text-[11px] text-gray-400">{r.deliveryInfo}</p>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold text-gray-700 shrink-0">
-                        {isSandbox
-                          ? "TBD"
-                          : r.rate === 0
-                          ? "FREE"
-                          : `$${r.rate.toFixed(2)}`}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <label className="flex items-center justify-between py-2 cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <input type="radio" checked readOnly className="accent-[#3DBFA4]" />
-                    <span className="text-xs text-gray-700">{staticShipping.label}</span>
-                  </div>
-                  <span className="text-xs font-semibold text-gray-700">
-                    {staticShipping.rate === 0 ? "FREE" : `$${staticShipping.rate.toFixed(2)}`}
-                  </span>
-                </label>
-              )}
-            </div>
+          <div className="border border-blue-50 bg-blue-50 rounded-xl px-4 py-3 flex items-start gap-3">
+            <svg className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              Shipping charges are calculated by our team after the order is placed and will be visible in your order tracking once shipped.
+            </p>
           </div>
           </div>{/* end sticky wrapper */}
         </div>

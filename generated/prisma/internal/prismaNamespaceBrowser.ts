@@ -59,6 +59,8 @@ export const ModelName = {
   Order: 'Order',
   WalletTransaction: 'WalletTransaction',
   WithdrawRequest: 'WithdrawRequest',
+  PhysicianWalletTransaction: 'PhysicianWalletTransaction',
+  PhysicianWithdrawRequest: 'PhysicianWithdrawRequest',
   Banner: 'Banner'
 } as const
 
@@ -189,6 +191,7 @@ export const PartneringPhysicianScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  walletBalance: 'walletBalance',
   ordersCount: 'ordersCount',
   addedByRole: 'addedByRole',
   addedByAdminId: 'addedByAdminId',
@@ -227,8 +230,11 @@ export const OrderScalarFieldEnum = {
   physicianCommissionAmount: 'physicianCommissionAmount',
   status: 'status',
   commissionPaid: 'commissionPaid',
+  billingAddress: 'billingAddress',
   shippingAddress: 'shippingAddress',
   shippingRate: 'shippingRate',
+  shippingCarrier: 'shippingCarrier',
+  trackingNumber: 'trackingNumber',
   estimatedDelivery: 'estimatedDelivery',
   paymentMethod: 'paymentMethod',
   paymentStatus: 'paymentStatus',
@@ -274,6 +280,34 @@ export const WithdrawRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawRequestScalarFieldEnum = (typeof WithdrawRequestScalarFieldEnum)[keyof typeof WithdrawRequestScalarFieldEnum]
+
+
+export const PhysicianWalletTransactionScalarFieldEnum = {
+  id: 'id',
+  physicianId: 'physicianId',
+  amount: 'amount',
+  type: 'type',
+  description: 'description',
+  orderId: 'orderId',
+  balance: 'balance',
+  createdAt: 'createdAt'
+} as const
+
+export type PhysicianWalletTransactionScalarFieldEnum = (typeof PhysicianWalletTransactionScalarFieldEnum)[keyof typeof PhysicianWalletTransactionScalarFieldEnum]
+
+
+export const PhysicianWithdrawRequestScalarFieldEnum = {
+  id: 'id',
+  physicianId: 'physicianId',
+  amount: 'amount',
+  status: 'status',
+  note: 'note',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PhysicianWithdrawRequestScalarFieldEnum = (typeof PhysicianWithdrawRequestScalarFieldEnum)[keyof typeof PhysicianWithdrawRequestScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {

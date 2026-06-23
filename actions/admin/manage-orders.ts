@@ -125,6 +125,40 @@ export async function createOrder(
   return { success: true, message: `Order ${orderNumber} created successfully.` };
 }
 
+export type ShipOrderPayload = {
+  carrier:          string;
+  trackingNumber:   string;
+  shippingCost:     number;
+  estimatedDelivery: string; // ISO date string yyyy-mm-dd
+};
+
+export async function shipOrder(
+  orderId: string,
+  payload: ShipOrderPayload,
+): Promise<OrderActionState> {
+  await requireAdmin();
+
+  const order = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true, status: true } });
+  if (!order) return { message: "Order not found." };
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status:           OrderStatus.SHIPPED,
+      shippingCarrier:  payload.carrier || null,
+      trackingNumber:   payload.trackingNumber.trim() || null,
+      shippingRate:     payload.shippingCost,
+      estimatedDelivery: payload.estimatedDelivery ? new Date(payload.estimatedDelivery) : null,
+    },
+  });
+
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/sales/orders");
+  revalidatePath("/physician/orders");
+  return { success: true, message: "Order marked as shipped." };
+}
+
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus
@@ -136,42 +170,59 @@ export async function updateOrderStatus(
     select: {
       id: true, status: true, orderNumber: true,
       salesRepId: true,
+      physicianId: true,
       salesRepCommissionAmount: true,
+      physicianCommissionAmount: true,
       commissionPaid: true,
     },
   });
   if (!order) return { message: "Order not found." };
 
-  const isCompletingWithCommission =
-    status === OrderStatus.COMPLETED &&
-    !!order.salesRepId &&
-    order.salesRepCommissionAmount > 0;
+  const isCompleting = status === OrderStatus.COMPLETED && !order.commissionPaid;
 
-  if (isCompletingWithCommission) {
-    const rep = await prisma.salesRepresentative.findUnique({
-      where:  { id: order.salesRepId! },
-      select: { walletBalance: true },
-    });
-
-    const walletBalance = rep?.walletBalance;
-
-    // Credit if not yet paid, OR if previous run set commissionPaid=true but
-    // wallet was never actually updated (walletBalance is still null)
-    const alreadyCredited = order.commissionPaid && walletBalance !== null;
-
-    if (!alreadyCredited) {
-      const currentBalance = walletBalance ?? 0;
+  if (isCompleting) {
+    // Credit sales rep commission
+    if (order.salesRepId && order.salesRepCommissionAmount > 0) {
+      const rep = await prisma.salesRepresentative.findUnique({
+        where:  { id: order.salesRepId },
+        select: { walletBalance: true },
+      });
+      const currentBalance = rep?.walletBalance ?? 0;
       const newBalance     = currentBalance + order.salesRepCommissionAmount;
 
       await prisma.salesRepresentative.update({
-        where: { id: order.salesRepId! },
+        where: { id: order.salesRepId },
         data:  { walletBalance: newBalance },
       });
-
       await prisma.walletTransaction.create({
         data: {
-          salesRepId:  order.salesRepId!,
+          salesRepId:  order.salesRepId,
           amount:      order.salesRepCommissionAmount,
+          type:        "CREDIT",
+          description: `Commission for order #${order.orderNumber}`,
+          orderId:     id,
+          balance:     newBalance,
+        },
+      });
+    }
+
+    // Credit physician commission
+    if (order.physicianId && order.physicianCommissionAmount > 0) {
+      const physician = await prisma.partneringPhysician.findUnique({
+        where:  { id: order.physicianId },
+        select: { walletBalance: true },
+      });
+      const currentBalance = physician?.walletBalance ?? 0;
+      const newBalance     = currentBalance + order.physicianCommissionAmount;
+
+      await prisma.partneringPhysician.update({
+        where: { id: order.physicianId },
+        data:  { walletBalance: newBalance },
+      });
+      await prisma.physicianWalletTransaction.create({
+        data: {
+          physicianId: order.physicianId,
+          amount:      order.physicianCommissionAmount,
           type:        "CREDIT",
           description: `Commission for order #${order.orderNumber}`,
           orderId:     id,
@@ -185,13 +236,14 @@ export async function updateOrderStatus(
     where: { id },
     data: {
       status,
-      ...(isCompletingWithCommission && { commissionPaid: true }),
+      ...(isCompleting && { commissionPaid: true }),
     },
   });
 
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${id}`);
   revalidatePath("/sales/wallet");
+  revalidatePath("/physician/wallet");
   return { success: true, message: "Order status updated." };
 }
 
@@ -230,6 +282,7 @@ export async function listOrders() {
       salesRepCommissionRate: true, salesRepCommissionAmount: true,
       physicianCommissionRate: true, physicianCommissionAmount: true,
       paymentMethod: true, paymentStatus: true, transactionId: true,
+      shippingCarrier: true, trackingNumber: true, shippingRate: true, estimatedDelivery: true,
       returnedAt: true, returnedTotal: true,
       salesRepClawback: true, physicianClawback: true,
       physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
@@ -300,17 +353,17 @@ export async function processReturn(
       salesRepCommissionAmount: true, physicianCommissionAmount: true,
       commissionPaid: true,
       returnedAt: true,
-      salesRep: { select: { walletBalance: true } },
+      salesRep:  { select: { walletBalance: true } },
+      physician: { select: { walletBalance: true } },
     },
   });
 
-  if (!order)          return { message: "Order not found." };
+  if (!order)           return { message: "Order not found." };
   if (order.returnedAt) return { message: "This order has already been returned." };
 
-  const items      = order.items as unknown as OrderItem[];
+  const items        = order.items as unknown as OrderItem[];
   const isFullReturn = returnedItemIndexes === null;
 
-  // Calculate the $ value of what's being returned
   const returnedTotal = isFullReturn
     ? order.total
     : (returnedItemIndexes ?? []).reduce((sum, idx) => {
@@ -320,31 +373,50 @@ export async function processReturn(
 
   if (returnedTotal <= 0) return { message: "No items selected for return." };
 
-  // Proportional commission clawback
-  const ratio = order.total > 0 ? returnedTotal / order.total : 0;
-  const salesRepClawback   = parseFloat((order.salesRepCommissionAmount  * ratio).toFixed(2));
-  const physicianClawback  = parseFloat((order.physicianCommissionAmount * ratio).toFixed(2));
+  const ratio             = order.total > 0 ? returnedTotal / order.total : 0;
+  const salesRepClawback  = parseFloat((order.salesRepCommissionAmount  * ratio).toFixed(2));
+  const physicianClawback = parseFloat((order.physicianCommissionAmount * ratio).toFixed(2));
 
-  // Deduct from sales rep wallet only if commission was already paid
-  if (order.commissionPaid && order.salesRepId && salesRepClawback > 0) {
-    const currentBalance = order.salesRep?.walletBalance ?? 0;
-    const newBalance     = Math.max(0, currentBalance - salesRepClawback);
+  if (order.commissionPaid) {
+    // Clawback sales rep
+    if (order.salesRepId && salesRepClawback > 0) {
+      const currentBalance = order.salesRep?.walletBalance ?? 0;
+      const newBalance     = Math.max(0, currentBalance - salesRepClawback);
+      await prisma.salesRepresentative.update({
+        where: { id: order.salesRepId },
+        data:  { walletBalance: newBalance },
+      });
+      await prisma.walletTransaction.create({
+        data: {
+          salesRepId:  order.salesRepId,
+          amount:      salesRepClawback,
+          type:        "DEBIT",
+          description: `Commission clawback — return on order #${order.orderNumber}`,
+          orderId,
+          balance:     newBalance,
+        },
+      });
+    }
 
-    await prisma.salesRepresentative.update({
-      where: { id: order.salesRepId },
-      data:  { walletBalance: newBalance },
-    });
-
-    await prisma.walletTransaction.create({
-      data: {
-        salesRepId:  order.salesRepId,
-        amount:      salesRepClawback,
-        type:        "DEBIT",
-        description: `Commission clawback — return on order #${order.orderNumber}`,
-        orderId,
-        balance:     newBalance,
-      },
-    });
+    // Clawback physician
+    if (order.physicianId && physicianClawback > 0) {
+      const currentBalance = order.physician?.walletBalance ?? 0;
+      const newBalance     = Math.max(0, currentBalance - physicianClawback);
+      await prisma.partneringPhysician.update({
+        where: { id: order.physicianId },
+        data:  { walletBalance: newBalance },
+      });
+      await prisma.physicianWalletTransaction.create({
+        data: {
+          physicianId: order.physicianId,
+          amount:      physicianClawback,
+          type:        "DEBIT",
+          description: `Commission clawback — return on order #${order.orderNumber}`,
+          orderId,
+          balance:     newBalance,
+        },
+      });
+    }
   }
 
   const newStatus = isFullReturn ? "REFUNDED" : order.status;
@@ -367,7 +439,13 @@ export async function processReturn(
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/sales/wallet");
-  return { success: true, message: `Return processed. ${order.commissionPaid ? `$${salesRepClawback.toFixed(2)} clawed back from sales rep wallet.` : "No commission was paid — no clawback needed."}` };
+  revalidatePath("/physician/wallet");
+  return {
+    success: true,
+    message: order.commissionPaid
+      ? `Return processed. Rep: $${salesRepClawback.toFixed(2)}, Dr: $${physicianClawback.toFixed(2)} clawed back.`
+      : "Return processed. No commission was paid — no clawback needed.",
+  };
 }
 
 export async function getCommissionSummary(opts?: { salesRepId?: string; physicianId?: string }) {

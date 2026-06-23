@@ -18,22 +18,15 @@ export default async function NewPhysicianPage() {
         Back to Physicians
       </Link>
 
-      <div className="flex items-start gap-3 mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Add Partnering Physician</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Physicians added by admin are automatically approved and can log in immediately.</p>
-        </div>
-        <span className="ml-auto shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-medium">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Auto-Approved
-        </span>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-800">Add Partnering Physician</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Choose to approve immediately or place in pending for later review.</p>
       </div>
 
       <PhysicianForm
         action={adminCreatePhysician}
-        submitLabel="Create & Approve"
+        submitLabel="Create"
+        showDualCreate
         backHref="/admin/physicians"
         successRedirect="/admin/physicians"
       />

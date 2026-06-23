@@ -30,6 +30,7 @@ export type PartneringPhysicianAvgAggregateOutputType = {
   yearsInPractice: number | null
   commission: number | null
   uplineCommission: number | null
+  walletBalance: number | null
   ordersCount: number | null
 }
 
@@ -37,6 +38,7 @@ export type PartneringPhysicianSumAggregateOutputType = {
   yearsInPractice: number | null
   commission: number | null
   uplineCommission: number | null
+  walletBalance: number | null
   ordersCount: number | null
 }
 
@@ -68,6 +70,7 @@ export type PartneringPhysicianMinAggregateOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  walletBalance: number | null
   ordersCount: number | null
   addedByRole: $Enums.Role | null
   addedByAdminId: string | null
@@ -104,6 +107,7 @@ export type PartneringPhysicianMaxAggregateOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  walletBalance: number | null
   ordersCount: number | null
   addedByRole: $Enums.Role | null
   addedByAdminId: string | null
@@ -141,6 +145,7 @@ export type PartneringPhysicianCountAggregateOutputType = {
   bankName: number
   bankAccountNumber: number
   bankAccountName: number
+  walletBalance: number
   ordersCount: number
   addedByRole: number
   addedByAdminId: number
@@ -155,6 +160,7 @@ export type PartneringPhysicianAvgAggregateInputType = {
   yearsInPractice?: true
   commission?: true
   uplineCommission?: true
+  walletBalance?: true
   ordersCount?: true
 }
 
@@ -162,6 +168,7 @@ export type PartneringPhysicianSumAggregateInputType = {
   yearsInPractice?: true
   commission?: true
   uplineCommission?: true
+  walletBalance?: true
   ordersCount?: true
 }
 
@@ -193,6 +200,7 @@ export type PartneringPhysicianMinAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  walletBalance?: true
   ordersCount?: true
   addedByRole?: true
   addedByAdminId?: true
@@ -229,6 +237,7 @@ export type PartneringPhysicianMaxAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  walletBalance?: true
   ordersCount?: true
   addedByRole?: true
   addedByAdminId?: true
@@ -266,6 +275,7 @@ export type PartneringPhysicianCountAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  walletBalance?: true
   ordersCount?: true
   addedByRole?: true
   addedByAdminId?: true
@@ -390,6 +400,7 @@ export type PartneringPhysicianGroupByOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  walletBalance: number
   ordersCount: number
   addedByRole: $Enums.Role
   addedByAdminId: string | null
@@ -450,6 +461,7 @@ export type PartneringPhysicianWhereInput = {
   bankName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountNumber?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
+  walletBalance?: Prisma.FloatFilter<"PartneringPhysician"> | number
   ordersCount?: Prisma.IntFilter<"PartneringPhysician"> | number
   addedByRole?: Prisma.EnumRoleFilter<"PartneringPhysician"> | $Enums.Role
   addedByAdminId?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
@@ -458,6 +470,8 @@ export type PartneringPhysicianWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"PartneringPhysician"> | Date | string
   salesRep?: Prisma.XOR<Prisma.SalesRepresentativeNullableScalarRelationFilter, Prisma.SalesRepresentativeWhereInput> | null
   orderItems?: Prisma.OrderListRelationFilter
+  walletTransactions?: Prisma.PhysicianWalletTransactionListRelationFilter
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestListRelationFilter
 }
 
 export type PartneringPhysicianOrderByWithRelationInput = {
@@ -489,6 +503,7 @@ export type PartneringPhysicianOrderByWithRelationInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
   addedByRole?: Prisma.SortOrder
   addedByAdminId?: Prisma.SortOrder
@@ -497,6 +512,8 @@ export type PartneringPhysicianOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   salesRep?: Prisma.SalesRepresentativeOrderByWithRelationInput
   orderItems?: Prisma.OrderOrderByRelationAggregateInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionOrderByRelationAggregateInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestOrderByRelationAggregateInput
 }
 
 export type PartneringPhysicianWhereUniqueInput = Prisma.AtLeast<{
@@ -531,6 +548,7 @@ export type PartneringPhysicianWhereUniqueInput = Prisma.AtLeast<{
   bankName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountNumber?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
+  walletBalance?: Prisma.FloatFilter<"PartneringPhysician"> | number
   ordersCount?: Prisma.IntFilter<"PartneringPhysician"> | number
   addedByRole?: Prisma.EnumRoleFilter<"PartneringPhysician"> | $Enums.Role
   addedByAdminId?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
@@ -539,6 +557,8 @@ export type PartneringPhysicianWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"PartneringPhysician"> | Date | string
   salesRep?: Prisma.XOR<Prisma.SalesRepresentativeNullableScalarRelationFilter, Prisma.SalesRepresentativeWhereInput> | null
   orderItems?: Prisma.OrderListRelationFilter
+  walletTransactions?: Prisma.PhysicianWalletTransactionListRelationFilter
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestListRelationFilter
 }, "id" | "email">
 
 export type PartneringPhysicianOrderByWithAggregationInput = {
@@ -570,6 +590,7 @@ export type PartneringPhysicianOrderByWithAggregationInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
   addedByRole?: Prisma.SortOrder
   addedByAdminId?: Prisma.SortOrder
@@ -615,6 +636,7 @@ export type PartneringPhysicianScalarWhereWithAggregatesInput = {
   bankName?: Prisma.StringNullableWithAggregatesFilter<"PartneringPhysician"> | string | null
   bankAccountNumber?: Prisma.StringNullableWithAggregatesFilter<"PartneringPhysician"> | string | null
   bankAccountName?: Prisma.StringNullableWithAggregatesFilter<"PartneringPhysician"> | string | null
+  walletBalance?: Prisma.FloatWithAggregatesFilter<"PartneringPhysician"> | number
   ordersCount?: Prisma.IntWithAggregatesFilter<"PartneringPhysician"> | number
   addedByRole?: Prisma.EnumRoleWithAggregatesFilter<"PartneringPhysician"> | $Enums.Role
   addedByAdminId?: Prisma.StringNullableWithAggregatesFilter<"PartneringPhysician"> | string | null
@@ -652,6 +674,7 @@ export type PartneringPhysicianCreateInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
@@ -659,6 +682,8 @@ export type PartneringPhysicianCreateInput = {
   updatedAt?: Date | string
   salesRep?: Prisma.SalesRepresentativeCreateNestedOneWithoutPhysiciansInput
   orderItems?: Prisma.OrderCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianUncheckedCreateInput = {
@@ -690,6 +715,7 @@ export type PartneringPhysicianUncheckedCreateInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
@@ -697,6 +723,8 @@ export type PartneringPhysicianUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianUpdateInput = {
@@ -727,6 +755,7 @@ export type PartneringPhysicianUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -734,6 +763,8 @@ export type PartneringPhysicianUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesRep?: Prisma.SalesRepresentativeUpdateOneWithoutPhysiciansNestedInput
   orderItems?: Prisma.OrderUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianUncheckedUpdateInput = {
@@ -764,6 +795,7 @@ export type PartneringPhysicianUncheckedUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -771,6 +803,8 @@ export type PartneringPhysicianUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderUncheckedUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianCreateManyInput = {
@@ -802,6 +836,7 @@ export type PartneringPhysicianCreateManyInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
@@ -838,6 +873,7 @@ export type PartneringPhysicianUpdateManyMutationInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -873,6 +909,7 @@ export type PartneringPhysicianUncheckedUpdateManyInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -920,6 +957,7 @@ export type PartneringPhysicianCountOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
   addedByRole?: Prisma.SortOrder
   addedByAdminId?: Prisma.SortOrder
@@ -932,6 +970,7 @@ export type PartneringPhysicianAvgOrderByAggregateInput = {
   yearsInPractice?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   uplineCommission?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
 }
 
@@ -963,6 +1002,7 @@ export type PartneringPhysicianMaxOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
   addedByRole?: Prisma.SortOrder
   addedByAdminId?: Prisma.SortOrder
@@ -999,6 +1039,7 @@ export type PartneringPhysicianMinOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
   addedByRole?: Prisma.SortOrder
   addedByAdminId?: Prisma.SortOrder
@@ -1011,12 +1052,18 @@ export type PartneringPhysicianSumOrderByAggregateInput = {
   yearsInPractice?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   uplineCommission?: Prisma.SortOrder
+  walletBalance?: Prisma.SortOrder
   ordersCount?: Prisma.SortOrder
 }
 
 export type PartneringPhysicianNullableScalarRelationFilter = {
   is?: Prisma.PartneringPhysicianWhereInput | null
   isNot?: Prisma.PartneringPhysicianWhereInput | null
+}
+
+export type PartneringPhysicianScalarRelationFilter = {
+  is?: Prisma.PartneringPhysicianWhereInput
+  isNot?: Prisma.PartneringPhysicianWhereInput
 }
 
 export type PartneringPhysicianCreateNestedManyWithoutSalesRepInput = {
@@ -1103,6 +1150,34 @@ export type PartneringPhysicianUpdateOneWithoutOrderItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PartneringPhysicianUpdateToOneWithWhereWithoutOrderItemsInput, Prisma.PartneringPhysicianUpdateWithoutOrderItemsInput>, Prisma.PartneringPhysicianUncheckedUpdateWithoutOrderItemsInput>
 }
 
+export type PartneringPhysicianCreateNestedOneWithoutWalletTransactionsInput = {
+  create?: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWalletTransactionsInput>
+  connectOrCreate?: Prisma.PartneringPhysicianCreateOrConnectWithoutWalletTransactionsInput
+  connect?: Prisma.PartneringPhysicianWhereUniqueInput
+}
+
+export type PartneringPhysicianUpdateOneRequiredWithoutWalletTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWalletTransactionsInput>
+  connectOrCreate?: Prisma.PartneringPhysicianCreateOrConnectWithoutWalletTransactionsInput
+  upsert?: Prisma.PartneringPhysicianUpsertWithoutWalletTransactionsInput
+  connect?: Prisma.PartneringPhysicianWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PartneringPhysicianUpdateToOneWithWhereWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUpdateWithoutWalletTransactionsInput>, Prisma.PartneringPhysicianUncheckedUpdateWithoutWalletTransactionsInput>
+}
+
+export type PartneringPhysicianCreateNestedOneWithoutWithdrawRequestsInput = {
+  create?: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWithdrawRequestsInput>
+  connectOrCreate?: Prisma.PartneringPhysicianCreateOrConnectWithoutWithdrawRequestsInput
+  connect?: Prisma.PartneringPhysicianWhereUniqueInput
+}
+
+export type PartneringPhysicianUpdateOneRequiredWithoutWithdrawRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWithdrawRequestsInput>
+  connectOrCreate?: Prisma.PartneringPhysicianCreateOrConnectWithoutWithdrawRequestsInput
+  upsert?: Prisma.PartneringPhysicianUpsertWithoutWithdrawRequestsInput
+  connect?: Prisma.PartneringPhysicianWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PartneringPhysicianUpdateToOneWithWhereWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUpdateWithoutWithdrawRequestsInput>, Prisma.PartneringPhysicianUncheckedUpdateWithoutWithdrawRequestsInput>
+}
+
 export type PartneringPhysicianCreateWithoutSalesRepInput = {
   id?: string
   isApproved?: $Enums.ApprovalStatus
@@ -1132,12 +1207,15 @@ export type PartneringPhysicianCreateWithoutSalesRepInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianUncheckedCreateWithoutSalesRepInput = {
@@ -1169,12 +1247,15 @@ export type PartneringPhysicianUncheckedCreateWithoutSalesRepInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianCreateOrConnectWithoutSalesRepInput = {
@@ -1234,6 +1315,7 @@ export type PartneringPhysicianScalarWhereInput = {
   bankName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountNumber?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
   bankAccountName?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
+  walletBalance?: Prisma.FloatFilter<"PartneringPhysician"> | number
   ordersCount?: Prisma.IntFilter<"PartneringPhysician"> | number
   addedByRole?: Prisma.EnumRoleFilter<"PartneringPhysician"> | $Enums.Role
   addedByAdminId?: Prisma.StringNullableFilter<"PartneringPhysician"> | string | null
@@ -1271,12 +1353,15 @@ export type PartneringPhysicianCreateWithoutOrderItemsInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   salesRep?: Prisma.SalesRepresentativeCreateNestedOneWithoutPhysiciansInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianUncheckedCreateWithoutOrderItemsInput = {
@@ -1308,12 +1393,15 @@ export type PartneringPhysicianUncheckedCreateWithoutOrderItemsInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
   salesRepId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedCreateNestedManyWithoutPhysicianInput
 }
 
 export type PartneringPhysicianCreateOrConnectWithoutOrderItemsInput = {
@@ -1360,12 +1448,15 @@ export type PartneringPhysicianUpdateWithoutOrderItemsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesRep?: Prisma.SalesRepresentativeUpdateOneWithoutPhysiciansNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianUncheckedUpdateWithoutOrderItemsInput = {
@@ -1396,12 +1487,363 @@ export type PartneringPhysicianUncheckedUpdateWithoutOrderItemsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesRepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedUpdateManyWithoutPhysicianNestedInput
+}
+
+export type PartneringPhysicianCreateWithoutWalletTransactionsInput = {
+  id?: string
+  isApproved?: $Enums.ApprovalStatus
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  aictherapy?: string | null
+  license?: string | null
+  websiteLink?: string | null
+  addressOne?: string | null
+  addressTwo?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  phone?: string | null
+  officeContactNumber?: string | null
+  fax?: string | null
+  nameOfPractice?: string | null
+  yearsInPractice?: number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianCreatefieldsOfSpecialityInput | string[]
+  commission?: number
+  uplineCommission?: number
+  salesRepNote?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiry?: Date | string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  bankAccountName?: string | null
+  walletBalance?: number
+  ordersCount?: number
+  addedByRole: $Enums.Role
+  addedByAdminId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  salesRep?: Prisma.SalesRepresentativeCreateNestedOneWithoutPhysiciansInput
+  orderItems?: Prisma.OrderCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestCreateNestedManyWithoutPhysicianInput
+}
+
+export type PartneringPhysicianUncheckedCreateWithoutWalletTransactionsInput = {
+  id?: string
+  isApproved?: $Enums.ApprovalStatus
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  aictherapy?: string | null
+  license?: string | null
+  websiteLink?: string | null
+  addressOne?: string | null
+  addressTwo?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  phone?: string | null
+  officeContactNumber?: string | null
+  fax?: string | null
+  nameOfPractice?: string | null
+  yearsInPractice?: number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianCreatefieldsOfSpecialityInput | string[]
+  commission?: number
+  uplineCommission?: number
+  salesRepNote?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiry?: Date | string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  bankAccountName?: string | null
+  walletBalance?: number
+  ordersCount?: number
+  addedByRole: $Enums.Role
+  addedByAdminId?: string | null
+  salesRepId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutPhysicianInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedCreateNestedManyWithoutPhysicianInput
+}
+
+export type PartneringPhysicianCreateOrConnectWithoutWalletTransactionsInput = {
+  where: Prisma.PartneringPhysicianWhereUniqueInput
+  create: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWalletTransactionsInput>
+}
+
+export type PartneringPhysicianUpsertWithoutWalletTransactionsInput = {
+  update: Prisma.XOR<Prisma.PartneringPhysicianUpdateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedUpdateWithoutWalletTransactionsInput>
+  create: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWalletTransactionsInput>
+  where?: Prisma.PartneringPhysicianWhereInput
+}
+
+export type PartneringPhysicianUpdateToOneWithWhereWithoutWalletTransactionsInput = {
+  where?: Prisma.PartneringPhysicianWhereInput
+  data: Prisma.XOR<Prisma.PartneringPhysicianUpdateWithoutWalletTransactionsInput, Prisma.PartneringPhysicianUncheckedUpdateWithoutWalletTransactionsInput>
+}
+
+export type PartneringPhysicianUpdateWithoutWalletTransactionsInput = {
+  isApproved?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  aictherapy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressOne?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressTwo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  officeContactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nameOfPractice?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsInPractice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianUpdatefieldsOfSpecialityInput | string[]
+  commission?: Prisma.FloatFieldUpdateOperationsInput | number
+  uplineCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  salesRepNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salesRep?: Prisma.SalesRepresentativeUpdateOneWithoutPhysiciansNestedInput
+  orderItems?: Prisma.OrderUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUpdateManyWithoutPhysicianNestedInput
+}
+
+export type PartneringPhysicianUncheckedUpdateWithoutWalletTransactionsInput = {
+  isApproved?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  aictherapy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressOne?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressTwo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  officeContactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nameOfPractice?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsInPractice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianUpdatefieldsOfSpecialityInput | string[]
+  commission?: Prisma.FloatFieldUpdateOperationsInput | number
+  uplineCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  salesRepNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salesRepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderItems?: Prisma.OrderUncheckedUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedUpdateManyWithoutPhysicianNestedInput
+}
+
+export type PartneringPhysicianCreateWithoutWithdrawRequestsInput = {
+  id?: string
+  isApproved?: $Enums.ApprovalStatus
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  aictherapy?: string | null
+  license?: string | null
+  websiteLink?: string | null
+  addressOne?: string | null
+  addressTwo?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  phone?: string | null
+  officeContactNumber?: string | null
+  fax?: string | null
+  nameOfPractice?: string | null
+  yearsInPractice?: number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianCreatefieldsOfSpecialityInput | string[]
+  commission?: number
+  uplineCommission?: number
+  salesRepNote?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiry?: Date | string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  bankAccountName?: string | null
+  walletBalance?: number
+  ordersCount?: number
+  addedByRole: $Enums.Role
+  addedByAdminId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  salesRep?: Prisma.SalesRepresentativeCreateNestedOneWithoutPhysiciansInput
+  orderItems?: Prisma.OrderCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionCreateNestedManyWithoutPhysicianInput
+}
+
+export type PartneringPhysicianUncheckedCreateWithoutWithdrawRequestsInput = {
+  id?: string
+  isApproved?: $Enums.ApprovalStatus
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  aictherapy?: string | null
+  license?: string | null
+  websiteLink?: string | null
+  addressOne?: string | null
+  addressTwo?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  phone?: string | null
+  officeContactNumber?: string | null
+  fax?: string | null
+  nameOfPractice?: string | null
+  yearsInPractice?: number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianCreatefieldsOfSpecialityInput | string[]
+  commission?: number
+  uplineCommission?: number
+  salesRepNote?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpiry?: Date | string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  bankAccountName?: string | null
+  walletBalance?: number
+  ordersCount?: number
+  addedByRole: $Enums.Role
+  addedByAdminId?: string | null
+  salesRepId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutPhysicianInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedCreateNestedManyWithoutPhysicianInput
+}
+
+export type PartneringPhysicianCreateOrConnectWithoutWithdrawRequestsInput = {
+  where: Prisma.PartneringPhysicianWhereUniqueInput
+  create: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWithdrawRequestsInput>
+}
+
+export type PartneringPhysicianUpsertWithoutWithdrawRequestsInput = {
+  update: Prisma.XOR<Prisma.PartneringPhysicianUpdateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedUpdateWithoutWithdrawRequestsInput>
+  create: Prisma.XOR<Prisma.PartneringPhysicianCreateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedCreateWithoutWithdrawRequestsInput>
+  where?: Prisma.PartneringPhysicianWhereInput
+}
+
+export type PartneringPhysicianUpdateToOneWithWhereWithoutWithdrawRequestsInput = {
+  where?: Prisma.PartneringPhysicianWhereInput
+  data: Prisma.XOR<Prisma.PartneringPhysicianUpdateWithoutWithdrawRequestsInput, Prisma.PartneringPhysicianUncheckedUpdateWithoutWithdrawRequestsInput>
+}
+
+export type PartneringPhysicianUpdateWithoutWithdrawRequestsInput = {
+  isApproved?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  aictherapy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressOne?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressTwo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  officeContactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nameOfPractice?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsInPractice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianUpdatefieldsOfSpecialityInput | string[]
+  commission?: Prisma.FloatFieldUpdateOperationsInput | number
+  uplineCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  salesRepNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salesRep?: Prisma.SalesRepresentativeUpdateOneWithoutPhysiciansNestedInput
+  orderItems?: Prisma.OrderUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUpdateManyWithoutPhysicianNestedInput
+}
+
+export type PartneringPhysicianUncheckedUpdateWithoutWithdrawRequestsInput = {
+  isApproved?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  aictherapy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressOne?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressTwo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  officeContactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nameOfPractice?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsInPractice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fieldsOfSpeciality?: Prisma.PartneringPhysicianUpdatefieldsOfSpecialityInput | string[]
+  commission?: Prisma.FloatFieldUpdateOperationsInput | number
+  uplineCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  salesRepNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salesRepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderItems?: Prisma.OrderUncheckedUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianCreateManySalesRepInput = {
@@ -1433,6 +1875,7 @@ export type PartneringPhysicianCreateManySalesRepInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  walletBalance?: number
   ordersCount?: number
   addedByRole: $Enums.Role
   addedByAdminId?: string | null
@@ -1468,12 +1911,15 @@ export type PartneringPhysicianUpdateWithoutSalesRepInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianUncheckedUpdateWithoutSalesRepInput = {
@@ -1504,12 +1950,15 @@ export type PartneringPhysicianUncheckedUpdateWithoutSalesRepInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderUncheckedUpdateManyWithoutPhysicianNestedInput
+  walletTransactions?: Prisma.PhysicianWalletTransactionUncheckedUpdateManyWithoutPhysicianNestedInput
+  withdrawRequests?: Prisma.PhysicianWithdrawRequestUncheckedUpdateManyWithoutPhysicianNestedInput
 }
 
 export type PartneringPhysicianUncheckedUpdateManyWithoutSalesRepInput = {
@@ -1540,6 +1989,7 @@ export type PartneringPhysicianUncheckedUpdateManyWithoutSalesRepInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
   addedByRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   addedByAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1554,10 +2004,14 @@ export type PartneringPhysicianUncheckedUpdateManyWithoutSalesRepInput = {
 
 export type PartneringPhysicianCountOutputType = {
   orderItems: number
+  walletTransactions: number
+  withdrawRequests: number
 }
 
 export type PartneringPhysicianCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orderItems?: boolean | PartneringPhysicianCountOutputTypeCountOrderItemsArgs
+  walletTransactions?: boolean | PartneringPhysicianCountOutputTypeCountWalletTransactionsArgs
+  withdrawRequests?: boolean | PartneringPhysicianCountOutputTypeCountWithdrawRequestsArgs
 }
 
 /**
@@ -1575,6 +2029,20 @@ export type PartneringPhysicianCountOutputTypeDefaultArgs<ExtArgs extends runtim
  */
 export type PartneringPhysicianCountOutputTypeCountOrderItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OrderWhereInput
+}
+
+/**
+ * PartneringPhysicianCountOutputType without action
+ */
+export type PartneringPhysicianCountOutputTypeCountWalletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PhysicianWalletTransactionWhereInput
+}
+
+/**
+ * PartneringPhysicianCountOutputType without action
+ */
+export type PartneringPhysicianCountOutputTypeCountWithdrawRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PhysicianWithdrawRequestWhereInput
 }
 
 
@@ -1607,6 +2075,7 @@ export type PartneringPhysicianSelect<ExtArgs extends runtime.Types.Extensions.I
   bankName?: boolean
   bankAccountNumber?: boolean
   bankAccountName?: boolean
+  walletBalance?: boolean
   ordersCount?: boolean
   addedByRole?: boolean
   addedByAdminId?: boolean
@@ -1615,6 +2084,8 @@ export type PartneringPhysicianSelect<ExtArgs extends runtime.Types.Extensions.I
   updatedAt?: boolean
   salesRep?: boolean | Prisma.PartneringPhysician$salesRepArgs<ExtArgs>
   orderItems?: boolean | Prisma.PartneringPhysician$orderItemsArgs<ExtArgs>
+  walletTransactions?: boolean | Prisma.PartneringPhysician$walletTransactionsArgs<ExtArgs>
+  withdrawRequests?: boolean | Prisma.PartneringPhysician$withdrawRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.PartneringPhysicianCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["partneringPhysician"]>
 
@@ -1649,6 +2120,7 @@ export type PartneringPhysicianSelectScalar = {
   bankName?: boolean
   bankAccountNumber?: boolean
   bankAccountName?: boolean
+  walletBalance?: boolean
   ordersCount?: boolean
   addedByRole?: boolean
   addedByAdminId?: boolean
@@ -1657,10 +2129,12 @@ export type PartneringPhysicianSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PartneringPhysicianOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "isApproved" | "firstName" | "lastName" | "email" | "password" | "aictherapy" | "license" | "websiteLink" | "addressOne" | "addressTwo" | "city" | "state" | "zipCode" | "phone" | "officeContactNumber" | "fax" | "nameOfPractice" | "yearsInPractice" | "fieldsOfSpeciality" | "commission" | "uplineCommission" | "salesRepNote" | "passwordResetToken" | "passwordResetExpiry" | "bankName" | "bankAccountNumber" | "bankAccountName" | "ordersCount" | "addedByRole" | "addedByAdminId" | "salesRepId" | "createdAt" | "updatedAt", ExtArgs["result"]["partneringPhysician"]>
+export type PartneringPhysicianOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "isApproved" | "firstName" | "lastName" | "email" | "password" | "aictherapy" | "license" | "websiteLink" | "addressOne" | "addressTwo" | "city" | "state" | "zipCode" | "phone" | "officeContactNumber" | "fax" | "nameOfPractice" | "yearsInPractice" | "fieldsOfSpeciality" | "commission" | "uplineCommission" | "salesRepNote" | "passwordResetToken" | "passwordResetExpiry" | "bankName" | "bankAccountNumber" | "bankAccountName" | "walletBalance" | "ordersCount" | "addedByRole" | "addedByAdminId" | "salesRepId" | "createdAt" | "updatedAt", ExtArgs["result"]["partneringPhysician"]>
 export type PartneringPhysicianInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   salesRep?: boolean | Prisma.PartneringPhysician$salesRepArgs<ExtArgs>
   orderItems?: boolean | Prisma.PartneringPhysician$orderItemsArgs<ExtArgs>
+  walletTransactions?: boolean | Prisma.PartneringPhysician$walletTransactionsArgs<ExtArgs>
+  withdrawRequests?: boolean | Prisma.PartneringPhysician$withdrawRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.PartneringPhysicianCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1669,6 +2143,8 @@ export type $PartneringPhysicianPayload<ExtArgs extends runtime.Types.Extensions
   objects: {
     salesRep: Prisma.$SalesRepresentativePayload<ExtArgs> | null
     orderItems: Prisma.$OrderPayload<ExtArgs>[]
+    walletTransactions: Prisma.$PhysicianWalletTransactionPayload<ExtArgs>[]
+    withdrawRequests: Prisma.$PhysicianWithdrawRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1699,6 +2175,7 @@ export type $PartneringPhysicianPayload<ExtArgs extends runtime.Types.Extensions
     bankName: string | null
     bankAccountNumber: string | null
     bankAccountName: string | null
+    walletBalance: number
     ordersCount: number
     addedByRole: $Enums.Role
     addedByAdminId: string | null
@@ -2070,6 +2547,8 @@ export interface Prisma__PartneringPhysicianClient<T, Null = never, ExtArgs exte
   readonly [Symbol.toStringTag]: "PrismaPromise"
   salesRep<T extends Prisma.PartneringPhysician$salesRepArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PartneringPhysician$salesRepArgs<ExtArgs>>): Prisma.Prisma__SalesRepresentativeClient<runtime.Types.Result.GetResult<Prisma.$SalesRepresentativePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   orderItems<T extends Prisma.PartneringPhysician$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PartneringPhysician$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  walletTransactions<T extends Prisma.PartneringPhysician$walletTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PartneringPhysician$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PhysicianWalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  withdrawRequests<T extends Prisma.PartneringPhysician$withdrawRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PartneringPhysician$withdrawRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PhysicianWithdrawRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2127,6 +2606,7 @@ export interface PartneringPhysicianFieldRefs {
   readonly bankName: Prisma.FieldRef<"PartneringPhysician", 'String'>
   readonly bankAccountNumber: Prisma.FieldRef<"PartneringPhysician", 'String'>
   readonly bankAccountName: Prisma.FieldRef<"PartneringPhysician", 'String'>
+  readonly walletBalance: Prisma.FieldRef<"PartneringPhysician", 'Float'>
   readonly ordersCount: Prisma.FieldRef<"PartneringPhysician", 'Int'>
   readonly addedByRole: Prisma.FieldRef<"PartneringPhysician", 'Role'>
   readonly addedByAdminId: Prisma.FieldRef<"PartneringPhysician", 'String'>
@@ -2543,6 +3023,54 @@ export type PartneringPhysician$orderItemsArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * PartneringPhysician.walletTransactions
+ */
+export type PartneringPhysician$walletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PhysicianWalletTransaction
+   */
+  select?: Prisma.PhysicianWalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PhysicianWalletTransaction
+   */
+  omit?: Prisma.PhysicianWalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PhysicianWalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.PhysicianWalletTransactionWhereInput
+  orderBy?: Prisma.PhysicianWalletTransactionOrderByWithRelationInput | Prisma.PhysicianWalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.PhysicianWalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PhysicianWalletTransactionScalarFieldEnum | Prisma.PhysicianWalletTransactionScalarFieldEnum[]
+}
+
+/**
+ * PartneringPhysician.withdrawRequests
+ */
+export type PartneringPhysician$withdrawRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PhysicianWithdrawRequest
+   */
+  select?: Prisma.PhysicianWithdrawRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PhysicianWithdrawRequest
+   */
+  omit?: Prisma.PhysicianWithdrawRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PhysicianWithdrawRequestInclude<ExtArgs> | null
+  where?: Prisma.PhysicianWithdrawRequestWhereInput
+  orderBy?: Prisma.PhysicianWithdrawRequestOrderByWithRelationInput | Prisma.PhysicianWithdrawRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PhysicianWithdrawRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PhysicianWithdrawRequestScalarFieldEnum | Prisma.PhysicianWithdrawRequestScalarFieldEnum[]
 }
 
 /**

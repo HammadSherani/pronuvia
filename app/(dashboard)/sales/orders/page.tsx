@@ -33,7 +33,7 @@ export default async function SalesOrdersPage() {
     select: {
       id: true, orderNumber: true, createdAt: true,
       items: true, subtotal: true, total: true,
-      shippingRate: true,
+      shippingRate: true, shippingCarrier: true, trackingNumber: true,
       salesRepCommissionRate: true, salesRepCommissionAmount: true,
       status: true,
       paymentMethod: true, paymentStatus: true,
@@ -105,6 +105,7 @@ export default async function SalesOrdersPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -135,6 +136,18 @@ export default async function SalesOrdersPage() {
                       <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
                       {o.shippingRate > 0 && (
                         <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
+                      )}
+                    </td>
+
+                    {/* Tracking */}
+                    <td className="px-5 py-4">
+                      {o.trackingNumber ? (
+                        <div>
+                          <p className="text-xs text-gray-500">{o.shippingCarrier}</p>
+                          <p className="text-xs font-mono font-semibold text-indigo-600 mt-0.5">{o.trackingNumber}</p>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-300 italic">Awaiting shipment</span>
                       )}
                     </td>
 

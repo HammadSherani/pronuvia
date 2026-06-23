@@ -34,6 +34,7 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/logout") ||
+    pathname.startsWith("/reset-password") ||
     pathname.startsWith("/api/")
   ) {
     return NextResponse.next();
