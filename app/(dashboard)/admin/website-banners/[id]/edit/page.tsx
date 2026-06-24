@@ -23,11 +23,7 @@ export default async function EditWebsiteBannerPage({ params }: { params: Promis
         <WebsiteBannerForm
           action={boundAction}
           defaultValues={{
-            title:       banner.title,
-            subtitle:    banner.subtitle ?? undefined,
-            buttonText:  banner.buttonText ?? undefined,
             imageUrl:    banner.imageUrl,
-            linkUrl:     banner.linkUrl ?? undefined,
             isPublished: banner.isPublished,
             sortOrder:   banner.sortOrder,
           }}

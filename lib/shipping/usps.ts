@@ -35,7 +35,7 @@ export async function getUSPSRates(
 
   const weightOz = Math.round(pkg.weightLbs * 16 * 10) / 10;
 
-  const requests = MAIL_CLASSES.map(async ({ code, label }) => {
+  const requests = MAIL_CLASSES.map(async ({ code, label }): Promise<RateResult | null> => {
     try {
       const res = await fetch(`${BASE}/prices/v3/total-rates/search`, {
         method: "POST",

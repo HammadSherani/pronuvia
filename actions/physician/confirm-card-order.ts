@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { stripe } from "@/lib/stripe/server";
 import { requirePhysician } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
@@ -100,7 +101,7 @@ export async function confirmPhysicianCardOrder(
     orderNumber = generateOrderNumber();
   }
 
-  const ops: Parameters<typeof prisma.$transaction>[0] = [
+  const ops: Prisma.PrismaPromise<unknown>[] = [
     prisma.order.create({
       data: {
         orderNumber,
@@ -138,11 +139,12 @@ export async function confirmPhysicianCardOrder(
       prisma.coupon.update({
         where: { id: payload.couponId },
         data:  { usedCount: { increment: 1 } },
-      }) as never
+      })
     );
   }
 
-  await prisma.$transaction(ops);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await prisma.$transaction(ops as any);
 
   revalidatePath("/physician/orders");
   return { success: true, orderNumber };
