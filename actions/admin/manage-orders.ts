@@ -196,7 +196,8 @@ export async function updateOrderStatus(
       });
       await prisma.walletTransaction.create({
         data: {
-          salesRepId:  order.salesRepId,
+          userId:      order.salesRepId,
+          userRole:    "SALES_REP",
           amount:      order.salesRepCommissionAmount,
           type:        "CREDIT",
           description: `Commission for order #${order.orderNumber}`,
@@ -219,9 +220,10 @@ export async function updateOrderStatus(
         where: { id: order.physicianId },
         data:  { walletBalance: newBalance },
       });
-      await prisma.physicianWalletTransaction.create({
+      await prisma.walletTransaction.create({
         data: {
-          physicianId: order.physicianId,
+          userId:      order.physicianId,
+          userRole:    "PHYSICIAN",
           amount:      order.physicianCommissionAmount,
           type:        "CREDIT",
           description: `Commission for order #${order.orderNumber}`,
@@ -315,6 +317,47 @@ export async function getOrderById(id: string) {
   });
 }
 
+export type OrderEmailType =
+  | "new_order"
+  | "cancelled_order"
+  | "processing_order"
+  | "completed_order"
+  | "order_details";
+
+export async function sendOrderEmail(
+  orderId: string,
+  emailType: OrderEmailType
+): Promise<{ success: boolean; message: string }> {
+  await requireAdmin();
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: {
+      orderNumber: true,
+      physician: { select: { email: true, firstName: true, lastName: true } },
+    },
+  });
+  if (!order) return { success: false, message: "Order not found." };
+
+  const label: Record<OrderEmailType, string> = {
+    new_order:          "New Order",
+    cancelled_order:    "Cancelled Order",
+    processing_order:   "Processing Order",
+    completed_order:    "Completed Order",
+    order_details:      "Order Details",
+  };
+
+  // TODO: wire up Resend / SendGrid / Nodemailer here
+  // For now logs and returns success so the UI flow works
+  console.log(
+    `[EMAIL] ${label[emailType]} → ${order.physician?.email ?? "unknown"} for order ${order.orderNumber}`
+  );
+
+  return {
+    success: true,
+    message: `"${label[emailType]}" email queued for ${order.orderNumber}.`,
+  };
+}
+
 export async function getOrderByNumber(orderNumber: string) {
   await requireAdmin();
   return prisma.order.findUnique({
@@ -388,9 +431,10 @@ export async function processReturn(
       });
       await prisma.walletTransaction.create({
         data: {
-          salesRepId:  order.salesRepId,
-          amount:      salesRepClawback,
-          type:        "DEBIT",
+          userId:   order.salesRepId,
+          userRole: "SALES_REP",
+          amount:   salesRepClawback,
+          type:     "DEBIT",
           description: `Commission clawback — return on order #${order.orderNumber}`,
           orderId,
           balance:     newBalance,
@@ -406,11 +450,12 @@ export async function processReturn(
         where: { id: order.physicianId },
         data:  { walletBalance: newBalance },
       });
-      await prisma.physicianWalletTransaction.create({
+      await prisma.walletTransaction.create({
         data: {
-          physicianId: order.physicianId,
-          amount:      physicianClawback,
-          type:        "DEBIT",
+          userId:   order.physicianId,
+          userRole: "PHYSICIAN",
+          amount:   physicianClawback,
+          type:     "DEBIT",
           description: `Commission clawback — return on order #${order.orderNumber}`,
           orderId,
           balance:     newBalance,

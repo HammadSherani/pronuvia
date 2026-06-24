@@ -40,8 +40,8 @@ export async function createPhysicianWithdrawRequest(
     };
   }
 
-  const existing = await prisma.physicianWithdrawRequest.findFirst({
-    where:  { physicianId: session.userId, status: "PENDING" },
+  const existing = await prisma.withdrawRequest.findFirst({
+    where:  { userId: session.userId, userRole: "PHYSICIAN", status: "PENDING" },
     select: { id: true },
   });
   if (existing) {
@@ -51,12 +51,8 @@ export async function createPhysicianWithdrawRequest(
     };
   }
 
-  await prisma.physicianWithdrawRequest.create({
-    data: {
-      physicianId: session.userId,
-      amount,
-      note,
-    },
+  await prisma.withdrawRequest.create({
+    data: { userId: session.userId, userRole: "PHYSICIAN", amount, note },
   });
 
   revalidatePath("/physician/wallet");

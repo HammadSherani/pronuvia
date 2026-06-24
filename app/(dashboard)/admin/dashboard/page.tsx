@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth/dal";
 import { getDashboardStats } from "@/actions/admin/dashboard";
+import { getPublishedBanners } from "@/actions/admin/banners";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
+import { BannerCarousel } from "@/components/dashboard/banner-carousel";
 import Link from "next/link";
 
 export const metadata = { title: "Admin Dashboard – Pronuvia" };
@@ -58,7 +60,7 @@ function KPICard({ label, value, sub, color, bg, href, icon }: KPIProps) {
 }
 
 export default async function AdminDashboardPage() {
-  const [session, stats] = await Promise.all([requireAdmin(), getDashboardStats()]);
+  const [session, stats, banners] = await Promise.all([requireAdmin(), getDashboardStats(), getPublishedBanners()]);
   const { kpis } = stats;
 
   const cards: KPIProps[] = [
@@ -131,6 +133,9 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-7">
+      {/* ── Banners ── */}
+      <BannerCarousel banners={banners} />
+
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

@@ -42,7 +42,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
     if (!note.trim())     { toast.error("Note is required.");     return; }
 
     startTransition(async () => {
-      const res = await adjustPhysicianWallet({ physicianId: selected!.id, type, amount: amt, note });
+      const res = await adjustPhysicianWallet({ userId: selected!.id, userRole: "PHYSICIAN", type, amount: amt, note });
       if (res.success) { toast.success(res.message); close(); }
       else { toast.error(res.message); }
     });

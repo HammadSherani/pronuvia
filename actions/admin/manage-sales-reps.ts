@@ -28,6 +28,7 @@ function parseCreate(formData: FormData) {
     bankName:          (formData.get("bankName")          as string) || undefined,
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")   as string) || undefined,
+    swiftCode:         (formData.get("swiftCode")         as string) || undefined,
   };
 }
 
@@ -44,6 +45,7 @@ function parseUpdate(formData: FormData) {
     bankName:          (formData.get("bankName")          as string) || undefined,
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")   as string) || undefined,
+    swiftCode:         (formData.get("swiftCode")         as string) || undefined,
   };
 }
 

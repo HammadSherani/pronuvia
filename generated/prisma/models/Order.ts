@@ -34,6 +34,7 @@ export type OrderAvgAggregateOutputType = {
   physicianCommissionRate: number | null
   physicianCommissionAmount: number | null
   shippingRate: number | null
+  discountAmount: number | null
   returnedTotal: number | null
   salesRepClawback: number | null
   physicianClawback: number | null
@@ -47,6 +48,7 @@ export type OrderSumAggregateOutputType = {
   physicianCommissionRate: number | null
   physicianCommissionAmount: number | null
   shippingRate: number | null
+  discountAmount: number | null
   returnedTotal: number | null
   salesRepClawback: number | null
   physicianClawback: number | null
@@ -76,6 +78,9 @@ export type OrderMinAggregateOutputType = {
   transactionId: string | null
   stripePaymentIntentId: string | null
   notes: string | null
+  couponCode: string | null
+  couponId: string | null
+  discountAmount: number | null
   returnedAt: Date | null
   returnReason: string | null
   returnedTotal: number | null
@@ -109,6 +114,9 @@ export type OrderMaxAggregateOutputType = {
   transactionId: string | null
   stripePaymentIntentId: string | null
   notes: string | null
+  couponCode: string | null
+  couponId: string | null
+  discountAmount: number | null
   returnedAt: Date | null
   returnReason: string | null
   returnedTotal: number | null
@@ -143,6 +151,9 @@ export type OrderCountAggregateOutputType = {
   transactionId: number
   stripePaymentIntentId: number
   notes: number
+  couponCode: number
+  couponId: number
+  discountAmount: number
   returnedAt: number
   returnReason: number
   returnedItems: number
@@ -163,6 +174,7 @@ export type OrderAvgAggregateInputType = {
   physicianCommissionRate?: true
   physicianCommissionAmount?: true
   shippingRate?: true
+  discountAmount?: true
   returnedTotal?: true
   salesRepClawback?: true
   physicianClawback?: true
@@ -176,6 +188,7 @@ export type OrderSumAggregateInputType = {
   physicianCommissionRate?: true
   physicianCommissionAmount?: true
   shippingRate?: true
+  discountAmount?: true
   returnedTotal?: true
   salesRepClawback?: true
   physicianClawback?: true
@@ -205,6 +218,9 @@ export type OrderMinAggregateInputType = {
   transactionId?: true
   stripePaymentIntentId?: true
   notes?: true
+  couponCode?: true
+  couponId?: true
+  discountAmount?: true
   returnedAt?: true
   returnReason?: true
   returnedTotal?: true
@@ -238,6 +254,9 @@ export type OrderMaxAggregateInputType = {
   transactionId?: true
   stripePaymentIntentId?: true
   notes?: true
+  couponCode?: true
+  couponId?: true
+  discountAmount?: true
   returnedAt?: true
   returnReason?: true
   returnedTotal?: true
@@ -272,6 +291,9 @@ export type OrderCountAggregateInputType = {
   transactionId?: true
   stripePaymentIntentId?: true
   notes?: true
+  couponCode?: true
+  couponId?: true
+  discountAmount?: true
   returnedAt?: true
   returnReason?: true
   returnedItems?: true
@@ -394,6 +416,9 @@ export type OrderGroupByOutputType = {
   transactionId: string | null
   stripePaymentIntentId: string | null
   notes: string | null
+  couponCode: string | null
+  couponId: string | null
+  discountAmount: number
   returnedAt: Date | null
   returnReason: string | null
   returnedItems: runtime.JsonValue | null
@@ -452,6 +477,9 @@ export type OrderWhereInput = {
   transactionId?: Prisma.StringNullableFilter<"Order"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   notes?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponId?: Prisma.StringNullableFilter<"Order"> | string | null
+  discountAmount?: Prisma.FloatFilter<"Order"> | number
   returnedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   returnReason?: Prisma.StringNullableFilter<"Order"> | string | null
   returnedItems?: Prisma.JsonNullableFilter<"Order">
@@ -489,6 +517,9 @@ export type OrderOrderByWithRelationInput = {
   transactionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  couponCode?: Prisma.SortOrder
+  couponId?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedAt?: Prisma.SortOrder
   returnReason?: Prisma.SortOrder
   returnedItems?: Prisma.SortOrder
@@ -529,6 +560,9 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   transactionId?: Prisma.StringNullableFilter<"Order"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   notes?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponId?: Prisma.StringNullableFilter<"Order"> | string | null
+  discountAmount?: Prisma.FloatFilter<"Order"> | number
   returnedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   returnReason?: Prisma.StringNullableFilter<"Order"> | string | null
   returnedItems?: Prisma.JsonNullableFilter<"Order">
@@ -566,6 +600,9 @@ export type OrderOrderByWithAggregationInput = {
   transactionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  couponCode?: Prisma.SortOrder
+  couponId?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedAt?: Prisma.SortOrder
   returnReason?: Prisma.SortOrder
   returnedItems?: Prisma.SortOrder
@@ -609,6 +646,9 @@ export type OrderScalarWhereWithAggregatesInput = {
   transactionId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  couponCode?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  couponId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  discountAmount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
   returnedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   returnReason?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   returnedItems?: Prisma.JsonNullableWithAggregatesFilter<"Order">
@@ -642,6 +682,9 @@ export type OrderCreateInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -679,6 +722,9 @@ export type OrderUncheckedCreateInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -711,6 +757,9 @@ export type OrderUpdateInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -747,6 +796,9 @@ export type OrderUncheckedUpdateInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -782,6 +834,9 @@ export type OrderCreateManyInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -814,6 +869,9 @@ export type OrderUpdateManyMutationInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -848,6 +906,9 @@ export type OrderUncheckedUpdateManyInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -893,6 +954,9 @@ export type OrderCountOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  couponCode?: Prisma.SortOrder
+  couponId?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedAt?: Prisma.SortOrder
   returnReason?: Prisma.SortOrder
   returnedItems?: Prisma.SortOrder
@@ -911,6 +975,7 @@ export type OrderAvgOrderByAggregateInput = {
   physicianCommissionRate?: Prisma.SortOrder
   physicianCommissionAmount?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedTotal?: Prisma.SortOrder
   salesRepClawback?: Prisma.SortOrder
   physicianClawback?: Prisma.SortOrder
@@ -940,6 +1005,9 @@ export type OrderMaxOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  couponCode?: Prisma.SortOrder
+  couponId?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedAt?: Prisma.SortOrder
   returnReason?: Prisma.SortOrder
   returnedTotal?: Prisma.SortOrder
@@ -973,6 +1041,9 @@ export type OrderMinOrderByAggregateInput = {
   transactionId?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  couponCode?: Prisma.SortOrder
+  couponId?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedAt?: Prisma.SortOrder
   returnReason?: Prisma.SortOrder
   returnedTotal?: Prisma.SortOrder
@@ -990,6 +1061,7 @@ export type OrderSumOrderByAggregateInput = {
   physicianCommissionRate?: Prisma.SortOrder
   physicianCommissionAmount?: Prisma.SortOrder
   shippingRate?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   returnedTotal?: Prisma.SortOrder
   salesRepClawback?: Prisma.SortOrder
   physicianClawback?: Prisma.SortOrder
@@ -1115,6 +1187,9 @@ export type OrderCreateWithoutSalesRepInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1150,6 +1225,9 @@ export type OrderUncheckedCreateWithoutSalesRepInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1213,6 +1291,9 @@ export type OrderScalarWhereInput = {
   transactionId?: Prisma.StringNullableFilter<"Order"> | string | null
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   notes?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  couponId?: Prisma.StringNullableFilter<"Order"> | string | null
+  discountAmount?: Prisma.FloatFilter<"Order"> | number
   returnedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   returnReason?: Prisma.StringNullableFilter<"Order"> | string | null
   returnedItems?: Prisma.JsonNullableFilter<"Order">
@@ -1246,6 +1327,9 @@ export type OrderCreateWithoutPhysicianInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1281,6 +1365,9 @@ export type OrderUncheckedCreateWithoutPhysicianInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1340,6 +1427,9 @@ export type OrderCreateManySalesRepInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1372,6 +1462,9 @@ export type OrderUpdateWithoutSalesRepInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1406,6 +1499,9 @@ export type OrderUncheckedUpdateWithoutSalesRepInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1439,6 +1535,9 @@ export type OrderUncheckedUpdateManyWithoutSalesRepInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1473,6 +1572,9 @@ export type OrderCreateManyPhysicianInput = {
   transactionId?: string | null
   stripePaymentIntentId?: string | null
   notes?: string | null
+  couponCode?: string | null
+  couponId?: string | null
+  discountAmount?: number
   returnedAt?: Date | string | null
   returnReason?: string | null
   returnedItems?: runtime.InputJsonValue | null
@@ -1505,6 +1607,9 @@ export type OrderUpdateWithoutPhysicianInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1539,6 +1644,9 @@ export type OrderUncheckedUpdateWithoutPhysicianInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1572,6 +1680,9 @@ export type OrderUncheckedUpdateManyWithoutPhysicianInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   returnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnedItems?: runtime.InputJsonValue | runtime.InputJsonValue | null
@@ -1609,6 +1720,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   transactionId?: boolean
   stripePaymentIntentId?: boolean
   notes?: boolean
+  couponCode?: boolean
+  couponId?: boolean
+  discountAmount?: boolean
   returnedAt?: boolean
   returnReason?: boolean
   returnedItems?: boolean
@@ -1648,6 +1762,9 @@ export type OrderSelectScalar = {
   transactionId?: boolean
   stripePaymentIntentId?: boolean
   notes?: boolean
+  couponCode?: boolean
+  couponId?: boolean
+  discountAmount?: boolean
   returnedAt?: boolean
   returnReason?: boolean
   returnedItems?: boolean
@@ -1658,7 +1775,7 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "physicianId" | "salesRepId" | "items" | "subtotal" | "total" | "salesRepCommissionRate" | "salesRepCommissionAmount" | "physicianCommissionRate" | "physicianCommissionAmount" | "status" | "commissionPaid" | "billingAddress" | "shippingAddress" | "shippingRate" | "shippingCarrier" | "trackingNumber" | "estimatedDelivery" | "paymentMethod" | "paymentStatus" | "transactionId" | "stripePaymentIntentId" | "notes" | "returnedAt" | "returnReason" | "returnedItems" | "returnedTotal" | "salesRepClawback" | "physicianClawback" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "physicianId" | "salesRepId" | "items" | "subtotal" | "total" | "salesRepCommissionRate" | "salesRepCommissionAmount" | "physicianCommissionRate" | "physicianCommissionAmount" | "status" | "commissionPaid" | "billingAddress" | "shippingAddress" | "shippingRate" | "shippingCarrier" | "trackingNumber" | "estimatedDelivery" | "paymentMethod" | "paymentStatus" | "transactionId" | "stripePaymentIntentId" | "notes" | "couponCode" | "couponId" | "discountAmount" | "returnedAt" | "returnReason" | "returnedItems" | "returnedTotal" | "salesRepClawback" | "physicianClawback" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   physician?: boolean | Prisma.Order$physicianArgs<ExtArgs>
   salesRep?: boolean | Prisma.Order$salesRepArgs<ExtArgs>
@@ -1695,6 +1812,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     transactionId: string | null
     stripePaymentIntentId: string | null
     notes: string | null
+    couponCode: string | null
+    couponId: string | null
+    discountAmount: number
     returnedAt: Date | null
     returnReason: string | null
     returnedItems: runtime.JsonValue | null
@@ -2121,6 +2241,9 @@ export interface OrderFieldRefs {
   readonly transactionId: Prisma.FieldRef<"Order", 'String'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"Order", 'String'>
   readonly notes: Prisma.FieldRef<"Order", 'String'>
+  readonly couponCode: Prisma.FieldRef<"Order", 'String'>
+  readonly couponId: Prisma.FieldRef<"Order", 'String'>
+  readonly discountAmount: Prisma.FieldRef<"Order", 'Float'>
   readonly returnedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly returnReason: Prisma.FieldRef<"Order", 'String'>
   readonly returnedItems: Prisma.FieldRef<"Order", 'Json'>

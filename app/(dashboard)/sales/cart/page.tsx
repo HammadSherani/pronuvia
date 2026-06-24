@@ -28,7 +28,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -74,22 +74,24 @@ export default function CartPage() {
                 <p className="text-sm font-bold text-gray-900 mt-1">${item.unitPrice.toFixed(2)}</p>
               </div>
 
-              <div className="flex flex-col items-end justify-between shrink-0">
+              <div className="flex flex-col items-end justify-between shrink-0 gap-3">
                 <button type="button" onClick={() => removeItem(item.cartId)}
                   className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                  <button type="button"
-                    onClick={() => item.quantity === 1 ? removeItem(item.cartId) : updateQty(item.cartId, item.quantity - 1)}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">−</button>
-                  <span className="w-8 text-center text-sm font-semibold text-gray-800">{item.quantity}</span>
-                  <button type="button" onClick={() => updateQty(item.cartId, item.quantity + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">+</button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                    <button type="button"
+                      onClick={() => item.quantity === 1 ? removeItem(item.cartId) : updateQty(item.cartId, item.quantity - 1)}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">−</button>
+                    <span className="w-8 text-center text-sm font-semibold text-gray-800">{item.quantity}</span>
+                    <button type="button" onClick={() => updateQty(item.cartId, item.quantity + 1)}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">+</button>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900 w-16 text-right">${(item.unitPrice * item.quantity).toFixed(2)}</p>
                 </div>
-                <p className="text-sm font-bold text-gray-900">${(item.unitPrice * item.quantity).toFixed(2)}</p>
               </div>
             </div>
           ))}

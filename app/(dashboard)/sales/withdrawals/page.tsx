@@ -23,7 +23,7 @@ export default async function SalesWithdrawalsPage() {
       select: { walletBalance: true, bankName: true },
     }),
     prisma.withdrawRequest.findMany({
-      where:   { salesRepId: session.userId },
+      where:   { userId: session.userId, userRole: "SALES_REP" },
       orderBy: { createdAt: "desc" },
     }),
   ]);

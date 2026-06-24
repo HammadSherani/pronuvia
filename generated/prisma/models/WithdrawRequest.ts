@@ -36,7 +36,8 @@ export type WithdrawRequestSumAggregateOutputType = {
 
 export type WithdrawRequestMinAggregateOutputType = {
   id: string | null
-  salesRepId: string | null
+  userId: string | null
+  userRole: $Enums.Role | null
   amount: number | null
   status: $Enums.WithdrawStatus | null
   note: string | null
@@ -47,7 +48,8 @@ export type WithdrawRequestMinAggregateOutputType = {
 
 export type WithdrawRequestMaxAggregateOutputType = {
   id: string | null
-  salesRepId: string | null
+  userId: string | null
+  userRole: $Enums.Role | null
   amount: number | null
   status: $Enums.WithdrawStatus | null
   note: string | null
@@ -58,7 +60,8 @@ export type WithdrawRequestMaxAggregateOutputType = {
 
 export type WithdrawRequestCountAggregateOutputType = {
   id: number
-  salesRepId: number
+  userId: number
+  userRole: number
   amount: number
   status: number
   note: number
@@ -79,7 +82,8 @@ export type WithdrawRequestSumAggregateInputType = {
 
 export type WithdrawRequestMinAggregateInputType = {
   id?: true
-  salesRepId?: true
+  userId?: true
+  userRole?: true
   amount?: true
   status?: true
   note?: true
@@ -90,7 +94,8 @@ export type WithdrawRequestMinAggregateInputType = {
 
 export type WithdrawRequestMaxAggregateInputType = {
   id?: true
-  salesRepId?: true
+  userId?: true
+  userRole?: true
   amount?: true
   status?: true
   note?: true
@@ -101,7 +106,8 @@ export type WithdrawRequestMaxAggregateInputType = {
 
 export type WithdrawRequestCountAggregateInputType = {
   id?: true
-  salesRepId?: true
+  userId?: true
+  userRole?: true
   amount?: true
   status?: true
   note?: true
@@ -199,7 +205,8 @@ export type WithdrawRequestGroupByArgs<ExtArgs extends runtime.Types.Extensions.
 
 export type WithdrawRequestGroupByOutputType = {
   id: string
-  salesRepId: string
+  userId: string
+  userRole: $Enums.Role
   amount: number
   status: $Enums.WithdrawStatus
   note: string | null
@@ -233,26 +240,26 @@ export type WithdrawRequestWhereInput = {
   OR?: Prisma.WithdrawRequestWhereInput[]
   NOT?: Prisma.WithdrawRequestWhereInput | Prisma.WithdrawRequestWhereInput[]
   id?: Prisma.StringFilter<"WithdrawRequest"> | string
-  salesRepId?: Prisma.StringFilter<"WithdrawRequest"> | string
+  userId?: Prisma.StringFilter<"WithdrawRequest"> | string
+  userRole?: Prisma.EnumRoleFilter<"WithdrawRequest"> | $Enums.Role
   amount?: Prisma.FloatFilter<"WithdrawRequest"> | number
   status?: Prisma.EnumWithdrawStatusFilter<"WithdrawRequest"> | $Enums.WithdrawStatus
   note?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
   adminNote?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
-  salesRep?: Prisma.XOR<Prisma.SalesRepresentativeScalarRelationFilter, Prisma.SalesRepresentativeWhereInput>
 }
 
 export type WithdrawRequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  salesRepId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   note?: Prisma.SortOrder
   adminNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  salesRep?: Prisma.SalesRepresentativeOrderByWithRelationInput
 }
 
 export type WithdrawRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -260,19 +267,20 @@ export type WithdrawRequestWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.WithdrawRequestWhereInput | Prisma.WithdrawRequestWhereInput[]
   OR?: Prisma.WithdrawRequestWhereInput[]
   NOT?: Prisma.WithdrawRequestWhereInput | Prisma.WithdrawRequestWhereInput[]
-  salesRepId?: Prisma.StringFilter<"WithdrawRequest"> | string
+  userId?: Prisma.StringFilter<"WithdrawRequest"> | string
+  userRole?: Prisma.EnumRoleFilter<"WithdrawRequest"> | $Enums.Role
   amount?: Prisma.FloatFilter<"WithdrawRequest"> | number
   status?: Prisma.EnumWithdrawStatusFilter<"WithdrawRequest"> | $Enums.WithdrawStatus
   note?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
   adminNote?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
-  salesRep?: Prisma.XOR<Prisma.SalesRepresentativeScalarRelationFilter, Prisma.SalesRepresentativeWhereInput>
 }, "id">
 
 export type WithdrawRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  salesRepId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -291,7 +299,8 @@ export type WithdrawRequestScalarWhereWithAggregatesInput = {
   OR?: Prisma.WithdrawRequestScalarWhereWithAggregatesInput[]
   NOT?: Prisma.WithdrawRequestScalarWhereWithAggregatesInput | Prisma.WithdrawRequestScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"WithdrawRequest"> | string
-  salesRepId?: Prisma.StringWithAggregatesFilter<"WithdrawRequest"> | string
+  userId?: Prisma.StringWithAggregatesFilter<"WithdrawRequest"> | string
+  userRole?: Prisma.EnumRoleWithAggregatesFilter<"WithdrawRequest"> | $Enums.Role
   amount?: Prisma.FloatWithAggregatesFilter<"WithdrawRequest"> | number
   status?: Prisma.EnumWithdrawStatusWithAggregatesFilter<"WithdrawRequest"> | $Enums.WithdrawStatus
   note?: Prisma.StringNullableWithAggregatesFilter<"WithdrawRequest"> | string | null
@@ -302,18 +311,20 @@ export type WithdrawRequestScalarWhereWithAggregatesInput = {
 
 export type WithdrawRequestCreateInput = {
   id?: string
+  userId: string
+  userRole: $Enums.Role
   amount: number
   status?: $Enums.WithdrawStatus
   note?: string | null
   adminNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  salesRep: Prisma.SalesRepresentativeCreateNestedOneWithoutWithdrawRequestsInput
 }
 
 export type WithdrawRequestUncheckedCreateInput = {
   id?: string
-  salesRepId: string
+  userId: string
+  userRole: $Enums.Role
   amount: number
   status?: $Enums.WithdrawStatus
   note?: string | null
@@ -323,17 +334,19 @@ export type WithdrawRequestUncheckedCreateInput = {
 }
 
 export type WithdrawRequestUpdateInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  salesRep?: Prisma.SalesRepresentativeUpdateOneRequiredWithoutWithdrawRequestsNestedInput
 }
 
 export type WithdrawRequestUncheckedUpdateInput = {
-  salesRepId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -344,7 +357,8 @@ export type WithdrawRequestUncheckedUpdateInput = {
 
 export type WithdrawRequestCreateManyInput = {
   id?: string
-  salesRepId: string
+  userId: string
+  userRole: $Enums.Role
   amount: number
   status?: $Enums.WithdrawStatus
   note?: string | null
@@ -354,6 +368,8 @@ export type WithdrawRequestCreateManyInput = {
 }
 
 export type WithdrawRequestUpdateManyMutationInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -363,7 +379,8 @@ export type WithdrawRequestUpdateManyMutationInput = {
 }
 
 export type WithdrawRequestUncheckedUpdateManyInput = {
-  salesRepId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userRole?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -372,19 +389,10 @@ export type WithdrawRequestUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type WithdrawRequestListRelationFilter = {
-  every?: Prisma.WithdrawRequestWhereInput
-  some?: Prisma.WithdrawRequestWhereInput
-  none?: Prisma.WithdrawRequestWhereInput
-}
-
-export type WithdrawRequestOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type WithdrawRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  salesRepId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -399,7 +407,8 @@ export type WithdrawRequestAvgOrderByAggregateInput = {
 
 export type WithdrawRequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  salesRepId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -410,7 +419,8 @@ export type WithdrawRequestMaxOrderByAggregateInput = {
 
 export type WithdrawRequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  salesRepId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -423,167 +433,30 @@ export type WithdrawRequestSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
 }
 
-export type WithdrawRequestCreateNestedManyWithoutSalesRepInput = {
-  create?: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput> | Prisma.WithdrawRequestCreateWithoutSalesRepInput[] | Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput[]
-  connectOrCreate?: Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput | Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput[]
-  createMany?: Prisma.WithdrawRequestCreateManySalesRepInputEnvelope
-  connect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-}
-
-export type WithdrawRequestUncheckedCreateNestedManyWithoutSalesRepInput = {
-  create?: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput> | Prisma.WithdrawRequestCreateWithoutSalesRepInput[] | Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput[]
-  connectOrCreate?: Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput | Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput[]
-  createMany?: Prisma.WithdrawRequestCreateManySalesRepInputEnvelope
-  connect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-}
-
-export type WithdrawRequestUpdateManyWithoutSalesRepNestedInput = {
-  create?: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput> | Prisma.WithdrawRequestCreateWithoutSalesRepInput[] | Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput[]
-  connectOrCreate?: Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput | Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput[]
-  upsert?: Prisma.WithdrawRequestUpsertWithWhereUniqueWithoutSalesRepInput | Prisma.WithdrawRequestUpsertWithWhereUniqueWithoutSalesRepInput[]
-  createMany?: Prisma.WithdrawRequestCreateManySalesRepInputEnvelope
-  set?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  disconnect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  delete?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  connect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  update?: Prisma.WithdrawRequestUpdateWithWhereUniqueWithoutSalesRepInput | Prisma.WithdrawRequestUpdateWithWhereUniqueWithoutSalesRepInput[]
-  updateMany?: Prisma.WithdrawRequestUpdateManyWithWhereWithoutSalesRepInput | Prisma.WithdrawRequestUpdateManyWithWhereWithoutSalesRepInput[]
-  deleteMany?: Prisma.WithdrawRequestScalarWhereInput | Prisma.WithdrawRequestScalarWhereInput[]
-}
-
-export type WithdrawRequestUncheckedUpdateManyWithoutSalesRepNestedInput = {
-  create?: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput> | Prisma.WithdrawRequestCreateWithoutSalesRepInput[] | Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput[]
-  connectOrCreate?: Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput | Prisma.WithdrawRequestCreateOrConnectWithoutSalesRepInput[]
-  upsert?: Prisma.WithdrawRequestUpsertWithWhereUniqueWithoutSalesRepInput | Prisma.WithdrawRequestUpsertWithWhereUniqueWithoutSalesRepInput[]
-  createMany?: Prisma.WithdrawRequestCreateManySalesRepInputEnvelope
-  set?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  disconnect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  delete?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  connect?: Prisma.WithdrawRequestWhereUniqueInput | Prisma.WithdrawRequestWhereUniqueInput[]
-  update?: Prisma.WithdrawRequestUpdateWithWhereUniqueWithoutSalesRepInput | Prisma.WithdrawRequestUpdateWithWhereUniqueWithoutSalesRepInput[]
-  updateMany?: Prisma.WithdrawRequestUpdateManyWithWhereWithoutSalesRepInput | Prisma.WithdrawRequestUpdateManyWithWhereWithoutSalesRepInput[]
-  deleteMany?: Prisma.WithdrawRequestScalarWhereInput | Prisma.WithdrawRequestScalarWhereInput[]
-}
-
 export type EnumWithdrawStatusFieldUpdateOperationsInput = {
   set?: $Enums.WithdrawStatus
-}
-
-export type WithdrawRequestCreateWithoutSalesRepInput = {
-  id?: string
-  amount: number
-  status?: $Enums.WithdrawStatus
-  note?: string | null
-  adminNote?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type WithdrawRequestUncheckedCreateWithoutSalesRepInput = {
-  id?: string
-  amount: number
-  status?: $Enums.WithdrawStatus
-  note?: string | null
-  adminNote?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type WithdrawRequestCreateOrConnectWithoutSalesRepInput = {
-  where: Prisma.WithdrawRequestWhereUniqueInput
-  create: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput>
-}
-
-export type WithdrawRequestCreateManySalesRepInputEnvelope = {
-  data: Prisma.WithdrawRequestCreateManySalesRepInput | Prisma.WithdrawRequestCreateManySalesRepInput[]
-}
-
-export type WithdrawRequestUpsertWithWhereUniqueWithoutSalesRepInput = {
-  where: Prisma.WithdrawRequestWhereUniqueInput
-  update: Prisma.XOR<Prisma.WithdrawRequestUpdateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedUpdateWithoutSalesRepInput>
-  create: Prisma.XOR<Prisma.WithdrawRequestCreateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedCreateWithoutSalesRepInput>
-}
-
-export type WithdrawRequestUpdateWithWhereUniqueWithoutSalesRepInput = {
-  where: Prisma.WithdrawRequestWhereUniqueInput
-  data: Prisma.XOR<Prisma.WithdrawRequestUpdateWithoutSalesRepInput, Prisma.WithdrawRequestUncheckedUpdateWithoutSalesRepInput>
-}
-
-export type WithdrawRequestUpdateManyWithWhereWithoutSalesRepInput = {
-  where: Prisma.WithdrawRequestScalarWhereInput
-  data: Prisma.XOR<Prisma.WithdrawRequestUpdateManyMutationInput, Prisma.WithdrawRequestUncheckedUpdateManyWithoutSalesRepInput>
-}
-
-export type WithdrawRequestScalarWhereInput = {
-  AND?: Prisma.WithdrawRequestScalarWhereInput | Prisma.WithdrawRequestScalarWhereInput[]
-  OR?: Prisma.WithdrawRequestScalarWhereInput[]
-  NOT?: Prisma.WithdrawRequestScalarWhereInput | Prisma.WithdrawRequestScalarWhereInput[]
-  id?: Prisma.StringFilter<"WithdrawRequest"> | string
-  salesRepId?: Prisma.StringFilter<"WithdrawRequest"> | string
-  amount?: Prisma.FloatFilter<"WithdrawRequest"> | number
-  status?: Prisma.EnumWithdrawStatusFilter<"WithdrawRequest"> | $Enums.WithdrawStatus
-  note?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
-  adminNote?: Prisma.StringNullableFilter<"WithdrawRequest"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"WithdrawRequest"> | Date | string
-}
-
-export type WithdrawRequestCreateManySalesRepInput = {
-  id?: string
-  amount: number
-  status?: $Enums.WithdrawStatus
-  note?: string | null
-  adminNote?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type WithdrawRequestUpdateWithoutSalesRepInput = {
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type WithdrawRequestUncheckedUpdateWithoutSalesRepInput = {
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type WithdrawRequestUncheckedUpdateManyWithoutSalesRepInput = {
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
-  status?: Prisma.EnumWithdrawStatusFieldUpdateOperationsInput | $Enums.WithdrawStatus
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
 
 export type WithdrawRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  salesRepId?: boolean
+  userId?: boolean
+  userRole?: boolean
   amount?: boolean
   status?: boolean
   note?: boolean
   adminNote?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  salesRep?: boolean | Prisma.SalesRepresentativeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["withdrawRequest"]>
 
 
 
 export type WithdrawRequestSelectScalar = {
   id?: boolean
-  salesRepId?: boolean
+  userId?: boolean
+  userRole?: boolean
   amount?: boolean
   status?: boolean
   note?: boolean
@@ -592,19 +465,15 @@ export type WithdrawRequestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type WithdrawRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "salesRepId" | "amount" | "status" | "note" | "adminNote" | "createdAt" | "updatedAt", ExtArgs["result"]["withdrawRequest"]>
-export type WithdrawRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  salesRep?: boolean | Prisma.SalesRepresentativeDefaultArgs<ExtArgs>
-}
+export type WithdrawRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "userRole" | "amount" | "status" | "note" | "adminNote" | "createdAt" | "updatedAt", ExtArgs["result"]["withdrawRequest"]>
 
 export type $WithdrawRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WithdrawRequest"
-  objects: {
-    salesRep: Prisma.$SalesRepresentativePayload<ExtArgs>
-  }
+  objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    salesRepId: string
+    userId: string
+    userRole: $Enums.Role
     amount: number
     status: $Enums.WithdrawStatus
     note: string | null
@@ -974,7 +843,6 @@ readonly fields: WithdrawRequestFieldRefs;
  */
 export interface Prisma__WithdrawRequestClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  salesRep<T extends Prisma.SalesRepresentativeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesRepresentativeDefaultArgs<ExtArgs>>): Prisma.Prisma__SalesRepresentativeClient<runtime.Types.Result.GetResult<Prisma.$SalesRepresentativePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1005,7 +873,8 @@ export interface Prisma__WithdrawRequestClient<T, Null = never, ExtArgs extends 
  */
 export interface WithdrawRequestFieldRefs {
   readonly id: Prisma.FieldRef<"WithdrawRequest", 'String'>
-  readonly salesRepId: Prisma.FieldRef<"WithdrawRequest", 'String'>
+  readonly userId: Prisma.FieldRef<"WithdrawRequest", 'String'>
+  readonly userRole: Prisma.FieldRef<"WithdrawRequest", 'Role'>
   readonly amount: Prisma.FieldRef<"WithdrawRequest", 'Float'>
   readonly status: Prisma.FieldRef<"WithdrawRequest", 'WithdrawStatus'>
   readonly note: Prisma.FieldRef<"WithdrawRequest", 'String'>
@@ -1029,10 +898,6 @@ export type WithdrawRequestFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * Filter, which WithdrawRequest to fetch.
    */
   where: Prisma.WithdrawRequestWhereUniqueInput
@@ -1051,10 +916,6 @@ export type WithdrawRequestFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * Filter, which WithdrawRequest to fetch.
    */
   where: Prisma.WithdrawRequestWhereUniqueInput
@@ -1072,10 +933,6 @@ export type WithdrawRequestFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WithdrawRequest
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
   /**
    * Filter, which WithdrawRequest to fetch.
    */
@@ -1125,10 +982,6 @@ export type WithdrawRequestFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * Filter, which WithdrawRequest to fetch.
    */
   where?: Prisma.WithdrawRequestWhereInput
@@ -1177,10 +1030,6 @@ export type WithdrawRequestFindManyArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * Filter, which WithdrawRequests to fetch.
    */
   where?: Prisma.WithdrawRequestWhereInput
@@ -1224,10 +1073,6 @@ export type WithdrawRequestCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * The data needed to create a WithdrawRequest.
    */
   data: Prisma.XOR<Prisma.WithdrawRequestCreateInput, Prisma.WithdrawRequestUncheckedCreateInput>
@@ -1255,10 +1100,6 @@ export type WithdrawRequestUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the WithdrawRequest
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
   /**
    * The data needed to update a WithdrawRequest.
    */
@@ -1300,10 +1141,6 @@ export type WithdrawRequestUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  /**
    * The filter to search for the WithdrawRequest to update in case it exists.
    */
   where: Prisma.WithdrawRequestWhereUniqueInput
@@ -1329,10 +1166,6 @@ export type WithdrawRequestDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the WithdrawRequest
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
   /**
    * Filter which WithdrawRequest to delete.
    */
@@ -1393,8 +1226,4 @@ export type WithdrawRequestDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the WithdrawRequest
    */
   omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
 }

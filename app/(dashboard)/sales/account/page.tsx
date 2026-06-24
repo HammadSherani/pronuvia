@@ -29,7 +29,7 @@ export default async function SalesAccountPage() {
       email: true, phone: true, website: true,
       commission: true, walletBalance: true, ordersCount: true,
       billingAddress: true, shippingAddress: true,
-      bankName: true, bankAccountName: true, bankAccountNumber: true,
+      bankName: true, bankAccountName: true, bankAccountNumber: true, swiftCode: true,
       createdAt: true,
       _count: { select: { physicians: true } },
     },

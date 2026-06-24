@@ -11,6 +11,7 @@ export const CreateSalesRepSchema = z.object({
   bankName:          z.string().optional(),
   bankAccountNumber: z.string().optional(),
   bankAccountName:   z.string().optional(),
+  swiftCode:         z.string().optional(),
 });
 
 export const UpdateSalesRepSchema = z.object({
@@ -24,6 +25,7 @@ export const UpdateSalesRepSchema = z.object({
   bankName:          z.string().optional(),
   bankAccountNumber: z.string().optional(),
   bankAccountName:   z.string().optional(),
+  swiftCode:         z.string().optional(),
 });
 
 export type CreateSalesRepInput = z.infer<typeof CreateSalesRepSchema>;

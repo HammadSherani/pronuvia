@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { updateSalesRepProfile } from "@/actions/sales-rep/profile";
 
 type Rep = {
@@ -8,6 +8,7 @@ type Rep = {
   phone?: string | null; website?: string | null;
   billingAddress?: string | null; shippingAddress?: string | null;
   bankName?: string | null; bankAccountName?: string | null; bankAccountNumber?: string | null;
+  swiftCode?: string | null;
 };
 
 function Field({
@@ -36,10 +37,33 @@ function Field({
 }
 
 export function SalesProfileForm({ rep }: { rep: Rep }) {
-  const [state, action, pending] = useActionState(updateSalesRepProfile, undefined);
+  const [state, action, pending]          = useActionState(updateSalesRepProfile, undefined);
+  const formRef                           = useRef<HTMLFormElement>(null);
+  const [accNum,        setAccNum]        = useState(rep.bankAccountNumber ?? "");
+  const [confirmAccNum, setConfirmAccNum] = useState(rep.bankAccountNumber ?? "");
+  const [accNumError,   setAccNumError]   = useState("");
+
+  function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
+    if (accNum && accNum !== confirmAccNum) {
+      ev.preventDefault();
+      setAccNumError("Account numbers do not match");
+      return;
+    }
+    setAccNumError("");
+  }
+
+  function onAccNumChange(val: string) {
+    setAccNum(val);
+    if (confirmAccNum) setAccNumError(val !== confirmAccNum ? "Account numbers do not match" : "");
+  }
+
+  function onConfirmChange(val: string) {
+    setConfirmAccNum(val);
+    setAccNumError(val !== accNum ? "Account numbers do not match" : "");
+  }
 
   return (
-    <form action={action} className="space-y-6">
+    <form ref={formRef} action={action} onSubmit={handleSubmit} className="space-y-6">
       {state?.message && (
         <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
           {state.message}
@@ -84,10 +108,31 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
           Required for withdrawal requests. Keep this up to date.
         </p>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Bank Name"       name="bankName"          defaultValue={rep.bankName}          placeholder="e.g. Chase Bank" />
-          <Field label="Account Name"    name="bankAccountName"   defaultValue={rep.bankAccountName}   placeholder="Name on account" />
+          <Field label="Bank Name"    name="bankName"        defaultValue={rep.bankName}        placeholder="e.g. Chase Bank" />
+          <Field label="Swift Code"   name="swiftCode"       defaultValue={rep.swiftCode}       placeholder="e.g. CHASUS33" />
           <div className="col-span-2">
-            <Field label="Account Number" name="bankAccountNumber" defaultValue={rep.bankAccountNumber} placeholder="Bank account number" />
+            <Field label="Account Name" name="bankAccountName" defaultValue={rep.bankAccountName} placeholder="Name on account" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Account Number</label>
+            <input
+              type="text" name="bankAccountNumber" placeholder="Bank account number"
+              value={accNum} onChange={(e) => onAccNumChange(e.target.value)}
+              className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
+                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+              }`}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Confirm Account Number</label>
+            <input
+              type="text" placeholder="Re-enter account number"
+              value={confirmAccNum} onChange={(e) => onConfirmChange(e.target.value)}
+              className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
+                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+              }`}
+            />
+            {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
           </div>
         </div>
       </div>

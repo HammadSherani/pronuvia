@@ -123,159 +123,153 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
       )}
 
       {/* ── Table ───────────────────────────────────────────────── */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
-              {/* Select-all checkbox */}
-              <th className="px-4 py-3.5">
-                {pendingIds.length > 0 && (
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={toggleAll}
-                    title="Select all pending"
-                    className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
-                  />
-                )}
-              </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Details</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet</th>
-              <th className="px-5 py-3.5" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {requests.map((r) => {
-              const isPending = r.status === "PENDING";
-              const isChecked = selected.has(r.id);
-              return (
-                <tr
-                  key={r.id}
-                  className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}
-                >
-                  {/* Checkbox */}
-                  <td className="px-4 py-4">
-                    {isPending ? (
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggle(r.id)}
-                        className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
-                      />
-                    ) : (
-                      <span className="block w-4 h-4" />
-                    )}
-                  </td>
-
-                  {/* Sales rep */}
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-[#3DBFA4]">
-                          {r.salesRep.firstName[0]}{r.salesRep.lastName[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-800 text-xs">
-                          {r.salesRep.firstName} {r.salesRep.lastName}
-                        </p>
-                        <p className="text-xs text-gray-400">{r.salesRep.email}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Bank details */}
-                  <td className="px-5 py-4">
-                    {r.salesRep.bankName ? (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800">{r.salesRep.bankAccountName}</p>
-                        <p className="text-xs text-gray-500">{r.salesRep.bankName}</p>
-                        {r.salesRep.bankAccountNumber && (
-                          <p className="text-xs font-mono font-semibold text-gray-700 mt-0.5">
-                            {r.salesRep.bankAccountNumber}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-red-400 font-medium">No bank linked</span>
-                    )}
-                  </td>
-
-                  {/* Amount */}
-                  <td className="px-5 py-4">
-                    <span className="text-base font-black text-gray-800">{fmt(r.amount)}</span>
-                  </td>
-
-                  {/* Wallet balance */}
-                  <td className="px-5 py-4">
-                    <span className={`text-sm font-semibold ${
-                      (r.salesRep.walletBalance ?? 0) >= r.amount ? "text-emerald-600" : "text-red-500"
-                    }`}>
-                      {fmt(r.salesRep.walletBalance ?? 0)}
-                    </span>
-                    {(r.salesRep.walletBalance ?? 0) < r.amount && r.status === "PENDING" && (
-                      <p className="text-[10px] text-red-400 mt-0.5">Insufficient</p>
-                    )}
-                  </td>
-
-                  {/* Note */}
-                  <td className="px-5 py-4 max-w-[160px]">
-                    {r.note ? (
-                      <p className="text-xs text-gray-500 italic truncate" title={r.note}>
-                        "{r.note}"
-                      </p>
-                    ) : (
-                      <span className="text-gray-300 text-xs">—</span>
-                    )}
-                    {r.adminNote && (
-                      <p className="text-xs text-[#3DBFA4] mt-0.5 truncate" title={r.adminNote}>
-                        ↳ {r.adminNote}
-                      </p>
-                    )}
-                  </td>
-
-                  {/* Date */}
-                  <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                    {new Date(r.createdAt).toLocaleDateString("en-US", {
-                      month: "short", day: "numeric", year: "numeric",
-                    })}
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${statusStyle[r.status]}`}>
-                      {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
-                    </span>
-                  </td>
-
-                  {/* Wallet modal */}
-                  <td className="px-5 py-4">
-                    <RepWalletModal
-                      salesRepId={r.salesRepId}
-                      repName={`${r.salesRep.firstName} ${r.salesRep.lastName}`}
+      <table className="w-full text-sm table-fixed">
+        <colgroup>
+          <col className="w-8" />
+          <col className="w-[18%]" />
+          <col className="w-[17%]" />
+          <col className="w-[9%]" />
+          <col className="w-[10%]" />
+          <col className="w-[13%]" />
+          <col className="w-[9%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50/60">
+            <th className="px-3 py-3">
+              {pendingIds.length > 0 && (
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  title="Select all pending"
+                  className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
+                />
+              )}
+            </th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Wallet</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-50">
+          {requests.map((r) => {
+            const isPending = r.status === "PENDING";
+            const isChecked = selected.has(r.id);
+            return (
+              <tr
+                key={r.id}
+                className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}
+              >
+                {/* Checkbox */}
+                <td className="px-3 py-3">
+                  {isPending ? (
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggle(r.id)}
+                      className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
                     />
-                  </td>
+                  ) : (
+                    <span className="block w-4 h-4" />
+                  )}
+                </td>
 
-                  {/* Individual actions */}
-                  <td className="px-5 py-4">
-                    {r.status === "PENDING" ? (
-                      <WithdrawalActions requestId={r.id} />
-                    ) : (
-                      <span className="text-xs text-gray-300">—</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                {/* Sales rep */}
+                <td className="px-3 py-3">
+                  <p className="font-semibold text-gray-800 text-xs truncate">
+                    {r.salesRep.firstName} {r.salesRep.lastName}
+                  </p>
+                  <p className="text-[11px] text-gray-400 truncate">{r.salesRep.email}</p>
+                </td>
+
+                {/* Bank details */}
+                <td className="px-3 py-3">
+                  {r.salesRep.bankName ? (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800 truncate">{r.salesRep.bankAccountName}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{r.salesRep.bankName}</p>
+                      {r.salesRep.bankAccountNumber && (
+                        <p className="text-[11px] font-mono text-gray-600 truncate">{r.salesRep.bankAccountNumber}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-red-400 font-medium">No bank</span>
+                  )}
+                </td>
+
+                {/* Amount */}
+                <td className="px-3 py-3">
+                  <span className="text-sm font-bold text-gray-800">{fmt(r.amount)}</span>
+                </td>
+
+                {/* Wallet balance */}
+                <td className="px-3 py-3">
+                  <span className={`text-xs font-semibold ${
+                    (r.salesRep.walletBalance ?? 0) >= r.amount ? "text-emerald-600" : "text-red-500"
+                  }`}>
+                    {fmt(r.salesRep.walletBalance ?? 0)}
+                  </span>
+                  {(r.salesRep.walletBalance ?? 0) < r.amount && r.status === "PENDING" && (
+                    <p className="text-[10px] text-red-400">Low</p>
+                  )}
+                </td>
+
+                {/* Note */}
+                <td className="px-3 py-3">
+                  {r.note ? (
+                    <p className="text-[11px] text-gray-500 italic truncate" title={r.note}>"{r.note}"</p>
+                  ) : (
+                    <span className="text-gray-300 text-xs">—</span>
+                  )}
+                  {r.adminNote && (
+                    <p className="text-[11px] text-[#3DBFA4] truncate" title={r.adminNote}>↳ {r.adminNote}</p>
+                  )}
+                </td>
+
+                {/* Date */}
+                <td className="px-3 py-3 text-[11px] text-gray-400">
+                  {new Date(r.createdAt).toLocaleDateString("en-US", {
+                    month: "short", day: "numeric", year: "2-digit",
+                  })}
+                </td>
+
+                {/* Status */}
+                <td className="px-3 py-3">
+                  <span className={`inline-flex px-1.5 py-0.5 border rounded-full text-[11px] font-medium ${statusStyle[r.status]}`}>
+                    {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
+                  </span>
+                </td>
+
+                {/* Wallet modal */}
+                <td className="px-3 py-3 text-center">
+                  <RepWalletModal
+                    salesRepId={r.salesRepId}
+                    repName={`${r.salesRep.firstName} ${r.salesRep.lastName}`}
+                  />
+                </td>
+
+                {/* Individual actions */}
+                <td className="px-3 py-3 text-right">
+                  {r.status === "PENDING" ? (
+                    <WithdrawalActions requestId={r.id} />
+                  ) : (
+                    <span className="text-xs text-gray-300">—</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       {/* ── Bulk confirm modal ──────────────────────────────────── */}
       {confirmAction && (

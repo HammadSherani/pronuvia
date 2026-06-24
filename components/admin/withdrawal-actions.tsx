@@ -32,28 +32,28 @@ export function WithdrawalActions({ requestId }: { requestId: string }) {
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-1.5">
         <button
           type="button"
           onClick={() => confirm("APPROVED")}
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+          title="Approve"
+          className="w-7 h-7 inline-flex items-center justify-center bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-          Approve
         </button>
         <button
           type="button"
           onClick={() => confirm("REJECTED")}
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+          title="Reject"
+          className="w-7 h-7 inline-flex items-center justify-center bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Reject
         </button>
       </div>
 

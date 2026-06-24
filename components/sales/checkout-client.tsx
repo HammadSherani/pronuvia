@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useTransition,
   useActionState,
   forwardRef,
   useImperativeHandle,
@@ -22,7 +23,8 @@ import { useCart } from "@/lib/cart/cart-context";
 import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
 import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
-import type { AddressData } from "@/actions/sales-rep/save-address";
+import { validateCoupon }      from "@/actions/checkout/validate-coupon";
+import type { AddressData }    from "@/actions/sales-rep/save-address";
 
 // ── Address helpers ─────────────────────────────────────────────────────────
 
@@ -100,6 +102,8 @@ function AddressFields({
 
 // ── Stripe inner form (must live inside <Elements>) ─────────────────────────
 
+type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
+
 type StripeHandle = { submit: () => void };
 type StripeFormProps = {
   itemsJson:       string;
@@ -107,6 +111,9 @@ type StripeFormProps = {
   notes:           string;
   shippingRate:    number;
   total:           number;
+  couponId?:       string;
+  couponCode?:     string;
+  discountAmount?: number;
   onSuccess:       (orderNumber: string) => void;
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
@@ -114,7 +121,7 @@ type StripeFormProps = {
 
 const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
   function StripeInnerForm(
-    { itemsJson, shippingAddress, notes, shippingRate, total, onSuccess, onProcessing, onError },
+    { itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError },
     ref
   ) {
     const stripe   = useStripe();
@@ -144,6 +151,9 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
           notes,
           shippingRate,
           total,
+          couponId,
+          couponCode,
+          discountAmount,
         });
         if (result.success && result.orderNumber) {
           onSuccess(result.orderNumber);
@@ -194,6 +204,12 @@ export function CheckoutClient({
   const [editBill,      setEditBill]      = useState(false);
   const [savingAddr,    setSavingAddr]    = useState(false);
 
+  // coupon
+  const [couponInput,    setCouponInput]    = useState("");
+  const [appliedCoupon,  setAppliedCoupon]  = useState<AppliedCoupon | null>(null);
+  const [couponError,    setCouponError]    = useState("");
+  const [couponPending,  startCoupon]       = useTransition();
+
   // payment
   const [payMethod,      setPayMethod]      = useState<"CARD" | "WALLET">("CARD");
   const [notes,          setNotes]          = useState("");
@@ -207,10 +223,11 @@ export function CheckoutClient({
   const walletSubmit = useRef<HTMLButtonElement>(null);
 
   // cart math — shipping is $0 at checkout; admin sets it at fulfillment
-  const subtotal   = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
-  const shippingRate = 0;
-  const total        = subtotal;
-  const cashback     = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
+  const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
+  const shippingRate   = 0;
+  const discountAmount = appliedCoupon?.discountAmount ?? 0;
+  const total          = parseFloat(Math.max(0, subtotal - discountAmount).toFixed(2));
+  const cashback       = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
   const canWallet    = walletBalance >= total;
 
   const itemsJson       = JSON.stringify(items.map((i) => ({
@@ -272,6 +289,20 @@ export function CheckoutClient({
     toast.success("Order placed successfully!");
     clearCart();
     router.push(`/sales/invoice/${orderNumber}`);
+  };
+
+  const handleApplyCoupon = () => {
+    setCouponError("");
+    startCoupon(async () => {
+      const res = await validateCoupon(couponInput, "SALES_REP", subtotal);
+      if (res.valid) {
+        setAppliedCoupon({ couponId: res.couponId, code: res.code, discountAmount: res.discountAmount });
+        setCouponInput("");
+        toast.success(res.message);
+      } else {
+        setCouponError(res.message);
+      }
+    });
   };
 
   // place order
@@ -485,6 +516,9 @@ export function CheckoutClient({
                           notes={notes}
                           shippingRate={shippingRate}
                           total={total}
+                          couponId={appliedCoupon?.couponId}
+                          couponCode={appliedCoupon?.code}
+                          discountAmount={discountAmount}
                           onSuccess={handleCardSuccess}
                           onProcessing={setCardProcessing}
                           onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
@@ -566,6 +600,9 @@ export function CheckoutClient({
             <input type="hidden" name="shippingRate"    value={shippingRate} />
             <input type="hidden" name="total"           value={total} />
             <input type="hidden" name="notes"           value={notes} />
+            <input type="hidden" name="couponCode"      value={appliedCoupon?.code      ?? ""} />
+            <input type="hidden" name="couponId"        value={appliedCoupon?.couponId  ?? ""} />
+            <input type="hidden" name="discountAmount"  value={discountAmount} />
             <button ref={walletSubmit} type="submit" aria-hidden="true" />
           </form>
 
@@ -636,12 +673,59 @@ export function CheckoutClient({
               ))}
             </div>
 
+            {/* Coupon input */}
+            <div className="px-4 py-3 border-b border-gray-200">
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                      <span className="text-xs font-bold text-emerald-700 font-mono">{appliedCoupon.code}</span>
+                      <span className="text-xs text-emerald-600 ml-1">— −${appliedCoupon.discountAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setAppliedCoupon(null)}
+                    className="text-xs text-emerald-600 hover:text-emerald-800 underline shrink-0">
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Coupon code"
+                      value={couponInput}
+                      onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 font-mono placeholder:font-sans placeholder:text-gray-400"
+                    />
+                    <button type="button" onClick={handleApplyCoupon} disabled={couponPending || !couponInput.trim()}
+                      className="px-3 py-2 text-xs font-bold text-white bg-gray-800 hover:bg-gray-900 disabled:opacity-50 rounded transition-colors whitespace-nowrap">
+                      {couponPending ? "…" : "Apply"}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="text-xs text-red-600">{couponError}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Totals */}
             <div className="px-4 py-4 space-y-3 border-b border-gray-200 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-emerald-600 font-medium">
+                  <span>Coupon ({appliedCoupon.code})</span>
+                  <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               {walletBalance > 0 && (
                 <div className="flex items-center justify-between text-xs py-2 border-y border-gray-100">
                   <span>

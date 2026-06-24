@@ -34,11 +34,14 @@ export async function payWithWallet(
 ): Promise<WalletPayState> {
   const session = await requireSalesRep();
 
-  const itemsRaw       = (formData.get("items")           as string) || "[]";
+  const itemsRaw        = (formData.get("items")           as string) || "[]";
   const shippingAddress = (formData.get("shippingAddress") as string) || undefined;
-  const shippingRate    = parseFloat((formData.get("shippingRate") as string) || "0");
-  const total           = parseFloat((formData.get("total")        as string) || "0");
+  const shippingRate    = parseFloat((formData.get("shippingRate")    as string) || "0");
+  const total           = parseFloat((formData.get("total")           as string) || "0");
   const notes           = (formData.get("notes")           as string) || undefined;
+  const couponCode      = (formData.get("couponCode")      as string) || undefined;
+  const couponId        = (formData.get("couponId")        as string) || undefined;
+  const discountAmount  = parseFloat((formData.get("discountAmount")  as string) || "0");
 
   let items: CartItem[];
   try {
@@ -73,7 +76,7 @@ export async function payWithWallet(
     orderNumber = generateOrderNumber();
   }
 
-  await prisma.$transaction([
+  const ops: Parameters<typeof prisma.$transaction>[0] = [
     prisma.order.create({
       data: {
         orderNumber,
@@ -81,6 +84,9 @@ export async function payWithWallet(
         items:      items as object[],
         subtotal,
         total,
+        discountAmount: discountAmount || 0,
+        couponCode:     couponCode || undefined,
+        couponId:       couponId   || undefined,
         salesRepCommissionRate:    commissionRate,
         salesRepCommissionAmount:  commissionAmount,
         physicianCommissionRate:   0,
@@ -103,14 +109,26 @@ export async function payWithWallet(
     }),
     prisma.walletTransaction.create({
       data: {
-        salesRepId:  session.userId,
+        userId:      session.userId,
+        userRole:    "SALES_REP",
         amount:      total,
         type:        "DEBIT",
         description: `Order ${orderNumber}`,
         balance:     newBalance,
       },
     }),
-  ]);
+  ];
+
+  if (couponId) {
+    ops.push(
+      prisma.coupon.update({
+        where: { id: couponId },
+        data:  { usedCount: { increment: 1 } },
+      }) as never
+    );
+  }
+
+  await prisma.$transaction(ops);
 
   revalidatePath("/sales/orders");
   return { success: true, orderNumber };

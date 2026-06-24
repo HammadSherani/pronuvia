@@ -57,11 +57,13 @@ export const ModelName = {
   PartneringPhysician: 'PartneringPhysician',
   CatalogDocument: 'CatalogDocument',
   Order: 'Order',
+  Coupon: 'Coupon',
+  Shipment: 'Shipment',
   WalletTransaction: 'WalletTransaction',
   WithdrawRequest: 'WithdrawRequest',
-  PhysicianWalletTransaction: 'PhysicianWalletTransaction',
-  PhysicianWithdrawRequest: 'PhysicianWithdrawRequest',
-  Banner: 'Banner'
+  Banner: 'Banner',
+  Blog: 'Blog',
+  WebsiteBanner: 'WebsiteBanner'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -98,6 +100,7 @@ export const SalesRepresentativeScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  swiftCode: 'swiftCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   passwordResetToken: 'passwordResetToken',
@@ -191,6 +194,7 @@ export const PartneringPhysicianScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  swiftCode: 'swiftCode',
   walletBalance: 'walletBalance',
   ordersCount: 'ordersCount',
   addedByRole: 'addedByRole',
@@ -241,6 +245,9 @@ export const OrderScalarFieldEnum = {
   transactionId: 'transactionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   notes: 'notes',
+  couponCode: 'couponCode',
+  couponId: 'couponId',
+  discountAmount: 'discountAmount',
   returnedAt: 'returnedAt',
   returnReason: 'returnReason',
   returnedItems: 'returnedItems',
@@ -254,9 +261,55 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  description: 'description',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  minOrderAmount: 'minOrderAmount',
+  maxUses: 'maxUses',
+  usedCount: 'usedCount',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  applicableTo: 'applicableTo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
+
+
+export const ShipmentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  carrier: 'carrier',
+  carrierLabel: 'carrierLabel',
+  service: 'service',
+  serviceCode: 'serviceCode',
+  trackingNumber: 'trackingNumber',
+  labelBase64: 'labelBase64',
+  labelFormat: 'labelFormat',
+  fromAddress: 'fromAddress',
+  toAddress: 'toAddress',
+  weightLbs: 'weightLbs',
+  lengthIn: 'lengthIn',
+  widthIn: 'widthIn',
+  heightIn: 'heightIn',
+  cost: 'cost',
+  currency: 'currency',
+  status: 'status',
+  shipDate: 'shipDate',
+  createdAt: 'createdAt'
+} as const
+
+export type ShipmentScalarFieldEnum = (typeof ShipmentScalarFieldEnum)[keyof typeof ShipmentScalarFieldEnum]
+
+
 export const WalletTransactionScalarFieldEnum = {
   id: 'id',
-  salesRepId: 'salesRepId',
+  userId: 'userId',
+  userRole: 'userRole',
   amount: 'amount',
   type: 'type',
   description: 'description',
@@ -270,7 +323,8 @@ export type WalletTransactionScalarFieldEnum = (typeof WalletTransactionScalarFi
 
 export const WithdrawRequestScalarFieldEnum = {
   id: 'id',
-  salesRepId: 'salesRepId',
+  userId: 'userId',
+  userRole: 'userRole',
   amount: 'amount',
   status: 'status',
   note: 'note',
@@ -280,34 +334,6 @@ export const WithdrawRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawRequestScalarFieldEnum = (typeof WithdrawRequestScalarFieldEnum)[keyof typeof WithdrawRequestScalarFieldEnum]
-
-
-export const PhysicianWalletTransactionScalarFieldEnum = {
-  id: 'id',
-  physicianId: 'physicianId',
-  amount: 'amount',
-  type: 'type',
-  description: 'description',
-  orderId: 'orderId',
-  balance: 'balance',
-  createdAt: 'createdAt'
-} as const
-
-export type PhysicianWalletTransactionScalarFieldEnum = (typeof PhysicianWalletTransactionScalarFieldEnum)[keyof typeof PhysicianWalletTransactionScalarFieldEnum]
-
-
-export const PhysicianWithdrawRequestScalarFieldEnum = {
-  id: 'id',
-  physicianId: 'physicianId',
-  amount: 'amount',
-  status: 'status',
-  note: 'note',
-  adminNote: 'adminNote',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type PhysicianWithdrawRequestScalarFieldEnum = (typeof PhysicianWithdrawRequestScalarFieldEnum)[keyof typeof PhysicianWithdrawRequestScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {
@@ -322,6 +348,38 @@ export const BannerScalarFieldEnum = {
 } as const
 
 export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
+
+
+export const BlogScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  imageUrl: 'imageUrl',
+  isPublished: 'isPublished',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogScalarFieldEnum = (typeof BlogScalarFieldEnum)[keyof typeof BlogScalarFieldEnum]
+
+
+export const WebsiteBannerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  subtitle: 'subtitle',
+  buttonText: 'buttonText',
+  imageUrl: 'imageUrl',
+  linkUrl: 'linkUrl',
+  isPublished: 'isPublished',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WebsiteBannerScalarFieldEnum = (typeof WebsiteBannerScalarFieldEnum)[keyof typeof WebsiteBannerScalarFieldEnum]
 
 
 export const SortOrder = {

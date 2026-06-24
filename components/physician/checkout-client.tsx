@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useTransition,
   forwardRef,
   useImperativeHandle,
   useRef,
@@ -19,6 +20,7 @@ import {
 import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmPhysicianCardOrder } from "@/actions/physician/confirm-card-order";
+import { validateCoupon }            from "@/actions/checkout/validate-coupon";
 
 type AddressData = {
   firstName: string; lastName: string;
@@ -77,6 +79,8 @@ function AddressFields({ value, onChange }: { value: AddressData; onChange: (v: 
   );
 }
 
+type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
+
 type StripeHandle = { submit: () => void };
 
 const StripeInnerForm = forwardRef<StripeHandle, {
@@ -85,10 +89,13 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   shippingAddress: string;
   notes:           string;
   total:           number;
+  couponId?:       string;
+  couponCode?:     string;
+  discountAmount?: number;
   onSuccess:       (orderNumber: string) => void;
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
-}>(function StripeInnerForm({ itemsJson, billingAddress, shippingAddress, notes, total, onSuccess, onProcessing, onError }, ref) {
+}>(function StripeInnerForm({ itemsJson, billingAddress, shippingAddress, notes, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
 
@@ -113,6 +120,9 @@ const StripeInnerForm = forwardRef<StripeHandle, {
         notes,
         shippingRate: 0,
         total,
+        couponId,
+        couponCode,
+        discountAmount,
       });
       if (result.success && result.orderNumber) {
         onSuccess(result.orderNumber);
@@ -152,10 +162,16 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const [stripeError,    setStripeError]    = useState("");
   const [cardProcessing, setCardProcessing] = useState(false);
 
+  const [couponInput,   setCouponInput]   = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponError,   setCouponError]   = useState("");
+  const [couponPending, startCoupon]      = useTransition();
+
   const stripeRef = useRef<StripeHandle>(null);
 
-  const subtotal = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
-  const total    = subtotal;
+  const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
+  const discountAmount = appliedCoupon?.discountAmount ?? 0;
+  const total          = parseFloat(Math.max(0, subtotal - discountAmount).toFixed(2));
 
   useEffect(() => {
     if (!items.length || total <= 0) return;
@@ -191,6 +207,20 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
     toast.success("Order placed successfully!");
     clearCart();
     router.push(`/physician/invoice/${orderNumber}`);
+  };
+
+  const handleApplyCoupon = () => {
+    setCouponError("");
+    startCoupon(async () => {
+      const res = await validateCoupon(couponInput, "PHYSICIAN", subtotal);
+      if (res.valid) {
+        setAppliedCoupon({ couponId: res.couponId, code: res.code, discountAmount: res.discountAmount });
+        setCouponInput("");
+        toast.success(res.message);
+      } else {
+        setCouponError(res.message);
+      }
+    });
   };
 
   const handlePlaceOrder = () => {
@@ -340,6 +370,9 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                     shippingAddress={shipStr}
                     notes={notes}
                     total={total}
+                    couponId={appliedCoupon?.couponId}
+                    couponCode={appliedCoupon?.code}
+                    discountAmount={discountAmount}
                     onSuccess={handleCardSuccess}
                     onProcessing={setCardProcessing}
                     onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
@@ -421,11 +454,55 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                   </div>
                 ))}
               </div>
+              {/* Coupon input */}
+              <div className="px-4 py-3 border-b border-gray-200">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <div>
+                        <span className="text-xs font-bold text-emerald-700 font-mono">{appliedCoupon.code}</span>
+                        <span className="text-xs text-emerald-600 ml-1">— −${appliedCoupon.discountAmount.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setAppliedCoupon(null)}
+                      className="text-xs text-emerald-600 hover:text-emerald-800 underline shrink-0">
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <div className="flex gap-2">
+                      <input
+                        type="text" placeholder="Coupon code"
+                        value={couponInput}
+                        onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 font-mono placeholder:font-sans placeholder:text-gray-400"
+                      />
+                      <button type="button" onClick={handleApplyCoupon} disabled={couponPending || !couponInput.trim()}
+                        className="px-3 py-2 text-xs font-bold text-white bg-gray-800 hover:bg-gray-900 disabled:opacity-50 rounded transition-colors whitespace-nowrap">
+                        {couponPending ? "…" : "Apply"}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-xs text-red-600">{couponError}</p>}
+                  </div>
+                )}
+              </div>
+
               <div className="px-4 py-4 space-y-2 border-b border-gray-200 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-600 font-medium">
+                    <span>Coupon ({appliedCoupon.code})</span>
+                    <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-400">
                   <span>Shipping</span>
                   <span className="italic text-xs">Added at fulfillment</span>

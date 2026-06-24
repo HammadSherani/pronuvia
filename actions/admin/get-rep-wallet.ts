@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma }       from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 
 export async function getRepWalletDetails(salesRepId: string) {
@@ -16,15 +16,15 @@ export async function getRepWalletDetails(salesRepId: string) {
       },
     }),
     prisma.walletTransaction.findMany({
-      where:   { salesRepId },
+      where:   { userId: salesRepId, userRole: "SALES_REP" },
       orderBy: { createdAt: "desc" },
       take:    30,
     }),
     prisma.withdrawRequest.findMany({
-      where:   { salesRepId },
+      where:   { userId: salesRepId, userRole: "SALES_REP" },
       orderBy: { createdAt: "desc" },
       take:    10,
-      select: { id: true, amount: true, status: true, createdAt: true, note: true, adminNote: true },
+      select:  { id: true, amount: true, status: true, createdAt: true, note: true, adminNote: true },
     }),
   ]);
 

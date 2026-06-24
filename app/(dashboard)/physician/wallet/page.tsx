@@ -44,15 +44,16 @@ export default async function PhysicianWalletPage() {
       orderBy: { createdAt: "desc" },
     }),
 
-    prisma.physicianWithdrawRequest.findMany({
-      where:   { physicianId: session.userId },
+    prisma.withdrawRequest.findMany({
+      where:   { userId: session.userId, userRole: "PHYSICIAN" },
       orderBy: { createdAt: "desc" },
       take:    10,
     }),
 
-    prisma.physicianWalletTransaction.findMany({
+    prisma.walletTransaction.findMany({
       where: {
-        physicianId: session.userId,
+        userId:      session.userId,
+        userRole:    "PHYSICIAN",
         description: { startsWith: "Admin adjustment:" },
       },
       orderBy: { createdAt: "desc" },

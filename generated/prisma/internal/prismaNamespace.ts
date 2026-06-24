@@ -398,11 +398,13 @@ export const ModelName = {
   PartneringPhysician: 'PartneringPhysician',
   CatalogDocument: 'CatalogDocument',
   Order: 'Order',
+  Coupon: 'Coupon',
+  Shipment: 'Shipment',
   WalletTransaction: 'WalletTransaction',
   WithdrawRequest: 'WithdrawRequest',
-  PhysicianWalletTransaction: 'PhysicianWalletTransaction',
-  PhysicianWithdrawRequest: 'PhysicianWithdrawRequest',
-  Banner: 'Banner'
+  Banner: 'Banner',
+  Blog: 'Blog',
+  WebsiteBanner: 'WebsiteBanner'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "admin" | "salesRepresentative" | "category" | "subCategory" | "product" | "partneringPhysician" | "catalogDocument" | "order" | "walletTransaction" | "withdrawRequest" | "physicianWalletTransaction" | "physicianWithdrawRequest" | "banner"
+    modelProps: "admin" | "salesRepresentative" | "category" | "subCategory" | "product" | "partneringPhysician" | "catalogDocument" | "order" | "coupon" | "shipment" | "walletTransaction" | "withdrawRequest" | "banner" | "blog" | "websiteBanner"
     txIsolationLevel: never
   }
   model: {
@@ -1014,6 +1016,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Coupon: {
+      payload: Prisma.$CouponPayload<ExtArgs>
+      fields: Prisma.CouponFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CouponFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CouponFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        findFirst: {
+          args: Prisma.CouponFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CouponFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        findMany: {
+          args: Prisma.CouponFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>[]
+        }
+        create: {
+          args: Prisma.CouponCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        createMany: {
+          args: Prisma.CouponCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.CouponDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        update: {
+          args: Prisma.CouponUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        deleteMany: {
+          args: Prisma.CouponDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CouponUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.CouponUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CouponPayload>
+        }
+        aggregate: {
+          args: Prisma.CouponAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCoupon>
+        }
+        groupBy: {
+          args: Prisma.CouponGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CouponGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.CouponFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.CouponAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.CouponCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CouponCountAggregateOutputType> | number
+        }
+      }
+    }
+    Shipment: {
+      payload: Prisma.$ShipmentPayload<ExtArgs>
+      fields: Prisma.ShipmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ShipmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ShipmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        findFirst: {
+          args: Prisma.ShipmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ShipmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        findMany: {
+          args: Prisma.ShipmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>[]
+        }
+        create: {
+          args: Prisma.ShipmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        createMany: {
+          args: Prisma.ShipmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ShipmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        update: {
+          args: Prisma.ShipmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.ShipmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ShipmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ShipmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShipmentPayload>
+        }
+        aggregate: {
+          args: Prisma.ShipmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShipment>
+        }
+        groupBy: {
+          args: Prisma.ShipmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShipmentGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.ShipmentFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.ShipmentAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.ShipmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShipmentCountAggregateOutputType> | number
+        }
+      }
+    }
     WalletTransaction: {
       payload: Prisma.$WalletTransactionPayload<ExtArgs>
       fields: Prisma.WalletTransactionFieldRefs
@@ -1162,154 +1312,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    PhysicianWalletTransaction: {
-      payload: Prisma.$PhysicianWalletTransactionPayload<ExtArgs>
-      fields: Prisma.PhysicianWalletTransactionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PhysicianWalletTransactionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PhysicianWalletTransactionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        findFirst: {
-          args: Prisma.PhysicianWalletTransactionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PhysicianWalletTransactionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        findMany: {
-          args: Prisma.PhysicianWalletTransactionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>[]
-        }
-        create: {
-          args: Prisma.PhysicianWalletTransactionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        createMany: {
-          args: Prisma.PhysicianWalletTransactionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.PhysicianWalletTransactionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        update: {
-          args: Prisma.PhysicianWalletTransactionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        deleteMany: {
-          args: Prisma.PhysicianWalletTransactionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PhysicianWalletTransactionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.PhysicianWalletTransactionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWalletTransactionPayload>
-        }
-        aggregate: {
-          args: Prisma.PhysicianWalletTransactionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePhysicianWalletTransaction>
-        }
-        groupBy: {
-          args: Prisma.PhysicianWalletTransactionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PhysicianWalletTransactionGroupByOutputType>[]
-        }
-        findRaw: {
-          args: Prisma.PhysicianWalletTransactionFindRawArgs<ExtArgs>
-          result: Prisma.JsonObject
-        }
-        aggregateRaw: {
-          args: Prisma.PhysicianWalletTransactionAggregateRawArgs<ExtArgs>
-          result: Prisma.JsonObject
-        }
-        count: {
-          args: Prisma.PhysicianWalletTransactionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PhysicianWalletTransactionCountAggregateOutputType> | number
-        }
-      }
-    }
-    PhysicianWithdrawRequest: {
-      payload: Prisma.$PhysicianWithdrawRequestPayload<ExtArgs>
-      fields: Prisma.PhysicianWithdrawRequestFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PhysicianWithdrawRequestFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PhysicianWithdrawRequestFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        findFirst: {
-          args: Prisma.PhysicianWithdrawRequestFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PhysicianWithdrawRequestFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        findMany: {
-          args: Prisma.PhysicianWithdrawRequestFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>[]
-        }
-        create: {
-          args: Prisma.PhysicianWithdrawRequestCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        createMany: {
-          args: Prisma.PhysicianWithdrawRequestCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.PhysicianWithdrawRequestDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        update: {
-          args: Prisma.PhysicianWithdrawRequestUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        deleteMany: {
-          args: Prisma.PhysicianWithdrawRequestDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PhysicianWithdrawRequestUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.PhysicianWithdrawRequestUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhysicianWithdrawRequestPayload>
-        }
-        aggregate: {
-          args: Prisma.PhysicianWithdrawRequestAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePhysicianWithdrawRequest>
-        }
-        groupBy: {
-          args: Prisma.PhysicianWithdrawRequestGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PhysicianWithdrawRequestGroupByOutputType>[]
-        }
-        findRaw: {
-          args: Prisma.PhysicianWithdrawRequestFindRawArgs<ExtArgs>
-          result: Prisma.JsonObject
-        }
-        aggregateRaw: {
-          args: Prisma.PhysicianWithdrawRequestAggregateRawArgs<ExtArgs>
-          result: Prisma.JsonObject
-        }
-        count: {
-          args: Prisma.PhysicianWithdrawRequestCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PhysicianWithdrawRequestCountAggregateOutputType> | number
-        }
-      }
-    }
     Banner: {
       payload: Prisma.$BannerPayload<ExtArgs>
       fields: Prisma.BannerFieldRefs
@@ -1384,6 +1386,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Blog: {
+      payload: Prisma.$BlogPayload<ExtArgs>
+      fields: Prisma.BlogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BlogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BlogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        findFirst: {
+          args: Prisma.BlogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BlogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        findMany: {
+          args: Prisma.BlogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>[]
+        }
+        create: {
+          args: Prisma.BlogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        createMany: {
+          args: Prisma.BlogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.BlogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        update: {
+          args: Prisma.BlogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        deleteMany: {
+          args: Prisma.BlogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BlogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.BlogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogPayload>
+        }
+        aggregate: {
+          args: Prisma.BlogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBlog>
+        }
+        groupBy: {
+          args: Prisma.BlogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.BlogFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.BlogAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.BlogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogCountAggregateOutputType> | number
+        }
+      }
+    }
+    WebsiteBanner: {
+      payload: Prisma.$WebsiteBannerPayload<ExtArgs>
+      fields: Prisma.WebsiteBannerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WebsiteBannerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WebsiteBannerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        findFirst: {
+          args: Prisma.WebsiteBannerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WebsiteBannerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        findMany: {
+          args: Prisma.WebsiteBannerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>[]
+        }
+        create: {
+          args: Prisma.WebsiteBannerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        createMany: {
+          args: Prisma.WebsiteBannerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.WebsiteBannerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        update: {
+          args: Prisma.WebsiteBannerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        deleteMany: {
+          args: Prisma.WebsiteBannerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WebsiteBannerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.WebsiteBannerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebsiteBannerPayload>
+        }
+        aggregate: {
+          args: Prisma.WebsiteBannerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWebsiteBanner>
+        }
+        groupBy: {
+          args: Prisma.WebsiteBannerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WebsiteBannerGroupByOutputType>[]
+        }
+        findRaw: {
+          args: Prisma.WebsiteBannerFindRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        aggregateRaw: {
+          args: Prisma.WebsiteBannerAggregateRawArgs<ExtArgs>
+          result: Prisma.JsonObject
+        }
+        count: {
+          args: Prisma.WebsiteBannerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WebsiteBannerCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1429,6 +1579,7 @@ export const SalesRepresentativeScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  swiftCode: 'swiftCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   passwordResetToken: 'passwordResetToken',
@@ -1522,6 +1673,7 @@ export const PartneringPhysicianScalarFieldEnum = {
   bankName: 'bankName',
   bankAccountNumber: 'bankAccountNumber',
   bankAccountName: 'bankAccountName',
+  swiftCode: 'swiftCode',
   walletBalance: 'walletBalance',
   ordersCount: 'ordersCount',
   addedByRole: 'addedByRole',
@@ -1572,6 +1724,9 @@ export const OrderScalarFieldEnum = {
   transactionId: 'transactionId',
   stripePaymentIntentId: 'stripePaymentIntentId',
   notes: 'notes',
+  couponCode: 'couponCode',
+  couponId: 'couponId',
+  discountAmount: 'discountAmount',
   returnedAt: 'returnedAt',
   returnReason: 'returnReason',
   returnedItems: 'returnedItems',
@@ -1585,9 +1740,55 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  description: 'description',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  minOrderAmount: 'minOrderAmount',
+  maxUses: 'maxUses',
+  usedCount: 'usedCount',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  applicableTo: 'applicableTo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
+
+
+export const ShipmentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  carrier: 'carrier',
+  carrierLabel: 'carrierLabel',
+  service: 'service',
+  serviceCode: 'serviceCode',
+  trackingNumber: 'trackingNumber',
+  labelBase64: 'labelBase64',
+  labelFormat: 'labelFormat',
+  fromAddress: 'fromAddress',
+  toAddress: 'toAddress',
+  weightLbs: 'weightLbs',
+  lengthIn: 'lengthIn',
+  widthIn: 'widthIn',
+  heightIn: 'heightIn',
+  cost: 'cost',
+  currency: 'currency',
+  status: 'status',
+  shipDate: 'shipDate',
+  createdAt: 'createdAt'
+} as const
+
+export type ShipmentScalarFieldEnum = (typeof ShipmentScalarFieldEnum)[keyof typeof ShipmentScalarFieldEnum]
+
+
 export const WalletTransactionScalarFieldEnum = {
   id: 'id',
-  salesRepId: 'salesRepId',
+  userId: 'userId',
+  userRole: 'userRole',
   amount: 'amount',
   type: 'type',
   description: 'description',
@@ -1601,7 +1802,8 @@ export type WalletTransactionScalarFieldEnum = (typeof WalletTransactionScalarFi
 
 export const WithdrawRequestScalarFieldEnum = {
   id: 'id',
-  salesRepId: 'salesRepId',
+  userId: 'userId',
+  userRole: 'userRole',
   amount: 'amount',
   status: 'status',
   note: 'note',
@@ -1611,34 +1813,6 @@ export const WithdrawRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawRequestScalarFieldEnum = (typeof WithdrawRequestScalarFieldEnum)[keyof typeof WithdrawRequestScalarFieldEnum]
-
-
-export const PhysicianWalletTransactionScalarFieldEnum = {
-  id: 'id',
-  physicianId: 'physicianId',
-  amount: 'amount',
-  type: 'type',
-  description: 'description',
-  orderId: 'orderId',
-  balance: 'balance',
-  createdAt: 'createdAt'
-} as const
-
-export type PhysicianWalletTransactionScalarFieldEnum = (typeof PhysicianWalletTransactionScalarFieldEnum)[keyof typeof PhysicianWalletTransactionScalarFieldEnum]
-
-
-export const PhysicianWithdrawRequestScalarFieldEnum = {
-  id: 'id',
-  physicianId: 'physicianId',
-  amount: 'amount',
-  status: 'status',
-  note: 'note',
-  adminNote: 'adminNote',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type PhysicianWithdrawRequestScalarFieldEnum = (typeof PhysicianWithdrawRequestScalarFieldEnum)[keyof typeof PhysicianWithdrawRequestScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {
@@ -1653,6 +1827,38 @@ export const BannerScalarFieldEnum = {
 } as const
 
 export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
+
+
+export const BlogScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  imageUrl: 'imageUrl',
+  isPublished: 'isPublished',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogScalarFieldEnum = (typeof BlogScalarFieldEnum)[keyof typeof BlogScalarFieldEnum]
+
+
+export const WebsiteBannerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  subtitle: 'subtitle',
+  buttonText: 'buttonText',
+  imageUrl: 'imageUrl',
+  linkUrl: 'linkUrl',
+  isPublished: 'isPublished',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WebsiteBannerScalarFieldEnum = (typeof WebsiteBannerScalarFieldEnum)[keyof typeof WebsiteBannerScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1917,11 +2123,13 @@ export type GlobalOmitConfig = {
   partneringPhysician?: Prisma.PartneringPhysicianOmit
   catalogDocument?: Prisma.CatalogDocumentOmit
   order?: Prisma.OrderOmit
+  coupon?: Prisma.CouponOmit
+  shipment?: Prisma.ShipmentOmit
   walletTransaction?: Prisma.WalletTransactionOmit
   withdrawRequest?: Prisma.WithdrawRequestOmit
-  physicianWalletTransaction?: Prisma.PhysicianWalletTransactionOmit
-  physicianWithdrawRequest?: Prisma.PhysicianWithdrawRequestOmit
   banner?: Prisma.BannerOmit
+  blog?: Prisma.BlogOmit
+  websiteBanner?: Prisma.WebsiteBannerOmit
 }
 
 /* Types for Logging */

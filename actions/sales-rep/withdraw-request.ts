@@ -38,7 +38,7 @@ export async function createWithdrawRequest(
 
   // Block if there's already a pending request
   const existing = await prisma.withdrawRequest.findFirst({
-    where:  { salesRepId: session.userId, status: "PENDING" },
+    where:  { userId: session.userId, userRole: "SALES_REP", status: "PENDING" },
     select: { id: true },
   });
   if (existing) {
@@ -49,11 +49,7 @@ export async function createWithdrawRequest(
   }
 
   await prisma.withdrawRequest.create({
-    data: {
-      salesRepId: session.userId,
-      amount,
-      note,
-    },
+    data: { userId: session.userId, userRole: "SALES_REP", amount, note },
   });
 
   revalidatePath("/sales/wallet");

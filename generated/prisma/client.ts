@@ -85,6 +85,16 @@ export type CatalogDocument = Prisma.CatalogDocumentModel
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model Coupon
+ * 
+ */
+export type Coupon = Prisma.CouponModel
+/**
+ * Model Shipment
+ * 
+ */
+export type Shipment = Prisma.ShipmentModel
+/**
  * Model WalletTransaction
  * 
  */
@@ -95,17 +105,17 @@ export type WalletTransaction = Prisma.WalletTransactionModel
  */
 export type WithdrawRequest = Prisma.WithdrawRequestModel
 /**
- * Model PhysicianWalletTransaction
- * 
- */
-export type PhysicianWalletTransaction = Prisma.PhysicianWalletTransactionModel
-/**
- * Model PhysicianWithdrawRequest
- * 
- */
-export type PhysicianWithdrawRequest = Prisma.PhysicianWithdrawRequestModel
-/**
  * Model Banner
  * 
  */
 export type Banner = Prisma.BannerModel
+/**
+ * Model Blog
+ * 
+ */
+export type Blog = Prisma.BlogModel
+/**
+ * Model WebsiteBanner
+ * 
+ */
+export type WebsiteBanner = Prisma.WebsiteBannerModel

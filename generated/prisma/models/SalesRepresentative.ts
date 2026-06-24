@@ -55,6 +55,7 @@ export type SalesRepresentativeMinAggregateOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  swiftCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
   passwordResetToken: string | null
@@ -78,6 +79,7 @@ export type SalesRepresentativeMaxAggregateOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  swiftCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
   passwordResetToken: string | null
@@ -101,6 +103,7 @@ export type SalesRepresentativeCountAggregateOutputType = {
   bankName: number
   bankAccountNumber: number
   bankAccountName: number
+  swiftCode: number
   createdAt: number
   updatedAt: number
   passwordResetToken: number
@@ -138,6 +141,7 @@ export type SalesRepresentativeMinAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  swiftCode?: true
   createdAt?: true
   updatedAt?: true
   passwordResetToken?: true
@@ -161,6 +165,7 @@ export type SalesRepresentativeMaxAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  swiftCode?: true
   createdAt?: true
   updatedAt?: true
   passwordResetToken?: true
@@ -184,6 +189,7 @@ export type SalesRepresentativeCountAggregateInputType = {
   bankName?: true
   bankAccountNumber?: true
   bankAccountName?: true
+  swiftCode?: true
   createdAt?: true
   updatedAt?: true
   passwordResetToken?: true
@@ -294,6 +300,7 @@ export type SalesRepresentativeGroupByOutputType = {
   bankName: string | null
   bankAccountNumber: string | null
   bankAccountName: string | null
+  swiftCode: string | null
   createdAt: Date
   updatedAt: Date
   passwordResetToken: string | null
@@ -340,14 +347,13 @@ export type SalesRepresentativeWhereInput = {
   bankName?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   bankAccountNumber?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   bankAccountName?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
+  swiftCode?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SalesRepresentative"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalesRepresentative"> | Date | string
   passwordResetToken?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   passwordResetExpiry?: Prisma.DateTimeNullableFilter<"SalesRepresentative"> | Date | string | null
   physicians?: Prisma.PartneringPhysicianListRelationFilter
   orderItems?: Prisma.OrderListRelationFilter
-  walletTransactions?: Prisma.WalletTransactionListRelationFilter
-  withdrawRequests?: Prisma.WithdrawRequestListRelationFilter
 }
 
 export type SalesRepresentativeOrderByWithRelationInput = {
@@ -367,14 +373,13 @@ export type SalesRepresentativeOrderByWithRelationInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  swiftCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetToken?: Prisma.SortOrder
   passwordResetExpiry?: Prisma.SortOrder
   physicians?: Prisma.PartneringPhysicianOrderByRelationAggregateInput
   orderItems?: Prisma.OrderOrderByRelationAggregateInput
-  walletTransactions?: Prisma.WalletTransactionOrderByRelationAggregateInput
-  withdrawRequests?: Prisma.WithdrawRequestOrderByRelationAggregateInput
 }
 
 export type SalesRepresentativeWhereUniqueInput = Prisma.AtLeast<{
@@ -397,14 +402,13 @@ export type SalesRepresentativeWhereUniqueInput = Prisma.AtLeast<{
   bankName?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   bankAccountNumber?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   bankAccountName?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
+  swiftCode?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SalesRepresentative"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SalesRepresentative"> | Date | string
   passwordResetToken?: Prisma.StringNullableFilter<"SalesRepresentative"> | string | null
   passwordResetExpiry?: Prisma.DateTimeNullableFilter<"SalesRepresentative"> | Date | string | null
   physicians?: Prisma.PartneringPhysicianListRelationFilter
   orderItems?: Prisma.OrderListRelationFilter
-  walletTransactions?: Prisma.WalletTransactionListRelationFilter
-  withdrawRequests?: Prisma.WithdrawRequestListRelationFilter
 }, "id" | "email">
 
 export type SalesRepresentativeOrderByWithAggregationInput = {
@@ -424,6 +428,7 @@ export type SalesRepresentativeOrderByWithAggregationInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  swiftCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetToken?: Prisma.SortOrder
@@ -455,6 +460,7 @@ export type SalesRepresentativeScalarWhereWithAggregatesInput = {
   bankName?: Prisma.StringNullableWithAggregatesFilter<"SalesRepresentative"> | string | null
   bankAccountNumber?: Prisma.StringNullableWithAggregatesFilter<"SalesRepresentative"> | string | null
   bankAccountName?: Prisma.StringNullableWithAggregatesFilter<"SalesRepresentative"> | string | null
+  swiftCode?: Prisma.StringNullableWithAggregatesFilter<"SalesRepresentative"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SalesRepresentative"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SalesRepresentative"> | Date | string
   passwordResetToken?: Prisma.StringNullableWithAggregatesFilter<"SalesRepresentative"> | string | null
@@ -478,14 +484,13 @@ export type SalesRepresentativeCreateInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   physicians?: Prisma.PartneringPhysicianCreateNestedManyWithoutSalesRepInput
   orderItems?: Prisma.OrderCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeUncheckedCreateInput = {
@@ -505,14 +510,13 @@ export type SalesRepresentativeUncheckedCreateInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   physicians?: Prisma.PartneringPhysicianUncheckedCreateNestedManyWithoutSalesRepInput
   orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeUpdateInput = {
@@ -531,14 +535,13 @@ export type SalesRepresentativeUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   physicians?: Prisma.PartneringPhysicianUpdateManyWithoutSalesRepNestedInput
   orderItems?: Prisma.OrderUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUpdateManyWithoutSalesRepNestedInput
 }
 
 export type SalesRepresentativeUncheckedUpdateInput = {
@@ -557,14 +560,13 @@ export type SalesRepresentativeUncheckedUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   physicians?: Prisma.PartneringPhysicianUncheckedUpdateManyWithoutSalesRepNestedInput
   orderItems?: Prisma.OrderUncheckedUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedUpdateManyWithoutSalesRepNestedInput
 }
 
 export type SalesRepresentativeCreateManyInput = {
@@ -584,6 +586,7 @@ export type SalesRepresentativeCreateManyInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
@@ -606,6 +609,7 @@ export type SalesRepresentativeUpdateManyMutationInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -628,6 +632,7 @@ export type SalesRepresentativeUncheckedUpdateManyInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -651,6 +656,7 @@ export type SalesRepresentativeCountOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  swiftCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetToken?: Prisma.SortOrder
@@ -680,6 +686,7 @@ export type SalesRepresentativeMaxOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  swiftCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetToken?: Prisma.SortOrder
@@ -703,6 +710,7 @@ export type SalesRepresentativeMinOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   bankAccountNumber?: Prisma.SortOrder
   bankAccountName?: Prisma.SortOrder
+  swiftCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetToken?: Prisma.SortOrder
@@ -718,11 +726,6 @@ export type SalesRepresentativeSumOrderByAggregateInput = {
 export type SalesRepresentativeNullableScalarRelationFilter = {
   is?: Prisma.SalesRepresentativeWhereInput | null
   isNot?: Prisma.SalesRepresentativeWhereInput | null
-}
-
-export type SalesRepresentativeScalarRelationFilter = {
-  is?: Prisma.SalesRepresentativeWhereInput
-  isNot?: Prisma.SalesRepresentativeWhereInput
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
@@ -783,34 +786,6 @@ export type SalesRepresentativeUpdateOneWithoutOrderItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SalesRepresentativeUpdateToOneWithWhereWithoutOrderItemsInput, Prisma.SalesRepresentativeUpdateWithoutOrderItemsInput>, Prisma.SalesRepresentativeUncheckedUpdateWithoutOrderItemsInput>
 }
 
-export type SalesRepresentativeCreateNestedOneWithoutWalletTransactionsInput = {
-  create?: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWalletTransactionsInput>
-  connectOrCreate?: Prisma.SalesRepresentativeCreateOrConnectWithoutWalletTransactionsInput
-  connect?: Prisma.SalesRepresentativeWhereUniqueInput
-}
-
-export type SalesRepresentativeUpdateOneRequiredWithoutWalletTransactionsNestedInput = {
-  create?: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWalletTransactionsInput>
-  connectOrCreate?: Prisma.SalesRepresentativeCreateOrConnectWithoutWalletTransactionsInput
-  upsert?: Prisma.SalesRepresentativeUpsertWithoutWalletTransactionsInput
-  connect?: Prisma.SalesRepresentativeWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.SalesRepresentativeUpdateToOneWithWhereWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUpdateWithoutWalletTransactionsInput>, Prisma.SalesRepresentativeUncheckedUpdateWithoutWalletTransactionsInput>
-}
-
-export type SalesRepresentativeCreateNestedOneWithoutWithdrawRequestsInput = {
-  create?: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWithdrawRequestsInput>
-  connectOrCreate?: Prisma.SalesRepresentativeCreateOrConnectWithoutWithdrawRequestsInput
-  connect?: Prisma.SalesRepresentativeWhereUniqueInput
-}
-
-export type SalesRepresentativeUpdateOneRequiredWithoutWithdrawRequestsNestedInput = {
-  create?: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWithdrawRequestsInput>
-  connectOrCreate?: Prisma.SalesRepresentativeCreateOrConnectWithoutWithdrawRequestsInput
-  upsert?: Prisma.SalesRepresentativeUpsertWithoutWithdrawRequestsInput
-  connect?: Prisma.SalesRepresentativeWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.SalesRepresentativeUpdateToOneWithWhereWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUpdateWithoutWithdrawRequestsInput>, Prisma.SalesRepresentativeUncheckedUpdateWithoutWithdrawRequestsInput>
-}
-
 export type SalesRepresentativeCreateWithoutPhysiciansInput = {
   id?: string
   name: string
@@ -828,13 +803,12 @@ export type SalesRepresentativeCreateWithoutPhysiciansInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   orderItems?: Prisma.OrderCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeUncheckedCreateWithoutPhysiciansInput = {
@@ -854,13 +828,12 @@ export type SalesRepresentativeUncheckedCreateWithoutPhysiciansInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeCreateOrConnectWithoutPhysiciansInput = {
@@ -895,13 +868,12 @@ export type SalesRepresentativeUpdateWithoutPhysiciansInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   orderItems?: Prisma.OrderUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUpdateManyWithoutSalesRepNestedInput
 }
 
 export type SalesRepresentativeUncheckedUpdateWithoutPhysiciansInput = {
@@ -920,13 +892,12 @@ export type SalesRepresentativeUncheckedUpdateWithoutPhysiciansInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   orderItems?: Prisma.OrderUncheckedUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedUpdateManyWithoutSalesRepNestedInput
 }
 
 export type SalesRepresentativeCreateWithoutOrderItemsInput = {
@@ -946,13 +917,12 @@ export type SalesRepresentativeCreateWithoutOrderItemsInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   physicians?: Prisma.PartneringPhysicianCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeUncheckedCreateWithoutOrderItemsInput = {
@@ -972,13 +942,12 @@ export type SalesRepresentativeUncheckedCreateWithoutOrderItemsInput = {
   bankName?: string | null
   bankAccountNumber?: string | null
   bankAccountName?: string | null
+  swiftCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetToken?: string | null
   passwordResetExpiry?: Date | string | null
   physicians?: Prisma.PartneringPhysicianUncheckedCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedCreateNestedManyWithoutSalesRepInput
 }
 
 export type SalesRepresentativeCreateOrConnectWithoutOrderItemsInput = {
@@ -1013,13 +982,12 @@ export type SalesRepresentativeUpdateWithoutOrderItemsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   physicians?: Prisma.PartneringPhysicianUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUpdateManyWithoutSalesRepNestedInput
 }
 
 export type SalesRepresentativeUncheckedUpdateWithoutOrderItemsInput = {
@@ -1038,249 +1006,12 @@ export type SalesRepresentativeUncheckedUpdateWithoutOrderItemsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  swiftCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   physicians?: Prisma.PartneringPhysicianUncheckedUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedUpdateManyWithoutSalesRepNestedInput
-}
-
-export type SalesRepresentativeCreateWithoutWalletTransactionsInput = {
-  id?: string
-  name: string
-  firstName: string
-  lastName: string
-  email: string
-  website?: string | null
-  password: string
-  phone?: string | null
-  ordersCount?: number
-  commission?: number
-  walletBalance?: number
-  billingAddress?: string | null
-  shippingAddress?: string | null
-  bankName?: string | null
-  bankAccountNumber?: string | null
-  bankAccountName?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  passwordResetToken?: string | null
-  passwordResetExpiry?: Date | string | null
-  physicians?: Prisma.PartneringPhysicianCreateNestedManyWithoutSalesRepInput
-  orderItems?: Prisma.OrderCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestCreateNestedManyWithoutSalesRepInput
-}
-
-export type SalesRepresentativeUncheckedCreateWithoutWalletTransactionsInput = {
-  id?: string
-  name: string
-  firstName: string
-  lastName: string
-  email: string
-  website?: string | null
-  password: string
-  phone?: string | null
-  ordersCount?: number
-  commission?: number
-  walletBalance?: number
-  billingAddress?: string | null
-  shippingAddress?: string | null
-  bankName?: string | null
-  bankAccountNumber?: string | null
-  bankAccountName?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  passwordResetToken?: string | null
-  passwordResetExpiry?: Date | string | null
-  physicians?: Prisma.PartneringPhysicianUncheckedCreateNestedManyWithoutSalesRepInput
-  orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutSalesRepInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedCreateNestedManyWithoutSalesRepInput
-}
-
-export type SalesRepresentativeCreateOrConnectWithoutWalletTransactionsInput = {
-  where: Prisma.SalesRepresentativeWhereUniqueInput
-  create: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWalletTransactionsInput>
-}
-
-export type SalesRepresentativeUpsertWithoutWalletTransactionsInput = {
-  update: Prisma.XOR<Prisma.SalesRepresentativeUpdateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedUpdateWithoutWalletTransactionsInput>
-  create: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWalletTransactionsInput>
-  where?: Prisma.SalesRepresentativeWhereInput
-}
-
-export type SalesRepresentativeUpdateToOneWithWhereWithoutWalletTransactionsInput = {
-  where?: Prisma.SalesRepresentativeWhereInput
-  data: Prisma.XOR<Prisma.SalesRepresentativeUpdateWithoutWalletTransactionsInput, Prisma.SalesRepresentativeUncheckedUpdateWithoutWalletTransactionsInput>
-}
-
-export type SalesRepresentativeUpdateWithoutWalletTransactionsInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
-  commission?: Prisma.FloatFieldUpdateOperationsInput | number
-  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
-  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  physicians?: Prisma.PartneringPhysicianUpdateManyWithoutSalesRepNestedInput
-  orderItems?: Prisma.OrderUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUpdateManyWithoutSalesRepNestedInput
-}
-
-export type SalesRepresentativeUncheckedUpdateWithoutWalletTransactionsInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
-  commission?: Prisma.FloatFieldUpdateOperationsInput | number
-  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
-  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  physicians?: Prisma.PartneringPhysicianUncheckedUpdateManyWithoutSalesRepNestedInput
-  orderItems?: Prisma.OrderUncheckedUpdateManyWithoutSalesRepNestedInput
-  withdrawRequests?: Prisma.WithdrawRequestUncheckedUpdateManyWithoutSalesRepNestedInput
-}
-
-export type SalesRepresentativeCreateWithoutWithdrawRequestsInput = {
-  id?: string
-  name: string
-  firstName: string
-  lastName: string
-  email: string
-  website?: string | null
-  password: string
-  phone?: string | null
-  ordersCount?: number
-  commission?: number
-  walletBalance?: number
-  billingAddress?: string | null
-  shippingAddress?: string | null
-  bankName?: string | null
-  bankAccountNumber?: string | null
-  bankAccountName?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  passwordResetToken?: string | null
-  passwordResetExpiry?: Date | string | null
-  physicians?: Prisma.PartneringPhysicianCreateNestedManyWithoutSalesRepInput
-  orderItems?: Prisma.OrderCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutSalesRepInput
-}
-
-export type SalesRepresentativeUncheckedCreateWithoutWithdrawRequestsInput = {
-  id?: string
-  name: string
-  firstName: string
-  lastName: string
-  email: string
-  website?: string | null
-  password: string
-  phone?: string | null
-  ordersCount?: number
-  commission?: number
-  walletBalance?: number
-  billingAddress?: string | null
-  shippingAddress?: string | null
-  bankName?: string | null
-  bankAccountNumber?: string | null
-  bankAccountName?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  passwordResetToken?: string | null
-  passwordResetExpiry?: Date | string | null
-  physicians?: Prisma.PartneringPhysicianUncheckedCreateNestedManyWithoutSalesRepInput
-  orderItems?: Prisma.OrderUncheckedCreateNestedManyWithoutSalesRepInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutSalesRepInput
-}
-
-export type SalesRepresentativeCreateOrConnectWithoutWithdrawRequestsInput = {
-  where: Prisma.SalesRepresentativeWhereUniqueInput
-  create: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWithdrawRequestsInput>
-}
-
-export type SalesRepresentativeUpsertWithoutWithdrawRequestsInput = {
-  update: Prisma.XOR<Prisma.SalesRepresentativeUpdateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedUpdateWithoutWithdrawRequestsInput>
-  create: Prisma.XOR<Prisma.SalesRepresentativeCreateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedCreateWithoutWithdrawRequestsInput>
-  where?: Prisma.SalesRepresentativeWhereInput
-}
-
-export type SalesRepresentativeUpdateToOneWithWhereWithoutWithdrawRequestsInput = {
-  where?: Prisma.SalesRepresentativeWhereInput
-  data: Prisma.XOR<Prisma.SalesRepresentativeUpdateWithoutWithdrawRequestsInput, Prisma.SalesRepresentativeUncheckedUpdateWithoutWithdrawRequestsInput>
-}
-
-export type SalesRepresentativeUpdateWithoutWithdrawRequestsInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
-  commission?: Prisma.FloatFieldUpdateOperationsInput | number
-  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
-  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  physicians?: Prisma.PartneringPhysicianUpdateManyWithoutSalesRepNestedInput
-  orderItems?: Prisma.OrderUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutSalesRepNestedInput
-}
-
-export type SalesRepresentativeUncheckedUpdateWithoutWithdrawRequestsInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ordersCount?: Prisma.IntFieldUpdateOperationsInput | number
-  commission?: Prisma.FloatFieldUpdateOperationsInput | number
-  walletBalance?: Prisma.FloatFieldUpdateOperationsInput | number
-  billingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bankAccountName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  physicians?: Prisma.PartneringPhysicianUncheckedUpdateManyWithoutSalesRepNestedInput
-  orderItems?: Prisma.OrderUncheckedUpdateManyWithoutSalesRepNestedInput
-  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutSalesRepNestedInput
 }
 
 
@@ -1291,15 +1022,11 @@ export type SalesRepresentativeUncheckedUpdateWithoutWithdrawRequestsInput = {
 export type SalesRepresentativeCountOutputType = {
   physicians: number
   orderItems: number
-  walletTransactions: number
-  withdrawRequests: number
 }
 
 export type SalesRepresentativeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   physicians?: boolean | SalesRepresentativeCountOutputTypeCountPhysiciansArgs
   orderItems?: boolean | SalesRepresentativeCountOutputTypeCountOrderItemsArgs
-  walletTransactions?: boolean | SalesRepresentativeCountOutputTypeCountWalletTransactionsArgs
-  withdrawRequests?: boolean | SalesRepresentativeCountOutputTypeCountWithdrawRequestsArgs
 }
 
 /**
@@ -1326,20 +1053,6 @@ export type SalesRepresentativeCountOutputTypeCountOrderItemsArgs<ExtArgs extend
   where?: Prisma.OrderWhereInput
 }
 
-/**
- * SalesRepresentativeCountOutputType without action
- */
-export type SalesRepresentativeCountOutputTypeCountWalletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WalletTransactionWhereInput
-}
-
-/**
- * SalesRepresentativeCountOutputType without action
- */
-export type SalesRepresentativeCountOutputTypeCountWithdrawRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WithdrawRequestWhereInput
-}
-
 
 export type SalesRepresentativeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1358,14 +1071,13 @@ export type SalesRepresentativeSelect<ExtArgs extends runtime.Types.Extensions.I
   bankName?: boolean
   bankAccountNumber?: boolean
   bankAccountName?: boolean
+  swiftCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   passwordResetToken?: boolean
   passwordResetExpiry?: boolean
   physicians?: boolean | Prisma.SalesRepresentative$physiciansArgs<ExtArgs>
   orderItems?: boolean | Prisma.SalesRepresentative$orderItemsArgs<ExtArgs>
-  walletTransactions?: boolean | Prisma.SalesRepresentative$walletTransactionsArgs<ExtArgs>
-  withdrawRequests?: boolean | Prisma.SalesRepresentative$withdrawRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.SalesRepresentativeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesRepresentative"]>
 
@@ -1388,18 +1100,17 @@ export type SalesRepresentativeSelectScalar = {
   bankName?: boolean
   bankAccountNumber?: boolean
   bankAccountName?: boolean
+  swiftCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   passwordResetToken?: boolean
   passwordResetExpiry?: boolean
 }
 
-export type SalesRepresentativeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "firstName" | "lastName" | "email" | "website" | "password" | "phone" | "ordersCount" | "commission" | "walletBalance" | "billingAddress" | "shippingAddress" | "bankName" | "bankAccountNumber" | "bankAccountName" | "createdAt" | "updatedAt" | "passwordResetToken" | "passwordResetExpiry", ExtArgs["result"]["salesRepresentative"]>
+export type SalesRepresentativeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "firstName" | "lastName" | "email" | "website" | "password" | "phone" | "ordersCount" | "commission" | "walletBalance" | "billingAddress" | "shippingAddress" | "bankName" | "bankAccountNumber" | "bankAccountName" | "swiftCode" | "createdAt" | "updatedAt" | "passwordResetToken" | "passwordResetExpiry", ExtArgs["result"]["salesRepresentative"]>
 export type SalesRepresentativeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   physicians?: boolean | Prisma.SalesRepresentative$physiciansArgs<ExtArgs>
   orderItems?: boolean | Prisma.SalesRepresentative$orderItemsArgs<ExtArgs>
-  walletTransactions?: boolean | Prisma.SalesRepresentative$walletTransactionsArgs<ExtArgs>
-  withdrawRequests?: boolean | Prisma.SalesRepresentative$withdrawRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.SalesRepresentativeCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1408,8 +1119,6 @@ export type $SalesRepresentativePayload<ExtArgs extends runtime.Types.Extensions
   objects: {
     physicians: Prisma.$PartneringPhysicianPayload<ExtArgs>[]
     orderItems: Prisma.$OrderPayload<ExtArgs>[]
-    walletTransactions: Prisma.$WalletTransactionPayload<ExtArgs>[]
-    withdrawRequests: Prisma.$WithdrawRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1428,6 +1137,7 @@ export type $SalesRepresentativePayload<ExtArgs extends runtime.Types.Extensions
     bankName: string | null
     bankAccountNumber: string | null
     bankAccountName: string | null
+    swiftCode: string | null
     createdAt: Date
     updatedAt: Date
     passwordResetToken: string | null
@@ -1797,8 +1507,6 @@ export interface Prisma__SalesRepresentativeClient<T, Null = never, ExtArgs exte
   readonly [Symbol.toStringTag]: "PrismaPromise"
   physicians<T extends Prisma.SalesRepresentative$physiciansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesRepresentative$physiciansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PartneringPhysicianPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderItems<T extends Prisma.SalesRepresentative$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesRepresentative$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  walletTransactions<T extends Prisma.SalesRepresentative$walletTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesRepresentative$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  withdrawRequests<T extends Prisma.SalesRepresentative$withdrawRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesRepresentative$withdrawRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WithdrawRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1844,6 +1552,7 @@ export interface SalesRepresentativeFieldRefs {
   readonly bankName: Prisma.FieldRef<"SalesRepresentative", 'String'>
   readonly bankAccountNumber: Prisma.FieldRef<"SalesRepresentative", 'String'>
   readonly bankAccountName: Prisma.FieldRef<"SalesRepresentative", 'String'>
+  readonly swiftCode: Prisma.FieldRef<"SalesRepresentative", 'String'>
   readonly createdAt: Prisma.FieldRef<"SalesRepresentative", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SalesRepresentative", 'DateTime'>
   readonly passwordResetToken: Prisma.FieldRef<"SalesRepresentative", 'String'>
@@ -2263,54 +1972,6 @@ export type SalesRepresentative$orderItemsArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
-}
-
-/**
- * SalesRepresentative.walletTransactions
- */
-export type SalesRepresentative$walletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the WalletTransaction
-   */
-  select?: Prisma.WalletTransactionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the WalletTransaction
-   */
-  omit?: Prisma.WalletTransactionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WalletTransactionInclude<ExtArgs> | null
-  where?: Prisma.WalletTransactionWhereInput
-  orderBy?: Prisma.WalletTransactionOrderByWithRelationInput | Prisma.WalletTransactionOrderByWithRelationInput[]
-  cursor?: Prisma.WalletTransactionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.WalletTransactionScalarFieldEnum | Prisma.WalletTransactionScalarFieldEnum[]
-}
-
-/**
- * SalesRepresentative.withdrawRequests
- */
-export type SalesRepresentative$withdrawRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the WithdrawRequest
-   */
-  select?: Prisma.WithdrawRequestSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the WithdrawRequest
-   */
-  omit?: Prisma.WithdrawRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WithdrawRequestInclude<ExtArgs> | null
-  where?: Prisma.WithdrawRequestWhereInput
-  orderBy?: Prisma.WithdrawRequestOrderByWithRelationInput | Prisma.WithdrawRequestOrderByWithRelationInput[]
-  cursor?: Prisma.WithdrawRequestWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.WithdrawRequestScalarFieldEnum | Prisma.WithdrawRequestScalarFieldEnum[]
 }
 
 /**

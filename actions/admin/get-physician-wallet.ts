@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma }       from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 
 export async function getPhysicianWalletDetails(physicianId: string) {
@@ -15,16 +15,16 @@ export async function getPhysicianWalletDetails(physicianId: string) {
         bankName: true, bankAccountNumber: true, bankAccountName: true,
       },
     }),
-    prisma.physicianWalletTransaction.findMany({
-      where:   { physicianId },
+    prisma.walletTransaction.findMany({
+      where:   { userId: physicianId, userRole: "PHYSICIAN" },
       orderBy: { createdAt: "desc" },
       take:    30,
     }),
-    prisma.physicianWithdrawRequest.findMany({
-      where:   { physicianId },
+    prisma.withdrawRequest.findMany({
+      where:   { userId: physicianId, userRole: "PHYSICIAN" },
       orderBy: { createdAt: "desc" },
       take:    10,
-      select: { id: true, amount: true, status: true, createdAt: true, note: true, adminNote: true },
+      select:  { id: true, amount: true, status: true, createdAt: true, note: true, adminNote: true },
     }),
   ]);
 

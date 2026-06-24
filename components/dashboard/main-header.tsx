@@ -33,27 +33,30 @@ type NavItem =
 function buildNav(role: Role): NavItem[] {
   if (role === "ADMIN") {
     return [
-      { label: "Dashboard", href: "/admin/dashboard" },
       {
         label: "Account Management",
         children: [
           { label: "Sales Representatives", href: "/admin/sales-reps" },
           { label: "Partnering Physicians", href: "/admin/physicians" },
-          { label: "Pending Approvals", href: "/admin/approvals" },
+          { label: "Pending Approvals",     href: "/admin/approvals" },
         ],
       },
       {
         label: "Product Management",
         children: [
-          { label: "Products", href: "/admin/products" },
-          { label: "Categories", href: "/admin/categories" },
-          { label: "Sub-Categories", href: "/admin/sub-categories" },
+          { label: "Products",        href: "/admin/products" },
+          { label: "Categories",      href: "/admin/categories" },
+          { label: "Sub-Categories",  href: "/admin/sub-categories" },
         ],
       },
-      // { label: "Order History", href: "/admin/orders" },
-      { label: "Withdrawals", href: "/admin/withdrawals" },
-      { label: "Downloads", href: "/admin/downloads" },
-      { label: "Contact Us", href: "/contact" },
+      { label: "Coupons", href: "/admin/coupons" },
+      {
+        label: "Website Management",
+        children: [
+          { label: "Website Banners", href: "/admin/website-banners" },
+          { label: "Blog Posts",      href: "/admin/blogs" },
+        ],
+      },
       {
         label: "My Account",
         children: [

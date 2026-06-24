@@ -23,6 +23,9 @@ export type ConfirmCardOrderPayload = {
   notes:           string;
   shippingRate:    number;
   total:           number;
+  couponId?:       string;
+  couponCode?:     string;
+  discountAmount?: number;
 };
 
 export type ConfirmCardOrderResult = {
@@ -91,14 +94,17 @@ export async function confirmCardOrder(
 
   const deliveryDate = estimatedDeliveryDate(7);
 
-  await prisma.$transaction([
+  const ops: Parameters<typeof prisma.$transaction>[0] = [
     prisma.order.create({
       data: {
         orderNumber,
         salesRepId: session.userId,
         items:      items as object[],
         subtotal,
-        total:      payload.total,
+        total:          payload.total,
+        discountAmount: payload.discountAmount ?? 0,
+        couponCode:     payload.couponCode     || undefined,
+        couponId:       payload.couponId       || undefined,
         salesRepCommissionRate:    commissionRate,
         salesRepCommissionAmount:  commissionAmount,
         physicianCommissionRate:   0,
@@ -117,7 +123,18 @@ export async function confirmCardOrder(
       where: { id: session.userId },
       data:  { ordersCount: { increment: 1 } },
     }),
-  ]);
+  ];
+
+  if (payload.couponId) {
+    ops.push(
+      prisma.coupon.update({
+        where: { id: payload.couponId },
+        data:  { usedCount: { increment: 1 } },
+      }) as never
+    );
+  }
+
+  await prisma.$transaction(ops);
 
   revalidatePath("/sales/orders");
   return { success: true, orderNumber };

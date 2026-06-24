@@ -49,9 +49,10 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
 
     startTransition(async () => {
       const res = await adjustWallet({
-        salesRepId: selected!.id,
+        userId:   selected!.id,
+        userRole: "SALES_REP",
         type,
-        amount:     amt,
+        amount:   amt,
         note,
       });
       if (res.success) {

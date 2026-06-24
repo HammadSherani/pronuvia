@@ -59,12 +59,12 @@ export default async function PhysiciansPage() {
     }),
 
     prisma.withdrawRequest.findMany({
-      where:  { status: "PENDING" },
-      select: { salesRepId: true },
+      where:  { status: "PENDING", userRole: "SALES_REP" },
+      select: { userId: true },
     }),
   ]);
 
-  const pendingRepIds = new Set(pendingWithdrawals.map((w) => w.salesRepId));
+  const pendingRepIds = new Set(pendingWithdrawals.map((w) => w.userId));
 
   return (
     <PhysiciansPageClient

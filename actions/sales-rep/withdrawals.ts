@@ -58,14 +58,14 @@ export async function createWithdrawRequest(
     }
 
     const pending = await prisma.withdrawRequest.findFirst({
-      where: { salesRepId: session.userId, status: "PENDING" },
+      where: { userId: session.userId, userRole: "SALES_REP", status: "PENDING" },
     });
     if (pending) {
       return { message: "You already have a pending withdrawal request. Please wait for it to be processed." };
     }
 
     await prisma.withdrawRequest.create({
-      data: { salesRepId: session.userId, amount, note: note ?? null },
+      data: { userId: session.userId, userRole: "SALES_REP", amount, note: note ?? null },
     });
 
     revalidatePath("/sales/withdrawals");

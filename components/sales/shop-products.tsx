@@ -129,18 +129,11 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
               });
               toast.success("Added to cart!");
             }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors shadow-sm">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
             Add to Cart
-          </button>
-          <button type="button" onClick={handleBuyNow}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors shadow-sm">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-            Buy Now
           </button>
         </div>
       </div>

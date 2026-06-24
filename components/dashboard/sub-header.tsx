@@ -13,16 +13,14 @@ type SubNavItem =
 function buildSubNav(role: Role): SubNavItem[] {
   if (role === "ADMIN") {
     return [
-      { label: "Dashboard",            href: "/admin/dashboard" },
-      { label: "Orders",               href: "/admin/orders" },
-      { label: "Approvals",            href: "/admin/approvals" },
-      { label: "Withdrawals",          href: "/admin/withdrawals" },
-      { label: "Wallet Adjustment",    href: "/admin/wallet-adjustment" },
-      { label: "Dr. Withdrawals",      href: "/admin/physician-withdrawals" },
-      { label: "Dr. Wallet",           href: "/admin/physician-wallet-adjustment" },
-      { label: "Banners",              href: "/admin/banners" },
-      { label: "Account",              href: "/admin/account" },
-      { label: "Log out",              action: async () => { await logout(); } },
+      { label: "Dashboard",       href: "/admin/dashboard" },
+      { label: "Orders",          href: "/admin/orders" },
+      { label: "Withdrawals",     href: "/admin/withdrawals" },
+      { label: "Wallet Adjustment", href: "/admin/wallet-adjustment" },
+      { label: "Banners",         href: "/admin/banners" },
+      { label: "Downloads",       href: "/admin/downloads" },
+      { label: "Account",         href: "/admin/account" },
+      { label: "Log out",         action: async () => { await logout(); } },
     ];
   }
 

@@ -13,9 +13,10 @@ const ProfileSchema = z.object({
   website:         z.string().url("Must be a valid URL").optional().or(z.literal("")),
   billingAddress:  z.string().optional(),
   shippingAddress: z.string().optional(),
-  bankName:        z.string().optional(),
-  bankAccountName: z.string().optional(),
+  bankName:          z.string().optional(),
+  bankAccountName:   z.string().optional(),
   bankAccountNumber: z.string().optional(),
+  swiftCode:         z.string().optional(),
 });
 
 const ChangePasswordSchema = z
@@ -51,6 +52,7 @@ export async function updateSalesRepProfile(
     bankName:          formData.get("bankName") || undefined,
     bankAccountName:   formData.get("bankAccountName") || undefined,
     bankAccountNumber: formData.get("bankAccountNumber") || undefined,
+    swiftCode:         formData.get("swiftCode") || undefined,
   };
 
   const validated = ProfileSchema.safeParse(raw);

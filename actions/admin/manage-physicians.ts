@@ -51,6 +51,7 @@ export async function adminCreatePhysician(
     bankName:          (formData.get("bankName") as string) || undefined,
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName") as string) || undefined,
+    swiftCode:         (formData.get("swiftCode") as string) || undefined,
   };
 
   const validated = CreatePhysicianSchema.safeParse(raw);
@@ -172,6 +173,7 @@ export async function updatePhysician(
     bankName:          (formData.get("bankName")           as string) || undefined,
     bankAccountNumber: (formData.get("bankAccountNumber")  as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")    as string) || undefined,
+    swiftCode:         (formData.get("swiftCode")          as string) || undefined,
   };
 
   const validated = UpdatePhysicianSchema.safeParse(raw);

@@ -47,14 +47,15 @@ export default async function WalletPage() {
     }),
 
     prisma.withdrawRequest.findMany({
-      where:   { salesRepId: session.userId },
+      where:   { userId: session.userId, userRole: "SALES_REP" },
       orderBy: { createdAt: "desc" },
       take:    10,
     }),
 
     prisma.walletTransaction.findMany({
       where: {
-        salesRepId:  session.userId,
+        userId:      session.userId,
+        userRole:    "SALES_REP",
         description: { startsWith: "Admin adjustment:" },
       },
       orderBy: { createdAt: "desc" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import type { SalesRepActionState } from "@/actions/admin/manage-sales-reps";
@@ -14,7 +14,7 @@ interface SalesRepFormProps {
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     commission?: number; billingAddress?: string; shippingAddress?: string;
-    bankName?: string; bankAccountNumber?: string; bankAccountName?: string;
+    bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string;
   };
 }
 
@@ -34,7 +34,12 @@ function Req() { return <span className="text-red-400"> *</span>; }
 
 export function SalesRepForm({ action, submitLabel, backHref, successRedirect, isEdit, defaults }: SalesRepFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
-  const router = useRouter();
+  const router   = useRouter();
+  const formRef  = useRef<HTMLFormElement>(null);
+  const [accNum,        setAccNum]        = useState(defaults?.bankAccountNumber ?? "");
+  const [confirmAccNum, setConfirmAccNum] = useState(defaults?.bankAccountNumber ?? "");
+  const [accNumError,   setAccNumError]   = useState("");
+
   useEffect(() => {
     if (!state) return;
     if (state.success) {
@@ -48,8 +53,27 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
 
   const e = state?.errors ?? {};
 
+  function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
+    if (accNum && accNum !== confirmAccNum) {
+      ev.preventDefault();
+      setAccNumError("Account numbers do not match");
+      return;
+    }
+    setAccNumError("");
+  }
+
+  function onAccNumChange(val: string) {
+    setAccNum(val);
+    if (confirmAccNum) setAccNumError(val !== confirmAccNum ? "Account numbers do not match" : "");
+  }
+
+  function onConfirmChange(val: string) {
+    setConfirmAccNum(val);
+    setAccNumError(val !== accNum ? "Account numbers do not match" : "");
+  }
+
   return (
-    <form action={formAction} noValidate>
+    <form ref={formRef} action={formAction} onSubmit={handleSubmit} noValidate>
 
       {/* ── Personal Info ── */}
       <div className={sec}>
@@ -87,7 +111,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
           <div className="relative">
             <input name="commission" type="number" step="0.01" min="0" max="100"
               className={icls(e.commission?.[0])} placeholder="0.00" defaultValue={defaults?.commission ?? 0} />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+            <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
           </div>
           <FE msg={e.commission?.[0]} />
         </div>
@@ -111,18 +135,31 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
       {/* ── Payout Info ── */}
       <div className={sec}>
         <p className={head}>Payout / Bank Details</p>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className={lbl}>Bank Name</label>
+            <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={defaults?.bankName} />
+          </div>
+          <div>
+            <label className={lbl}>Swift Code</label>
+            <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33" defaultValue={defaults?.swiftCode} />
+          </div>
+        </div>
         <div className="mb-4">
-          <label className={lbl}>Bank Name</label>
-          <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={defaults?.bankName} />
+          <label className={lbl}>Account Name</label>
+          <input name="bankAccountName" className={icls()} placeholder="John Smith" defaultValue={defaults?.bankAccountName} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Account Number</label>
-            <input name="bankAccountNumber" className={icls()} placeholder="000000000" defaultValue={defaults?.bankAccountNumber} />
+            <input name="bankAccountNumber" className={icls(accNumError)} placeholder="000000000"
+              value={accNum} onChange={(e) => onAccNumChange(e.target.value)} />
           </div>
           <div>
-            <label className={lbl}>Account Name</label>
-            <input name="bankAccountName" className={icls()} placeholder="John Smith" defaultValue={defaults?.bankAccountName} />
+            <label className={lbl}>Confirm Account Number</label>
+            <input className={icls(accNumError)} placeholder="Re-enter account number"
+              value={confirmAccNum} onChange={(e) => onConfirmChange(e.target.value)} />
+            {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
           </div>
         </div>
       </div>

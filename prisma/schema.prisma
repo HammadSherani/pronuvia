@@ -45,16 +45,15 @@ model SalesRepresentative {
   bankName          String?
   bankAccountNumber String?
   bankAccountName   String?
+  swiftCode         String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   passwordResetToken  String?
   passwordResetExpiry DateTime?
 
-  physicians         PartneringPhysician[]
-  orderItems         Order[]
-  walletTransactions WalletTransaction[]
-  withdrawRequests   WithdrawRequest[]
+  physicians  PartneringPhysician[]
+  orderItems  Order[]
 }
 
 model Category {
@@ -146,6 +145,7 @@ model PartneringPhysician {
   bankName            String?
   bankAccountNumber   String?
   bankAccountName     String?
+  swiftCode           String?
   walletBalance       Float          @default(0)
   ordersCount         Int            @default(0)
   addedByRole         Role
@@ -155,9 +155,7 @@ model PartneringPhysician {
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 
-  orderItems          Order[]
-  walletTransactions  PhysicianWalletTransaction[]
-  withdrawRequests    PhysicianWithdrawRequest[]
+  orderItems  Order[]
 }
 
 model CatalogDocument {
@@ -215,6 +213,10 @@ model Order {
   stripePaymentIntentId     String?
   notes                     String?
 
+  couponCode                String?
+  couponId                  String?              @db.ObjectId
+  discountAmount            Float                @default(0)
+
   // Return / clawback fields
   returnedAt                DateTime?
   returnReason              String?
@@ -227,16 +229,55 @@ model Order {
   updatedAt                 DateTime             @updatedAt
 }
 
+model Coupon {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  code           String    @unique
+  description    String?
+  discountType   String    @default("PERCENTAGE")
+  discountValue  Float
+  minOrderAmount Float?
+  maxUses        Int?
+  usedCount      Int       @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  applicableTo   String    @default("ALL")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Shipment {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId        String   @db.ObjectId
+  carrier        String
+  carrierLabel   String
+  service        String
+  serviceCode    String
+  trackingNumber String
+  labelBase64    String?
+  labelFormat    String   @default("PNG")
+  fromAddress    Json
+  toAddress      Json
+  weightLbs      Float
+  lengthIn       Float?
+  widthIn        Float?
+  heightIn       Float?
+  cost           Float    @default(0)
+  currency       String   @default("USD")
+  status         String   @default("created")
+  shipDate       DateTime @default(now())
+  createdAt      DateTime @default(now())
+}
+
 model WalletTransaction {
-  id          String              @id @default(auto()) @map("_id") @db.ObjectId
-  salesRepId  String              @db.ObjectId
-  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id])
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  userRole    Role
   amount      Float
   type        String
   description String?
-  orderId     String?             @db.ObjectId
+  orderId     String?  @db.ObjectId
   balance     Float
-  createdAt   DateTime            @default(now())
+  createdAt   DateTime @default(now())
 }
 
 enum WithdrawStatus {
@@ -246,44 +287,46 @@ enum WithdrawStatus {
 }
 
 model WithdrawRequest {
-  id          String              @id @default(auto()) @map("_id") @db.ObjectId
-  salesRepId  String              @db.ObjectId
-  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id])
-  amount      Float
-  status      WithdrawStatus      @default(PENDING)
-  note        String?
-  adminNote   String?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-}
-
-model PhysicianWalletTransaction {
-  id          String              @id @default(auto()) @map("_id") @db.ObjectId
-  physicianId String              @db.ObjectId
-  physician   PartneringPhysician @relation(fields: [physicianId], references: [id])
-  amount      Float
-  type        String
-  description String?
-  orderId     String?             @db.ObjectId
-  balance     Float
-  createdAt   DateTime            @default(now())
-}
-
-model PhysicianWithdrawRequest {
-  id          String              @id @default(auto()) @map("_id") @db.ObjectId
-  physicianId String              @db.ObjectId
-  physician   PartneringPhysician @relation(fields: [physicianId], references: [id])
-  amount      Float
-  status      WithdrawStatus      @default(PENDING)
-  note        String?
-  adminNote   String?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String         @db.ObjectId
+  userRole  Role
+  amount    Float
+  status    WithdrawStatus @default(PENDING)
+  note      String?
+  adminNote String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
 model Banner {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  imageUrl    String
+  linkUrl     String?
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Blog {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  excerpt     String?
+  content     String?
+  imageUrl    String?
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model WebsiteBanner {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  subtitle    String?
+  buttonText  String?
   imageUrl    String
   linkUrl     String?
   isPublished Boolean  @default(false)

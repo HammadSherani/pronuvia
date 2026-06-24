@@ -14,7 +14,7 @@ export default async function NewWithdrawPage() {
   });
 
   const hasPending = await prisma.withdrawRequest.findFirst({
-    where: { salesRepId: session.userId, status: "PENDING" },
+    where: { userId: session.userId, userRole: "SALES_REP", status: "PENDING" },
   });
 
   const balance = rep?.walletBalance ?? 0;
