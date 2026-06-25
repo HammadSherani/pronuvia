@@ -165,11 +165,24 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
 function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
   const [state, action, pending] = useActionState<UpdateProfileState, FormData>(updatePhysicianProfile, undefined);
   const [specialties, setSpecialties] = useState<string[]>(p.fieldsOfSpeciality ?? []);
+  const [accountNumber, setAccountNumber]         = useState(p.bankAccountNumber ?? "");
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState(p.bankAccountNumber ?? "");
+  const [accountMismatch, setAccountMismatch]     = useState(false);
 
   const e = state?.errors ?? {};
 
   function toggle(s: string) {
     setSpecialties((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+  }
+
+  function handleAccountChange(val: string) {
+    setAccountNumber(val);
+    setAccountMismatch(confirmAccountNumber.length > 0 && val !== confirmAccountNumber);
+  }
+
+  function handleConfirmChange(val: string) {
+    setConfirmAccountNumber(val);
+    setAccountMismatch(val !== accountNumber);
   }
 
   return (
@@ -187,7 +200,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
             className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
             Cancel
           </button>
-          <button type="submit" disabled={pending}
+          <button type="submit" disabled={pending || accountMismatch}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg disabled:opacity-50 transition-colors">
             {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
             {pending ? "Saving…" : "Save Changes"}
@@ -328,14 +341,31 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           </Field>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Account Number">
-            <input name="bankAccountNumber" defaultValue={p.bankAccountNumber ?? ""} placeholder="Account number" className={inp} />
-          </Field>
-          <Field label="SWIFT / IBAN Code">
-            <input name="swiftCode" defaultValue={p.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
-          </Field>
-        </div>
+        <Field label="Account Number">
+          <input
+            name="bankAccountNumber"
+            value={accountNumber}
+            onChange={(ev) => handleAccountChange(ev.target.value)}
+            placeholder="Account number"
+            className={inp}
+          />
+        </Field>
+
+        <Field
+          label="Confirm Account Number"
+          error={accountMismatch ? "Account numbers do not match" : undefined}
+        >
+          <input
+            value={confirmAccountNumber}
+            onChange={(ev) => handleConfirmChange(ev.target.value)}
+            placeholder="Re-enter account number"
+            className={accountMismatch ? inpErr : inp}
+          />
+        </Field>
+
+        <Field label="SWIFT / IBAN Code">
+          <input name="swiftCode" defaultValue={p.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
+        </Field>
       </div>
 
       {/* Bottom action bar */}

@@ -23,8 +23,8 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith("/login")) {
     const cookie = request.cookies.get("pronuvia_session")?.value;
     const session = cookie ? await decryptEdge(cookie) : null;
-    if (session) {
-      const dest = DASHBOARD_ROUTES[session.role] ?? "/";
+    const dest = session?.role ? DASHBOARD_ROUTES[session.role] : null;
+    if (dest) {
       return NextResponse.redirect(new URL(dest, request.url));
     }
     return NextResponse.next();
@@ -67,29 +67,31 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Refresh session cookie on every request (sliding window)
+  // Refresh session cookie on every request (sliding window) — only when logged in
   const response = NextResponse.next();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  const { SignJWT } = await import("jose");
-  const secret = new TextEncoder().encode(process.env.SESSION_SECRET ?? "");
-  const refreshed = await new SignJWT({
-    userId: session?.userId,
-    role:   session?.role,
-    email:  session?.email,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(expiresAt)
-    .sign(secret);
+  if (session?.userId && session?.role) {
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const { SignJWT } = await import("jose");
+    const secret = new TextEncoder().encode(process.env.SESSION_SECRET ?? "");
+    const refreshed = await new SignJWT({
+      userId: session.userId,
+      role:   session.role,
+      email:  session.email,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(expiresAt)
+      .sign(secret);
 
-  response.cookies.set("pronuvia_session", refreshed, {
-    httpOnly: true,
-    secure:   process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires:  expiresAt,
-    path:     "/",
-  });
+    response.cookies.set("pronuvia_session", refreshed, {
+      httpOnly: true,
+      secure:   process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires:  expiresAt,
+      path:     "/",
+    });
+  }
 
   return response;
 }

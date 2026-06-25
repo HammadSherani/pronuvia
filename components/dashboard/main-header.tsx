@@ -38,15 +38,15 @@ function buildNav(role: Role): NavItem[] {
         children: [
           { label: "Sales Representatives", href: "/admin/sales-reps" },
           { label: "Partnering Physicians", href: "/admin/physicians" },
-          { label: "Pending Approvals",     href: "/admin/approvals" },
+          { label: "Pending Approvals", href: "/admin/approvals" },
         ],
       },
       {
         label: "Product Management",
         children: [
-          { label: "Products",        href: "/admin/products" },
-          { label: "Categories",      href: "/admin/categories" },
-          { label: "Sub-Categories",  href: "/admin/sub-categories" },
+          { label: "Products", href: "/admin/products" },
+          { label: "Categories", href: "/admin/categories" },
+          { label: "Sub-Categories", href: "/admin/sub-categories" },
         ],
       },
       { label: "Coupons", href: "/admin/coupons" },
@@ -54,7 +54,7 @@ function buildNav(role: Role): NavItem[] {
         label: "Website Management",
         children: [
           { label: "Website Banners", href: "/admin/website-banners" },
-          { label: "Blog Posts",      href: "/admin/blogs" },
+          { label: "Blog Posts", href: "/admin/blogs" },
         ],
       },
       {
@@ -68,9 +68,9 @@ function buildNav(role: Role): NavItem[] {
 
   if (role === "SALES_REP") {
     return [
-      { label: "Website", href: "/website" },
+      { label: "Website", href: "/" },
 
-      { label: "Terms and Conditions", href: "/Terms" },
+      // { label: "Terms and Conditions", href: "/Terms" },
       { label: "Contact Us", href: "/contact" },
       {
         label: "My Account",
@@ -125,9 +125,8 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
         {item.label}
 
         <svg
-          className={`w-3.5 h-3.5 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""
+            }`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -166,29 +165,29 @@ export function MainHeader({ role }: { role: Role }) {
     <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 h-[70px] flex items-center justify-between">
         <PronuviaLogoDark />
-   <nav className="flex items-center gap-6 flex-wrap">
-  {navItems.map((item) =>
-    item.children ? (
-      role !== "SALES_REP" ? (
-        <DropdownMenu
-          key={item.label}
-          item={item as NavItem & { children: NavChild[] }}
-        />
-      ) : null
-    ) : (
-      <Link
-        key={item.href}
-        href={item.href}
-        className="text-[#6b7280] hover:text-[#374151] text-sm font-medium transition-colors whitespace-nowrap"
-      >
-        {item.label}
-      </Link>
-    )
-  )}
+        <nav className="flex items-center gap-6 flex-wrap">
+          {navItems.map((item) =>
+            item.children ? (
+              role !== "SALES_REP" ? (
+                <DropdownMenu
+                  key={item.label}
+                  item={item as NavItem & { children: NavChild[] }}
+                />
+              ) : null
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-[#6b7280] hover:text-[#374151] text-sm font-medium transition-colors whitespace-nowrap"
+              >
+                {item.label}
+              </Link>
+            )
+          )}
 
-  {role === "SALES_REP" && <CartIcon href="/sales/cart" />}
-  {role === "PHYSICIAN"  && <CartIcon href="/physician/cart" />}
-</nav>
+          {role === "SALES_REP" && <CartIcon href="/sales/cart" />}
+          {role === "PHYSICIAN" && <CartIcon href="/physician/cart" />}
+        </nav>
       </div>
     </header>
   );
