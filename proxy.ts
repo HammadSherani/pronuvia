@@ -5,7 +5,7 @@ import { decryptEdge } from "@/lib/auth/session-edge";
 const DASHBOARD_ROUTES: Record<string, string> = {
   ADMIN:      "/admin/dashboard",
   SALES_REP:  "/sales/shop",
-  PHYSICIAN:  "/physician/dashboard",
+  PHYSICIAN:  "/physician/shop",
 };
 
 const ADMIN_SETUP_ROUTE = "/admin-setup";

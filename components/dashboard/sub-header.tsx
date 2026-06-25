@@ -26,8 +26,8 @@ function buildSubNav(role: Role): SubNavItem[] {
 
   if (role === "SALES_REP") {
     return [
-      { label: "Dashbaord", href: "/sales/dashboard" },
-      { label: "Patnering Physicians", href: "/sales/physicians" },
+      { label: "Dashboard",            href: "/sales/dashboard" },
+      { label: "Partnering Physicians", href: "/sales/physicians" },
       { label: "Shop",      href: "/sales/shop" },
       { label: "Wallet",    href: "/sales/wallet" },
       { label: "Downloads", href: "/sales/downloads" },
@@ -39,6 +39,7 @@ function buildSubNav(role: Role): SubNavItem[] {
 
   // PHYSICIAN
   return [
+    { label: "Dashboard",   href: "/physician/dashboard" },
     { label: "Shop",        href: "/physician/shop" },
     // { label: "Cart",        href: "/physician/cart", isCart: true },
     { label: "Orders",      href: "/physician/orders" },

@@ -24,7 +24,7 @@ export type LoginState = {
 const DASHBOARD_ROUTES: Record<Role, string> = {
   [Role.ADMIN]: "/admin/dashboard",
   [Role.SALES_REP]: "/sales/shop",
-  [Role.PHYSICIAN]: "/physician/dashboard",
+  [Role.PHYSICIAN]: "/physician/shop",
 };
 
 export async function login(

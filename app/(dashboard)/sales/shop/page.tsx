@@ -1,14 +1,16 @@
-﻿import { requireSalesRep } from "@/lib/auth/dal";
+import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ProductStatus } from "@/generated/prisma/enums";
 import { ShopProducts } from "@/components/sales/shop-products";
+import { BannerCarousel } from "@/components/dashboard/banner-carousel";
+import { getPublishedBanners } from "@/actions/admin/banners";
 
 export const metadata = { title: "Shop – Pronuvia" };
 
 export default async function SalesShopPage() {
   await requireSalesRep();
 
-  const [products, categories] = await Promise.all([
+  const [products, categories, banners] = await Promise.all([
     prisma.product.findMany({
       where:   { status: ProductStatus.ACTIVE },
       select: {
@@ -24,16 +26,13 @@ export default async function SalesShopPage() {
       select:  { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    getPublishedBanners(),
   ]);
 
   return (
-    <div>
-      <div className="mb-7">
-        <h1 className="text-xl font-bold text-gray-800">Shop</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Browse products and place your orders.</p>
-      </div>
+    <div className="space-y-6">
+      <BannerCarousel banners={banners} />
       <ShopProducts products={products} categories={categories} />
     </div>
   );
 }
-
