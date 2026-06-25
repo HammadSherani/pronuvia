@@ -1,33 +1,29 @@
 "use server";
 
-import { prisma }        from "@/lib/db/prisma";
-import { hashPassword }  from "@/lib/auth/password";
-import { Role, ApprovalStatus } from "@/generated/prisma/enums";
-import { z }             from "zod";
+import { prisma }                    from "@/lib/db/prisma";
+import { hashPassword }              from "@/lib/auth/password";
+import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
+import { Role, ApprovalStatus }      from "@/generated/prisma/enums";
+import { z }                         from "zod";
 
 const Schema = z.object({
-  email:              z.string().email("Valid email is required"),
-  firstName:          z.string().min(1, "First name is required"),
-  lastName:           z.string().min(1, "Last name is required"),
-  password:           z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword:    z.string().min(1, "Please confirm your password"),
-  aictherapy:         z.string().min(1, "This field is required"),
-  license:            z.string().optional(),
-  websiteLink:        z.string().url("Enter a valid URL (https://...)").optional().or(z.literal("")),
-  country:            z.string().optional(),
-  addressOne:         z.string().optional(),
-  addressTwo:         z.string().optional(),
-  city:               z.string().optional(),
-  state:              z.string().optional(),
-  zipCode:            z.string().optional(),
-  phone:              z.string().optional(),
-  officeContactNumber:z.string().optional(),
-  fax:                z.string().optional(),
-  nameOfPractice:     z.string().optional(),
-  yearsInPractice:    z.coerce.number().min(0).optional(),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
+  email:               z.string().email("Valid email is required"),
+  firstName:           z.string().min(1, "First name is required"),
+  lastName:            z.string().min(1, "Last name is required"),
+  aictherapy:          z.string().min(1, "This field is required"),
+  license:             z.string().min(1, "Doctor's license number is required"),
+  websiteLink:         z.string().url("Enter a valid URL (https://...)"),
+  country:             z.string().min(1, "Country is required"),
+  addressOne:          z.string().min(1, "Address is required"),
+  addressTwo:          z.string().optional(),
+  city:                z.string().min(1, "City is required"),
+  state:               z.string().min(1, "State is required"),
+  zipCode:             z.string().min(1, "Zip code is required"),
+  phone:               z.string().min(1, "Phone is required"),
+  officeContactNumber: z.string().min(1, "Office contact person is required"),
+  fax:                 z.string().min(1, "Fax is required"),
+  nameOfPractice:      z.string().min(1, "Name of practice is required"),
+  yearsInPractice:     z.coerce.number({ invalid_type_error: "Years in practice is required" }).min(0, "Must be 0 or more"),
 });
 
 export type RegisterPhysicianState = {
@@ -44,27 +40,32 @@ export async function registerPhysician(
     email:               (formData.get("email") as string)?.trim().toLowerCase(),
     firstName:           (formData.get("firstName") as string)?.trim(),
     lastName:            (formData.get("lastName") as string)?.trim(),
-    password:            formData.get("password") as string,
-    confirmPassword:     formData.get("confirmPassword") as string,
     aictherapy:          (formData.get("aictherapy") as string)?.trim(),
-    license:             (formData.get("license") as string) || undefined,
-    websiteLink:         (formData.get("websiteLink") as string) || undefined,
-    country:             (formData.get("country") as string) || undefined,
-    addressOne:          (formData.get("addressOne") as string) || undefined,
+    license:             (formData.get("license") as string)?.trim(),
+    websiteLink:         (formData.get("websiteLink") as string)?.trim(),
+    country:             (formData.get("country") as string)?.trim(),
+    addressOne:          (formData.get("addressOne") as string)?.trim(),
     addressTwo:          (formData.get("addressTwo") as string) || undefined,
-    city:                (formData.get("city") as string) || undefined,
-    state:               (formData.get("state") as string) || undefined,
-    zipCode:             (formData.get("zipCode") as string) || undefined,
-    phone:               (formData.get("phone") as string) || undefined,
-    officeContactNumber: (formData.get("officeContactNumber") as string) || undefined,
-    fax:                 (formData.get("fax") as string) || undefined,
-    nameOfPractice:      (formData.get("nameOfPractice") as string) || undefined,
-    yearsInPractice:     formData.get("yearsInPractice") ? Number(formData.get("yearsInPractice")) : undefined,
+    city:                (formData.get("city") as string)?.trim(),
+    state:               (formData.get("state") as string)?.trim(),
+    zipCode:             (formData.get("zipCode") as string)?.trim(),
+    phone:               (formData.get("phone") as string)?.trim(),
+    officeContactNumber: (formData.get("officeContactNumber") as string)?.trim(),
+    fax:                 (formData.get("fax") as string)?.trim(),
+    nameOfPractice:      (formData.get("nameOfPractice") as string)?.trim(),
+    yearsInPractice:     formData.get("yearsInPractice") || undefined,
   };
 
   const validated = Schema.safeParse(raw);
   if (!validated.success) {
     return { errors: z.flattenError(validated.error).fieldErrors };
+  }
+
+  const specialtiesRaw = formData.get("fieldsOfSpeciality") as string;
+  const fieldsOfSpeciality: string[] = specialtiesRaw ? JSON.parse(specialtiesRaw) : [];
+
+  if (fieldsOfSpeciality.length === 0) {
+    return { errors: { fieldsOfSpeciality: ["Please select at least one specialty"] } };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -74,12 +75,9 @@ export async function registerPhysician(
     return { errors: { email: ["An account with this email already exists."] } };
   }
 
-  const specialtiesRaw = formData.get("fieldsOfSpeciality") as string;
-  const fieldsOfSpeciality: string[] = specialtiesRaw ? JSON.parse(specialtiesRaw) : [];
-
-  const hashed = await hashPassword(validated.data.password);
-
-  const { confirmPassword, country, ...rest } = validated.data;
+  const { country, ...rest } = validated.data;
+  const placeholder = randomPlaceholderPassword();
+  const hashed      = await hashPassword(placeholder);
 
   await prisma.partneringPhysician.create({
     data: {
@@ -93,5 +91,8 @@ export async function registerPhysician(
     },
   });
 
-  return { success: true, message: "Registration submitted! We will review your application and contact you soon." };
+  return {
+    success: true,
+    message: "Your application has been submitted! We will review it and send you an email with login details once approved.",
+  };
 }

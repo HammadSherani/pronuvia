@@ -1,21 +1,26 @@
 "use client";
 
-import Link        from "next/link";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState }    from "react";
+import { useState } from "react";
+import logo from "@/public/assets/logo.png"
+import whiteLogo from "@/public/assets/logo-white.png"
 
 const NAV = [
-  { label: "Home",                href: "/" },
-  { label: "About",               href: "/about" },
-  { label: "Contact",             href: "/contact" },
-  { label: "Partnering physician", href: "/partnering-physician" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  // { label: "Account",              href: "/account" },
+  { label: "Partnering Physician", href: "/account" },
 ];
 
 export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
-  const pathname   = usePathname();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const isSolid = variant === "solid";
+  const isHome = pathname === "/";
 
   return (
     <header className={isSolid
@@ -25,7 +30,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
       <div className="max-w-7xl mx-auto px-6 flex items-center h-16">
 
         {/* ── Logo (left) ── */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 select-none w-1/3">
+        {/* <Link href="/" className="flex items-center gap-2 shrink-0 select-none w-1/3">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
             <path d="M14 2C8 2 3 7 3 13c0 4 2.5 7.5 6 9.5V24a1 1 0 001 1h8a1 1 0 001-1v-1.5c3.5-2 6-5.5 6-9.5 0-6-5-11-11-11z"
               fill="#3DBFA4" opacity="0.9"/>
@@ -37,19 +42,30 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
           >
             Pronuvia
           </span>
-        </Link>
+        </Link> */}
+        <div className="flex items-center gap-2 shrink-0 select-none w-1/3">
+          <Link href="/">
+            <Image
+              src={isHome ? whiteLogo : logo}
+              alt="Pronuvia Logo"
+              width={150}
+              height={50}
+              className="w-auto h-10"
+            />
+          </Link>
+        </div>
+
 
         {/* ── Desktop nav (center) ── */}
         <nav className="hidden md:flex items-center justify-center gap-8 w-1/3">
           {NAV.map(({ label, href }) => (
             <Link key={href} href={href}
-              className={`text-sm font-medium transition-colors ${
-                pathname === href
+              className={`text-sm font-medium transition-colors ${pathname === href
                   ? "text-[#3DBFA4]"
                   : isSolid
                     ? "text-gray-600 hover:text-[#3DBFA4]"
                     : "text-white/90 hover:text-[#3DBFA4]"
-              }`}>
+                }`}>
               {label}
             </Link>
           ))}
@@ -67,8 +83,8 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
         <button type="button" onClick={() => setOpen(!open)}
           className={`md:hidden ml-auto w-9 h-9 flex items-center justify-center ${isSolid ? "text-gray-700" : "text-white"}`}>
           {open
-            ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           }
         </button>
       </div>
@@ -78,9 +94,8 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
         <div className={`md:hidden px-6 pb-5 space-y-1 ${isSolid ? "bg-white border-b border-gray-100" : "bg-black/80 backdrop-blur-md"}`}>
           {NAV.map(({ label, href }) => (
             <Link key={href} href={href} onClick={() => setOpen(false)}
-              className={`block py-2.5 text-sm font-medium border-b ${
-                isSolid ? "border-gray-100" : "border-white/10"
-              } ${pathname === href ? "text-[#3DBFA4]" : isSolid ? "text-gray-600" : "text-white/90"}`}>
+              className={`block py-2.5 text-sm font-medium border-b ${isSolid ? "border-gray-100" : "border-white/10"
+                } ${pathname === href ? "text-[#3DBFA4]" : isSolid ? "text-gray-600" : "text-white/90"}`}>
               {label}
             </Link>
           ))}

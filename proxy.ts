@@ -54,14 +54,14 @@ export async function proxy(request: NextRequest) {
   const cookie = request.cookies.get("pronuvia_session")?.value;
   const session = cookie ? await decryptEdge(cookie) : null;
 
-  if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // if (!session) {
+  //   return NextResponse.redirect(new URL("/login", request.url));
+  // }
 
   // Role-based route protection
   for (const [role, prefixes] of Object.entries(ROLE_ROUTES)) {
     if (prefixes.some((p) => pathname.startsWith(p))) {
-      if (session.role !== role) {
+      if (!session || session.role !== role) {
         return NextResponse.redirect(new URL("/unauthorized", request.url));
       }
     }
@@ -74,9 +74,9 @@ export async function proxy(request: NextRequest) {
   const { SignJWT } = await import("jose");
   const secret = new TextEncoder().encode(process.env.SESSION_SECRET ?? "");
   const refreshed = await new SignJWT({
-    userId: session.userId,
-    role:   session.role,
-    email:  session.email,
+    userId: session?.userId,
+    role:   session?.role,
+    email:  session?.email,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
