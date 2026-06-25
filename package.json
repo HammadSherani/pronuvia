@@ -23,6 +23,7 @@
     "@tiptap/starter-kit": "^3.27.1",
     "@vercel/blob": "^2.4.1",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
     "jose": "^6.2.3",
     "next": "16.2.9",
     "nodemailer": "^9.0.1",

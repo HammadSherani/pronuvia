@@ -1,8 +1,7 @@
-﻿import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { Role } from "@/generated/prisma/enums";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
 
@@ -23,28 +22,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File exceeds 20 MB limit" }, { status: 400 });
   }
 
-  // On Vercel only /tmp is writable; for local dev we use public/catalogs
-  const isVercel = !!process.env.VERCEL;
-  const dir = isVercel
-    ? path.join("/tmp", "catalogs")
-    : path.join(process.cwd(), "public", "catalogs");
-
-  await mkdir(dir, { recursive: true });
-
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const unique   = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
-  const filePath = path.join(dir, unique);
-
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
-
-  // On Vercel, /tmp files are ephemeral per-function; use the DB record as the source of truth
-  const publicUrl = isVercel ? null : `/catalogs/${unique}`;
+  const url    = await uploadToCloudinary(buffer, "pronuvia/catalogs", "raw");
 
   return NextResponse.json({
-    url:      publicUrl,
+    url,
     fileName: file.name,
     fileSize: file.size,
   });
 }
-
