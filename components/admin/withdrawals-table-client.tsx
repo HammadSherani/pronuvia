@@ -224,14 +224,21 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                 </td>
 
                 {/* Note */}
-                <td className="px-3 py-3">
+                <td className="px-3 py-3 space-y-1">
                   {r.note ? (
-                    <p className="text-[11px] text-gray-500 italic truncate" title={r.note}>"{r.note}"</p>
+                    <p className="text-[11px] text-gray-500 italic line-clamp-2" title={r.note}>"{r.note}"</p>
                   ) : (
                     <span className="text-gray-300 text-xs">—</span>
                   )}
                   {r.adminNote && (
-                    <p className="text-[11px] text-[#3DBFA4] truncate" title={r.adminNote}>↳ {r.adminNote}</p>
+                    <div className="mt-1">
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                        Admin
+                      </span>
+                      <p className="text-[11px] text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                        {r.adminNote}
+                      </p>
+                    </div>
                   )}
                 </td>
 

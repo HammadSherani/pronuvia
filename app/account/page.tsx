@@ -1,6 +1,6 @@
 import { getCurrentSession }       from "@/lib/auth/dal";
 import { prisma }                  from "@/lib/db/prisma";
-import { SiteHeader }              from "@/components/website/site-header";
+import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 import { SiteFooter }              from "@/components/website/site-footer";
 import { PhysicianRegisterForm }   from "@/components/website/physician-register-form";
 import { logout }                  from "@/actions/auth/logout";

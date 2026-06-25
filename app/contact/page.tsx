@@ -1,4 +1,4 @@
-import { SiteHeader } from "@/components/website/site-header";
+import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 import { SiteFooter } from "@/components/website/site-footer";
 import { ContactPageClient } from "@/components/website/contact-page-client";
 

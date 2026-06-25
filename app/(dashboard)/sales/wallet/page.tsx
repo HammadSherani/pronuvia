@@ -139,6 +139,7 @@ export default async function WalletPage() {
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Number</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Source</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
                   <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission Applied</th>
                   <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net Earnings</th>
                   <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -185,6 +186,7 @@ export default async function WalletPage() {
                             </div>
                           )}
                         </td>
+                        <td className="px-5 py-4"><span className="text-gray-300 text-xs">—</span></td>
                         <td className="px-5 py-4 text-right">
                           <span className="inline-flex px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-semibold">
                             {o.salesRepCommissionRate}%
@@ -235,8 +237,11 @@ export default async function WalletPage() {
                           Admin
                         </span>
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="text-xs text-gray-500 italic">{note || "—"}</span>
+                      <td className="px-5 py-4"><span className="text-gray-300 text-xs">—</span></td>
+                      <td className="px-5 py-4 max-w-[180px]">
+                        {note
+                          ? <p className="text-xs text-gray-700 line-clamp-2" title={note}>{note}</p>
+                          : <span className="text-gray-300 text-xs">—</span>}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <span className="text-xs text-gray-300">—</span>
@@ -263,7 +268,7 @@ export default async function WalletPage() {
               {/* Footer */}
               <tfoot>
                 <tr className="border-t-2 border-gray-100 bg-gray-50/60">
-                  <td colSpan={4} className="px-5 py-3.5 text-xs font-bold text-gray-500 text-right">
+                  <td colSpan={5} className="px-5 py-3.5 text-xs font-bold text-gray-500 text-right">
                     Paid to Wallet
                   </td>
                   <td className="px-5 py-3.5 text-right">
@@ -310,8 +315,19 @@ export default async function WalletPage() {
                       <td className="px-5 py-3.5 text-xs text-gray-500 italic max-w-[180px] truncate">
                         {r.note ?? <span className="text-gray-300 not-italic">—</span>}
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-[#5BB8D4] max-w-[200px] truncate">
-                        {r.adminNote ?? <span className="text-gray-300">—</span>}
+                      <td className="px-5 py-3.5 max-w-[220px]">
+                        {r.adminNote ? (
+                          <div>
+                            <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                              Admin
+                            </span>
+                            <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                              {r.adminNote}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${cls}`}>

@@ -130,8 +130,19 @@ export default async function SalesWithdrawalsPage() {
                   <td className="px-5 py-4 text-xs text-gray-500 italic max-w-[200px]">
                     {r.note ?? <span className="text-gray-300 not-italic">—</span>}
                   </td>
-                  <td className="px-5 py-4 text-xs text-[#5BB8D4] max-w-[200px]">
-                    {r.adminNote ?? <span className="text-gray-300">—</span>}
+                  <td className="px-5 py-4 max-w-[220px]">
+                    {r.adminNote ? (
+                      <div>
+                        <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                          Admin
+                        </span>
+                        <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                          {r.adminNote}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-gray-300 text-xs">—</span>
+                    )}
                   </td>
                   <td className="px-5 py-4">
                     <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[r.status] ?? statusStyle.PENDING}`}>

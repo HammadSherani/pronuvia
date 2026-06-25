@@ -15,7 +15,7 @@ const NAV = [
   { label: "Partnering Physician", href: "/account" },
 ];
 
-export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
+export function SiteHeader({ variant = "overlay", dashboardHref }: { variant?: "overlay" | "solid"; dashboardHref?: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -71,12 +71,19 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
           ))}
         </nav>
 
-        {/* ── Login (right) ── */}
+        {/* ── Login / Dashboard (right) ── */}
         <div className="hidden md:flex justify-end w-1/3">
-          <Link href="/login"
-            className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
-            Login
-          </Link>
+          {dashboardHref ? (
+            <Link href={dashboardHref}
+              className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
+              Dashboard
+            </Link>
+          ) : (
+            <Link href="/login"
+              className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
+              Login
+            </Link>
+          )}
         </div>
 
         {/* ── Mobile hamburger ── */}
@@ -99,10 +106,17 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
               {label}
             </Link>
           ))}
-          <Link href="/login" onClick={() => setOpen(false)}
-            className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg">
-            Login
-          </Link>
+          {dashboardHref ? (
+            <Link href={dashboardHref} onClick={() => setOpen(false)}
+              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg">
+              Dashboard
+            </Link>
+          ) : (
+            <Link href="/login" onClick={() => setOpen(false)}
+              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg">
+              Login
+            </Link>
+          )}
         </div>
       )}
     </header>

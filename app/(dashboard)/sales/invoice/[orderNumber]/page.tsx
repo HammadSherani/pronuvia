@@ -43,6 +43,7 @@ export default async function InvoicePage({ params }: Props) {
       id: true, orderNumber: true, createdAt: true,
       paymentMethod: true, paymentStatus: true, transactionId: true,
       subtotal: true, total: true, shippingRate: true,
+      couponCode: true, discountAmount: true,
       shippingCarrier: true, trackingNumber: true,
       shippingAddress: true, estimatedDelivery: true,
       notes: true, items: true,
@@ -236,6 +237,18 @@ export default async function InvoicePage({ params }: Props) {
                     }
                   </span>
                 </div>
+                {order.couponCode && (order.discountAmount ?? 0) > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-600">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      Coupon
+                      <span className="font-mono font-semibold tracking-wide">{order.couponCode}</span>
+                    </span>
+                    <span className="font-semibold">−{fmtMoney(order.discountAmount ?? 0)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Total Paid</span>
                   <span>{fmtMoney(order.total)}</span>

@@ -1,5 +1,5 @@
 import { prisma }        from "@/lib/db/prisma";
-import { SiteHeader }    from "@/components/website/site-header";
+import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 import { HeroCarousel }  from "@/components/website/hero-carousel";
 import { MarqueeStrip }  from "@/components/website/marquee-strip";
 import { AboutSection }        from "@/components/website/about-section";

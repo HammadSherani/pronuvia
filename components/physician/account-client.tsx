@@ -363,7 +363,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           />
         </Field>
 
-        <Field label="SWIFT / IBAN Code">
+        <Field label="SWIFT">
           <input name="swiftCode" defaultValue={p.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
         </Field>
       </div>

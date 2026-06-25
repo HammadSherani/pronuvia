@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link         from "next/link";
 import { prisma }   from "@/lib/db/prisma";
-import { SiteHeader } from "@/components/website/site-header";
+import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

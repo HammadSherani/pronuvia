@@ -40,7 +40,7 @@ function buildSubNav(role: Role): SubNavItem[] {
   // PHYSICIAN
   return [
     { label: "Shop",        href: "/physician/shop" },
-    { label: "Cart",        href: "/physician/cart", isCart: true },
+    // { label: "Cart",        href: "/physician/cart", isCart: true },
     { label: "Orders",      href: "/physician/orders" },
     { label: "Wallet",      href: "/physician/wallet" },
     { label: "Downloads",   href: "/physician/downloads" },
