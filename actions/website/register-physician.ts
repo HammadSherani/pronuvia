@@ -23,7 +23,7 @@ const Schema = z.object({
   officeContactNumber: z.string().min(1, "Office contact person is required"),
   fax:                 z.string().min(1, "Fax is required"),
   nameOfPractice:      z.string().min(1, "Name of practice is required"),
-  yearsInPractice:     z.coerce.number({ invalid_type_error: "Years in practice is required" }).min(0, "Must be 0 or more"),
+  yearsInPractice:     z.coerce.number().min(0, "Must be 0 or more"),
 });
 
 export type RegisterPhysicianState = {
