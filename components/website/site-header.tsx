@@ -11,12 +11,17 @@ const NAV = [
   { label: "Partnering physician", href: "/partnering-physician" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
   const pathname   = usePathname();
   const [open, setOpen] = useState(false);
 
+  const isSolid = variant === "solid";
+
   return (
-    <header className="absolute top-0 inset-x-0 z-50">
+    <header className={isSolid
+      ? "sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm"
+      : "absolute top-0 inset-x-0 z-50"
+    }>
       <div className="max-w-7xl mx-auto px-6 flex items-center h-16">
 
         {/* ── Logo (left) ── */}
@@ -26,7 +31,10 @@ export function SiteHeader() {
               fill="#3DBFA4" opacity="0.9"/>
             <path d="M10 13c1-3 4-5 7-4" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
-          <span className="text-white font-semibold text-xl tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
+          <span
+            className={`font-semibold text-xl tracking-wide ${isSolid ? "text-gray-900" : "text-white"}`}
+            style={{ fontFamily: "Georgia, serif" }}
+          >
             Pronuvia
           </span>
         </Link>
@@ -38,7 +46,9 @@ export function SiteHeader() {
               className={`text-sm font-medium transition-colors ${
                 pathname === href
                   ? "text-[#3DBFA4]"
-                  : "text-white/90 hover:text-[#3DBFA4]"
+                  : isSolid
+                    ? "text-gray-600 hover:text-[#3DBFA4]"
+                    : "text-white/90 hover:text-[#3DBFA4]"
               }`}>
               {label}
             </Link>
@@ -55,7 +65,7 @@ export function SiteHeader() {
 
         {/* ── Mobile hamburger ── */}
         <button type="button" onClick={() => setOpen(!open)}
-          className="md:hidden ml-auto w-9 h-9 flex items-center justify-center text-white">
+          className={`md:hidden ml-auto w-9 h-9 flex items-center justify-center ${isSolid ? "text-gray-700" : "text-white"}`}>
           {open
             ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -65,12 +75,12 @@ export function SiteHeader() {
 
       {/* ── Mobile menu ── */}
       {open && (
-        <div className="md:hidden bg-black/80 backdrop-blur-md px-6 pb-5 space-y-1">
+        <div className={`md:hidden px-6 pb-5 space-y-1 ${isSolid ? "bg-white border-b border-gray-100" : "bg-black/80 backdrop-blur-md"}`}>
           {NAV.map(({ label, href }) => (
             <Link key={href} href={href} onClick={() => setOpen(false)}
-              className={`block py-2.5 text-sm font-medium border-b border-white/10 ${
-                pathname === href ? "text-[#3DBFA4]" : "text-white/90"
-              }`}>
+              className={`block py-2.5 text-sm font-medium border-b ${
+                isSolid ? "border-gray-100" : "border-white/10"
+              } ${pathname === href ? "text-[#3DBFA4]" : isSolid ? "text-gray-600" : "text-white/90"}`}>
               {label}
             </Link>
           ))}
