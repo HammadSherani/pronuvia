@@ -21,34 +21,105 @@ function getFromAddress(): ShipAddress {
   };
 }
 
-async function buildToAddress(orderId: string): Promise<ShipAddress | null> {
+// State name → 2-letter code (for legacy addresses stored without codes)
+const US_STATES: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA",
+  colorado: "CO", connecticut: "CT", delaware: "DE", florida: "FL", georgia: "GA",
+  hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA",
+  kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD",
+  massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS",
+  missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH",
+  "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC",
+  "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA",
+  "rhode island": "RI", "south carolina": "SC", "south dakota": "SD", tennessee: "TN",
+  texas: "TX", utah: "UT", vermont: "VT", virginia: "VA", washington: "WA",
+  "west virginia": "WV", wisconsin: "WI", wyoming: "WY",
+  "district of columbia": "DC",
+};
+
+function toStateCode(s: string): string {
+  const trimmed = s.trim();
+  if (/^[A-Za-z]{2}$/.test(trimmed)) return trimmed.toUpperCase();
+  return US_STATES[trimmed.toLowerCase()] ?? trimmed.toUpperCase().slice(0, 2);
+}
+
+function toCountryCode(s: string): string {
+  const lower = s.trim().toLowerCase();
+  if (/^[a-z]{2}$/i.test(lower)) return lower.toUpperCase();
+  if (lower === "united states" || lower === "usa" || lower === "us") return "US";
+  if (lower === "canada") return "CA";
+  // fallback: first 2 letters (rare for non-US orders)
+  return s.trim().toUpperCase().slice(0, 2) || "US";
+}
+
+function parseAddressString(raw: string): { street: string; city: string; state: string; zip: string; country: string } | null {
+  const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
+
+  // ── City + State + ZIP via regex (most reliable, works even with duplicate data) ──
+  // Matches "Battle Ground, WA 98604" or "Battle Ground, WA, 98604"
+  const csz = raw.match(/([A-Za-z][A-Za-z\s]{2,}?),\s*([A-Za-z]{2})[,\s]+(\d{5}(?:-\d{4})?)/);
+  if (!csz) return null;
+  const city  = csz[1].trim();
+  const state = toStateCode(csz[2]);
+  const zip   = csz[3];
+
+  // ── Street: first line starting with a digit ────────────────────────────────
+  const streetLine = lines.find(l => /^\d/.test(l));
+  if (!streetLine) return null;
+  const street = streetLine.split(",")[0].trim();
+
+  // ── Country: last alphabetic-only line ──────────────────────────────────────
+  const lastLine = lines[lines.length - 1] ?? "";
+  const country = /^[A-Za-z\s]+$/.test(lastLine) ? toCountryCode(lastLine) : "US";
+
+  console.log("[parseAddress] → street:", street, "| city:", city, "| state:", state, "| zip:", zip, "| country:", country);
+
+  if (!street || !city || !zip) return null;
+  return { street, city, state, zip, country };
+}
+
+async function buildToAddress(orderId: string): Promise<[ShipAddress, null] | [null, string]> {
   const order = await prisma.order.findUnique({
     where:  { id: orderId },
     select: {
       shippingAddress: true,
       physician: {
-        select: {
-          firstName: true, lastName: true, phone: true,
-          addressOne: true, city: true, state: true, zipCode: true,
-        },
+        select: { firstName: true, lastName: true, phone: true },
+      },
+      salesRep: {
+        select: { firstName: true, lastName: true, phone: true },
       },
     },
   });
-  if (!order) return null;
 
-  const ph = order.physician;
-  if (!ph) return null;
+  if (!order) return [null, "Order not found."];
 
-  const street = order.shippingAddress ?? ph.addressOne ?? "";
-  return {
-    name:    `Dr. ${ph.firstName} ${ph.lastName}`,
-    street1: street,
-    city:    ph.city    ?? "",
-    state:   ph.state   ?? "",
-    zip:     ph.zipCode ?? "",
-    country: "US",
-    phone:   ph.phone   ?? undefined,
-  };
+  // ── Use order.shippingAddress (set at checkout) as primary source ─────────
+  if (order.shippingAddress) {
+    const parsed = parseAddressString(order.shippingAddress);
+    if (parsed) {
+      const ph  = order.physician;
+      const rep = order.salesRep;
+      const name = ph
+        ? `Dr. ${ph.firstName} ${ph.lastName}`
+        : rep ? `${rep.firstName ?? ""} ${rep.lastName ?? ""}`.trim() : "Recipient";
+      const phone = ph?.phone ?? rep?.phone ?? undefined;
+
+      return [{
+        name,
+        street1: parsed.street,
+        city:    parsed.city,
+        state:   parsed.state,
+        zip:     parsed.zip,
+        country: parsed.country,
+        phone,
+      }, null];
+    }
+
+    return [null, `Could not parse shipping address: "${order.shippingAddress}". Expected format: "123 Main St, City, ST 12345".`];
+  }
+
+  return [null, "No shipping address was saved on this order."];
 }
 
 export async function getOrderShipments(orderId: string) {
@@ -62,13 +133,20 @@ export async function getOrderShipments(orderId: string) {
 export async function getShippingRates(
   orderId:  string,
   pkg:      PackageInfo,
-  carriers: CarrierCode[]
+  carriers: CarrierCode[],
+  overrideAddress?: ShipAddress
 ): Promise<{ rates: RateResult[]; error?: string }> {
   await requireAdmin();
 
   const from = getFromAddress();
-  const to   = await buildToAddress(orderId);
-  if (!to) return { rates: [], error: "Shipping address not found on this order." };
+  let to: ShipAddress;
+  if (overrideAddress) {
+    to = overrideAddress;
+  } else {
+    const [toOrNull, toErr] = await buildToAddress(orderId);
+    if (toErr || !toOrNull) return { rates: [], error: toErr ?? "Address unavailable." };
+    to = toOrNull;
+  }
 
   const tasks: Promise<RateResult[]>[] = [];
 
@@ -103,13 +181,20 @@ export async function purchaseLabel(
   pkg:         PackageInfo,
   carrier:     CarrierCode,
   serviceCode: string,
-  service:     string
+  service:     string,
+  overrideAddress?: ShipAddress
 ): Promise<{ success: boolean; message: string; shipment?: { trackingNumber: string; labelBase64: string; labelFormat: string; cost: number } }> {
   await requireAdmin();
 
   const from = getFromAddress();
-  const to   = await buildToAddress(orderId);
-  if (!to) return { success: false, message: "Shipping address not found." };
+  let to: ShipAddress;
+  if (overrideAddress) {
+    to = overrideAddress;
+  } else {
+    const [toOrNull2, toErr2] = await buildToAddress(orderId);
+    if (toErr2 || !toOrNull2) return { success: false, message: toErr2 ?? "Address unavailable." };
+    to = toOrNull2;
+  }
 
   let result: LabelResult;
 

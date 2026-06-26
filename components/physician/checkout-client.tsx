@@ -21,18 +21,8 @@ import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmPhysicianCardOrder } from "@/actions/physician/confirm-card-order";
 import { validateCoupon }            from "@/actions/checkout/validate-coupon";
-
-type AddressData = {
-  firstName: string; lastName: string;
-  address1:  string; address2:  string;
-  city:      string; state:     string;
-  zip:       string; country:   string;
-};
-
-const EMPTY: AddressData = {
-  firstName: "", lastName: "", address1: "", address2: "",
-  city:      "", state:    "", zip:      "", country:  "United States",
-};
+import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
+import type { AddressData } from "@/components/shared/address-fields";
 
 function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
@@ -42,41 +32,12 @@ function displayAddr(a: AddressData) {
   const name   = `${a.firstName} ${a.lastName}`.trim();
   const street = [a.address1, a.address2].filter(Boolean).join(", ");
   const city   = [a.city, a.state, a.zip].filter(Boolean).join(", ");
-  const line2  = [street, city, a.country].filter(Boolean).join(", ");
+  const line2  = [street, city, a.countryName].filter(Boolean).join(", ");
   return { name, line2 };
 }
 
 function addrToString(a: AddressData): string {
-  return [
-    `${a.firstName} ${a.lastName}`.trim(),
-    a.address1,
-    a.address2,
-    [a.city, a.state, a.zip].filter(Boolean).join(", "),
-    a.country,
-  ].filter(Boolean).join("\n");
-}
-
-const inp = "w-full px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors bg-white placeholder:text-gray-400";
-
-function AddressFields({ value, onChange }: { value: AddressData; onChange: (v: AddressData) => void }) {
-  const set = (k: keyof AddressData) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    onChange({ ...value, [k]: e.target.value });
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <input className={inp} placeholder="First name" value={value.firstName} onChange={set("firstName")} />
-        <input className={inp} placeholder="Last name"  value={value.lastName}  onChange={set("lastName")} />
-      </div>
-      <input className={inp} placeholder="Address" value={value.address1} onChange={set("address1")} />
-      <input className={inp} placeholder="Apartment, suite, etc. (optional)" value={value.address2} onChange={set("address2")} />
-      <div className="grid grid-cols-5 gap-3">
-        <input className={inp + " col-span-2"} placeholder="City"     value={value.city}  onChange={set("city")} />
-        <input className={inp}                  placeholder="State"    value={value.state} onChange={set("state")} />
-        <input className={inp + " col-span-2"} placeholder="ZIP code" value={value.zip}   onChange={set("zip")} />
-      </div>
-      <input className={inp} placeholder="Country" value={value.country} onChange={set("country")} />
-    </div>
-  );
+  return formatAddress(a);
 }
 
 type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
@@ -142,17 +103,18 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 
 type Props = {
   physicianEmail:  string;
-  initialAddress:  Partial<AddressData>;
+  initialAddress:  Partial<AddressData> & { country?: string; state?: string };
 };
 
 export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Props) {
   const { items, clearCart } = useCart();
   const router = useRouter();
 
-  const [shipping,      setShipping]      = useState<AddressData>({ ...EMPTY, ...initialAddress });
-  const [billing,       setBilling]       = useState<AddressData>({ ...EMPTY, ...initialAddress });
+  const migrated = migrateAddressData({ ...EMPTY_ADDRESS, ...initialAddress });
+  const [shipping,      setShipping]      = useState<AddressData>(migrated);
+  const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [editShip,      setEditShip]      = useState(!hasAddr({ ...EMPTY, ...initialAddress }));
+  const [editShip,      setEditShip]      = useState(!hasAddr(migrated));
   const [editBill,      setEditBill]      = useState(false);
 
   const [notes,          setNotes]          = useState("");

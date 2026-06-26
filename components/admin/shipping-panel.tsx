@@ -378,11 +378,11 @@ function AddShipmentForm({
           <div className="space-y-2.5">
             <div className="flex justify-between gap-2">
               <span className="text-gray-500">Ship to</span>
-              <span className="text-gray-800 font-medium text-right">
+              {/* <span className="text-gray-800 font-medium text-right">
                 {physician
                   ? `Dr. ${physician.firstName} ${physician.lastName}${physician.city ? `, ${physician.city}` : ""}${physician.state ? `, ${physician.state}` : ""}`
                   : "No address"}
-              </span>
+              </span> */}
             </div>
             <div className="flex justify-between gap-2">
               <span className="text-gray-500">Items</span>

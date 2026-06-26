@@ -1,6 +1,7 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
 
-const BASE = "https://apis.fedex.com";
+const BASE = process.env.FEDEX_API_URL ?? "https://apis-sandbox.fedex.com";
+console.log("[FedEx] Using API:", BASE);
 
 async function getToken(): Promise<string> {
   const res = await fetch(`${BASE}/oauth/token`, {
@@ -55,6 +56,8 @@ export async function getFedExRates(
     },
   };
 
+  console.log("[FedEx] Rates request body:", JSON.stringify(body, null, 2));
+
   const res = await fetch(`${BASE}/rate/v1/rates/quotes`, {
     method: "POST",
     headers: {
@@ -66,12 +69,13 @@ export async function getFedExRates(
     cache: "no-store",
   });
 
+  const data = await res.json();
+  console.log("[FedEx] Rates response:", JSON.stringify(data, null, 2));
+
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`FedEx rates error: ${err}`);
+    throw new Error(`FedEx rates error: ${JSON.stringify(data)}`);
   }
 
-  const data = await res.json();
   const rateDetails = data?.output?.rateReplyDetails ?? [];
 
   const SERVICE_NAMES: Record<string, string> = {
@@ -120,6 +124,14 @@ export async function purchaseFedExLabel(
       serviceType:     serviceCode,
       packagingType:   "YOUR_PACKAGING",
       pickupType:      "DROPOFF_AT_FEDEX_LOCATION",
+      shippingChargesPayment: {
+        paymentType: "SENDER",
+        payor: {
+          responsibleParty: {
+            accountNumber: { value: process.env.FEDEX_ACCOUNT_NUMBER ?? "" },
+          },
+        },
+      },
       labelSpecification: {
         labelFormatType: "COMMON2D",
         imageType:       "PNG",
@@ -148,12 +160,16 @@ export async function purchaseFedExLabel(
     cache: "no-store",
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`FedEx label error: ${err}`);
-  }
-
   const data = await res.json();
+  console.log("[FedEx] Label response status:", res.status);
+  console.log("[FedEx] Label response:", JSON.stringify({
+    errors: (data as Record<string,unknown>).errors,
+    output: (data as Record<string,unknown>).output ? "present" : "missing",
+  }));
+
+  if (!res.ok) {
+    throw new Error(`FedEx label error: ${JSON.stringify(data)}`);
+  }
   const shipment   = data?.output?.transactionShipments?.[0];
   const piece      = shipment?.pieceResponses?.[0];
   const doc        = piece?.packageDocuments?.[0];

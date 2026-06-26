@@ -24,6 +24,7 @@
     "@vercel/blob": "^2.4.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
+    "country-state-city": "^3.2.1",
     "jose": "^6.2.3",
     "next": "16.2.9",
     "nodemailer": "^9.0.1",

@@ -4,16 +4,8 @@ import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 
-export type AddressData = {
-  firstName: string;
-  lastName:  string;
-  address1:  string;
-  address2:  string;
-  city:      string;
-  state:     string;
-  zip:       string;
-  country:   string;
-};
+export type { AddressData } from "@/components/shared/address-fields";
+import type { AddressData } from "@/components/shared/address-fields";
 
 export async function saveCheckoutAddress(data: {
   shipping: AddressData;
