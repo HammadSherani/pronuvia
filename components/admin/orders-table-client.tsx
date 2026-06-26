@@ -121,7 +121,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                   {o.salesRep ? (
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#3DBFA4]" />
-                      {o.salesRep.name}
+                      Sales Rep
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">

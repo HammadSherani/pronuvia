@@ -231,15 +231,68 @@ export async function purchaseLabel(
     },
   });
 
+  // Get current order to check status and items before updating
+  const currentOrder = await prisma.order.findUnique({
+    where:  { id: orderId },
+    select: { status: true, items: true },
+  });
+
   // Update order with latest tracking info
   await prisma.order.update({
     where: { id: orderId },
     data: {
       trackingNumber:  result.trackingNumber,
       shippingCarrier: `${result.carrierLabel} - ${result.service}`,
+      shippingRate:    result.cost,
       status:          "SHIPPED",
     },
   });
+
+  // Decrease inventory only on FIRST shipment (when order wasn't already SHIPPED)
+  if (currentOrder && currentOrder.status !== "SHIPPED") {
+    type RawItem = { productId?: string; sku?: string; quantity?: number };
+    const orderItems = currentOrder.items as RawItem[];
+
+    await Promise.all(
+      orderItems
+        .filter(it => it.productId && it.quantity)
+        .map(async it => {
+          try {
+            const product = await prisma.product.findUnique({ where: { id: it.productId! } });
+            if (!product) return;
+
+            type Variant = { sku?: string; stock?: number; [key: string]: unknown };
+            const variants = (product.variants ?? []) as Variant[];
+
+            // Find variant by SKU match
+            const variantIdx = variants.findIndex(v => v.sku && it.sku && v.sku === it.sku);
+
+            if (variantIdx !== -1) {
+              // Decrement variant stock
+              variants[variantIdx] = {
+                ...variants[variantIdx],
+                stock: Math.max(0, (variants[variantIdx].stock ?? 0) - it.quantity!),
+              };
+              const newTotal = variants.reduce((s, v) => s + (v.stock ?? 0), 0);
+              await prisma.product.update({
+                where: { id: it.productId! },
+                data:  { variants: variants as object[], quantity: newTotal },
+              });
+              console.log(`[Inventory] Variant ${it.sku} stock: ${variants[variantIdx].stock}`);
+            } else {
+              // No variant match — just decrement top-level quantity
+              await prisma.product.update({
+                where: { id: it.productId! },
+                data:  { quantity: { decrement: it.quantity! } },
+              });
+            }
+          } catch (e) {
+            console.error(`[Inventory] Failed for product ${it.productId}:`, (e as Error).message);
+          }
+        })
+    );
+    console.log(`[Inventory] Stock updated for ${orderItems.length} item(s) on order ${orderId}`);
+  }
 
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/admin/orders");

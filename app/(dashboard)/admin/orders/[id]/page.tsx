@@ -88,7 +88,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             Order History
           </Link>
           <div className="flex items-center gap-2">
-            <PrintButton />
+            {/* <PrintButton /> */}
           </div>
         </div>
 

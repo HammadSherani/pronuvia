@@ -20,6 +20,7 @@ import {
 import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmPhysicianCardOrder } from "@/actions/physician/confirm-card-order";
+import { savePhysicianAddress }      from "@/actions/physician/save-address";
 import { validateCoupon }            from "@/actions/checkout/validate-coupon";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
@@ -116,6 +117,26 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [editShip,      setEditShip]      = useState(!hasAddr(migrated));
   const [editBill,      setEditBill]      = useState(false);
+  const [savingAddr,    setSavingAddr]    = useState(false);
+
+  const handleSaveForLater = async () => {
+    setSavingAddr(true);
+    const res = await savePhysicianAddress({
+      address1: shipping.address1,
+      address2: shipping.address2,
+      city:     shipping.city,
+      state:    shipping.state,
+      zip:      shipping.zip,
+      country:  shipping.country,
+    });
+    setSavingAddr(false);
+    if (res.success) {
+      toast.success("Address saved for later.");
+      setEditShip(false);
+    } else {
+      toast.error(res.message ?? "Failed to save address.");
+    }
+  };
 
   const [notes,          setNotes]          = useState("");
   const [showNotes,      setShowNotes]      = useState(false);
@@ -232,14 +253,18 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             {editShip ? (
               <div className="border border-gray-300 rounded p-4 space-y-4">
                 <AddressFields value={shipping} onChange={setShipping} />
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => setEditShip(false)}
                     className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors">
-                    Save
+                    Use this address
+                  </button>
+                  <button type="button" onClick={handleSaveForLater} disabled={savingAddr}
+                    className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700">
+                    {savingAddr ? "Saving…" : "Save for later"}
                   </button>
                   {hasAddr(shipping) && (
                     <button type="button" onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded hover:border-gray-300 transition-colors">
+                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
                       Cancel
                     </button>
                   )}

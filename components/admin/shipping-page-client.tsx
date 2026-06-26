@@ -93,6 +93,136 @@ const CARRIER_PACKAGES: { group: string; carrier: CarrierCode; packages: Carrier
 
 function fmt(n: number) { return n.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
 
+function generatePackingSlip(params: {
+  orderNumber:    string;
+  trackingNumber: string;
+  carrier:        string;
+  service:        string;
+  shipDate:       string;
+  shipFrom:       Props["shipFrom"];
+  shipTo:         Props["shipTo"];
+  items:          OrderItem[];
+  subtotal:       number;
+  shippingCost:   number;
+}) {
+  const { orderNumber, trackingNumber, carrier, service, shipDate, shipFrom, shipTo, items, subtotal, shippingCost } = params;
+  const total = subtotal + shippingCost;
+  const fmt = (n: number) => `$${n.toFixed(2)}`;
+
+  // Parse shipTo address lines (skip name line)
+  const addrLines = (shipTo.address ?? "").split("\n").map(l => l.trim()).filter(Boolean);
+  const firstIsName = shipTo.name && addrLines[0]?.toLowerCase() === shipTo.name?.toLowerCase();
+  const displayAddr = firstIsName ? addrLines.slice(1) : addrLines;
+
+  const itemRows = items.map(it => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0">${it.title ?? "—"}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;color:#666">${it.variantSize ?? "—"} ${it.sku ? `· ${it.sku}` : ""}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:center">${it.quantity}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:right">${fmt(it.unitPrice ?? 0)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600">${fmt(it.lineTotal ?? 0)}</td>
+    </tr>`).join("");
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Packing Slip – ${orderNumber}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; padding: 32px; }
+    @media print { body { padding: 16px; } .no-print { display: none; } }
+    h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .badge { display: inline-block; background: #3DBFA4; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+    .box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; }
+    .box h3 { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .box p { font-size: 13px; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #f9fafb; }
+    thead th { padding: 9px 10px; text-align: left; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
+    thead th:last-child, thead th:nth-child(3) { text-align: right; }
+    thead th:nth-child(3) { text-align: center; }
+    .totals { margin-top: 16px; display: flex; justify-content: flex-end; }
+    .totals table { width: 220px; }
+    .totals td { padding: 5px 0; font-size: 13px; }
+    .totals td:last-child { text-align: right; font-weight: 600; }
+    .total-row td { font-size: 15px; font-weight: 800; border-top: 2px solid #1a1a1a; padding-top: 8px; }
+    .tracking-box { margin-top: 24px; border: 1.5px dashed #3DBFA4; border-radius: 8px; padding: 14px 16px; display: flex; gap: 32px; align-items: center; }
+    .tracking-box .label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
+    .tracking-box .value { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 2px; }
+    .print-btn { margin-top: 24px; display: inline-flex; align-items: center; gap: 8px; background: #1a1a1a; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <h1>Pronuvia <span class="badge">Packing Slip</span></h1>
+      <p style="margin-top:6px;color:#6b7280">Order #${orderNumber} &nbsp;·&nbsp; ${new Date(shipDate).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</p>
+    </div>
+    <button class="print-btn no-print" onclick="window.print()">&#128438; Print / Save PDF</button>
+  </div>
+
+  <hr/>
+
+  <div class="grid2">
+    <div class="box">
+      <h3>Ship From</h3>
+      <p><strong>${shipFrom.name}</strong></p>
+      <p>${shipFrom.street}</p>
+      <p>${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}</p>
+      <p>${shipFrom.country}</p>
+    </div>
+    <div class="box">
+      <h3>Ship To</h3>
+      ${shipTo.name ? `<p><strong>${shipTo.name}</strong></p>` : ""}
+      ${displayAddr.map(l => `<p>${l}</p>`).join("")}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Variation / SKU</th>
+        <th style="text-align:center">Qty</th>
+        <th style="text-align:right">Unit Price</th>
+        <th style="text-align:right">Total</th>
+      </tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+
+  <div class="totals">
+    <table>
+      <tr><td>Subtotal</td><td>${fmt(subtotal)}</td></tr>
+      <tr><td>Shipping</td><td>${shippingCost > 0 ? fmt(shippingCost) : "Free"}</td></tr>
+      <tr class="total-row"><td>Total</td><td>${fmt(total)}</td></tr>
+    </table>
+  </div>
+
+  <div class="tracking-box">
+    <div>
+      <div class="label">Tracking Number</div>
+      <div class="value">${trackingNumber}</div>
+    </div>
+    <div>
+      <div class="label">Carrier & Service</div>
+      <div class="value">${carrier} – ${service}</div>
+    </div>
+  </div>
+
+  <p style="margin-top:24px;font-size:11px;color:#9ca3af;text-align:center">Thank you for your order — Pronuvia</p>
+</body>
+</html>`;
+
+  const win = window.open("", "_blank", "width=800,height=900");
+  if (!win) return;
+  win.document.write(html);
+  win.document.close();
+}
+
 function toLbs(val: number, unit: WeightUnit): number {
   if (unit === "kg")  return val * 2.20462;
   if (unit === "oz")  return val * 0.0625;
@@ -126,7 +256,11 @@ function CarrierBadge({ carrier }: { carrier: string }) {
 
 // ── Shipment detail view ──────────────────────────────────────────────────────
 
-function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
+function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumber }: {
+  s: Shipment; index: number;
+  shipFrom: Props["shipFrom"]; shipTo: Props["shipTo"];
+  items: OrderItem[]; subtotal: number; orderNumber: string;
+}) {
   const [showLabel, setShowLabel] = useState(false);
   return (
     <div className="space-y-4">
@@ -188,6 +322,22 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors">
               {showLabel ? "Hide" : "View"} Label
             </button>
+            <button type="button"
+              onClick={() => generatePackingSlip({
+                orderNumber,
+                trackingNumber: s.trackingNumber,
+                carrier:   s.carrierLabel,
+                service:   s.service,
+                shipDate:  s.shipDate.toString(),
+                shipFrom, shipTo, items, subtotal,
+                shippingCost: s.cost,
+              })}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Packing Slip
+            </button>
           </div>
           {showLabel && s.labelFormat === "PNG" && (
             <div className="border border-gray-200 rounded-xl overflow-hidden max-w-xs">
@@ -210,8 +360,8 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
 
 type PkgTab = "custom" | "carrier" | "saved";
 
-function AddShipmentForm({ orderId, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier }: {
-  orderId: string; items: OrderItem[]; orderValue: number; subtotal: number;
+function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier }: {
+  orderId: string; orderNumber: string; items: OrderItem[]; orderValue: number; subtotal: number;
   shippingRate: number; shippingCarrier: string | null;
   shipTo: Props["shipTo"]; shipFrom: Props["shipFrom"];
 }) {
@@ -389,10 +539,10 @@ function AddShipmentForm({ orderId, items, shipTo, shipFrom, orderValue, subtota
                 <img src={`data:image/png;base64,${purchased.labelBase64}`} alt="Label" className="w-full" />
               </div>
             )}
-            <div className="flex gap-3 justify-center">
+            <div className="flex gap-2 justify-center flex-wrap">
               <button
                 onClick={() => printLabel(purchased.labelBase64!, purchased.labelFormat)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z" />
@@ -401,7 +551,7 @@ function AddShipmentForm({ orderId, items, shipTo, shipFrom, orderValue, subtota
               </button>
               {purchased.labelFormat === "PDF" ? (
                 <a href={`data:application/pdf;base64,${purchased.labelBase64}`} download={`label-${purchased.trackingNumber}.pdf`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
@@ -409,13 +559,33 @@ function AddShipmentForm({ orderId, items, shipTo, shipFrom, orderValue, subtota
                 </a>
               ) : (
                 <a href={`data:image/png;base64,${purchased.labelBase64}`} download={`label-${purchased.trackingNumber}.png`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download PNG
                 </a>
               )}
+              <button
+                onClick={() => generatePackingSlip({
+                  orderNumber,
+                  trackingNumber: purchased.trackingNumber,
+                  carrier:   purchased.labelFormat === "PNG" ? "FedEx" : "Carrier",
+                  service:   selectedRate?.service ?? "",
+                  shipDate:  new Date().toISOString(),
+                  shipFrom,
+                  shipTo,
+                  items,
+                  subtotal,
+                  shippingCost: purchased.cost,
+                })}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Packing Slip
+              </button>
             </div>
           </>
         )}
@@ -871,9 +1041,10 @@ export function ShippingPageClient(props: Props) {
 
         <div className="p-6">
           {typeof activeTab === "number" && props.shipments[activeTab]
-            ?   <ShipmentDetail s={props.shipments[activeTab]} index={activeTab} />
+            ?   <ShipmentDetail s={props.shipments[activeTab]} index={activeTab} shipFrom={props.shipFrom} shipTo={props.shipTo} items={props.items} subtotal={props.subtotal} orderNumber={props.orderNumber} />
             : <AddShipmentForm
                 orderId={props.orderId}
+                orderNumber={props.orderNumber}
                 items={props.items}
                 shipTo={props.shipTo}
                 shipFrom={props.shipFrom}

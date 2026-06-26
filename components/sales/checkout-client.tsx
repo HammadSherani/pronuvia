@@ -195,14 +195,17 @@ export function CheckoutClient({
   })));
   const shipStr = addrToString(shipping);
 
-  // save address + re-fetch rates
-  const handleSaveAddress = async () => {
+  const handleUseAddress = () => {
+    setEditShip(false);
+  };
+
+  const handleSaveForLater = async () => {
     setSavingAddr(true);
     const billingToSave = sameAsBilling ? shipping : billing;
     const res = await saveCheckoutAddress({ shipping, billing: billingToSave });
     setSavingAddr(false);
     if (res.success) {
-      toast.success("Address saved.");
+      toast.success("Address saved for later.");
       setEditShip(false);
     } else {
       toast.error(res.message ?? "Failed to save address.");
@@ -337,18 +340,24 @@ export function CheckoutClient({
             {editShip ? (
               <div className="border border-gray-300 rounded p-4 space-y-4">
                 <AddressFields value={shipping} onChange={setShipping} />
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={handleSaveAddress}
-                    disabled={savingAddr}
-                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] disabled:opacity-50 transition-colors"
+                    onClick={handleUseAddress}
+                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors"
                   >
-                    {savingAddr ? "Saving…" : "Save"}
+                    Use this address
+                  </button>
+                  <button
+                    onClick={handleSaveForLater}
+                    disabled={savingAddr}
+                    className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700"
+                  >
+                    {savingAddr ? "Saving…" : "Save for later"}
                   </button>
                   {hasAddr(shipping) && (
                     <button
                       onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded hover:border-gray-300 transition-colors"
+                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                     >
                       Cancel
                     </button>
