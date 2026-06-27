@@ -20,6 +20,20 @@ function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
+type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+function fmtAddress(raw: string | null | undefined): string {
+  if (!raw) return "";
+  try {
+    const a: AddrObj = JSON.parse(raw);
+    return [
+      [a.firstName, a.lastName].filter(Boolean).join(" "),
+      a.address1, a.address2,
+      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.country,
+    ].filter(Boolean).join("\n");
+  } catch { return raw; }
+}
+
 function fmtDate(d: Date | string | null) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", {
@@ -130,7 +144,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
                 {order.billingAddress ? (
-                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{order.billingAddress}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{fmtAddress(order.billingAddress)}</p>
                 ) : order.physician ? (
                   <div className="text-sm text-gray-700 space-y-0.5">
                     <p className="font-semibold">{order.physician.firstName} {order.physician.lastName}</p>
@@ -142,7 +156,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ship To</p>
                 {order.shippingAddress ? (
-                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{order.shippingAddress}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{fmtAddress(order.shippingAddress)}</p>
                 ) : (
                   <p className="text-sm text-gray-400">No shipping address provided.</p>
                 )}

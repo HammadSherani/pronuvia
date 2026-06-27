@@ -12,7 +12,7 @@ const Schema = z.object({
   lastName:            z.string().min(1, "Last name is required"),
   aictherapy:          z.string().min(1, "This field is required"),
   license:             z.string().min(1, "Doctor's license number is required"),
-  websiteLink:         z.string().url("Enter a valid URL (https://...)"),
+  websiteLink:         z.string().optional(),
   country:             z.string().min(1, "Country is required"),
   addressOne:          z.string().min(1, "Address is required"),
   addressTwo:          z.string().optional(),
@@ -21,15 +21,16 @@ const Schema = z.object({
   zipCode:             z.string().min(1, "Zip code is required"),
   phone:               z.string().min(1, "Phone is required"),
   officeContactNumber: z.string().min(1, "Office contact person is required"),
-  fax:                 z.string().min(1, "Fax is required"),
+  fax:                 z.string().optional(),
   nameOfPractice:      z.string().min(1, "Name of practice is required"),
   yearsInPractice:     z.coerce.number().min(0, "Must be 0 or more"),
 });
 
 export type RegisterPhysicianState = {
-  errors?: Record<string, string[]>;
+  errors?:  Record<string, string[]>;
   message?: string;
   success?: boolean;
+  values?:  Record<string, string>;
 } | undefined;
 
 export async function registerPhysician(
@@ -56,23 +57,27 @@ export async function registerPhysician(
     yearsInPractice:     formData.get("yearsInPractice") || undefined,
   };
 
+  const strValues: Record<string, string> = Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+  );
+
   const validated = Schema.safeParse(raw);
   if (!validated.success) {
-    return { errors: z.flattenError(validated.error).fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
   }
 
   const specialtiesRaw = formData.get("fieldsOfSpeciality") as string;
   const fieldsOfSpeciality: string[] = specialtiesRaw ? JSON.parse(specialtiesRaw) : [];
 
   if (fieldsOfSpeciality.length === 0) {
-    return { errors: { fieldsOfSpeciality: ["Please select at least one specialty"] } };
+    return { errors: { fieldsOfSpeciality: ["Please select at least one specialty"] }, values: strValues };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
     where: { email: validated.data.email },
   });
   if (exists) {
-    return { errors: { email: ["An account with this email already exists."] } };
+    return { errors: { email: ["An account with this email already exists."] }, values: strValues };
   }
 
   const { country, ...rest } = validated.data;

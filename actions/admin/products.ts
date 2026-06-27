@@ -204,18 +204,24 @@ export async function deleteProduct(id: string): Promise<ProductActionState> {
   return { success: true };
 }
 
-export async function getProducts() {
+export async function getProducts(opts?: { skip?: number; take?: number }) {
   await requireAdmin();
-  return prisma.product.findMany({
-    select: {
-      id: true, title: true, image: true, salePrice: true,
-      quantity: true, sku: true, status: true,
-      category: { select: { name: true } },
-      subCategory: { select: { name: true } },
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      select: {
+        id: true, title: true, image: true, salePrice: true,
+        quantity: true, sku: true, status: true,
+        category: { select: { name: true } },
+        subCategory: { select: { name: true } },
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
+    }),
+    prisma.product.count(),
+  ]);
+  return { products, total };
 }
 
 export async function getProductById(id: string) {

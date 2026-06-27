@@ -14,7 +14,7 @@ export default async function DashboardLayout({
   if (!session) redirect("/login");
 
   return (
-    <CartProviderWrapper>
+    <CartProviderWrapper userId={session.userId}>
       <div className="min-h-screen flex flex-col bg-[#f9fafb]">
         <ToastProvider />
         <MainHeader role={session.role} />

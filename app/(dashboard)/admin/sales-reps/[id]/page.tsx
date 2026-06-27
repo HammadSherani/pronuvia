@@ -15,6 +15,36 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
+type AddressObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; stateName?: string; zip?: string; country?: string };
+
+function AddressDisplay({ label, raw }: { label: string; raw?: string | null }) {
+  let addr: AddressObj | null = null;
+  if (raw) {
+    try { addr = JSON.parse(raw); } catch { /* raw string, show as-is */ }
+  }
+
+  return (
+    <div>
+      <dt className="text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">{label}</dt>
+      <dd className="text-sm text-gray-700 leading-relaxed">
+        {!addr ? (
+          raw ? <span>{raw}</span> : <span className="text-gray-300">—</span>
+        ) : (
+          <span className="whitespace-pre-line">
+            {[
+              [addr.firstName, addr.lastName].filter(Boolean).join(" "),
+              addr.address1,
+              addr.address2,
+              [addr.city, addr.state, addr.zip].filter(Boolean).join(", "),
+              addr.country,
+            ].filter(Boolean).join("\n")}
+          </span>
+        )}
+      </dd>
+    </div>
+  );
+}
+
 function Card({ title, children, wide }: { title: string; children: React.ReactNode; wide?: boolean }) {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
@@ -84,12 +114,12 @@ export default async function SalesRepViewPage({ params }: Props) {
         <InfoRow label="Member Since" value={new Date(rep.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
       </Card>
 
-      <Card title="Logistics">
+      <Card title="Addresses">
         <div className="col-span-2">
-          <InfoRow label="Billing Address" value={rep.billingAddress} />
+          <AddressDisplay label="Billing Address" raw={rep.billingAddress} />
         </div>
         <div className="col-span-2">
-          <InfoRow label="Shipping Address" value={rep.shippingAddress} />
+          <AddressDisplay label="Shipping Address" raw={rep.shippingAddress} />
         </div>
       </Card>
 

@@ -35,9 +35,8 @@ const CONTACT_LINKS = [
 ];
 
 const BOTTOM_LINKS = [
-  { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms of use",   href: "/terms" },
-  { label: "Accessibility",  href: "/accessibility" },
+  { label: "Terms of use",  href: "/terms" },
+  { label: "Accessibility", href: "/accessibility" },
 ];
 
 export function SiteFooter() {

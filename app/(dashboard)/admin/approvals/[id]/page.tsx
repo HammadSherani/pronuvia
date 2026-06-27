@@ -80,6 +80,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
           id={p.id}
           name={fullName}
           salesRepNote={p.salesRepNote ?? null}
+          salesRep={p.salesRep ?? null}
         />
       </div>
 
@@ -187,6 +188,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
           id={p.id}
           name={fullName}
           salesRepNote={p.salesRepNote ?? null}
+          salesRep={p.salesRep ?? null}
         />
       </div>
     </div>

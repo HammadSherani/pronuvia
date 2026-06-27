@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import toast from "react-hot-toast";
 import { adjustWallet } from "@/actions/admin/wallet-adjustment";
+import { ClientPagination } from "@/components/shared/pagination";
 
 type UserType = "REP" | "DR";
 
@@ -36,15 +37,25 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
   const [amount,    setAmount]    = useState("");
   const [note,      setNote]      = useState("");
   const [isPending, startTransition] = useTransition();
+  const [page,      setPage]      = useState(1);
+  const [pageSize,  setPageSize]  = useState(10);
 
-  const filtered = allPersons.filter((p) => {
+  const filtered = useMemo(() => {
+    if (!search.trim()) return allPersons;
     const q = search.toLowerCase();
-    return (
+    return allPersons.filter((p) =>
       p.firstName.toLowerCase().includes(q) ||
       p.lastName.toLowerCase().includes(q)  ||
       p.email.toLowerCase().includes(q)
     );
-  });
+  }, [search, allPersons]);
+
+  useEffect(() => { setPage(1); }, [filtered]);
+
+  const pagedPersons = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageSize]);
 
   const open  = (p: Person) => { setSelected(p); setAdjType("CREDIT"); setAmount(""); setNote(""); };
   const close = () => setSelected(null);
@@ -87,6 +98,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">No users found.</div>
         ) : (
+          <>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -98,7 +110,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map((person) => (
+              {pagedPersons.map((person) => (
                 <tr key={`${person.userType}-${person.id}`} className="hover:bg-gray-50/50 transition-colors">
 
                   {/* Type */}
@@ -154,6 +166,14 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
               ))}
             </tbody>
           </table>
+          <ClientPagination
+            total={filtered.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
+          </>
         )}
       </div>
 

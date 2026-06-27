@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import toast                       from "react-hot-toast";
+import { ClientPagination } from "@/components/shared/pagination";
 import {
   createCoupon,
   updateCoupon,
@@ -229,6 +230,13 @@ export function CouponsClient({ coupons: initial }: Props) {
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);
   const [deleting, setDeleting]   = useState<string | null>(null);
   const [isPending, start]         = useTransition();
+  const [page,     setPage]        = useState(1);
+  const [pageSize, setPageSize]    = useState(10);
+
+  const pagedCoupons = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return coupons.slice(start, start + pageSize);
+  }, [coupons, page, pageSize]);
 
   const handleToggle = (id: string, current: boolean) => {
     start(async () => {
@@ -299,7 +307,7 @@ export function CouponsClient({ coupons: initial }: Props) {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Coupons</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""} total</p>
           </div>
           <button
             type="button"
@@ -337,7 +345,7 @@ export function CouponsClient({ coupons: initial }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {coupons.map((c) => {
+                {pagedCoupons.map((c) => {
                   const isExpired = c.expiresAt && new Date(c.expiresAt) < new Date();
                   const isExhausted = c.maxUses !== null && c.usedCount >= c.maxUses;
                   const effectivelyInactive = !c.isActive || isExpired || isExhausted;
@@ -444,6 +452,13 @@ export function CouponsClient({ coupons: initial }: Props) {
                 })}
               </tbody>
             </table>
+            <ClientPagination
+              total={coupons.length}
+              page={page}
+              pageSize={pageSize}
+              onPage={setPage}
+              onPageSize={setPageSize}
+            />
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -97,12 +97,18 @@ export async function deleteCategory(id: string): Promise<CategoryActionState> {
   return { success: true };
 }
 
-export async function getCategories() {
+export async function getCategories(opts?: { skip?: number; take?: number }) {
   await requireAdmin();
-  return prisma.category.findMany({
-    include: { _count: { select: { subCategories: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [categories, total] = await Promise.all([
+    prisma.category.findMany({
+      include: { _count: { select: { subCategories: true } } },
+      orderBy: { createdAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
+    }),
+    prisma.category.count(),
+  ]);
+  return { categories, total };
 }
 
 export async function getCategoryById(id: string) {

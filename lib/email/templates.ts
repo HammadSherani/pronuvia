@@ -267,3 +267,198 @@ export function salesRepPhysicianAssignedEmail(opts: {
 
   return { subject, html };
 }
+
+// ─────────────────────────────────────────────
+// Order email templates (admin → physician)
+// ─────────────────────────────────────────────
+type OrderItem = {
+  title: string; variantSize?: string;
+  quantity: number; unitPrice: number; lineTotal: number;
+};
+
+function orderItemsTable(items: OrderItem[]) {
+  const rows = items.map((i) => `
+    <tr>
+      <td style="padding:10px 0;font-size:13px;color:#111827;border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` <span style="color:#6b7280;">(${i.variantSize})</span>` : ""}
+      </td>
+      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.unitPrice.toFixed(2)}</td>
+      <td style="padding:10px 0;font-size:13px;font-weight:600;color:#111827;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <thead><tr>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Product</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:center;">Qty</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Unit</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Total</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+export type OrderEmailData = {
+  orderNumber:       string;
+  firstName:         string;
+  total:             number;
+  status:            string;
+  items:             OrderItem[];
+  trackingNumber?:   string | null;
+  shippingCarrier?:  string | null;
+  estimatedDelivery?: Date | null;
+};
+
+export function orderConfirmationEmail(d: OrderEmailData) {
+  return {
+    subject: `Order Confirmed: ${d.orderNumber}`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Confirmed!</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${d.firstName}, thank you for your order. We've received it and will start processing shortly.
+      </p>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Order #${d.orderNumber} · Total: $${d.total.toFixed(2)}</p>
+      </div>
+      ${orderItemsTable(d.items)}
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      </div>`),
+  };
+}
+
+export function orderProcessingEmail(d: OrderEmailData) {
+  return {
+    subject: `Your order ${d.orderNumber} is being processed`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order In Progress</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> is being processed and prepared for shipment.
+      </p>
+      ${orderItemsTable(d.items)}
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:13px;color:#1d4ed8;font-weight:600;">We'll notify you once your order ships.</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
+      </div>`),
+  };
+}
+
+export function orderCompletedEmail(d: OrderEmailData) {
+  return {
+    subject: `Order ${d.orderNumber} Completed — Thank You!`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Completed!</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
+      </p>
+      ${orderItemsTable(d.items)}
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Total paid: $${d.total.toFixed(2)}</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order History</a>
+      </div>`),
+  };
+}
+
+export function orderCancelledEmail(d: OrderEmailData) {
+  return {
+    subject: `Order ${d.orderNumber} Cancelled`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Cancelled</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been cancelled.
+        If you believe this is an error, please contact your administrator.
+      </p>
+      ${orderItemsTable(d.items)}
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:13px;color:#dc2626;font-weight:600;">For questions, please contact support.</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      </div>`),
+  };
+}
+
+export function orderDetailsEmail(d: OrderEmailData) {
+  return {
+    subject: `Order Details: ${d.orderNumber}`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Details</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${d.firstName}, here are the details for your order <strong>${d.orderNumber}</strong>.
+      </p>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:4px 0;font-size:13px;color:#6b7280;width:140px;">Order</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.orderNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Status</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.status.charAt(0) + d.status.slice(1).toLowerCase()}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Total</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">$${d.total.toFixed(2)}</td>
+          </tr>
+          ${d.trackingNumber ? `
+          <tr>
+            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Tracking</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.shippingCarrier ?? ""} ${d.trackingNumber}</td>
+          </tr>` : ""}
+          ${d.estimatedDelivery ? `
+          <tr>
+            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Est. Delivery</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${new Date(d.estimatedDelivery).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}</td>
+          </tr>` : ""}
+        </table>
+      </div>
+      ${orderItemsTable(d.items)}
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      </div>`),
+  };
+}
+
+export function forgotPasswordEmail(opts: { firstName: string; resetLink: string }) {
+  return {
+    subject: "Reset Your Pronuvia Password",
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Reset your password</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi ${opts.firstName}, we received a request to reset your Pronuvia password. Click the button below to choose a new one.
+      </p>
+      <div style="text-align:center;margin-bottom:28px;">
+        <a href="${opts.resetLink}" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:13px 36px;border-radius:8px;">Reset Password</a>
+      </div>
+      <p style="margin:0 0 8px;font-size:13px;color:#6b7280;text-align:center;">
+        This link will expire in <strong>1 hour</strong>.
+      </p>
+      <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+        If you didn&apos;t request a password reset, you can safely ignore this email.
+      </p>`),
+  };
+}
+
+export function orderNoteEmail(opts: { firstName: string; orderNumber: string; note: string }) {
+  return {
+    subject: `Message regarding your order ${opts.orderNumber}`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">A note about your order</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+        Hi Dr. ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong>${opts.orderNumber}</strong>.
+      </p>
+      <div style="background:#f9fafb;border-left:4px solid #3DBFA4;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
+        <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      </div>
+      <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
+        If you have questions, please contact your administrator.
+      </p>`),
+  };
+}

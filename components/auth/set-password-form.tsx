@@ -92,7 +92,7 @@ export function SetPasswordForm({ action }: Props) {
         className="w-full py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2"
       >
         {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-        {pending ? "Setting password…" : "Set Password & Activate Account"}
+        {pending ? "Saving…" : "Save New Password"}
       </button>
     </form>
   );

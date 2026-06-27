@@ -12,9 +12,10 @@ import { sendMail } from "@/lib/email/mailer";
 import { passwordSetupEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 
 export type PhysicianActionState = {
-  errors?: Record<string, string[]>;
+  errors?:  Record<string, string[]>;
   message?: string;
   success?: boolean;
+  values?:  Record<string, string>;
 } | undefined;
 
 export async function adminCreatePhysician(
@@ -54,9 +55,13 @@ export async function adminCreatePhysician(
     swiftCode:         (formData.get("swiftCode") as string) || undefined,
   };
 
+  const strValues: Record<string, string> = Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+  );
+
   const validated = CreatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: z.flattenError(validated.error).fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -268,7 +273,7 @@ export async function getPhysicianById(id: string) {
       commission: true, uplineCommission: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true,
       addedByRole: true, salesRepId: true,
-      salesRep: { select: { name: true, email: true } },
+      salesRep: { select: { name: true, email: true, firstName: true, lastName: true } },
       createdAt: true, updatedAt: true,
     },
   });

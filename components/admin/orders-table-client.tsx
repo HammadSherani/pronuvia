@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import { OrderStatus } from "@/generated/prisma/enums";
 
 type Order = {
-  id:          string;
-  orderNumber: string;
-  status:      OrderStatus;
-  total:       number;
-  createdAt:   Date;
-  returnedAt:  Date | null;
-  physician:   { firstName: string; lastName: string } | null;
-  salesRep:    { name: string } | null;
+  id:            string;
+  orderNumber:   string;
+  status:        OrderStatus;
+  total:         number;
+  createdAt:     Date;
+  returnedAt:    Date | null;
+  placedByAdmin: boolean | null;
+  physician:     { firstName: string; lastName: string } | null;
+  salesRep:      { name: string } | null;
 };
 
 const statusBadge: Record<OrderStatus, string> = {
@@ -118,7 +119,12 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
 
                 {/* ── Origin ── */}
                 <td className="px-5 py-4">
-                  {o.salesRep ? (
+                  {o.placedByAdmin ? (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      Admin
+                    </span>
+                  ) : o.salesRep ? (
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#3DBFA4]" />
                       Sales Rep

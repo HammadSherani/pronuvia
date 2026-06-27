@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import toast from "react-hot-toast";
 import { WithdrawStatus } from "@/generated/prisma/enums";
 import { updateWithdrawRequest, bulkUpdateWithdrawals } from "@/actions/admin/manage-withdrawals";
 import { RepWalletModal }       from "@/components/admin/rep-wallet-modal";
 import { PhysicianWalletModal } from "@/components/admin/physician-wallet-modal";
+import { ClientPagination } from "@/components/shared/pagination";
 
 type Request = {
   id:        string;
@@ -119,11 +120,18 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
   const [selected,      setSelected]      = useState<Set<string>>(new Set());
   const [confirmAction, setConfirmAction] = useState<"APPROVED" | "REJECTED" | null>(null);
   const [isPending,     startTransition]  = useTransition();
+  const [page,          setPage]          = useState(1);
+  const [pageSize,      setPageSize]      = useState(10);
 
   const pendingIds  = requests.filter((r) => r.status === "PENDING").map((r) => r.id);
   const allSelected = pendingIds.length > 0 && pendingIds.every((id) => selected.has(id));
   const toggle    = (id: string) => setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => setSelected(allSelected ? new Set() : new Set(pendingIds));
+
+  const pagedRequests = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return requests.slice(start, start + pageSize);
+  }, [requests, page, pageSize]);
 
   const handleBulk = (action: "APPROVED" | "REJECTED") => {
     startTransition(async () => {
@@ -213,7 +221,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {requests.map((r) => {
+            {pagedRequests.map((r) => {
               const isRep       = r.userRole === "SALES_REP";
               const user        = isRep ? repMap.get(r.userId) : drMap.get(r.userId);
               const isPendingRow = r.status === "PENDING";
@@ -314,6 +322,13 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
             })}
           </tbody>
         </table>
+        <ClientPagination
+          total={requests.length}
+          page={page}
+          pageSize={pageSize}
+          onPage={setPage}
+          onPageSize={setPageSize}
+        />
       </div>
 
       {confirmAction && (

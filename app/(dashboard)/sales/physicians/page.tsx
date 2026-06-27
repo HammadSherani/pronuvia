@@ -2,6 +2,9 @@
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
+import { Pagination } from "@/components/shared/pagination";
+import { parsePagination } from "@/lib/pagination";
+import { Suspense } from "react";
 
 export const metadata = { title: "My Physicians – Pronuvia" };
 
@@ -11,19 +14,31 @@ const statusBadge: Record<ApprovalStatus, { label: string; cls: string }> = {
   REJECTED: { label: "Rejected", cls: "bg-red-50    text-red-700    border-red-200" },
 };
 
-export default async function SalesPhysiciansPage() {
+export default async function SalesPhysiciansPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await requireSalesRep();
+  const sp = await searchParams;
+  const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const physicians = await prisma.partneringPhysician.findMany({
-    where:   { salesRepId: session.userId },
-    select: {
-      id: true, firstName: true, lastName: true, email: true,
-      phone: true, nameOfPractice: true, city: true, state: true,
-      commission: true, isApproved: true, createdAt: true,
-      fieldsOfSpeciality: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const where = { salesRepId: session.userId };
+  const [physicians, total] = await Promise.all([
+    prisma.partneringPhysician.findMany({
+      where,
+      select: {
+        id: true, firstName: true, lastName: true, email: true,
+        phone: true, nameOfPractice: true, city: true, state: true,
+        commission: true, isApproved: true, createdAt: true,
+        fieldsOfSpeciality: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.partneringPhysician.count({ where }),
+  ]);
 
   const approvedCount = physicians.filter((p) => p.isApproved === ApprovalStatus.APPROVED).length;
   const pendingCount  = physicians.filter((p) => p.isApproved === ApprovalStatus.PENDING).length;
@@ -35,7 +50,7 @@ export default async function SalesPhysiciansPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-800">My Partnering Physicians</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Doctors added under your account
+            Doctors added under your account ({total} total)
           </p>
         </div>
         <Link
@@ -50,12 +65,12 @@ export default async function SalesPhysiciansPage() {
       </div>
 
       {/* Summary chips */}
-      {physicians.length > 0 && (
+      {total > 0 && (
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-1 rounded-full bg-[#3DBFA4]" />
             <div>
-              <p className="text-lg font-bold text-gray-800">{physicians.length}</p>
+              <p className="text-lg font-bold text-gray-800">{total}</p>
               <p className="text-xs text-gray-500">Total Physicians</p>
             </div>
           </div>
@@ -80,7 +95,7 @@ export default async function SalesPhysiciansPage() {
 
       {/* Table / empty state */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        {physicians.length === 0 ? (
+        {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
               <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,105 +109,94 @@ export default async function SalesPhysiciansPage() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Practice</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Speciality</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Added</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {physicians.map((p) => {
-                const badge = statusBadge[p.isApproved];
-                return (
-                  <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                    {/* Name + email */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-[#5BB8D4]">
-                            {p.firstName[0]}{p.lastName[0]}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">Dr. {p.firstName} {p.lastName}</p>
-                          <p className="text-xs text-gray-400">{p.email}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Practice */}
-                    <td className="px-5 py-4 text-gray-600">
-                      {p.nameOfPractice ?? <span className="text-gray-300">—</span>}
-                    </td>
-
-                    {/* Location */}
-                    <td className="px-5 py-4 text-gray-500 text-xs">
-                      {p.city && p.state
-                        ? `${p.city}, ${p.state}`
-                        : p.city || p.state || <span className="text-gray-300">—</span>
-                      }
-                    </td>
-
-                    {/* Phone */}
-                    <td className="px-5 py-4 text-gray-500">
-                      {p.phone ?? <span className="text-gray-300">—</span>}
-                    </td>
-
-                    {/* Speciality */}
-                    <td className="px-5 py-4">
-                      {p.fieldsOfSpeciality.length > 0 ? (
-                        <div className="flex flex-wrap gap-1 max-w-[180px]">
-                          {p.fieldsOfSpeciality.slice(0, 2).map((s) => (
-                            <span key={s} className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                              {s}
+          <>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/60">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Practice</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Speciality</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Added</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {physicians.map((p) => {
+                  const badge = statusBadge[p.isApproved];
+                  return (
+                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-[#5BB8D4]">
+                              {p.firstName[0]}{p.lastName[0]}
                             </span>
-                          ))}
-                          {p.fieldsOfSpeciality.length > 2 && (
-                            <span className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full text-xs">
-                              +{p.fieldsOfSpeciality.length - 2}
-                            </span>
-                          )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">Dr. {p.firstName} {p.lastName}</p>
+                            <p className="text-xs text-gray-400">{p.email}</p>
+                          </div>
                         </div>
-                      ) : (
-                        <span className="text-gray-300">—</span>
-                      )}
-                    </td>
-
-                    {/* Commission — read-only (only admin can change) */}
-                    <td className="px-5 py-4">
-                      <span className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">
-                        {p.commission}%
-                      </span>
-                    </td>
-
-                    {/* Approval status */}
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${badge.cls}`}>
-                        {badge.label}
-                      </span>
-                    </td>
-
-                    {/* Date added */}
-                    <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                      {new Date(p.createdAt).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric",
-                      })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-5 py-4 text-gray-600">
+                        {p.nameOfPractice ?? <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-5 py-4 text-gray-500 text-xs">
+                        {p.city && p.state
+                          ? `${p.city}, ${p.state}`
+                          : p.city || p.state || <span className="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td className="px-5 py-4 text-gray-500">
+                        {p.phone ?? <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-5 py-4">
+                        {p.fieldsOfSpeciality.length > 0 ? (
+                          <div className="flex flex-wrap gap-1 max-w-[180px]">
+                            {p.fieldsOfSpeciality.slice(0, 2).map((s) => (
+                              <span key={s} className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                                {s}
+                              </span>
+                            ))}
+                            {p.fieldsOfSpeciality.length > 2 && (
+                              <span className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full text-xs">
+                                +{p.fieldsOfSpeciality.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">
+                          {p.commission}%
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${badge.cls}`}>
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                        {new Date(p.createdAt).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <Suspense>
+              <Pagination total={total} page={page} pageSize={pageSize} />
+            </Suspense>
+          </>
         )}
       </div>
     </div>
   );
 }
-

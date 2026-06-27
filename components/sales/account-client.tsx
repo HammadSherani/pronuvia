@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateSalesRepProfile, type ProfileState } from "@/actions/sales-rep/profile";
+import { AddressFields, migrateAddressData, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
 
 type Rep = {
   firstName: string; lastName: string; name: string; email: string;
@@ -30,6 +31,32 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
         {value !== null && value !== undefined && value !== ""
           ? String(value)
           : <span className="text-gray-300 italic text-xs">Not provided</span>}
+      </dd>
+    </div>
+  );
+}
+
+type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+function parseAddress(raw: string | null | undefined): string {
+  if (!raw) return "";
+  try {
+    const a: AddrObj = JSON.parse(raw);
+    return [
+      [a.firstName, a.lastName].filter(Boolean).join(" "),
+      a.address1, a.address2,
+      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.country,
+    ].filter(Boolean).join("\n");
+  } catch { return raw; }
+}
+
+function AddressRow({ label, raw }: { label: string; raw?: string | null }) {
+  const formatted = parseAddress(raw);
+  return (
+    <div className="py-3 border-b border-gray-50 last:border-0 flex flex-col sm:flex-row sm:items-start gap-1">
+      <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider sm:w-44 shrink-0 pt-0.5">{label}</dt>
+      <dd className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+        {formatted || <span className="text-gray-300 italic text-xs">Not provided</span>}
       </dd>
     </div>
   );
@@ -115,8 +142,8 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
       </Section>
 
       <Section title="Addresses">
-        <InfoRow label="Billing Address"  value={r.billingAddress} />
-        <InfoRow label="Shipping Address" value={r.shippingAddress} />
+        <AddressRow label="Billing Address"  raw={r.billingAddress} />
+        <AddressRow label="Shipping Address" raw={r.shippingAddress} />
       </Section>
 
       <Section title="Bank Details">
@@ -134,9 +161,15 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
 function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(updateSalesRepProfile, undefined);
 
-  const [accNum,    setAccNum]    = useState(r.bankAccountNumber ?? "");
-  const [confirm,   setConfirm]   = useState(r.bankAccountNumber ?? "");
-  const [mismatch,  setMismatch]  = useState(false);
+  const [accNum,       setAccNum]       = useState(r.bankAccountNumber ?? "");
+  const [confirm,      setConfirm]      = useState(r.bankAccountNumber ?? "");
+  const [mismatch,     setMismatch]     = useState(false);
+
+  const parseAddr = (raw: string | null): AddressData =>
+    raw ? migrateAddressData((() => { try { return JSON.parse(raw); } catch { return {}; } })()) : { ...EMPTY_ADDRESS };
+
+  const [billingAddr,  setBillingAddr]  = useState<AddressData>(() => parseAddr(r.billingAddress));
+  const [shippingAddr, setShippingAddr] = useState<AddressData>(() => parseAddr(r.shippingAddress));
 
   function onAccChange(val: string) {
     setAccNum(val);
@@ -206,16 +239,20 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
       </div>
 
       {/* Addresses */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 border-b border-gray-100">Addresses</p>
-        <Field label="Billing Address">
-          <input name="billingAddress" defaultValue={r.billingAddress ?? ""} placeholder="123 Main St, City, State 12345"
-            className={inp} />
-        </Field>
-        <Field label="Shipping Address">
-          <input name="shippingAddress" defaultValue={r.shippingAddress ?? ""} placeholder="Same as billing or different"
-            className={inp} />
-        </Field>
+        {/* Hidden inputs carry the JSON to the server action */}
+        <input type="hidden" name="billingAddress"  value={JSON.stringify(billingAddr)} />
+        <input type="hidden" name="shippingAddress" value={JSON.stringify(shippingAddr)} />
+
+        <div>
+          <p className="text-xs font-semibold text-gray-500 mb-3">Billing Address</p>
+          <AddressFields value={billingAddr} onChange={setBillingAddr} showName={false} />
+        </div>
+        <div className="pt-4 border-t border-gray-100">
+          <p className="text-xs font-semibold text-gray-500 mb-3">Shipping Address</p>
+          <AddressFields value={shippingAddr} onChange={setShippingAddr} showName={false} />
+        </div>
       </div>
 
       {/* Bank details */}

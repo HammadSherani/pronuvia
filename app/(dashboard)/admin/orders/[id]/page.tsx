@@ -9,8 +9,25 @@ import { SendOrderEmailPanel }    from "@/components/admin/send-order-email-pane
 import { OrderActionsPanel }      from "@/components/admin/order-actions-panel";
 import { getOrderShipments }      from "@/actions/admin/shipping";
 import type { OrderItem }         from "@/actions/admin/manage-orders";
+import { getOrderNotes }          from "@/actions/admin/order-notes";
+import { OrderNotesPanel }        from "@/components/admin/order-notes-panel";
 
 type Props = { params: Promise<{ id: string }> };
+
+type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+function fmtAddress(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const a: AddrObj = JSON.parse(raw);
+    return [
+      [a.firstName, a.lastName].filter(Boolean).join(" "),
+      a.address1,
+      a.address2,
+      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.country,
+    ].filter(Boolean).join("\n");
+  } catch { return raw; }
+}
 
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -52,9 +69,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   await requireAdmin();
   const { id } = await params;
 
-  const [order, shipments] = await Promise.all([
+  const [order, shipments, notes] = await Promise.all([
     getOrderById(id),
     getOrderShipments(id),
+    getOrderNotes(id),
   ]);
   if (!order) notFound();
 
@@ -266,7 +284,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           Dr. {order.physician.firstName} {order.physician.lastName}
                         </p>
                       )}
-                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{order.shippingAddress}</p>
+                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
                       {order.physician?.phone && (
                         <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
                           {order.physician.phone}
@@ -481,6 +499,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 <ReturnOrderModal />
               </div>
             )}
+
+            {/* Order Notes */}
+            <OrderNotesPanel orderId={id} initialNotes={notes} />
           </div>
         </div>
       </div>

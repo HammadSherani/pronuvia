@@ -25,29 +25,34 @@ type CartContextValue = {
 };
 
 const CartCtx = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "pronuvia_cart";
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({ userId, cartKey, children }: { userId?: string; cartKey?: string; children: React.ReactNode }) {
+  const storageKey = cartKey ?? `pronuvia_cart_${userId ?? "guest"}`;
   const [items,    setItems]    = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const didRead = useRef(false);
 
-  // Read from localStorage once on mount
+  // Re-read when userId changes (different user logged in)
+  useEffect(() => {
+    didRead.current = false;
+  }, [userId]);
+
+  // Read from localStorage once on mount / on userId change
   useEffect(() => {
     if (didRead.current) return;
     didRead.current = true;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
-    } catch {}
+      const raw = localStorage.getItem(storageKey);
+      setItems(raw ? JSON.parse(raw) : []);
+    } catch { setItems([]); }
     setHydrated(true);
-  }, []);
+  }, [storageKey]);
 
   // Persist on every change after hydration
   useEffect(() => {
     if (!hydrated) return;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
-  }, [items, hydrated]);
+    try { localStorage.setItem(storageKey, JSON.stringify(items)); } catch {}
+  }, [items, hydrated, storageKey]);
 
   const addItem = useCallback((item: Omit<CartItem, "cartId">) => {
     setItems((prev) => {
@@ -77,8 +82,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
-  }, []);
+    try { localStorage.removeItem(storageKey); } catch {}
+  }, [storageKey]);
 
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);

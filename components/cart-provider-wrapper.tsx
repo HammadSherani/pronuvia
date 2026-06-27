@@ -2,6 +2,6 @@
 
 import { CartProvider } from "@/lib/cart/cart-context";
 
-export function CartProviderWrapper({ children }: { children: React.ReactNode }) {
-  return <CartProvider>{children}</CartProvider>;
+export function CartProviderWrapper({ userId, children }: { userId: string; children: React.ReactNode }) {
+  return <CartProvider userId={userId}>{children}</CartProvider>;
 }

@@ -32,6 +32,7 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Wallet",    href: "/sales/wallet" },
       { label: "Downloads", href: "/sales/downloads" },
       { label: "Orders",    href: "/sales/orders" },
+      { label: "Account",    href: "/sales/account" },
       { label: "Withdrawals", href: "/sales/withdrawals" },
       { label: "Log out",   action: async () => { await logout(); } },
     ];
@@ -44,6 +45,7 @@ function buildSubNav(role: Role): SubNavItem[] {
     // { label: "Cart",        href: "/physician/cart", isCart: true },
     { label: "Orders",      href: "/physician/orders" },
     { label: "Wallet",      href: "/physician/wallet" },
+    // { label: "Account",      href: "/physician/account" },
     { label: "Downloads",   href: "/physician/downloads" },
     { label: "Account",     href: "/physician/account" },
     { label: "Log out",     action: async () => { await logout(); } },

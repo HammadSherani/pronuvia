@@ -99,7 +99,15 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   };
 
   useImperativeHandle(ref, () => ({ submit: handlePay }));
-  return <PaymentElement options={{ layout: "tabs" }} />;
+  return (
+    <PaymentElement
+      options={{
+        layout: "tabs",
+        wallets: { applePay: "never", googlePay: "never" },
+        terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
+      }}
+    />
+  );
 });
 
 type Props = {
@@ -390,8 +398,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
 
           <p className="text-xs text-gray-500">
             By proceeding you agree to our{" "}
-            <Link href="/terms"   className="underline hover:text-gray-700">Terms and Conditions</Link>{" "}and{" "}
-            <Link href="/privacy" className="underline hover:text-gray-700">Privacy Policy</Link>.
+            <Link href="/terms" className="underline hover:text-gray-700">Terms and Conditions</Link>.
           </p>
 
           <button type="button" onClick={handlePlaceOrder}

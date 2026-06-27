@@ -1,8 +1,11 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { DownloadOrdersButton } from "@/components/physician/download-orders-button";
+import { Pagination } from "@/components/shared/pagination";
+import { parsePagination } from "@/lib/pagination";
+import { Suspense } from "react";
 
 export const metadata = { title: "My Orders – Pronuvia" };
 
@@ -26,33 +29,44 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-export default async function PhysicianOrdersPage() {
+export default async function PhysicianOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await requirePhysician();
+  const sp = await searchParams;
+  const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const orders = await prisma.order.findMany({
-    where:   { physicianId: session.userId },
-    select: {
-      id: true, orderNumber: true, createdAt: true,
-      items: true, subtotal: true, total: true,
-      shippingRate: true, shippingCarrier: true, trackingNumber: true,
-      physicianCommissionRate: true, physicianCommissionAmount: true,
-      status: true,
-      paymentMethod: true, paymentStatus: true,
-      transactionId: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const where = { physicianId: session.userId };
+  const select = {
+    id: true, orderNumber: true, createdAt: true,
+    items: true, subtotal: true, total: true,
+    shippingRate: true, shippingCarrier: true, trackingNumber: true,
+    physicianCommissionRate: true, physicianCommissionAmount: true,
+    status: true,
+    paymentMethod: true, paymentStatus: true,
+    transactionId: true,
+  };
 
-  const totalSpent      = orders.reduce((s, o) => s + o.total, 0);
-  const totalCommission = orders.reduce((s, o) => s + o.physicianCommissionAmount, 0);
-  const paidCount       = orders.filter((o) => o.paymentStatus === "PAID").length;
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({ where, select, orderBy: { createdAt: "desc" }, skip, take }),
+    prisma.order.count({ where }),
+  ]);
+
+  // Stats from all orders
+  const [totalSpent, totalCommission, paidCount] = await Promise.all([
+    prisma.order.aggregate({ where, _sum: { total: true } }).then(r => r._sum.total ?? 0),
+    prisma.order.aggregate({ where, _sum: { physicianCommissionAmount: true } }).then(r => r._sum.physicianCommissionAmount ?? 0),
+    prisma.order.count({ where: { ...where, paymentStatus: "PAID" } }),
+  ]);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-800">My Orders</h1>
-          <p className="text-sm text-gray-500 mt-0.5">All orders you have placed</p>
+          <p className="text-sm text-gray-500 mt-0.5">All orders you have placed ({total} total)</p>
         </div>
         <div className="flex items-center gap-3">
           <DownloadOrdersButton />
@@ -69,9 +83,9 @@ export default async function PhysicianOrdersPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-5 mb-6">
         {[
-          { label: "Total Orders",    value: String(orders.length), color: "#3DBFA4" },
-          { label: "Total Spent",     value: fmt(totalSpent),       color: "#5BB8D4" },
-          { label: "Your Commission", value: fmt(totalCommission),  color: "#8b5cf6" },
+          { label: "Total Orders",    value: String(total),       color: "#3DBFA4" },
+          { label: "Total Spent",     value: fmt(totalSpent),     color: "#5BB8D4" },
+          { label: "Your Commission", value: fmt(totalCommission), color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
@@ -82,7 +96,7 @@ export default async function PhysicianOrdersPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        {orders.length === 0 ? (
+        {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
               <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,99 +111,108 @@ export default async function PhysicianOrdersPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-5 py-3.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {orders.map((o) => {
-                const itemCount = Array.isArray(o.items) ? o.items.length : 0;
-                const payStatus = o.paymentStatus ?? "PENDING";
-                const payCls    = payStatusStyle[payStatus] ?? payStatusStyle["PENDING"];
-                const stsCls    = statusStyle[o.status];
-                return (
-                  <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">{o.orderNumber}</td>
-                    <td className="px-5 py-4 text-gray-600">{itemCount} item{itemCount !== 1 ? "s" : ""}</td>
-                    <td className="px-5 py-4">
-                      <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
-                      {o.shippingRate > 0 && (
-                        <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      {o.trackingNumber ? (
-                        <div>
-                          <p className="text-xs text-gray-500">{o.shippingCarrier}</p>
-                          <p className="text-xs font-mono font-semibold text-indigo-600 mt-0.5">{o.trackingNumber}</p>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-300 italic">Awaiting shipment</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-[#5BB8D4] font-semibold">{fmt(o.physicianCommissionAmount)}</span>
-                      <span className="text-xs text-gray-400 ml-1">({o.physicianCommissionRate}%)</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex flex-col gap-1">
-                        {o.paymentMethod && (
-                          <span className="text-xs text-gray-500">
-                            {o.paymentMethod === "CARD" ? "💳 Card" : "👛 Wallet"}
-                          </span>
+          <>
+            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-700">
+                Orders <span className="text-gray-400 font-normal">({total})</span>
+              </span>
+              {paidCount > 0 && (
+                <span className="text-xs text-gray-400">
+                  {paidCount} paid · {total - paidCount} pending
+                </span>
+              )}
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/60">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-5 py-3.5" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {orders.map((o) => {
+                  const itemCount = Array.isArray(o.items) ? o.items.length : 0;
+                  const payStatus = o.paymentStatus ?? "PENDING";
+                  const payCls    = payStatusStyle[payStatus] ?? payStatusStyle["PENDING"];
+                  const stsCls    = statusStyle[o.status];
+                  return (
+                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">{o.orderNumber}</td>
+                      <td className="px-5 py-4 text-gray-600">{itemCount} item{itemCount !== 1 ? "s" : ""}</td>
+                      <td className="px-5 py-4">
+                        <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
+                        {o.shippingRate > 0 && (
+                          <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
                         )}
-                        <span className={`inline-flex items-center px-2 py-0.5 border rounded-full text-xs font-medium w-fit ${payCls}`}>
-                          {payStatus === "PAID" && (
-                            <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
+                      </td>
+                      <td className="px-5 py-4">
+                        {o.trackingNumber ? (
+                          <div>
+                            <p className="text-xs text-gray-500">{o.shippingCarrier}</p>
+                            <p className="text-xs font-mono font-semibold text-indigo-600 mt-0.5">{o.trackingNumber}</p>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-300 italic">Awaiting shipment</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-[#5BB8D4] font-semibold">{fmt(o.physicianCommissionAmount)}</span>
+                        <span className="text-xs text-gray-400 ml-1">({o.physicianCommissionRate}%)</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex flex-col gap-1">
+                          {o.paymentMethod && (
+                            <span className="text-xs text-gray-500">
+                              {o.paymentMethod === "CARD" ? "💳 Card" : "👛 Wallet"}
+                            </span>
                           )}
-                          {payStatus}
+                          <span className={`inline-flex items-center px-2 py-0.5 border rounded-full text-xs font-medium w-fit ${payCls}`}>
+                            {payStatus === "PAID" && (
+                              <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                            {payStatus}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${stsCls}`}>
+                          {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${stsCls}`}>
-                        {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                      {new Date(o.createdAt).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-5 py-4">
-                      <Link href={`/physician/invoice/${o.orderNumber}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-[#3DBFA4] hover:text-[#35a993] transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Invoice
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                        {new Date(o.createdAt).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-5 py-4">
+                        <Link href={`/physician/invoice/${o.orderNumber}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-[#3DBFA4] hover:text-[#35a993] transition-colors">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Invoice
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <Suspense>
+              <Pagination total={total} page={page} pageSize={pageSize} />
+            </Suspense>
+          </>
         )}
       </div>
-
-      {paidCount > 0 && (
-        <p className="text-xs text-gray-400 mt-3 text-right">
-          {paidCount} paid order{paidCount !== 1 ? "s" : ""} · {orders.length - paidCount} pending
-        </p>
-      )}
     </div>
   );
 }

@@ -57,6 +57,7 @@ export default async function PhysicianViewPage({ params }: Props) {
               physicianId={id}
               physicianName={`Dr. ${p.firstName} ${p.lastName}`}
               existingCommission={p.commission}
+              salesRep={p.salesRep ? { firstName: p.salesRep.firstName, lastName: p.salesRep.lastName } : null}
             />
           )}
           <Link href={`/admin/physicians/${id}/edit`}

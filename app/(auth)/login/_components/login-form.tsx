@@ -12,9 +12,9 @@ export function LoginForm() {
   return (
     <form action={action} className="flex flex-col items-center w-full">
       {/* Logo */}
-      <div className="mb-7">
+      {/* <div className="mb-7">
         <PronuviaLogo size={34} />
-      </div>
+      </div> */}
 
       <h1 className="text-[22px] font-bold text-gray-800 mb-1">
         Login to your account
@@ -106,12 +106,12 @@ export function LoginForm() {
         {pending ? "Logging in…" : "Login"}
       </button>
 
-      <p className="mt-6 text-sm text-gray-400">
+      {/* <p className="mt-6 text-sm text-gray-400">
         Not registered yet?{" "}
         <Link href="#" className="text-[#5BB8D4] hover:underline font-medium">
           Create an account
         </Link>
-      </p>
+      </p> */}
     </form>
   );
 }

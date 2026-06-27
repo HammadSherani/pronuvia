@@ -9,23 +9,30 @@ type Props = {
   id: string;
   name: string;
   salesRepNote: string | null;
+  salesRep?: { firstName: string; lastName: string } | null;
 };
 
-export function ApprovalDetailActions({ id, name, salesRepNote }: Props) {
+export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Props) {
   const router = useRouter();
-  const [showApprove, setShowApprove] = useState(false);
-  const [showReject, setShowReject]   = useState(false);
-  const [commission, setCommission]   = useState("");
-  const [isPending, startTransition]  = useTransition();
+  const [showApprove,  setShowApprove]  = useState(false);
+  const [showReject,   setShowReject]   = useState(false);
+  const [commission,   setCommission]   = useState("");
+  const [uplineComm,   setUplineComm]   = useState("");
+  const [isPending,    startTransition] = useTransition();
 
   function handleApprove() {
-    const pct = parseFloat(commission);
-    if (isNaN(pct) || pct < 0 || pct > 100) {
-      toast.error("Enter a valid commission between 0 and 100");
+    const docPct    = parseFloat(commission);
+    const uplinePct = parseFloat(uplineComm || "0");
+    if (isNaN(docPct) || docPct < 0 || docPct > 100) {
+      toast.error("Enter a valid doctor commission between 0 and 100");
+      return;
+    }
+    if (isNaN(uplinePct) || uplinePct < 0 || uplinePct > 100) {
+      toast.error("Enter a valid sales rep commission between 0 and 100");
       return;
     }
     startTransition(async () => {
-      const res = await approvePhysician(id, pct);
+      const res = await approvePhysician(id, docPct, uplinePct);
       if (res?.success) {
         toast.success("Physician approved successfully");
         router.push("/admin/approvals");
@@ -52,7 +59,7 @@ export function ApprovalDetailActions({ id, name, salesRepNote }: Props) {
       {/* Action buttons */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => { setCommission(""); setShowApprove(true); }}
+          onClick={() => { setCommission(""); setUplineComm(""); setShowApprove(true); }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white text-sm font-semibold rounded-lg hover:bg-emerald-600 transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -83,7 +90,7 @@ export function ApprovalDetailActions({ id, name, salesRepNote }: Props) {
               </div>
               <div>
                 <p className="font-semibold text-gray-800">Approve {name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Set commission percentage before approving</p>
+                <p className="text-xs text-gray-400 mt-0.5">Set commission percentages before approving</p>
               </div>
             </div>
 
@@ -94,26 +101,47 @@ export function ApprovalDetailActions({ id, name, salesRepNote }: Props) {
               </div>
             )}
 
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Doctor&apos;s Commission %
-                <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own sales</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  value={commission}
-                  onChange={(e) => setCommission(e.target.value)}
-                  placeholder="e.g. 15"
-                  className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] transition bg-white"
-                  autoFocus
-                  onKeyDown={(e) => { if (e.key === "Enter") handleApprove(); }}
-                />
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+            <div className="space-y-4 mb-5">
+              {/* Doctor commission */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Doctor&apos;s Commission %
+                  <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number" step="0.01" min="0" max="100"
+                    value={commission}
+                    onChange={(e) => setCommission(e.target.value)}
+                    placeholder="e.g. 15"
+                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] transition bg-white"
+                    autoFocus
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+                </div>
               </div>
+
+              {/* Sales rep upline commission — only if doctor was added by a sales rep */}
+              {salesRep && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Sales Rep&apos;s Commission %
+                    <span className="ml-1.5 text-xs font-normal text-gray-400">
+                      earned by {salesRep.firstName} {salesRep.lastName} on this doctor&apos;s orders
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number" step="0.01" min="0" max="100"
+                      value={uplineComm}
+                      onChange={(e) => setUplineComm(e.target.value)}
+                      placeholder="e.g. 10"
+                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] transition bg-white"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">

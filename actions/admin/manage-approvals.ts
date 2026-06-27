@@ -37,11 +37,15 @@ export async function listPendingPhysicians() {
 export async function approvePhysician(
   id: string,
   commission: number,
+  uplineCommission: number,
 ): Promise<ApprovalActionState> {
   await requireAdmin();
 
   if (commission < 0 || commission > 100) {
-    return { message: "Commission must be between 0 and 100." };
+    return { message: "Doctor commission must be between 0 and 100." };
+  }
+  if (uplineCommission < 0 || uplineCommission > 100) {
+    return { message: "Sales rep upline commission must be between 0 and 100." };
   }
 
   const physician = await prisma.partneringPhysician.findUnique({ where: { id } });
@@ -60,6 +64,7 @@ export async function approvePhysician(
     data: {
       isApproved:          ApprovalStatus.APPROVED,
       commission,
+      uplineCommission,
       passwordResetToken:  token,
       passwordResetExpiry: expiry,
     },

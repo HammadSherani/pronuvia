@@ -106,7 +106,7 @@ export function OrderActionsPanel({
             <button
               type="button"
               onClick={() => setConfirmDelete(true)}
-              className="text-sm text-red-500 hover:text-red-700 font-medium hover:underline transition-colors"
+              className="text-sm hidden text-red-500 hover:text-red-700 font-medium hover:underline transition-colors"
             >
               Move to Trash
             </button>

@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { Country, State } from "country-state-city";
 import { registerPhysician, type RegisterPhysicianState } from "@/actions/website/register-physician";
+
+const ALL_COUNTRIES = Country.getAllCountries();
 
 const SPECIALTIES = [
   "Cardiology","Dermatology","Endocrinology","Family Medicine","Gastroenterology",
@@ -30,7 +33,15 @@ function Field({ label, req = true, error, children }: { label: string; req?: bo
 export function PhysicianRegisterForm() {
   const [state, action, pending] = useActionState<RegisterPhysicianState, FormData>(registerPhysician, undefined);
   const [specialties, setSpecialties] = useState<string[]>([]);
+  const [customSpecialty, setCustomSpecialty] = useState("");
   const [terms, setTerms] = useState(false);
+  const [countryIso, setCountryIso] = useState("US");
+
+  const states = useMemo(() => State.getStatesOfCountry(countryIso), [countryIso]);
+  const countryName = useMemo(
+    () => ALL_COUNTRIES.find((c) => c.isoCode === countryIso)?.name ?? "",
+    [countryIso]
+  );
 
   const e = state?.errors ?? {};
 
@@ -38,8 +49,18 @@ export function PhysicianRegisterForm() {
     setSpecialties((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s]);
   }
 
+  function addCustomSpecialty() {
+    const v = customSpecialty.trim();
+    if (v && !specialties.includes(v)) setSpecialties((p) => [...p, v]);
+    setCustomSpecialty("");
+  }
+
   useEffect(() => {
     if (state?.success) window.scrollTo({ top: 0, behavior: "smooth" });
+    if (state?.values?.country) {
+      const match = ALL_COUNTRIES.find((c) => c.name === state.values!.country);
+      if (match) setCountryIso(match.isoCode);
+    }
   }, [state]);
 
   if (state?.success) {
@@ -71,89 +92,107 @@ export function PhysicianRegisterForm() {
       {/* Email + First Name */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Email" error={e.email?.[0]}>
-          <input required name="email" type="email" placeholder="doctor@clinic.com" className={e.email ? inpErr : inp} />
+          <input required name="email" type="email" placeholder="doctor@clinic.com" defaultValue={state?.values?.email} className={e.email ? inpErr : inp} />
         </Field>
         <Field label="First Name" error={e.firstName?.[0]}>
-          <input required name="firstName" placeholder="Dr. Jane" className={e.firstName ? inpErr : inp} />
+          <input required name="firstName" placeholder="Dr. Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
         </Field>
       </div>
 
       {/* Last Name + SAC Therapy */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Last Name" error={e.lastName?.[0]}>
-          <input required name="lastName" placeholder="Doe" className={e.lastName ? inpErr : inp} />
+          <input required name="lastName" placeholder="Doe" defaultValue={state?.values?.lastName} className={e.lastName ? inpErr : inp} />
         </Field>
-        <Field label="How did you hear about SAC Therapy?" error={e.aictherapy?.[0]}>
-          <input required name="aictherapy" placeholder="e.g. Conference, Referral, Online..." className={e.aictherapy ? inpErr : inp} />
+        <Field label="How did you hear about AIC Therapy?" error={e.aictherapy?.[0]}>
+          <input required name="aictherapy" placeholder="e.g. Conference, Referral, Online..." defaultValue={state?.values?.aictherapy} className={e.aictherapy ? inpErr : inp} />
         </Field>
       </div>
 
       {/* License + Website */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Doctor's License Number" error={e.license?.[0]}>
-          <input required name="license" placeholder="LIC-000000" className={e.license ? inpErr : inp} />
+          <input required name="license" placeholder="LIC-000000" defaultValue={state?.values?.license} className={e.license ? inpErr : inp} />
         </Field>
-        <Field label="Office Website" error={e.websiteLink?.[0]}>
-          <input required name="websiteLink" type="url" placeholder="https://yourclinic.com" className={e.websiteLink ? inpErr : inp} />
+        <Field label="Website" req={false} error={e.websiteLink?.[0]}>
+          <input name="websiteLink" placeholder="www.yourclinic.com" defaultValue={state?.values?.websiteLink} className={e.websiteLink ? inpErr : inp} />
         </Field>
       </div>
 
-      {/* Country */}
+      {/* Country — hidden real name field + visible iso select */}
       <Field label="Country" error={e.country?.[0]}>
-        <input required name="country" placeholder="e.g. United States" className={e.country ? inpErr : inp} />
+        <input type="hidden" name="country" value={countryName} />
+        <select
+          value={countryIso}
+          onChange={(ev) => { setCountryIso(ev.target.value); }}
+          className={e.country ? inpErr : inp}
+        >
+          {ALL_COUNTRIES.map((c) => (
+            <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+          ))}
+        </select>
       </Field>
 
       {/* Address */}
       <Field label="Address Line 1" error={e.addressOne?.[0]}>
-        <input required name="addressOne" placeholder="123 Medical Drive" className={e.addressOne ? inpErr : inp} />
+        <input required name="addressOne" placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne} className={e.addressOne ? inpErr : inp} />
       </Field>
       <Field label="Address Line 2" req={false}>
-        <input name="addressTwo" placeholder="Suite 400 (optional)" className={inp} />
+        <input name="addressTwo" placeholder="Suite 400 (optional)" defaultValue={state?.values?.addressTwo} className={inp} />
       </Field>
 
       {/* City + State */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="City" error={e.city?.[0]}>
-          <input required name="city" placeholder="e.g. Los Angeles" className={e.city ? inpErr : inp} />
+          <input required name="city" placeholder="e.g. Los Angeles" defaultValue={state?.values?.city} className={e.city ? inpErr : inp} />
         </Field>
-        <Field label="State" error={e.state?.[0]}>
-          <input required name="state" placeholder="e.g. California" className={e.state ? inpErr : inp} />
+        <Field label="State / Province" error={e.state?.[0]}>
+          {states.length > 0 ? (
+            <select name="state" defaultValue={state?.values?.state ?? ""} className={e.state ? inpErr : inp}>
+              <option value="" disabled>Select state…</option>
+              {states.map((s) => (
+                <option key={s.isoCode} value={s.name}>{s.name}</option>
+              ))}
+            </select>
+          ) : (
+            <input name="state" placeholder="State / Province / Region" defaultValue={state?.values?.state} className={e.state ? inpErr : inp} />
+          )}
         </Field>
       </div>
 
       {/* Zip + Phone */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Zip Code" error={e.zipCode?.[0]}>
-          <input required name="zipCode" placeholder="90001" className={e.zipCode ? inpErr : inp} />
+          <input required name="zipCode" placeholder="90001" defaultValue={state?.values?.zipCode} className={e.zipCode ? inpErr : inp} />
         </Field>
         <Field label="Phone" error={e.phone?.[0]}>
-          <input required name="phone" type="tel" placeholder="+1 555 000 0000" className={e.phone ? inpErr : inp} />
+          <input required name="phone" type="tel" placeholder="+1 555 000 0000" defaultValue={state?.values?.phone} className={e.phone ? inpErr : inp} />
         </Field>
       </div>
 
       {/* Office Contact + Fax */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Office Contact Person" error={e.officeContactNumber?.[0]}>
-          <input required name="officeContactNumber" placeholder="Office contact number" className={e.officeContactNumber ? inpErr : inp} />
+          <input required name="officeContactNumber" placeholder="Office contact number" defaultValue={state?.values?.officeContactNumber} className={e.officeContactNumber ? inpErr : inp} />
         </Field>
-        <Field label="Fax" error={e.fax?.[0]}>
-          <input required name="fax" placeholder="+1 555 000 0002" className={e.fax ? inpErr : inp} />
+        <Field label="Fax" req={false} error={e.fax?.[0]}>
+          <input name="fax" placeholder="+1 555 000 0002" defaultValue={state?.values?.fax} className={e.fax ? inpErr : inp} />
         </Field>
       </div>
 
       {/* Practice Name + Years */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Name of Practice" error={e.nameOfPractice?.[0]}>
-          <input required name="nameOfPractice" placeholder="City Health Clinic" className={e.nameOfPractice ? inpErr : inp} />
+          <input required name="nameOfPractice" placeholder="City Health Clinic" defaultValue={state?.values?.nameOfPractice} className={e.nameOfPractice ? inpErr : inp} />
         </Field>
         <Field label="Number of Years in Practice" error={e.yearsInPractice?.[0]}>
-          <input required name="yearsInPractice" type="number" min="0" placeholder="10" className={e.yearsInPractice ? inpErr : inp} />
+          <input required name="yearsInPractice" type="number" min="0" placeholder="10" defaultValue={state?.values?.yearsInPractice} className={e.yearsInPractice ? inpErr : inp} />
         </Field>
       </div>
 
       {/* Specialties */}
       <div>
-        <label className={lbl}>Preferred Specialties<R /></label>
+        <label className={lbl}>Fields of Specialties<R /></label>
         <div className="flex flex-wrap gap-2 mt-1">
           {SPECIALTIES.map((s) => (
             <button key={s} type="button" onClick={() => toggleSpecialty(s)}
@@ -166,11 +205,37 @@ export function PhysicianRegisterForm() {
             </button>
           ))}
         </div>
+
+        {/* Custom specialty */}
+        <div className="flex gap-2 mt-3">
+          <input
+            value={customSpecialty}
+            onChange={(ev) => setCustomSpecialty(ev.target.value)}
+            onKeyDown={(ev) => { if (ev.key === "Enter") { ev.preventDefault(); addCustomSpecialty(); } }}
+            placeholder="Add custom specialty and press Enter"
+            className={`${inp} flex-1`}
+          />
+          <button
+            type="button"
+            onClick={addCustomSpecialty}
+            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
+          >
+            Add
+          </button>
+        </div>
+
         {(e as Record<string, string[]>).fieldsOfSpeciality?.[0] && (
           <p className="text-xs text-red-500 mt-1">{(e as Record<string, string[]>).fieldsOfSpeciality[0]}</p>
         )}
         {specialties.length > 0 && (
-          <p className="text-xs text-[#3DBFA4] mt-2">{specialties.length} selected: {specialties.join(", ")}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {specialties.map((s) => (
+              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#3DBFA4]/10 text-[#3DBFA4] text-xs rounded-full font-medium">
+                {s}
+                <button type="button" onClick={() => toggleSpecialty(s)} className="hover:text-red-500 transition-colors">×</button>
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
@@ -180,9 +245,7 @@ export function PhysicianRegisterForm() {
           className="mt-0.5 w-4 h-4 accent-[#3DBFA4] cursor-pointer" />
         <span className="text-sm text-gray-600">
           I agree to the{" "}
-          <a href="#" className="text-[#3DBFA4] hover:underline">Terms and Conditions</a>{" "}
-          and{" "}
-          <a href="#" className="text-[#3DBFA4] hover:underline">Privacy Policy</a>
+          <a href="/terms" target="_blank" className="text-[#3DBFA4] hover:underline">Terms and Conditions</a>
         </span>
       </label>
 

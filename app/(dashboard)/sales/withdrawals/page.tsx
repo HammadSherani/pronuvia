@@ -1,6 +1,10 @@
-import { requireSalesRep } from "@/lib/auth/dal";
+﻿import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
+import { Role } from "@/generated/prisma/enums";
 import Link from "next/link";
+import { Pagination } from "@/components/shared/pagination";
+import { parsePagination } from "@/lib/pagination";
+import { Suspense } from "react";
 
 export const metadata = { title: "Withdrawal History – Pronuvia" };
 
@@ -14,30 +18,41 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-export default async function SalesWithdrawalsPage() {
+export default async function SalesWithdrawalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await requireSalesRep();
+  const sp = await searchParams;
+  const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const [rep, requests] = await Promise.all([
+  const where = { userId: session.userId, userRole: Role.SALES_REP };
+
+  const [rep, [requests, total]] = await Promise.all([
     prisma.salesRepresentative.findUnique({
       where:  { id: session.userId },
       select: { walletBalance: true, bankName: true },
     }),
-    prisma.withdrawRequest.findMany({
-      where:   { userId: session.userId, userRole: "SALES_REP" },
-      orderBy: { createdAt: "desc" },
-    }),
+    Promise.all([
+      prisma.withdrawRequest.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
+      prisma.withdrawRequest.count({ where }),
+    ]),
   ]);
 
-  const balance     = rep?.walletBalance ?? 0;
-  const hasPending  = requests.some((r) => r.status === "PENDING");
-  const totalPaid   = requests.filter((r) => r.status === "APPROVED").reduce((s, r) => s + r.amount, 0);
+  const balance    = rep?.walletBalance ?? 0;
+  const hasPending = requests.some((r) => r.status === "PENDING");
+  const totalPaid  = await prisma.withdrawRequest.aggregate({
+    where: { ...where, status: "APPROVED" },
+    _sum: { amount: true },
+  }).then(r => r._sum.amount ?? 0);
 
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Withdrawal Requests</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Your withdrawal request history and status</p>
+          <p className="text-sm text-gray-400 mt-0.5">Your withdrawal request history and status ({total} total)</p>
         </div>
         {!hasPending && (
           <Link
@@ -55,9 +70,9 @@ export default async function SalesWithdrawalsPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Wallet Balance",    value: fmt(balance),   color: "#3DBFA4" },
-          { label: "Total Withdrawn",   value: fmt(totalPaid), color: "#5BB8D4" },
-          { label: "Total Requests",    value: String(requests.length), color: "#8b5cf6" },
+          { label: "Wallet Balance",  value: fmt(balance),        color: "#3DBFA4" },
+          { label: "Total Withdrawn", value: fmt(totalPaid),      color: "#5BB8D4" },
+          { label: "Total Requests",  value: String(total),       color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
@@ -94,7 +109,7 @@ export default async function SalesWithdrawalsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {requests.length === 0 ? (
+        {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,49 +125,54 @@ export default async function SalesWithdrawalsPage() {
             )}
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Reply</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {requests.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                    {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </td>
-                  <td className="px-5 py-4 font-bold text-gray-800">{fmt(r.amount)}</td>
-                  <td className="px-5 py-4 text-xs text-gray-500 italic max-w-[200px]">
-                    {r.note ?? <span className="text-gray-300 not-italic">—</span>}
-                  </td>
-                  <td className="px-5 py-4 max-w-[220px]">
-                    {r.adminNote ? (
-                      <div>
-                        <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
-                          Admin
-                        </span>
-                        <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
-                          {r.adminNote}
-                        </p>
-                      </div>
-                    ) : (
-                      <span className="text-gray-300 text-xs">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[r.status] ?? statusStyle.PENDING}`}>
-                      {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
-                    </span>
-                  </td>
+          <>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/60">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Reply</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {requests.map((r) => (
+                  <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                      {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </td>
+                    <td className="px-5 py-4 font-bold text-gray-800">{fmt(r.amount)}</td>
+                    <td className="px-5 py-4 text-xs text-gray-500 italic max-w-[200px]">
+                      {r.note ?? <span className="text-gray-300 not-italic">—</span>}
+                    </td>
+                    <td className="px-5 py-4 max-w-[220px]">
+                      {r.adminNote ? (
+                        <div>
+                          <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                            Admin
+                          </span>
+                          <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                            {r.adminNote}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-gray-300 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[r.status] ?? statusStyle.PENDING}`}>
+                        {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Suspense>
+              <Pagination total={total} page={page} pageSize={pageSize} />
+            </Suspense>
+          </>
         )}
       </div>
     </div>

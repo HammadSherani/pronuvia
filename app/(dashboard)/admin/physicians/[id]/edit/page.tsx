@@ -52,6 +52,8 @@ export default async function EditPhysicianPage({ params }: Props) {
           yearsInPractice:     p.yearsInPractice      ?? undefined,
           fieldsOfSpeciality:  p.fieldsOfSpeciality,
           commission:          p.commission,
+          uplineCommission:    p.uplineCommission,
+          salesRepName:        p.salesRep ? p.salesRep.name : undefined,
           bankName:            p.bankName            ?? undefined,
           bankAccountNumber:   p.bankAccountNumber   ?? undefined,
           bankAccountName:     p.bankAccountName      ?? undefined,

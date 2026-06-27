@@ -1,6 +1,9 @@
 ﻿import { listOrders }        from "@/actions/admin/manage-orders";
 import { ReturnOrderModal }  from "@/components/admin/return-order-modal";
 import { OrdersTableClient } from "@/components/admin/orders-table-client";
+import { Pagination } from "@/components/shared/pagination";
+import { parsePagination } from "@/lib/pagination";
+import { Suspense } from "react";
 
 export const metadata = { title: "Order History – Pronuvia Admin" };
 
@@ -19,17 +22,27 @@ function SummaryCard({ label, value, sub, color }: { label: string; value: strin
   );
 }
 
-export default async function OrdersPage() {
-  const orders = await listOrders();
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const totalRevenue    = orders.reduce((s, o) => s + o.total,                     0);
-  const totalRepComm    = orders.reduce((s, o) => s + o.salesRepCommissionAmount,   0);
-  const totalDrComm     = orders.reduce((s, o) => s + o.physicianCommissionAmount,  0);
-  const totalClawback   = orders.reduce((s, o) => s + (o.salesRepClawback ?? 0),   0);
+  // Paginated page + full totals in parallel
+  const [{ orders, total }, { orders: allOrders }] = await Promise.all([
+    listOrders({ skip, take }),
+    listOrders({}),
+  ]);
 
-  const completedCount  = orders.filter((o) => o.status === "COMPLETED").length;
-  const pendingCount    = orders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING").length;
-  const returnedCount   = orders.filter((o) => !!o.returnedAt).length;
+  const totalRevenue   = allOrders.reduce((s, o) => s + o.total,                    0);
+  const totalRepComm   = allOrders.reduce((s, o) => s + o.salesRepCommissionAmount,  0);
+  const totalDrComm    = allOrders.reduce((s, o) => s + o.physicianCommissionAmount, 0);
+  const totalClawback  = allOrders.reduce((s, o) => s + (o.salesRepClawback ?? 0),  0);
+  const completedCount = allOrders.filter((o) => o.status === "COMPLETED").length;
+  const pendingCount   = allOrders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING").length;
+  const returnedCount  = allOrders.filter((o) => !!o.returnedAt).length;
 
   return (
     <div className="space-y-6">
@@ -50,7 +63,7 @@ export default async function OrdersPage() {
         <SummaryCard
           label="Total Revenue"
           value={fmt(totalRevenue)}
-          sub={`${orders.length} orders total`}
+          sub={`${total} orders total`}
           color="#3DBFA4"
         />
         <SummaryCard
@@ -78,14 +91,17 @@ export default async function OrdersPage() {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-700">
             All Orders
-            <span className="ml-2 text-xs font-normal text-gray-400">({orders.length})</span>
+            <span className="ml-2 text-xs font-normal text-gray-400">({total})</span>
           </h2>
           <p className="text-xs text-gray-400">Click any row to view order details</p>
         </div>
 
         <OrdersTableClient orders={orders} />
+
+        <Suspense>
+          <Pagination total={total} page={page} pageSize={pageSize} />
+        </Suspense>
       </div>
     </div>
   );
 }
-

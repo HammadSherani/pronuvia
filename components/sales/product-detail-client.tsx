@@ -192,7 +192,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
         {/* Right — info + buy */}
         <div>
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
+          {/* <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
             {breadcrumb.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 {i > 0 && <span>/</span>}
@@ -202,7 +202,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
                 }
               </span>
             ))}
-          </nav>
+          </nav> */}
 
           {/* Category */}
           {product.category && (
@@ -265,7 +265,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           </div>
 
           {/* Meta */}
-          <div className="text-xs text-gray-500 space-y-1 pt-3 border-t border-gray-100">
+          <div className="text-xs hidden text-gray-500 space-y-1 pt-3 border-t border-gray-100">
             {selectedVariant?.sku && <p><span className="font-medium text-gray-700">SKU:</span> {selectedVariant.sku}</p>}
             {product.category && <p><span className="font-medium text-gray-700">Category:</span>{" "}
               <span className="text-[#3DBFA4]">{product.category.name}</span>

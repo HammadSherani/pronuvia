@@ -19,7 +19,8 @@ interface PhysicianFormProps {
     aictherapy?: string; license?: string; websiteLink?: string;
     addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string;
     nameOfPractice?: string; yearsInPractice?: number;
-    fieldsOfSpeciality?: string[]; commission?: number;
+    fieldsOfSpeciality?: string[]; commission?: number; uplineCommission?: number;
+    salesRepName?: string;
     bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string;
   };
 }
@@ -114,34 +115,34 @@ export function PhysicianForm({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>First Name<Req /></label>
-            <input name="firstName" className={icls(e.firstName?.[0])} placeholder="Dr. Jane" defaultValue={defaults?.firstName} />
+            <input name="firstName" className={icls(e.firstName?.[0])} placeholder="Dr. Jane" defaultValue={state?.values?.firstName ?? defaults?.firstName} />
             <FE msg={e.firstName?.[0]} />
           </div>
           <div>
             <label className={lbl}>Last Name<Req /></label>
-            <input name="lastName" className={icls(e.lastName?.[0])} placeholder="Doe" defaultValue={defaults?.lastName} />
+            <input name="lastName" className={icls(e.lastName?.[0])} placeholder="Doe" defaultValue={state?.values?.lastName ?? defaults?.lastName} />
             <FE msg={e.lastName?.[0]} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Email<Req /></label>
-            <input name="email" type="email" className={icls(e.email?.[0])} placeholder="doctor@clinic.com" defaultValue={defaults?.email} />
+            <input name="email" type="email" className={icls(e.email?.[0])} placeholder="doctor@clinic.com" defaultValue={state?.values?.email ?? defaults?.email} />
             <FE msg={e.email?.[0]} />
           </div>
           <div>
             <label className={lbl}>Mobile Phone</label>
-            <input name="phone" className={icls()} placeholder="+1 555 000 0000" defaultValue={defaults?.phone} />
+            <input name="phone" className={icls()} placeholder="+1 555 000 0000" defaultValue={state?.values?.phone ?? defaults?.phone} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Office Contact Number</label>
-            <input name="officeContactNumber" className={icls()} placeholder="+1 555 000 0001" defaultValue={defaults?.officeContactNumber} />
+            <input name="officeContactNumber" className={icls()} placeholder="+1 555 000 0001" defaultValue={state?.values?.officeContactNumber ?? defaults?.officeContactNumber} />
           </div>
           <div>
-            <label className={lbl}>Fax</label>
-            <input name="fax" className={icls()} placeholder="+1 555 000 0002" defaultValue={defaults?.fax} />
+            <label className={lbl}>Fax <span className="font-normal text-gray-400">(Optional)</span></label>
+            <input name="fax" className={icls()} placeholder="+1 555 000 0002" defaultValue={state?.values?.fax ?? defaults?.fax} />
           </div>
         </div>
       </div>
@@ -150,18 +151,37 @@ export function PhysicianForm({
       {!hideCommission && (
         <div className={sec}>
           <p className={head}>Commission Settings</p>
-          <div className="max-w-xs">
-            <label className={lbl}>
-              Doctor&apos;s Commission %
-              <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own sales</span>
-            </label>
-            <div className="relative">
-              <input name="commission" type="number" step="0.01" min="0" max="100"
-                className={icls(e.commission?.[0])} placeholder="0.00"
-                defaultValue={defaults?.commission ?? 0} />
-              <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={lbl}>
+                Doctor&apos;s Commission %
+                <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
+              </label>
+              <div className="relative">
+                <input name="commission" type="number" step="0.01" min="0" max="100"
+                  className={icls(e.commission?.[0])} placeholder="0.00"
+                  defaultValue={state?.values?.commission ?? defaults?.commission ?? 0} />
+                <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+              </div>
+              <FE msg={e.commission?.[0]} />
             </div>
-            <FE msg={e.commission?.[0]} />
+
+            <div>
+              <label className={lbl}>
+                Sales Rep&apos;s Commission %
+                {defaults?.salesRepName
+                  ? <span className="ml-1.5 text-xs font-normal text-gray-400">earned by {defaults.salesRepName} on this doctor&apos;s orders</span>
+                  : <span className="ml-1.5 text-xs font-normal text-gray-400">upline commission on this doctor&apos;s orders</span>
+                }
+              </label>
+              <div className="relative">
+                <input name="uplineCommission" type="number" step="0.01" min="0" max="100"
+                  className={icls(e.uplineCommission?.[0])} placeholder="0.00"
+                  defaultValue={state?.values?.uplineCommission ?? defaults?.uplineCommission ?? 0} />
+                <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+              </div>
+              <FE msg={e.uplineCommission?.[0]} />
+            </div>
           </div>
         </div>
       )}
@@ -194,26 +214,26 @@ export function PhysicianForm({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Name of Practice</label>
-            <input name="nameOfPractice" className={icls()} placeholder="City Health Clinic" defaultValue={defaults?.nameOfPractice} />
+            <input name="nameOfPractice" className={icls()} placeholder="City Health Clinic" defaultValue={state?.values?.nameOfPractice ?? defaults?.nameOfPractice} />
           </div>
           <div>
             <label className={lbl}>Years in Practice</label>
-            <input name="yearsInPractice" type="number" min="0" className={icls()} placeholder="10" defaultValue={defaults?.yearsInPractice} />
+            <input name="yearsInPractice" type="number" min="0" className={icls()} placeholder="10" defaultValue={state?.values?.yearsInPractice ?? defaults?.yearsInPractice} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>License Number</label>
-            <input name="license" className={icls()} placeholder="LIC-000000" defaultValue={defaults?.license} />
+            <input name="license" className={icls()} placeholder="LIC-000000" defaultValue={state?.values?.license ?? defaults?.license} />
           </div>
           <div>
             <label className={lbl}>AIC Therapy ID</label>
-            <input name="aictherapy" className={icls()} placeholder="AIC-000" defaultValue={defaults?.aictherapy} />
+            <input name="aictherapy" className={icls()} placeholder="AIC-000" defaultValue={state?.values?.aictherapy ?? defaults?.aictherapy} />
           </div>
         </div>
         <div>
           <label className={lbl}>Website</label>
-          <input name="websiteLink" type="url" className={icls(e.websiteLink?.[0])} placeholder="https://clinic.com" defaultValue={defaults?.websiteLink ?? ""} />
+          <input name="websiteLink" type="url" className={icls(e.websiteLink?.[0])} placeholder="https://clinic.com" defaultValue={state?.values?.websiteLink ?? defaults?.websiteLink ?? ""} />
           <FE msg={e.websiteLink?.[0]} />
         </div>
       </div>
@@ -223,24 +243,24 @@ export function PhysicianForm({
         <p className={head}>Practice Address</p>
         <div className="mb-4">
           <label className={lbl}>Address Line 1</label>
-          <input name="addressOne" className={icls()} placeholder="123 Medical Drive" defaultValue={defaults?.addressOne} />
+          <input name="addressOne" className={icls()} placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne ?? defaults?.addressOne} />
         </div>
         <div className="mb-4">
           <label className={lbl}>Address Line 2</label>
-          <input name="addressTwo" className={icls()} placeholder="Suite 400" defaultValue={defaults?.addressTwo} />
+          <input name="addressTwo" className={icls()} placeholder="Suite 400" defaultValue={state?.values?.addressTwo ?? defaults?.addressTwo} />
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className={lbl}>City</label>
-            <input name="city" className={icls()} placeholder="Los Angeles" defaultValue={defaults?.city} />
+            <input name="city" className={icls()} placeholder="Los Angeles" defaultValue={state?.values?.city ?? defaults?.city} />
           </div>
           <div>
             <label className={lbl}>State</label>
-            <input name="state" className={icls()} placeholder="CA" defaultValue={defaults?.state} />
+            <input name="state" className={icls()} placeholder="CA" defaultValue={state?.values?.state ?? defaults?.state} />
           </div>
           <div>
             <label className={lbl}>ZIP Code</label>
-            <input name="zipCode" className={icls()} placeholder="90001" defaultValue={defaults?.zipCode} />
+            <input name="zipCode" className={icls()} placeholder="90001" defaultValue={state?.values?.zipCode ?? defaults?.zipCode} />
           </div>
         </div>
       </div>
@@ -251,16 +271,16 @@ export function PhysicianForm({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Bank Name</label>
-            <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={defaults?.bankName} />
+            <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={state?.values?.bankName ?? defaults?.bankName} />
           </div>
           <div>
             <label className={lbl}>Swift Code</label>
-            <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33" defaultValue={defaults?.swiftCode} />
+            <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33" defaultValue={state?.values?.swiftCode ?? defaults?.swiftCode} />
           </div>
         </div>
         <div className="mb-4">
           <label className={lbl}>Account Name</label>
-          <input name="bankAccountName" className={icls()} placeholder="Jane Doe" defaultValue={defaults?.bankAccountName} />
+          <input name="bankAccountName" className={icls()} placeholder="Jane Doe" defaultValue={state?.values?.bankAccountName ?? defaults?.bankAccountName} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

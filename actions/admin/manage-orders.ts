@@ -93,7 +93,7 @@ export async function createOrder(
   }
 
   // Transactionally create order + increment counters on both sides
-  await prisma.$transaction([
+  await Promise.all([
     prisma.order.create({
       data: {
         orderNumber,
@@ -255,7 +255,7 @@ export async function deleteOrder(id: string): Promise<OrderActionState> {
   if (!order) return { message: "Order not found." };
 
   // Decrement counters
-  await prisma.$transaction([
+  await Promise.all([
     prisma.order.delete({ where: { id } }),
     ...(order.physicianId
       ? [prisma.partneringPhysician.update({
@@ -275,24 +275,30 @@ export async function deleteOrder(id: string): Promise<OrderActionState> {
   return { success: true, message: "Order deleted." };
 }
 
-export async function listOrders() {
+export async function listOrders(opts?: { skip?: number; take?: number }) {
   await requireAdmin();
-  return prisma.order.findMany({
-    select: {
-      id: true, orderNumber: true, status: true, total: true,
-      subtotal: true,
-      salesRepCommissionRate: true, salesRepCommissionAmount: true,
-      physicianCommissionRate: true, physicianCommissionAmount: true,
-      paymentMethod: true, paymentStatus: true, transactionId: true,
-      shippingCarrier: true, trackingNumber: true, shippingRate: true, estimatedDelivery: true,
-      returnedAt: true, returnedTotal: true,
-      salesRepClawback: true, physicianClawback: true,
-      physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
-      salesRep:  { select: { name: true } },
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      select: {
+        id: true, orderNumber: true, status: true, total: true,
+        subtotal: true, placedByAdmin: true,
+        salesRepCommissionRate: true, salesRepCommissionAmount: true,
+        physicianCommissionRate: true, physicianCommissionAmount: true,
+        paymentMethod: true, paymentStatus: true, transactionId: true,
+        shippingCarrier: true, trackingNumber: true, shippingRate: true, estimatedDelivery: true,
+        returnedAt: true, returnedTotal: true,
+        salesRepClawback: true, physicianClawback: true,
+        physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
+        salesRep:  { select: { name: true } },
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
+    }),
+    prisma.order.count(),
+  ]);
+  return { orders, total };
 }
 
 export async function getOrderById(id: string) {
@@ -329,33 +335,69 @@ export async function sendOrderEmail(
   emailType: OrderEmailType
 ): Promise<{ success: boolean; message: string }> {
   await requireAdmin();
+
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     select: {
-      orderNumber: true,
+      orderNumber: true, total: true, status: true, items: true,
+      trackingNumber: true, shippingCarrier: true, estimatedDelivery: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
     },
   });
-  if (!order) return { success: false, message: "Order not found." };
+  if (!order)               return { success: false, message: "Order not found." };
+  if (!order.physician)     return { success: false, message: "No physician linked to this order." };
 
   const label: Record<OrderEmailType, string> = {
-    new_order:          "New Order",
-    cancelled_order:    "Cancelled Order",
-    processing_order:   "Processing Order",
-    completed_order:    "Completed Order",
-    order_details:      "Order Details",
+    new_order:        "New Order",
+    cancelled_order:  "Cancelled Order",
+    processing_order: "Processing Order",
+    completed_order:  "Completed Order",
+    order_details:    "Order Details",
   };
 
-  // TODO: wire up Resend / SendGrid / Nodemailer here
-  // For now logs and returns success so the UI flow works
-  console.log(
-    `[EMAIL] ${label[emailType]} → ${order.physician?.email ?? "unknown"} for order ${order.orderNumber}`
-  );
+  type RawItem = { title?: string; variantSize?: string; quantity?: number; unitPrice?: number; lineTotal?: number };
+  const items = (order.items as RawItem[]).map((i) => ({
+    title:       i.title       ?? "Product",
+    variantSize: i.variantSize,
+    quantity:    i.quantity    ?? 1,
+    unitPrice:   i.unitPrice   ?? 0,
+    lineTotal:   i.lineTotal   ?? 0,
+  }));
 
-  return {
-    success: true,
-    message: `"${label[emailType]}" email queued for ${order.orderNumber}.`,
+  const emailData = {
+    orderNumber:       order.orderNumber,
+    firstName:         order.physician.firstName,
+    total:             order.total,
+    status:            order.status,
+    items,
+    trackingNumber:    order.trackingNumber,
+    shippingCarrier:   order.shippingCarrier,
+    estimatedDelivery: order.estimatedDelivery,
   };
+
+  const {
+    orderConfirmationEmail, orderProcessingEmail, orderCompletedEmail,
+    orderCancelledEmail, orderDetailsEmail,
+  } = await import("@/lib/email/templates");
+  const { sendMail } = await import("@/lib/email/mailer");
+
+  const templateFns: Record<OrderEmailType, (d: typeof emailData) => { subject: string; html: string }> = {
+    new_order:        orderConfirmationEmail,
+    processing_order: orderProcessingEmail,
+    completed_order:  orderCompletedEmail,
+    cancelled_order:  orderCancelledEmail,
+    order_details:    orderDetailsEmail,
+  };
+
+  const { subject, html } = templateFns[emailType](emailData);
+
+  try {
+    await sendMail({ to: order.physician.email, subject, html });
+    return { success: true, message: `"${label[emailType]}" email sent to ${order.physician.email}.` };
+  } catch (err) {
+    console.error("[sendOrderEmail]", err);
+    return { success: false, message: "Failed to send email. Check SMTP settings." };
+  }
 }
 
 export async function getOrderByNumber(orderNumber: string) {

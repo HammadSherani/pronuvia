@@ -80,19 +80,16 @@ export async function confirmPhysicianCardOrder(
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, salesRepId: true },
+    select: { commission: true, uplineCommission: true, salesRepId: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
   const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
 
+  // Use uplineCommission (set by admin per doctor) for the sales rep's cut on this doctor's orders
   let salesRepCommissionRate   = 0;
   let salesRepCommissionAmount = 0;
   if (physician?.salesRepId) {
-    const rep = await prisma.salesRepresentative.findUnique({
-      where:  { id: physician.salesRepId },
-      select: { commission: true },
-    });
-    salesRepCommissionRate   = rep?.commission ?? 0;
+    salesRepCommissionRate   = physician.uplineCommission ?? 0;
     salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
   }
 

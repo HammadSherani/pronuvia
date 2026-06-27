@@ -217,6 +217,8 @@ model Order {
   couponId                  String?              @db.ObjectId
   discountAmount            Float                @default(0)
 
+  placedByAdmin             Boolean              @default(false)
+
   // Return / clawback fields
   returnedAt                DateTime?
   returnReason              String?
@@ -266,6 +268,14 @@ model Shipment {
   status         String   @default("created")
   shipDate       DateTime @default(now())
   createdAt      DateTime @default(now())
+}
+
+model OrderNote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @db.ObjectId
+  type      String   // "private" | "customer"
+  content   String
+  createdAt DateTime @default(now())
 }
 
 model WalletTransaction {

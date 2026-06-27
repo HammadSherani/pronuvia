@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
@@ -156,15 +156,21 @@ export async function deleteSalesRep(id: string): Promise<SalesRepActionState> {
   return { success: true, message: "Sales representative deleted." };
 }
 
-export async function listSalesReps() {
+export async function listSalesReps(opts?: { skip?: number; take?: number }) {
   await requireAdmin();
-  return prisma.salesRepresentative.findMany({
-    select: {
-      id: true, name: true, firstName: true, lastName: true,
-      email: true, phone: true, commission: true, ordersCount: true, createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [reps, total] = await Promise.all([
+    prisma.salesRepresentative.findMany({
+      select: {
+        id: true, name: true, firstName: true, lastName: true,
+        email: true, phone: true, commission: true, ordersCount: true, createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
+    }),
+    prisma.salesRepresentative.count(),
+  ]);
+  return { reps, total };
 }
 
 export async function getSalesRepById(id: string) {

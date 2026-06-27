@@ -10,9 +10,10 @@ import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 
 export type AddPhysicianState = {
-  errors?: Record<string, string[]>;
+  errors?:  Record<string, string[]>;
   message?: string;
   success?: boolean;
+  values?:  Record<string, string>;
 } | undefined;
 
 export async function salesRepAddPhysician(
@@ -46,16 +47,20 @@ export async function salesRepAddPhysician(
     commission: 0, // only admin can set commission
   };
 
+  const strValues: Record<string, string> = Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+  );
+
   const validated = CreatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
-    return { errors: z.flattenError(validated.error).fieldErrors };
+    return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
     where: { email: validated.data.email },
   });
   if (exists) {
-    return { errors: { email: ["A physician with this email already exists."] } };
+    return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
   }
 
   const salesRepNote = (formData.get("salesRepNote") as string)?.trim() || null;

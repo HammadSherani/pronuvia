@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
+import { AddressFields, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
+import { State, Country } from "country-state-city";
 
 const SPECIALTIES = [
   "Cardiology","Dermatology","Endocrinology","Family Medicine","Gastroenterology",
@@ -169,6 +171,24 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
   const [confirmAccountNumber, setConfirmAccountNumber] = useState(p.bankAccountNumber ?? "");
   const [accountMismatch, setAccountMismatch]     = useState(false);
 
+  const [addrData, setAddrData] = useState<AddressData>(() => {
+    const stateCode = p.state ?? "";
+    const stateList = State.getStatesOfCountry("US");
+    const stObj = stateList.find(s => s.isoCode === stateCode.toUpperCase()) ?? stateList.find(s => s.name.toLowerCase() === stateCode.toLowerCase());
+    const country = Country.getCountryByCode("US");
+    return {
+      ...EMPTY_ADDRESS,
+      address1:    p.addressOne  ?? "",
+      address2:    p.addressTwo  ?? "",
+      city:        p.city        ?? "",
+      state:       stObj?.isoCode ?? stateCode,
+      stateName:   stObj?.name    ?? stateCode,
+      zip:         p.zipCode     ?? "",
+      country:     "US",
+      countryName: country?.name ?? "United States",
+    };
+  });
+
   const e = state?.errors ?? {};
 
   function toggle(s: string) {
@@ -270,18 +290,18 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           <Field label="Years in Practice *" error={e.yearsInPractice?.[0]}>
             <input name="yearsInPractice" type="number" min="0" required defaultValue={p.yearsInPractice ?? ""} className={e.yearsInPractice ? inpErr : inp} />
           </Field>
-          <Field label="How did you hear about SAC Therapy? *" error={e.aictherapy?.[0]}>
+          <Field label="How did you hear about AIC Therapy? *" error={e.aictherapy?.[0]}>
             <input name="aictherapy" required defaultValue={p.aictherapy ?? ""} className={e.aictherapy ? inpErr : inp} />
           </Field>
         </div>
 
-        <Field label="Office Website *" error={e.websiteLink?.[0]}>
+        <Field label="Website *" error={e.websiteLink?.[0]}>
           <input name="websiteLink" type="url" required defaultValue={p.websiteLink ?? ""} className={e.websiteLink ? inpErr : inp} />
         </Field>
 
         {/* Specialties */}
         <div>
-          <label className={lbl}>Preferred Specialties *</label>
+          <label className={lbl}>Fields of Specialties *</label>
           <div className="flex flex-wrap gap-2 mt-1">
             {SPECIALTIES.map((s) => (
               <button key={s} type="button" onClick={() => toggle(s)}
@@ -306,25 +326,16 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
       {/* ── Address ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100">Address</h2>
-
-        <Field label="Address Line 1 *" error={e.addressOne?.[0]}>
-          <input name="addressOne" required defaultValue={p.addressOne ?? ""} className={e.addressOne ? inpErr : inp} />
-        </Field>
-        <Field label="Address Line 2">
-          <input name="addressTwo" defaultValue={p.addressTwo ?? ""} className={inp} placeholder="Suite, floor, etc. (optional)" />
-        </Field>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Field label="City *" error={e.city?.[0]}>
-            <input name="city" required defaultValue={p.city ?? ""} className={e.city ? inpErr : inp} />
-          </Field>
-          <Field label="State *" error={e.state?.[0]}>
-            <input name="state" required defaultValue={p.state ?? ""} className={e.state ? inpErr : inp} />
-          </Field>
-          <Field label="Zip Code *" error={e.zipCode?.[0]}>
-            <input name="zipCode" required defaultValue={p.zipCode ?? ""} className={e.zipCode ? inpErr : inp} />
-          </Field>
-        </div>
+        {/* Hidden inputs map AddressFields state → server action fields */}
+        <input type="hidden" name="addressOne" value={addrData.address1} />
+        <input type="hidden" name="addressTwo" value={addrData.address2} />
+        <input type="hidden" name="city"       value={addrData.city} />
+        <input type="hidden" name="state"      value={addrData.state} />
+        <input type="hidden" name="zipCode"    value={addrData.zip} />
+        {(e.addressOne ?? e.city ?? e.state ?? e.zipCode) && (
+          <p className="text-xs text-red-500">{e.addressOne?.[0] ?? e.city?.[0] ?? e.state?.[0] ?? e.zipCode?.[0]}</p>
+        )}
+        <AddressFields value={addrData} onChange={setAddrData} showName={false} />
       </div>
 
       {/* ── Bank Details ── */}
