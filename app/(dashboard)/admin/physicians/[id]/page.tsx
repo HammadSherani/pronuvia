@@ -110,7 +110,7 @@ export default async function PhysicianViewPage({ params }: Props) {
         <InfoRow label="Name of Practice" value={p.nameOfPractice} />
         <InfoRow label="Years in Practice" value={p.yearsInPractice != null ? String(p.yearsInPractice) : null} />
         <InfoRow label="License Number" value={p.license} />
-        <InfoRow label="AIC Therapy ID" value={p.aictherapy} />
+        <InfoRow label="How did you hear about AIC Therapy? " value={p.aictherapy} />
         <div className="col-span-2">
           <InfoRow label="Website" value={p.websiteLink} />
         </div>
@@ -126,6 +126,7 @@ export default async function PhysicianViewPage({ params }: Props) {
         <InfoRow label="City" value={p.city} />
         <InfoRow label="State" value={p.state} />
         <InfoRow label="ZIP Code" value={p.zipCode} />
+        <InfoRow label="Country" value={p.country} />
       </Card>
 
       {/* Specialties */}

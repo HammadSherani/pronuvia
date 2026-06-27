@@ -80,13 +80,12 @@ export async function registerPhysician(
     return { errors: { email: ["An account with this email already exists."] }, values: strValues };
   }
 
-  const { country, ...rest } = validated.data;
   const placeholder = randomPlaceholderPassword();
   const hashed      = await hashPassword(placeholder);
 
   await prisma.partneringPhysician.create({
     data: {
-      ...rest,
+      ...validated.data,
       password:          hashed,
       fieldsOfSpeciality,
       isApproved:        ApprovalStatus.PENDING,

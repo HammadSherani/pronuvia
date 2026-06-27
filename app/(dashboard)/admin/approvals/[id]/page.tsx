@@ -134,7 +134,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
           <InfoRow label="Name of Practice"  value={p.nameOfPractice} />
           <InfoRow label="Years in Practice" value={p.yearsInPractice} />
           <InfoRow label="License Number"    value={p.license} />
-          <InfoRow label="AIC Therapy ID"    value={p.aictherapy} />
+          <InfoRow label="How did you hear about AIC Therapy? "    value={p.aictherapy} />
           <div className="col-span-2">
             <InfoRow label="Website" value={p.websiteLink} />
           </div>

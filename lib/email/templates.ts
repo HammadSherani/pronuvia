@@ -94,6 +94,163 @@ export function passwordSetupEmail(opts: {
 }
 
 // ─────────────────────────────────────────────
+// Physician approval welcome email (detailed onboarding)
+// ─────────────────────────────────────────────
+export function physicianApprovalEmail(opts: {
+  firstName: string;
+  lastName:  string;
+  email:     string;
+  resetToken: string;
+}) {
+  const resetLink = `${APP_URL}/reset-password/${opts.resetToken}`;
+  const subject   = "Welcome to Pronuvia — Your Account is Approved";
+
+  const row = (label: string, value: string) =>
+    `<tr>
+      <td style="padding:7px 0;font-size:13px;color:#6b7280;white-space:nowrap;vertical-align:top;width:160px;">${label}</td>
+      <td style="padding:7px 0 7px 12px;font-size:13px;color:#111827;font-weight:600;word-break:break-all;">${value}</td>
+    </tr>`;
+
+  const h2 = (t: string) =>
+    `<p style="margin:24px 0 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3DBFA4;">${t}</p>`;
+
+  const html = base(`
+    <p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.6;">Dear Dr. ${opts.firstName} ${opts.lastName},</p>
+    <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.7;">
+      I am Jason from Pronuvia and am glad to welcome you as a participating physician for AIC Therapy.
+    </p>
+    <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.7;">
+      Your application to set up an account with us is now <strong>approved</strong>. Congratulations.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      We also sent you a Welcome Aboard email with links and information on AIC Therapy for your study and reference.
+      If you did not receive it yet, please check your email's Promotion or Spam folder to locate it.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      I am certain that you are excited to try out our new ionic calcium therapy for your patients, and we are equally
+      excited to come alongside to provide all the needed support. However, let's get all the required legal documentation
+      taken care of first so that we can move forward with full steam.
+    </p>
+
+    ${h2("Login Info")}
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:6px;">
+      <table cellpadding="0" cellspacing="0" style="width:100%;">
+        ${row("Website:", "www.pronuvia.com")}
+        ${row("Username (Login ID):", opts.email)}
+        ${row("Email:", opts.email)}
+        ${row("Password:", "Click &ldquo;Forgot Your Password?&rdquo; to set your password")}
+      </table>
+    </div>
+    <div style="text-align:center;margin:16px 0 24px;">
+      <a href="${resetLink}" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
+        Set My Password
+      </a>
+    </div>
+
+    ${h2("B2B Order Process")}
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      Your office needs to enter the order through our website after login at <strong>www.pronuvia.com</strong> (not www.AICtherapy.com).
+    </p>
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      After login, please go to <strong>"Account Manager"</strong> and click <strong>"Order Products"</strong> on the menu.
+    </p>
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      You can put the shipping address and credit card info of your patient if you want so that we can support the drop ship to your patient.
+    </p>
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      Please enter patient's email address when you order so that they can receive shipment tracking number.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      You will receive the order confirmation email automatically as cc.
+    </p>
+
+    ${h2("Agreement")}
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      We attached the Terms and Conditions you agreed during the application process.
+    </p>
+
+    ${h2("Free Consultation")}
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      To help new doctors get started, we provide a 30-minute personal free consultation. You and your staff or anyone
+      in the practice who needs the basic introduction to AIC Therapy can join. During the call, we can answer any
+      questions that you may have.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      You can book a free consultation at:<br/>
+      <a href="https://www.aictherapy.com/book-a-consultation" style="color:#3DBFA4;">https://www.aictherapy.com/book-a-consultation</a>
+    </p>
+
+    ${h2("The Scope of Practice")}
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      We ask approved doctors and health practitioners to limit the use of AIC (Anti-orbital Ionic Calcium) therapy
+      within the legally allowed scope of the license in treating patients. For example, for nutritionists, AIC therapy
+      can be utilized to treat ionic calcium deficiency, to restore calcium homeostasis, to boost the immune system,
+      to balance the body pH, and for other general calcium-related health issues from a nutritional therapy point of view.
+    </p>
+
+    ${h2("Commission Payout")}
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      We will send you 25% of the commission in the first week of each month. Please provide the information for one of
+      the following payout options (we suggest ACH as it is safer and faster):
+    </p>
+    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(1) ACH</p>
+    <p style="margin:0 0 10px;font-size:13px;color:#374151;line-height:1.7;">Bank Name · Bank Routing Number · Account Number · Account Type (Checking or Savings) · Name on the Account</p>
+    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(2) Check</p>
+    <p style="margin:0 0 10px;font-size:13px;color:#374151;line-height:1.7;">Provide name for "Payable to" and mailing address.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(3) Zelle, Venmo, or PayPal</p>
+    <p style="margin:0 0 24px;font-size:13px;color:#374151;line-height:1.7;">
+      Zelle: email or phone number · Venmo: username or email · PayPal: email address
+    </p>
+
+    ${h2("W-9 Form")}
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      We sent an email via QuickBooks to you for W-9 now. Please fill out the W-9 form within 24 hours as the link
+      will become inactive. The email subject is <em>"Fill out your W-9 tax info for Pronuvia, Inc."</em>
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      Alternatively, you may fill out the attached W-9 form with your signature and send us back the scanned file.
+    </p>
+
+    ${h2("AIC Therapy Booklet and Dosing Protocol")}
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      Please read through the attached Pronuvia AIC Therapy Booklet and Dosing Protocol files. Not only the dosing
+      protocol, but it will also provide a fundamental guideline for the doctor's practice.
+    </p>
+
+    ${h2("Website Content Policy for Pronuvia Products")}
+    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+      We suggest doctors market AIC as a therapy under a generic treatment name (e.g. AIC calcium therapy or ionic
+      calcium therapy) instead of marketing branded products directly.
+    </p>
+    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Please do not list our company name (Pronuvia) and product information searchable on Google on your website.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Please provide a doctor's phone number or email for consultations. All orders should be offline by phone.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Recommended treatment names: "AIC Therapy," "AIC Ionic Calcium Treatment," "Ionic Calcium Treatment," "Calcium Ion Treatment."</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+      Please note that the 30-min free consultation is a very important and useful session to understand our products.
+    </p>
+
+    <p style="margin:0 0 6px;font-size:14px;color:#374151;line-height:1.7;">
+      If you have any questions, please contact us at <strong>800-568-2982</strong> or
+      <a href="mailto:contact@pronuvia.com" style="color:#3DBFA4;">contact@pronuvia.com</a>.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">Thank you.<br/><br/>Sincerely,<br/><strong>Jason Park</strong><br/>Pronuvia Physician Support</p>
+
+    <div style="border-top:1px solid #e5e7eb;margin-top:24px;padding-top:20px;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:0.06em;text-transform:uppercase;">Disclaimer</p>
+      <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.7;">
+        Pronuvia thanks participating doctors, clinics, and health care practitioners for making AIC therapy available
+        to consenting patients. Please note that Pronuvia hereby makes no medical claims to treat or cure any diseases.
+        AIC products are registered as dietary supplements. AIC therapy is a nutritional therapy based on ionic calcium.
+        Utilizing physiological reactions in treating diseases is solely at the discretion of participating physicians.
+        Pronuvia distributes AIC applied products only through licensed physicians, clinics, and health care practitioners.
+        Pronuvia, as a company, does not treat patients directly nor offer any health advice.
+      </p>
+    </div>
+  `);
+  return { subject, html };
+}
+
+// ─────────────────────────────────────────────
 // Sales rep welcome email (kept for compatibility)
 // ─────────────────────────────────────────────
 export function salesRepWelcomeEmail(opts: {

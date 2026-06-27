@@ -131,6 +131,7 @@ model PartneringPhysician {
   city                String?
   state               String?
   zipCode             String?
+  country             String?
   phone               String?
   officeContactNumber String?
   fax                 String?

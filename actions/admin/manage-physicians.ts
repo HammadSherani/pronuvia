@@ -9,7 +9,7 @@ import { generateResetToken, randomPlaceholderPassword } from "@/lib/auth/reset-
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
-import { passwordSetupEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
+import { physicianApprovalEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 
 export type PhysicianActionState = {
   errors?:  Record<string, string[]>;
@@ -101,16 +101,16 @@ export async function adminCreatePhysician(
     },
   });
 
-  // Send password setup email only when approving immediately
+  // Send approval welcome email only when approving immediately
   if (isApproved === ApprovalStatus.APPROVED && token) {
-    const drEmail = passwordSetupEmail({
+    const drEmail = physicianApprovalEmail({
       firstName:  rest.firstName,
+      lastName:   rest.lastName,
       email:      rest.email,
       resetToken: token,
-      role:       "physician",
     });
     sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
-      console.error("[email] physicianSetupPassword failed:", err)
+      console.error("[email] physicianApprovalEmail failed:", err)
     );
   }
 
@@ -268,7 +268,7 @@ export async function getPhysicianById(id: string) {
       firstName: true, lastName: true, email: true,
       phone: true, officeContactNumber: true, fax: true,
       aictherapy: true, license: true, websiteLink: true,
-      addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
+      addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
       nameOfPractice: true, yearsInPractice: true, fieldsOfSpeciality: true,
       commission: true, uplineCommission: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true,

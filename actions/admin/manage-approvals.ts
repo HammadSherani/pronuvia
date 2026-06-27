@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { generateResetToken } from "@/lib/auth/reset-token";
 import { sendMail } from "@/lib/email/mailer";
-import { passwordSetupEmail } from "@/lib/email/templates";
+import { physicianApprovalEmail } from "@/lib/email/templates";
 
 export type ApprovalActionState = {
   message?: string;
@@ -70,15 +70,15 @@ export async function approvePhysician(
     },
   });
 
-  // Send password setup email to the physician
-  const setupEmail = passwordSetupEmail({
+  // Send approval welcome email to the physician
+  const setupEmail = physicianApprovalEmail({
     firstName:  physician.firstName,
+    lastName:   physician.lastName,
     email:      physician.email,
     resetToken: token,
-    role:       "physician",
   });
   sendMail({ to: physician.email, subject: setupEmail.subject, html: setupEmail.html }).catch((err) =>
-    console.error("[email] physicianApprovedSetupPassword failed:", err)
+    console.error("[email] physicianApprovalEmail failed:", err)
   );
 
   revalidatePath("/admin/approvals");
