@@ -17,10 +17,11 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Orders",          href: "/admin/orders" },
       { label: "Withdrawals",     href: "/admin/withdrawals" },
       { label: "Wallet Adjustment", href: "/admin/wallet-adjustment" },
-      { label: "Banners",         href: "/admin/banners" },
-      { label: "Downloads",       href: "/admin/downloads" },
-      { label: "Account",         href: "/admin/account" },
-      { label: "Log out",         action: async () => { await logout(); } },
+      { label: "Promotional Banners",         href: "/admin/banners" },
+      { label: "Coupons",         href: "/admin/coupons" },
+      // { label: "Downloads",       href: "/admin/downloads" },
+      // { label: "Account",         href: "/admin/account" },
+      // { label: "Log out",         action: async () => { await logout(); } },
     ];
   }
 
@@ -29,12 +30,12 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Dashboard",            href: "/sales/dashboard" },
       { label: "Partnering Physicians", href: "/sales/physicians" },
       { label: "Shop",      href: "/sales/shop" },
-      { label: "Wallet",    href: "/sales/wallet" },
-      { label: "Downloads", href: "/sales/downloads" },
-      { label: "Orders",    href: "/sales/orders" },
-      { label: "Account",    href: "/sales/account" },
+      // { label: "Wallet",    href: "/sales/wallet" },
+      // { label: "Downloads", href: "/sales/downloads" },
+      // { label: "Orders",    href: "/sales/orders" },
+      // { label: "Account",    href: "/sales/account" },
       { label: "Withdrawals", href: "/sales/withdrawals" },
-      { label: "Log out",   action: async () => { await logout(); } },
+      // { label: "Log out",   action: async () => { await logout(); } },
     ];
   }
 
@@ -46,9 +47,9 @@ function buildSubNav(role: Role): SubNavItem[] {
     { label: "Orders",      href: "/physician/orders" },
     { label: "Wallet",      href: "/physician/wallet" },
     // { label: "Account",      href: "/physician/account" },
-    { label: "Downloads",   href: "/physician/downloads" },
-    { label: "Account",     href: "/physician/account" },
-    { label: "Log out",     action: async () => { await logout(); } },
+    // { label: "Downloads",   href: "/physician/downloads" },
+    // { label: "Account",     href: "/physician/account" },
+    // { label: "Log out",     action: async () => { await logout(); } },
   ];
 }
 

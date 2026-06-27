@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PronuviaLogoDark } from "./pronuvia-logo-dark";
 import { useCart } from "@/lib/cart/cart-context";
 import type { Role } from "@/generated/prisma/enums";
+import { logout } from "@/actions/auth/logout";
 
 function CartIcon({ href }: { href: string }) {
   const { totalItems } = useCart();
@@ -25,7 +26,9 @@ function CartIcon({ href }: { href: string }) {
   );
 }
 
-type NavChild = { label: string; href: string };
+type NavChild =
+  | { label: string; href: string; action?: never }
+  | { label: string; href?: never; action: () => void | Promise<void> };
 type NavItem =
   | { label: string; href: string; children?: never }
   | { label: string; href?: never; children: NavChild[] };
@@ -49,7 +52,7 @@ function buildNav(role: Role): NavItem[] {
           { label: "Sub-Categories", href: "/admin/sub-categories" },
         ],
       },
-      { label: "Coupons", href: "/admin/coupons" },
+      // { label: "Coupons", href: "/admin/coupons" },
       {
         label: "Website Management",
         children: [
@@ -61,6 +64,8 @@ function buildNav(role: Role): NavItem[] {
         label: "My Account",
         children: [
           { label: "Account Details", href: "/admin/account" },
+          { label: "Downloads", href: "/admin/downloads" },
+          { label: "Logout", action: async () => { await logout(); } },
         ],
       },
     ];
@@ -72,10 +77,16 @@ function buildNav(role: Role): NavItem[] {
 
       // { label: "Terms and Conditions", href: "/Terms" },
       { label: "Contact Us", href: "/contact" },
+      { label: "Terms and conditions", href: "/terms" },
       {
         label: "My Account",
         children: [
           { label: "Account Details", href: "/sales/account" },
+          { label: "Orders", href: "/sales/orders" },
+          // { label: "Terms and conditions", href: "/terms" },
+          { label: "Wallet", href: "/sales/wallet" },
+          { label: "Downloads", href: "/sales/downloads" },
+          { label: "Logout", action: async () => { await logout(); } },
         ],
       },
     ];
@@ -90,6 +101,9 @@ function buildNav(role: Role): NavItem[] {
       label: "My Account",
       children: [
         { label: "Account Details", href: "/physician/account" },
+        { label: "Downloads", href: "/physician/downloads" },
+        { label: "Account", href: "/physician/account" },
+         { label: "Logout", action: async () => { await logout(); } },
       ],
     },
   ];
@@ -105,14 +119,8 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
         setOpen(false);
       }
     };
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
   return (
@@ -142,16 +150,30 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
 
       {open && (
         <div className="absolute top-full -left-20 mt-2 min-w-[180px] bg-white border border-gray-100 rounded-lg shadow-lg py-1 z-50">
-          {item.children.map((child) => (
-            <Link
-              key={child.href}
-              href={child.href}
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2.5 text-sm text-[#6b7280] hover:bg-gray-50 hover:text-[#374151] transition-colors"
-            >
-              {child.label}
-            </Link>
-          ))}
+          {item.children.map((child) =>
+            child.action ? (
+              <button
+                key={child.label}
+                type="button"
+                onClick={async () => {
+                  setOpen(false);
+                  await child.action();
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-[#6b7280] hover:bg-gray-50 hover:text-[#374151] transition-colors"
+              >
+                {child.label}
+              </button>
+            ) : (
+              <Link
+                key={child.href}
+                href={child.href}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-sm text-[#6b7280] hover:bg-gray-50 hover:text-[#374151] transition-colors"
+              >
+                {child.label}
+              </Link>
+            )
+          )}
         </div>
       )}
     </div>
@@ -168,12 +190,10 @@ export function MainHeader({ role }: { role: Role }) {
         <nav className="flex items-center gap-6 flex-wrap">
           {navItems.map((item) =>
             item.children ? (
-              role !== "SALES_REP" ? (
                 <DropdownMenu
                   key={item.label}
                   item={item as NavItem & { children: NavChild[] }}
                 />
-              ) : null
             ) : (
               <Link
                 key={item.href}

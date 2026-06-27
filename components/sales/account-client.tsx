@@ -315,7 +315,7 @@ export function SalesAccountClient({ rep }: { rep: Rep }) {
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="">
       {!editing && (
         <div>
           <h1 className="text-xl font-bold text-gray-900">My Account</h1>
