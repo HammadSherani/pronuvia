@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -22,8 +22,11 @@ import { useCart } from "@/lib/cart/cart-context";
 import { confirmPhysicianCardOrder } from "@/actions/physician/confirm-card-order";
 import { savePhysicianAddress }      from "@/actions/physician/save-address";
 import { validateCoupon }            from "@/actions/checkout/validate-coupon";
+import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
+
+type ShippingOption = { id: string; method: string; label: string; cost: number };
 
 function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
@@ -46,18 +49,19 @@ type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
 type StripeHandle = { submit: () => void };
 
 const StripeInnerForm = forwardRef<StripeHandle, {
-  itemsJson:       string;
-  billingAddress:  string;
-  shippingAddress: string;
-  notes:           string;
-  total:           number;
-  couponId?:       string;
-  couponCode?:     string;
-  discountAmount?: number;
-  onSuccess:       (orderNumber: string) => void;
-  onProcessing:    (v: boolean) => void;
-  onError:         (msg: string) => void;
-}>(function StripeInnerForm({ itemsJson, billingAddress, shippingAddress, notes, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
+  itemsJson:        string;
+  billingAddress:   string;
+  shippingAddress:  string;
+  notes:            string;
+  total:            number;
+  shippingRate:     number;
+  couponId?:        string;
+  couponCode?:      string;
+  discountAmount?:  number;
+  onSuccess:        (orderNumber: string) => void;
+  onProcessing:     (v: boolean) => void;
+  onError:          (msg: string) => void;
+}>(function StripeInnerForm({ itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
 
@@ -80,7 +84,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
         billingAddress,
         shippingAddress,
         notes,
-        shippingRate: 0,
+        shippingRate,
         total,
         couponId,
         couponCode,
@@ -127,6 +131,31 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const [editBill,      setEditBill]      = useState(false);
   const [savingAddr,    setSavingAddr]    = useState(false);
 
+  // Shipping options
+  const [shippingOptions,    setShippingOptions]    = useState<ShippingOption[]>([]);
+  const [selectedShipping,   setSelectedShipping]   = useState<ShippingOption | null>(null);
+  const [loadingShipping,    setLoadingShipping]    = useState(false);
+
+  // Fetch shipping options when country changes
+  useEffect(() => {
+    if (!shipping.country) {
+      setShippingOptions([]);
+      setSelectedShipping(null);
+      return;
+    }
+    setLoadingShipping(true);
+    getShippingOptionsForCountry(shipping.country, shipping.state || undefined)
+      .then((opts) => {
+        setShippingOptions(opts);
+        setSelectedShipping(opts.length > 0 ? opts[0] : null);
+      })
+      .catch(() => {
+        setShippingOptions([]);
+        setSelectedShipping(null);
+      })
+      .finally(() => setLoadingShipping(false));
+  }, [shipping.country, shipping.state]);
+
   const handleSaveForLater = async () => {
     setSavingAddr(true);
     const res = await savePhysicianAddress({
@@ -162,7 +191,8 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
 
   const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
-  const total          = parseFloat(Math.max(0, subtotal - discountAmount).toFixed(2));
+  const shippingCost   = selectedShipping?.cost ?? 0;
+  const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
 
   useEffect(() => {
     if (!items.length || total <= 0) return;
@@ -216,6 +246,10 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
 
   const handlePlaceOrder = () => {
     if (!hasAddr(shipping)) { toast.error("Please enter a shipping address."); return; }
+    if (shippingOptions.length > 0 && !selectedShipping) {
+      toast.error("Please select a shipping method.");
+      return;
+    }
     stripeRef.current?.submit();
   };
 
@@ -236,7 +270,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const billDsp     = displayAddr(billing);
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-gray-900 mb-6" />
 
@@ -304,7 +338,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
               <span className="text-sm text-gray-700">Use same address for billing</span>
             </label>
 
-            {/* Billing address — shown when checkbox is unchecked */}
             {!sameAsBilling && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
@@ -329,7 +362,44 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             )}
           </section>
 
-          {/* 3. Payment */}
+          {/* 3. Shipping method */}
+          {shipping.country && !editShip && (
+            <section>
+              <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
+              {loadingShipping ? (
+                <div className="flex items-center gap-2 py-4 text-sm text-gray-400 border border-gray-200 rounded px-4">
+                  <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                  Loading shipping options…
+                </div>
+              ) : shippingOptions.length === 0 ? (
+                <div className="border border-amber-200 bg-amber-50 rounded px-4 py-3 text-sm text-amber-700">
+                  No shipping options available for {shipping.countryName}. Please contact us.
+                </div>
+              ) : (
+                <div className="border border-gray-300 rounded divide-y divide-gray-100">
+                  {shippingOptions.map((opt) => (
+                    <label key={opt.id} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="shippingMethod"
+                        checked={selectedShipping?.id === opt.id}
+                        onChange={() => setSelectedShipping(opt)}
+                        className="accent-gray-900"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{opt.label}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : `$${opt.cost.toFixed(2)}`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* 4. Payment */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Payment</h2>
             <div className="border border-gray-300 rounded p-4">
@@ -365,6 +435,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                     shippingAddress={shipStr}
                     notes={notes}
                     total={total}
+                    shippingRate={shippingCost}
                     couponId={appliedCoupon?.couponId}
                     couponCode={appliedCoupon?.code}
                     discountAmount={discountAmount}
@@ -382,7 +453,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             </div>
           </section>
 
-          {/* 4. Notes */}
+          {/* 5. Notes */}
           <div>
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" checked={showNotes} onChange={(e) => setShowNotes(e.target.checked)}
@@ -497,9 +568,19 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                     <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-gray-400">
+                <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span className="italic text-xs">Added at fulfillment</span>
+                  {loadingShipping ? (
+                    <span className="text-gray-400 italic text-xs">Calculating…</span>
+                  ) : selectedShipping ? (
+                    <span className={selectedShipping.cost === 0 ? "text-emerald-600 font-medium" : ""}>
+                      {selectedShipping.cost === 0 ? "Free" : `$${selectedShipping.cost.toFixed(2)}`}
+                    </span>
+                  ) : !shipping.country ? (
+                    <span className="italic text-xs text-gray-400">Enter address first</span>
+                  ) : (
+                    <span className="italic text-xs text-amber-600">Not available</span>
+                  )}
                 </div>
               </div>
               <div className="px-4 py-4">
@@ -508,15 +589,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-            </div>
-
-            <div className="border border-blue-50 bg-blue-50 rounded-xl px-4 py-3 flex items-start gap-3">
-              <svg className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-xs text-blue-700 leading-relaxed">
-                Shipping charges are calculated by our team and will appear in your order tracking once shipped.
-              </p>
             </div>
           </div>
         </div>

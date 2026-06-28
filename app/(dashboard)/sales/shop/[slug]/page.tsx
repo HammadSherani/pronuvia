@@ -38,7 +38,7 @@ export default async function ShopProductPage({ params }: Props) {
   ]);
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       {/* Back */}
       <Link href="/sales/shop"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors">

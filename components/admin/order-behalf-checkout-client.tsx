@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState, useEffect, useTransition,
@@ -12,8 +12,11 @@ import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmBehalfCardOrder } from "@/actions/admin/order-behalf";
 import { validateCoupon } from "@/actions/checkout/validate-coupon";
+import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
+
+type ShippingOption = { id: string; method: string; label: string; cost: number };
 
 function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
@@ -35,13 +38,14 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   shippingAddress: string;
   notes:           string;
   total:           number;
+  shippingRate:    number;
   couponId?:       string;
   couponCode?:     string;
   discountAmount?: number;
   onSuccess:       (orderNumber: string) => void;
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
-}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
+}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
 
@@ -65,7 +69,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
         billingAddress,
         shippingAddress,
         notes,
-        shippingRate: 0,
+        shippingRate,
         total,
         couponId,
         couponCode,
@@ -113,6 +117,30 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const [editShip,      setEditShip]      = useState(!hasAddr(migrated));
   const [editBill,      setEditBill]      = useState(false);
 
+  // Shipping options
+  const [shippingOptions,  setShippingOptions]  = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [loadingShipping,  setLoadingShipping]  = useState(false);
+
+  useEffect(() => {
+    if (!shipping.country) {
+      setShippingOptions([]);
+      setSelectedShipping(null);
+      return;
+    }
+    setLoadingShipping(true);
+    getShippingOptionsForCountry(shipping.country, shipping.state || undefined)
+      .then((opts) => {
+        setShippingOptions(opts);
+        setSelectedShipping(opts.length > 0 ? opts[0] : null);
+      })
+      .catch(() => {
+        setShippingOptions([]);
+        setSelectedShipping(null);
+      })
+      .finally(() => setLoadingShipping(false));
+  }, [shipping.country, shipping.state]);
+
   const [notes,          setNotes]          = useState("");
   const [showNotes,      setShowNotes]      = useState(false);
   const [clientSecret,   setClientSecret]   = useState("");
@@ -128,8 +156,9 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const stripeRef = useRef<StripeHandle>(null);
 
   const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
+  const shippingCost   = selectedShipping?.cost ?? 0;
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
-  const total          = parseFloat(Math.max(0, subtotal - discountAmount).toFixed(2));
+  const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
 
   useEffect(() => {
     if (!items.length || total <= 0) return;
@@ -163,7 +192,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const shipDsp = displayAddr(shipping);
   const billDsp = displayAddr(effectiveBilling);
 
-  const handleCardSuccess = (orderNumber: string) => {
+  const handleCardSuccess = (_orderNumber: string) => {
     toast.success("Order placed successfully!");
     clearCart();
     router.push(`/admin/orders`);
@@ -185,6 +214,10 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   const handlePlaceOrder = () => {
     if (!hasAddr(shipping)) { toast.error("Please enter a shipping address."); return; }
+    if (shippingOptions.length > 0 && !selectedShipping) {
+      toast.error("Please select a shipping method.");
+      return;
+    }
     stripeRef.current?.submit();
   };
 
@@ -204,7 +237,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const stripeReady = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       {/* On-behalf banner */}
       <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 mb-6">
         <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -293,6 +326,43 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             )}
           </section>
 
+          {/* Shipping method */}
+          {shipping.country && !editShip && (
+            <section>
+              <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
+              {loadingShipping ? (
+                <div className="flex items-center gap-2 py-4 text-sm text-gray-400 border border-gray-200 rounded px-4">
+                  <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                  Loading shipping options…
+                </div>
+              ) : shippingOptions.length === 0 ? (
+                <div className="border border-amber-200 bg-amber-50 rounded px-4 py-3 text-sm text-amber-700">
+                  No shipping options configured for {shipping.countryName}.
+                </div>
+              ) : (
+                <div className="border border-gray-300 rounded divide-y divide-gray-100">
+                  {shippingOptions.map((opt) => (
+                    <label key={opt.id} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="shippingMethod"
+                        checked={selectedShipping?.id === opt.id}
+                        onChange={() => setSelectedShipping(opt)}
+                        className="accent-gray-900"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{opt.label}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : `$${opt.cost.toFixed(2)}`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Payment */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Payment</h2>
@@ -322,6 +392,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                     shippingAddress={shipStr}
                     notes={notes}
                     total={total}
+                    shippingRate={shippingCost}
                     couponId={appliedCoupon?.couponId}
                     couponCode={appliedCoupon?.code}
                     discountAmount={discountAmount}
@@ -420,17 +491,28 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   </div>
                 ))}
               </div>
-              <div className="px-4 py-3 space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+              <div className="px-4 py-3 space-y-2 text-sm text-gray-600">
+                <div className="flex justify-between">
                   <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-sm text-emerald-600">
+                  <div className="flex justify-between text-emerald-600">
                     <span>Discount ({appliedCoupon?.code})</span><span>−${discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Shipping</span><span className="text-emerald-600 font-medium">Free</span>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  {loadingShipping ? (
+                    <span className="text-gray-400 italic text-xs">Calculating…</span>
+                  ) : selectedShipping ? (
+                    <span className={selectedShipping.cost === 0 ? "text-emerald-600 font-medium" : ""}>
+                      {selectedShipping.cost === 0 ? "Free" : `$${selectedShipping.cost.toFixed(2)}`}
+                    </span>
+                  ) : !shipping.country ? (
+                    <span className="italic text-xs text-gray-400">Enter address first</span>
+                  ) : (
+                    <span className="italic text-xs text-amber-600">Not available</span>
+                  )}
                 </div>
                 <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
                   <span>Total</span><span>${total.toFixed(2)}</span>

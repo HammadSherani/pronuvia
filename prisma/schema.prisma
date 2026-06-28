@@ -345,3 +345,24 @@ model WebsiteBanner {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+enum ShippingMethod {
+  FLAT
+  FREE
+  LOCAL_PICKUP
+}
+
+model ShippingRate {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  continent   String
+  country     String         // ISO 2-letter code e.g. "US"
+  countryName String         // Full name e.g. "United States"
+  // empty = country-wide rule; populated = applies only to these state codes
+  states      String[]
+  stateNames  String[]
+  method      ShippingMethod
+  cost        Float          @default(0)
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}

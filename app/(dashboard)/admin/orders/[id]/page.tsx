@@ -379,9 +379,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <div className="flex justify-between text-sm text-gray-500">
                         <span>Shipping</span>
                         <span>
-                          {(order.shippingRate ?? 0) === 0
-                            ? <span className="text-[#3DBFA4] font-medium">Free</span>
-                            : fmtMoney(order.shippingRate ?? 0)}
+                          {(() => {
+                            const stored  = order.shippingRate ?? 0;
+                            // If stored rate is 0 but total > subtotal - discount, recover the implied amount
+                            const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
+                            const display = stored > 0 ? stored : implied > 0 ? implied : 0;
+                            return display === 0
+                              ? <span className="text-[#3DBFA4] font-medium">Free</span>
+                              : fmtMoney(display);
+                          })()}
                         </span>
                       </div>
                       {isReturned && order.returnedTotal != null && (

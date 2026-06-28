@@ -5,7 +5,7 @@ import Image from "next/image";
 export function WhyChooseSection() {
   return (
     <section className="bg-gray-50 py-20">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className=" mx-auto px-6">
 
         {/* Heading */}
         <h2

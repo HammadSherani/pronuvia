@@ -215,7 +215,7 @@ export function ContactPageClient() {
           </div>
 
           {/* Topic content */}
-          <div className="max-w-5xl">
+          <div className="">
             <TopicAccordion items={TOPICS[activeTab]} />
           </div>
         </div>
