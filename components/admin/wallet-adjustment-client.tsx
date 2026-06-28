@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -83,22 +83,22 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">No sales reps found.</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sales Rep</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet Balance</th>
                 <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
               {filtered.map((rep) => (
-                <tr key={rep.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={rep.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                   {/* Avatar + name */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -107,14 +107,14 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
                           {rep.firstName[0]}{rep.lastName[0]}
                         </span>
                       </div>
-                      <p className="font-semibold text-gray-800 text-sm">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">
                         {rep.firstName} {rep.lastName}
                       </p>
                     </div>
                   </td>
 
                   {/* Email */}
-                  <td className="px-5 py-4 text-sm text-gray-500">{rep.email}</td>
+                  <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{rep.email}</td>
 
                   {/* Balance */}
                   <td className="px-5 py-4">
@@ -143,7 +143,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
         )}
       </div>
 
-      {/* ── Modal ──────────────────────────────────────────────── */}
+      {/* -- Modal ------------------------------------------------ */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -151,8 +151,8 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">Wallet Adjustment</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {selected.firstName} {selected.lastName}
                 </p>
               </div>
@@ -169,8 +169,8 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
 
             {/* Current balance */}
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl mb-5">
-              <span className="text-xs text-gray-500 font-medium">Current balance</span>
-              <span className="text-base font-bold text-gray-800">{fmt(selected.walletBalance)}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Current balance</span>
+              <span className="text-base font-bold text-gray-800 dark:text-gray-100">{fmt(selected.walletBalance)}</span>
             </div>
 
             {/* Credit / Debit toggle */}
@@ -222,7 +222,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
               </div>
               {/* Preview new balance */}
               {amount && parseFloat(amount) > 0 && (
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                   New balance:{" "}
                   <span className="font-semibold text-gray-700">
                     {fmt(

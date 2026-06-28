@@ -5,7 +5,7 @@ import { PageHeader }          from "@/components/admin/page-header";
 import { WebsiteBannerForm }   from "@/components/admin/website-banner-form";
 import { updateWebsiteBanner } from "@/actions/admin/website-banners";
 
-export const metadata = { title: "Edit Website Banner – Pronuvia Admin" };
+export const metadata = { title: "Edit Website Banner -“ Pronuvia Admin" };
 
 export default async function EditWebsiteBannerPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
@@ -62,7 +62,7 @@ function CommissionCell({
           disabled={pending}
           className={`w-20 px-2.5 py-1.5 pr-6 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 transition-colors ${ring}`}
         />
-        <span className="absolute right-2 text-xs text-gray-400 pointer-events-none">%</span>
+        <span className="absolute right-2 text-xs text-gray-400 dark:text-gray-500 pointer-events-none">%</span>
       </div>
 
       {dirty && (
@@ -104,7 +104,7 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100">
+          <tr className="border-b border-gray-100 dark:border-gray-700">
             <th className="pb-3 text-left text-xs font-medium text-gray-400 pr-4">Physician</th>
             <th className="pb-3 text-left text-xs font-medium text-gray-400 pr-4">Practice</th>
             <th className="pb-3 text-left text-xs font-medium text-gray-400 pr-4">
@@ -122,7 +122,7 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
             <th className="pb-3 text-right text-xs font-medium text-gray-400">Orders</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
           {doctors.map((doc) => (
             <tr key={doc.id} className="hover:bg-gray-50/40 transition-colors">
               {/* Name */}
@@ -134,20 +134,20 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800 group-hover:text-[#3DBFA4] transition-colors leading-tight">
+                    <p className="font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#3DBFA4] transition-colors leading-tight">
                       Dr. {doc.firstName} {doc.lastName}
                     </p>
-                    <p className="text-xs text-gray-400">{doc.email}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{doc.email}</p>
                   </div>
                 </Link>
               </td>
 
               {/* Practice */}
               <td className="py-3.5 pr-4 text-gray-600">
-                {doc.nameOfPractice || <span className="text-gray-300">—</span>}
+                {doc.nameOfPractice || <span className="text-gray-300">-</span>}
               </td>
 
-              {/* Doctor commission — editable */}
+              {/* Doctor commission - editable */}
               <td className="py-3.5 pr-4">
                 <CommissionCell
                   initialValue={doc.commission}
@@ -156,7 +156,7 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
                 />
               </td>
 
-              {/* Upline commission — editable */}
+              {/* Upline commission - editable */}
               <td className="py-3.5 pr-4">
                 <CommissionCell
                   initialValue={doc.uplineCommission}

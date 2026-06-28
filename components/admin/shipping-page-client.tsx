@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter }  from "next/navigation";
@@ -8,7 +8,7 @@ import { getShippingRates, purchaseLabel } from "@/actions/admin/shipping";
 import type { CarrierCode, PackageInfo, RateResult } from "@/lib/shipping/types";
 import type { OrderItem } from "@/actions/admin/manage-orders";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 type WeightUnit = "lbs" | "kg" | "oz" | "g";
 type PkgType    = "Box" | "Envelope" | "Tube" | "Pak" | "Other";
@@ -37,7 +37,7 @@ interface Props {
   shippingCarrier: string | null;
 }
 
-// ── Static carrier package data ───────────────────────────────────────────────
+// -- Static carrier package data -----------------------------------------------
 
 type CarrierPkg = { id: string; carrier: CarrierCode; name: string; lCm: number; wCm: number; hCm: number };
 
@@ -89,7 +89,7 @@ const CARRIER_PACKAGES: { group: string; carrier: CarrierCode; packages: Carrier
   },
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 function fmt(n: number) { return n.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
 
@@ -116,8 +116,8 @@ function generatePackingSlip(params: {
 
   const itemRows = items.map(it => `
     <tr>
-      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0">${it.title ?? "—"}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;color:#666">${it.variantSize ?? "—"} ${it.sku ? `· ${it.sku}` : ""}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0">${it.title ?? "–"}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;color:#666">${it.variantSize ?? "–"} ${it.sku ? `· ${it.sku}` : ""}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:center">${it.quantity}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:right">${fmt(it.unitPrice ?? 0)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600">${fmt(it.lineTotal ?? 0)}</td>
@@ -127,7 +127,7 @@ function generatePackingSlip(params: {
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Packing Slip – ${orderNumber}</title>
+  <title>Packing Slip –“ ${orderNumber}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 13px; color: #1a1a1a; padding: 32px; }
@@ -209,11 +209,11 @@ function generatePackingSlip(params: {
     </div>
     <div>
       <div class="label">Carrier & Service</div>
-      <div class="value">${carrier} – ${service}</div>
+      <div class="value">${carrier} –“ ${service}</div>
     </div>
   </div>
 
-  <p style="margin-top:24px;font-size:11px;color:#9ca3af;text-align:center">Thank you for your order — Pronuvia</p>
+  <p style="margin-top:24px;font-size:11px;color:#9ca3af;text-align:center">Thank you for your order –” Pronuvia</p>
 </body>
 </html>`;
 
@@ -254,7 +254,7 @@ function CarrierBadge({ carrier }: { carrier: string }) {
   );
 }
 
-// ── Shipment detail view ──────────────────────────────────────────────────────
+// -- Shipment detail view ------------------------------------------------------
 
 function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumber }: {
   s: Shipment; index: number;
@@ -271,7 +271,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
           </svg>
         </div>
         <div>
-          <p className="text-sm font-bold text-emerald-800">Shipment {index + 1} — label ready</p>
+          <p className="text-sm font-bold text-emerald-800">Shipment {index + 1} –” label ready</p>
           <p className="text-xs text-emerald-600">
             {new Date(s.shipDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
@@ -279,8 +279,8 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
       </div>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Carrier",       content: <div className="flex items-center gap-2"><CarrierBadge carrier={s.carrier} /><span className="text-sm text-gray-700">{s.service}</span></div> },
-          { label: "Shipping Cost", content: <span className="text-sm font-bold text-gray-900">{fmt(s.cost)}</span> },
+          { label: "Carrier",       content: <div className="flex items-center gap-2"><CarrierBadge carrier={s.carrier} /><span className="text-sm text-gray-700 dark:text-gray-300">{s.service}</span></div> },
+          { label: "Shipping Cost", content: <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{fmt(s.cost)}</span> },
           { label: "Tracking",      content: (
             <a href={trackUrl(s.carrier, s.trackingNumber)} target="_blank" rel="noopener noreferrer"
               className="text-sm font-mono font-semibold text-[#3DBFA4] hover:underline inline-flex items-center gap-1">
@@ -290,10 +290,10 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
               </svg>
             </a>
           )},
-          { label: "Format",        content: <span className="text-sm text-gray-700">{s.labelFormat}</span> },
+          { label: "Format",        content: <span className="text-sm text-gray-700 dark:text-gray-300">{s.labelFormat}</span> },
         ].map(({ label, content }) => (
-          <div key={label} className="bg-gray-50 rounded-xl p-3.5 space-y-1.5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+          <div key={label} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3.5 space-y-1.5">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-widest">{label}</p>
             {content}
           </div>
         ))}
@@ -319,7 +319,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
               Print Label
             </button>
             <button type="button" onClick={() => setShowLabel(!showLabel)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors">
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
               {showLabel ? "Hide" : "View"} Label
             </button>
             <button type="button"
@@ -332,7 +332,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
                 shipFrom, shipTo, items, subtotal,
                 shippingCost: s.cost,
               })}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors">
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -340,7 +340,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
             </button>
           </div>
           {showLabel && s.labelFormat === "PNG" && (
-            <div className="border border-gray-200 rounded-xl overflow-hidden max-w-xs">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden max-w-xs">
               <img src={`data:image/png;base64,${s.labelBase64}`} alt="Shipping Label" className="w-full" />
             </div>
           )}
@@ -356,7 +356,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
   );
 }
 
-// ── Add shipment form ─────────────────────────────────────────────────────────
+// -- Add shipment form ---------------------------------------------------------
 
 type PkgTab = "custom" | "carrier" | "saved";
 
@@ -535,7 +535,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
         {purchased.labelBase64 && (
           <>
             {purchased.labelFormat === "PNG" && (
-              <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                 <img src={`data:image/png;base64,${purchased.labelBase64}`} alt="Label" className="w-full" />
               </div>
             )}
@@ -579,7 +579,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                   subtotal,
                   shippingCost: purchased.cost,
                 })}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -596,13 +596,13 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
 
-      {/* ── LEFT ── */}
+      {/* -- LEFT -- */}
       <div className="space-y-6">
 
         {/* 1. Items */}
         <section>
-          <h3 className="text-sm font-bold text-gray-800 mb-3">Items</h3>
-          <div className="border border-gray-100 rounded-xl overflow-hidden">
+          <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Items</h3>
+          <div className="border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden">
             <div className="bg-blue-50 border-b border-blue-100 px-4 py-2.5">
               <p className="text-xs text-blue-700">
                 Select the items you want to include in this shipment.
@@ -610,22 +610,22 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
             </div>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-gray-700">
                   <th className="w-8 px-3 py-2.5">
-                    <input type="checkbox" className="rounded border-gray-300"
+                    <input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                       checked={selectedItems.size === items.length}
                       onChange={e => setSelectedItems(e.target.checked ? new Set(items.map((_, i) => i)) : new Set())} />
                   </th>
                   {["Product", "QTY", "Variation", "Weight", "Price"].map(h => (
-                    <th key={h} className="px-3 py-2.5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-3 py-2.5 text-left text-[11px] font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, i) => (
-                  <tr key={i} className={`border-b border-gray-50 last:border-0 transition-colors ${selectedItems.has(i) ? "bg-white" : "bg-gray-50/50 opacity-50"}`}>
+                  <tr key={i} className={`border-b border-gray-50 dark:border-gray-700 last:border-0 transition-colors ${selectedItems.has(i) ? "bg-white" : "bg-gray-50/50 opacity-50"}`}>
                     <td className="px-3 py-3">
-                      <input type="checkbox" className="rounded border-gray-300"
+                      <input type="checkbox" className="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                         checked={selectedItems.has(i)}
                         onChange={e => {
                           const next = new Set(selectedItems);
@@ -633,19 +633,19 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                           setSelectedItems(next);
                         }} />
                     </td>
-                    <td className="px-3 py-3 font-medium text-gray-800 max-w-[180px]">
+                    <td className="px-3 py-3 font-medium text-gray-800 dark:text-gray-100 max-w-[180px]">
                       <span className="line-clamp-2">{item.title}</span>
                     </td>
-                    <td className="px-3 py-3 text-gray-600">{item.quantity}</td>
-                    <td className="px-3 py-3 text-gray-500">{item.variantSize || "—"}</td>
-                    <td className="px-3 py-3 text-gray-400 text-xs">—</td>
-                    <td className="px-3 py-3 font-semibold text-gray-800">{fmt(item.lineTotal)}</td>
+                    <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{item.quantity}</td>
+                    <td className="px-3 py-3 text-gray-500 dark:text-gray-400">{item.variantSize || "–"}</td>
+                    <td className="px-3 py-3 text-gray-400 text-xs">–”</td>
+                    <td className="px-3 py-3 font-semibold text-gray-800 dark:text-gray-100">{fmt(item.lineTotal)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {selectedItems.size > 0 && (
-              <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 text-xs text-gray-500">
+              <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                 {selectedItems.size} of {items.length} item{items.length !== 1 ? "s" : ""} selected
                 <button type="button" onClick={() => setSelectedItems(new Set())}
                   className="ml-3 text-red-400 hover:text-red-500 font-medium">
@@ -658,17 +658,17 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
 
         {/* 2. Package */}
         <section>
-          <h3 className="text-sm font-bold text-gray-800 mb-3">Package</h3>
-          <div className="border border-gray-100 rounded-xl overflow-hidden">
+          <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Package</h3>
+          <div className="border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden">
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-100">
+            <div className="flex border-b border-gray-100 dark:border-gray-700">
               {([["custom", "Custom package"], ["carrier", "Carrier package"], ["saved", "Saved templates"]] as [PkgTab, string][]).map(([t, label]) => (
                 <button key={t} type="button" onClick={() => setPkgTab(t)}
                   className={`flex-1 px-4 py-3 text-xs font-semibold transition-colors ${
                     pkgTab === t
                       ? "bg-gray-900 text-white"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-50"
                   }`}>
                   {label}
                 </button>
@@ -681,16 +681,16 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               {pkgTab === "custom" && (
                 <>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">Package Type</label>
+                    <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1.5 block">Package Type</label>
                     <select value={pkgType} onChange={e => setPkgType(e.target.value as PkgType)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white">
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-700 dark:text-gray-200">
                       {(["Box", "Envelope", "Tube", "Pak", "Other"] as PkgType[]).map(t => (
                         <option key={t} value={t}>{t}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">Dimensions (cm)</label>
+                    <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1.5 block">Dimensions (cm)</label>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         { p: "Length", v: lengthCm, s: setLengthCm },
@@ -699,21 +699,21 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                       ].map(({ p, v, s }) => (
                         <input key={p} type="number" min="0" step="0.1" placeholder={p} value={v}
                           onChange={e => s(e.target.value)}
-                          className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 placeholder:text-gray-300 bg-white" />
+                          className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 placeholder:text-gray-300 dark:placeholder:text-gray-500 bg-white" />
                       ))}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <input type="checkbox" id="save-tpl" checked={saveAsTemplate}
                       onChange={e => setSaveAsTemplate(e.target.checked)}
-                      className="rounded border-gray-300" />
-                    <label htmlFor="save-tpl" className="text-xs text-gray-600 cursor-pointer">Save this template</label>
+                      className="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700" />
+                    <label htmlFor="save-tpl" className="text-xs text-gray-600 dark:text-gray-300 cursor-pointer">Save this template</label>
                   </div>
                   {saveAsTemplate && (
                     <div className="flex gap-2">
                       <input type="text" placeholder="Template name" value={templateName}
                         onChange={e => setTemplateName(e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white" />
+                        className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-700 dark:text-gray-200" />
                       <button type="button" onClick={saveTemplate}
                         className="px-3 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors">
                         Save
@@ -733,7 +733,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                       const inCarrier = selectedCarriers.includes(c);
                       return (
                         <button key={c} type="button" onClick={() => toggleCarrier(c)}
-                          className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${inCarrier ? "text-white shadow-sm" : "text-gray-400"}`}
+                          className={`flex-1 py-1.5 text-xs font-black rounded-md transition-all ${inCarrier ? "text-white shadow-sm" : "text-gray-400 dark:text-gray-500"}`}
                           style={inCarrier ? { backgroundColor: colors[c] } : {}}>
                           {c.toUpperCase()}
                         </button>
@@ -745,21 +745,21 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                     .filter(g => selectedCarriers.includes(g.carrier))
                     .map(group => (
                       <div key={group.group}>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{group.group}</p>
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">{group.group}</p>
                         <div className="space-y-1">
                           {group.packages.map(pkg => {
                             const active = selectedCarrierPkg?.id === pkg.id;
                             return (
                               <button key={pkg.id} type="button" onClick={() => setSelectedCarrierPkg(active ? null : pkg)}
                                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-left transition-all text-sm ${
-                                  active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200"}`}>
+                                  active ? "border-gray-900 dark:border-gray-400 bg-gray-900/5 dark:bg-gray-600/20" : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"}`}>
                                 <div className="flex items-center gap-2.5">
-                                  <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                                  <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900 dark:border-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
                                     {active && <div className="w-1.5 h-1.5 rounded-full bg-gray-900" />}
                                   </div>
-                                  <span className="font-medium text-gray-800">{pkg.name}</span>
+                                  <span className="font-medium text-gray-800 dark:text-gray-100">{pkg.name}</span>
                                 </div>
-                                <span className="text-xs text-gray-400 shrink-0">
+                                <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 shrink-0">
                                   {pkg.lCm} × {pkg.wCm} × {pkg.hCm} cm
                                 </span>
                               </button>
@@ -778,26 +778,26 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                     <svg className="w-10 h-10 text-gray-200 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <p className="text-sm text-gray-400">No saved templates yet.</p>
-                    <p className="text-xs text-gray-300 mt-0.5">Save a custom package as template.</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">No saved templates yet.</p>
+                    <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5">Save a custom package as template.</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
                     {savedTemplates.map(t => {
                       const active = selectedTemplate?.id === t.id;
                       return (
-                        <div key={t.id} className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200"}`}>
+                        <div key={t.id} className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${active ? "border-gray-900 dark:border-gray-400 bg-gray-900/5 dark:bg-gray-600/20" : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"}`}>
                           <button type="button" className="flex items-center gap-2.5 flex-1 text-left" onClick={() => setSelectedTemplate(active ? null : t)}>
-                            <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                            <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900 dark:border-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
                               {active && <div className="w-1.5 h-1.5 rounded-full bg-gray-900" />}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-800">{t.name}</p>
-                              <p className="text-xs text-gray-400">{t.type} · {t.lengthCm} × {t.widthCm} × {t.heightCm} cm</p>
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{t.name}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">{t.type} · {t.lengthCm} × {t.widthCm} × {t.heightCm} cm</p>
                             </div>
                           </button>
                           <button type="button" onClick={() => deleteTemplate(t.id)}
-                            className="p-1 text-gray-300 hover:text-red-400 transition-colors">
+                            className="p-1 text-gray-300 dark:text-gray-600 hover:text-red-400 transition-colors">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -809,17 +809,17 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 )
               )}
 
-              {/* Weight — always visible */}
-              <div className="pt-2 border-t border-gray-100">
-                <label className="text-xs text-gray-500 mb-1.5 block">
-                  Total shipment weight <span className="text-gray-400">(with package)</span>
+              {/* Weight –” always visible */}
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1.5 block">
+                  Total shipment weight <span className="text-gray-400 dark:text-gray-500">(with package)</span>
                 </label>
                 <div className="flex gap-2">
                   <input type="number" min="0.01" step="0.01" value={weight}
                     onChange={e => setWeight(e.target.value)}
-                    className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white" />
+                    className="flex-1 px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-700 dark:text-gray-200" />
                   <select value={weightUnit} onChange={e => setWeightUnit(e.target.value as WeightUnit)}
-                    className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white">
+                    className="px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-700 dark:text-gray-200">
                     <option value="lbs">lbs</option>
                     <option value="kg">kg</option>
                     <option value="oz">oz</option>
@@ -831,7 +831,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               {/* Carrier selection (for custom/saved tabs) */}
               {pkgTab !== "carrier" && (
                 <div>
-                  <label className="text-xs text-gray-500 mb-1.5 block">Carrier</label>
+                  <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1.5 block">Carrier</label>
                   <div className="flex gap-2">
                     {(["fedex", "ups", "usps"] as CarrierCode[]).map(c => {
                       const colors: Record<string, string> = { fedex: "#4D148C", ups: "#351C15", usps: "#333366" };
@@ -880,29 +880,29 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
         {/* 4. Shipping service rates */}
         {rates && rates.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Shipping service</h3>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Shipping service</h3>
             <div className="space-y-2">
               {rates.map((r, i) => {
                 const active = selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier;
                 return (
                   <button key={i} type="button" onClick={() => setSelectedRate(r)}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
-                      active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200 bg-white"}`}>
+                      active ? "border-gray-900 dark:border-gray-400 bg-gray-900/5 dark:bg-gray-600/20" : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 bg-white dark:bg-gray-700/30"}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900 dark:border-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
                         {active && <div className="w-2 h-2 rounded-full bg-gray-900" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <CarrierBadge carrier={r.carrier} />
-                          <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">{r.service}</span>
                         </div>
                         {r.deliveryDays != null && (
-                          <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
                         )}
                       </div>
                     </div>
-                    <span className="text-base font-bold text-gray-900 shrink-0">{fmt(r.totalCost)}</span>
+                    <span className="text-base font-bold text-gray-900 dark:text-gray-100 shrink-0">{fmt(r.totalCost)}</span>
                   </button>
                 );
               })}
@@ -925,12 +925,12 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
         )}
       </div>
 
-      {/* ── RIGHT SIDEBAR ── */}
+      {/* -- RIGHT SIDEBAR -- */}
       <div className="space-y-4 sticky top-6">
 
         {/* Order details */}
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Details</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-widest">Order Details</p>
           <div className="space-y-2.5">
             <Row label="Ship from" value={`${shipFrom.name}, ${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}`} />
             <Row label="Ship to"   value={
@@ -954,12 +954,12 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
 
         {/* Shipment details */}
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Shipment Details</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 uppercase tracking-widest">Shipment Details</p>
           <div className="space-y-2.5">
             <div className="flex justify-between items-center gap-2">
-              <span className="text-gray-500 shrink-0">Ship date</span>
+              <span className="text-gray-500 dark:text-gray-400 shrink-0">Ship date</span>
               <input type="date" value={shipDate} onChange={e => setShipDate(e.target.value)}
-                className="text-xs text-gray-800 font-medium border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white" />
+                className="text-xs text-gray-800 dark:text-gray-100 font-medium border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white" />
             </div>
             <div className="border-t border-gray-200 pt-2.5 space-y-2">
               <Row label="Subtotal" value={fmt(subtotal)} />
@@ -975,13 +975,13 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex justify-between gap-2 items-start">
-      <span className="text-gray-500 shrink-0 text-xs">{label}</span>
+      <span className="text-gray-500 dark:text-gray-400 shrink-0 text-xs">{label}</span>
       <span className={`text-right text-xs leading-relaxed ${bold ? "font-bold text-gray-900" : "text-gray-700 font-medium"}`}>{value}</span>
     </div>
   );
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
+// -- Main export ---------------------------------------------------------------
 
 export function ShippingPageClient(props: Props) {
   const [activeTab, setActiveTab] = useState<number | "add">(
@@ -992,7 +992,7 @@ export function ShippingPageClient(props: Props) {
     <div className="max-w-5xl mx-auto space-y-5 px-4 py-6">
 
       <Link href={`/admin/orders/${props.orderId}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 hover:text-gray-700 transition-colors">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
@@ -1001,8 +1001,8 @@ export function ShippingPageClient(props: Props) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Create shipping label</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Order {props.orderNumber}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Create shipping label</h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Order {props.orderNumber}</p>
         </div>
         {props.shipments.length > 0 && (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-full">
@@ -1014,14 +1014,14 @@ export function ShippingPageClient(props: Props) {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Tabs */}
-        <div className="border-b border-gray-100 px-6">
+        <div className="border-b border-gray-100 dark:border-gray-700 px-6">
           <div className="flex items-center overflow-x-auto">
             {props.shipments.map((s, i) => (
               <button key={s.id} type="button" onClick={() => setActiveTab(i)}
                 className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === i ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                  activeTab === i ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-300"}`}>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1030,7 +1030,7 @@ export function ShippingPageClient(props: Props) {
             ))}
             <button type="button" onClick={() => setActiveTab("add")}
               className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
-                activeTab === "add" ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                activeTab === "add" ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600 dark:text-gray-300"}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { BehalfCartClient } from "@/components/admin/order-behalf-cart-client";
 
-export const metadata = { title: "Cart – Order on Behalf | Pronuvia Admin" };
+export const metadata = { title: "Cart -“ Order on Behalf | Pronuvia Admin" };
 
 type Props = { params: Promise<{ physicianId: string }> };
 

@@ -1,11 +1,11 @@
-﻿import { listOrders }        from "@/actions/admin/manage-orders";
+import { listOrders }        from "@/actions/admin/manage-orders";
 import { ReturnOrderModal }  from "@/components/admin/return-order-modal";
 import { OrdersTableClient } from "@/components/admin/orders-table-client";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Order History – Pronuvia Admin" };
+export const metadata = { title: "Order History -“ Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -13,11 +13,11 @@ function fmt(n: number) {
 
 function SummaryCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
       <div className="w-8 h-1 rounded-full mb-3" style={{ background: color }} />
-      <p className="text-xl font-bold text-gray-800">{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+      <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{value}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
+      {sub && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -47,18 +47,18 @@ export default async function OrdersPage({
   return (
     <div className="space-y-6">
 
-      {/* ── Header ─────────────────────────────────────────────────── */}
+      {/* -- Header --------------------------------------------------- */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Order History</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Order History</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Track orders, update statuses, and manage commission clawbacks
           </p>
         </div>
         <ReturnOrderModal />
       </div>
 
-      {/* ── Summary cards ──────────────────────────────────────────── */}
+      {/* -- Summary cards -------------------------------------------- */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           label="Total Revenue"
@@ -86,14 +86,14 @@ export default async function OrdersPage({
         />
       </div>
 
-      {/* ── Orders table ───────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700">
+      {/* -- Orders table --------------------------------------------- */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
             All Orders
-            <span className="ml-2 text-xs font-normal text-gray-400">({total})</span>
+            <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">({total})</span>
           </h2>
-          <p className="text-xs text-gray-400">Click any row to view order details</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Click any row to view order details</p>
         </div>
 
         <OrdersTableClient orders={orders} />

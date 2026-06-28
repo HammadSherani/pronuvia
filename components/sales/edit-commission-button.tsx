@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -84,9 +84,9 @@ export function EditCommissionButton({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={onKeyDown}
-          className="w-16 px-2 py-1 text-xs font-medium text-gray-800 outline-none bg-white"
+          className="w-16 px-2 py-1 text-xs font-medium text-gray-800 dark:text-gray-100 outline-none bg-white"
         />
-        <span className="pr-2 text-xs text-gray-400 bg-white">%</span>
+        <span className="pr-2 text-xs text-gray-400 dark:text-gray-500 bg-white">%</span>
       </div>
 
       {/* Save */}

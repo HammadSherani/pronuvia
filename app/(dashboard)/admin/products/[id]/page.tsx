@@ -14,8 +14,8 @@ const STATUS_STYLES = {
   ARCHIVED: "bg-gray-100 text-gray-500 border border-gray-200",
 };
 
-function fmt(n?: number | null) { return n != null ? `$${n.toFixed(2)}` : "—"; }
-function fmtN(n?: number | null) { return n != null ? String(n) : "—"; }
+function fmt(n?: number | null) { return n != null ? `$${n.toFixed(2)}` : "-"; }
+function fmtN(n?: number | null) { return n != null ? String(n) : "-"; }
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -78,11 +78,11 @@ export default async function ProductViewPage({ params }: Props) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="text-xs text-gray-400 font-medium mb-0.5">Category</dt>
-                <dd className="text-sm text-gray-700">{product.category ? (product as { category?: { name: string } }).category?.name : "—"}</dd>
+                <dd className="text-sm text-gray-700">{product.category ? (product as { category?: { name: string } }).category?.name : "-"}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-400 font-medium mb-0.5">Sub-Category</dt>
-                <dd className="text-sm text-gray-700">{product.subCategory ? (product as { subCategory?: { name: string } }).subCategory?.name : "—"}</dd>
+                <dd className="text-sm text-gray-700">{product.subCategory ? (product as { subCategory?: { name: string } }).subCategory?.name : "-"}</dd>
               </div>
             </div>
             <div>
@@ -90,7 +90,7 @@ export default async function ProductViewPage({ params }: Props) {
               <dd className="flex flex-wrap gap-1.5 mt-1">
                 {product.tags.length ? product.tags.map((t) => (
                   <span key={t} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{t}</span>
-                )) : <span className="text-sm text-gray-400">—</span>}
+                )) : <span className="text-sm text-gray-400">-</span>}
               </dd>
             </div>
             <div>
@@ -170,12 +170,12 @@ export default async function ProductViewPage({ params }: Props) {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-800">{v.size}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{v.sku || "—"}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{v.gtin || "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{v.sku || "-"}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{v.gtin || "-"}</td>
                     <td className="px-4 py-3 text-gray-600">{fmt(v.costPrice)}</td>
                     <td className="px-4 py-3 font-semibold text-gray-800">{fmt(v.salePrice)}</td>
                     <td className="px-4 py-3 text-gray-600">{fmtN(v.stock)}</td>
-                    <td className="px-4 py-3 text-gray-600">{v.weight != null ? `${v.weight} kg` : "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{v.weight != null ? `${v.weight} kg` : "-"}</td>
                   </tr>
                 ))}
               </tbody>

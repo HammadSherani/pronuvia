@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -11,7 +11,7 @@ function matchStr(text: string, q: string) {
   return text.toLowerCase().includes(q.toLowerCase());
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type Physician = {
   id: string; firstName: string; lastName: string;
@@ -26,7 +26,7 @@ type SalesRep = {
   physicians: Physician[];
 };
 
-// ─── Doctor row ───────────────────────────────────────────────────────────────
+// --- Doctor row ---------------------------------------------------------------
 
 function DoctorRow({ doctor }: { doctor: Physician }) {
   const handleUpline = async (v: number) => {
@@ -50,12 +50,12 @@ function DoctorRow({ doctor }: { doctor: Physician }) {
             </span>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-800">Dr. {doctor.firstName} {doctor.lastName}</p>
+            <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">Dr. {doctor.firstName} {doctor.lastName}</p>
             <p className="text-[10px] text-gray-400">{doctor.email}</p>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 text-[10px] text-gray-500">{doctor.nameOfPractice ?? "—"}</td>
+      <td className="px-4 py-3 text-[10px] text-gray-500">{doctor.nameOfPractice ?? "-"}</td>
       <td className="px-4 py-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-[10px] text-gray-400 leading-none">Rep gets</span>
@@ -78,7 +78,7 @@ function DoctorRow({ doctor }: { doctor: Physician }) {
   );
 }
 
-// ─── Sales Rep accordion row ──────────────────────────────────────────────────
+// --- Sales Rep accordion row --------------------------------------------------
 
 function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string }) {
   const hasMatchingDoctors = useMemo(() => {
@@ -104,7 +104,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
   return (
     <>
       <tr
-        className={`cursor-pointer select-none transition-colors ${open ? "bg-gray-900/5" : "hover:bg-gray-50/60"}`}
+        className={`cursor-pointer select-none transition-colors ${open ? "bg-gray-900/5" : "hover:bg-gray-50/60 dark:bg-gray-700/40"}`}
         onClick={() => setOpen((o) => !o)}
       >
         <td className="px-5 py-4">
@@ -119,12 +119,12 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
               <span className="text-xs font-bold text-[#3DBFA4]">{rep.firstName[0]}{rep.lastName[0]}</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">{rep.firstName} {rep.lastName}</p>
-              <p className="text-xs text-gray-400">{rep.email}</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{rep.firstName} {rep.lastName}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{rep.email}</p>
             </div>
           </div>
         </td>
-        <td className="px-5 py-4 text-xs text-gray-500">{rep.phone ?? "—"}</td>
+        <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">{rep.phone ?? "-"}</td>
         <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
           <CommissionEditor value={rep.commission} label="sales rep commission" onSave={handleRepCommission} />
         </td>
@@ -155,7 +155,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
         <tr>
           <td colSpan={6} className="p-0 bg-gray-900/[0.03]">
             {rep.physicians.length === 0 ? (
-              <div className="pl-16 pr-5 py-4 text-xs text-gray-400 italic border-t border-gray-900/10">
+              <div className="pl-16 pr-5 py-4 text-xs text-gray-400 dark:text-gray-500 italic border-t border-gray-900/10">
                 No downline doctors assigned to this sales rep yet.
               </div>
             ) : (
@@ -183,7 +183,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
   );
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+// --- Main export --------------------------------------------------------------
 
 export function SalesRepAccordionList({
   salesReps,
@@ -193,7 +193,7 @@ export function SalesRepAccordionList({
   searchQuery?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
       {salesReps.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-14">
           <p className="text-sm text-gray-400">
@@ -203,16 +203,16 @@ export function SalesRepAccordionList({
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Representative</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission %</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Downline</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet</th>
+            <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sales Representative</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Commission %</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Downline</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet</th>
               <th className="px-5 py-3.5" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {salesReps.map((rep) => (
               <SalesRepRow key={rep.id} rep={rep} searchQuery={searchQuery} />
             ))}

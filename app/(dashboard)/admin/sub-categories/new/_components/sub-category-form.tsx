@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState } from "react";
 import { createSubCategory } from "@/actions/admin/sub-categories";
@@ -27,7 +27,7 @@ export function SubCategoryForm({ categories }: { categories: Category[] }) {
       <FormField label="Parent Category" name="categoryId" required error={state?.errors?.categoryId?.[0]}>
         <select
           name="categoryId"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white"
         >
           <option value="">Select a category…</option>
           {categories.map((cat) => (
@@ -41,7 +41,7 @@ export function SubCategoryForm({ categories }: { categories: Category[] }) {
           name="description"
           rows={3}
           placeholder="Optional description"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white resize-none"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white resize-none"
         />
       </FormField>
 

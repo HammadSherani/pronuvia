@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -53,9 +53,9 @@ export function OrderActionsPanel({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-700">Order actions</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300">Order actions</h3>
       </div>
       <div className="p-4 space-y-4">
         {!isReturned && (
@@ -63,7 +63,7 @@ export function OrderActionsPanel({
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as OrderStatus)}
-              className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white text-gray-700"
+              className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white dark:bg-gray-700 dark:text-gray-200 text-gray-700 dark:text-gray-300"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -82,14 +82,14 @@ export function OrderActionsPanel({
           </div>
         )}
 
-        <div className="pt-1 border-t border-gray-100 flex items-center justify-between">
+        <div className="pt-1 border-t border-gray-100 dark:border-gray-700 dark:border-gray-700 dark:border-gray-700 flex items-center justify-between">
           {confirmDelete ? (
             <div className="flex items-center gap-2 w-full">
-              <span className="text-xs text-gray-500 flex-1">Delete this order?</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 flex-1">Delete this order?</span>
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded"
+                className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
               >
                 Cancel
               </button>

@@ -3,7 +3,7 @@ import { prisma }                from "@/lib/db/prisma";
 import { PageHeader }            from "@/components/admin/page-header";
 import { AllWithdrawalsTable }   from "@/components/admin/all-withdrawals-table";
 
-export const metadata = { title: "Withdrawal Requests – Pronuvia Admin" };
+export const metadata = { title: "Withdrawal Requests -“ Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -12,7 +12,7 @@ function fmt(n: number) {
 export default async function WithdrawalsPage() {
   await requireAdmin();
 
-  // Single query — unified model
+  // Single query - unified model
   const requests = await prisma.withdrawRequest.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -57,10 +57,10 @@ export default async function WithdrawalsPage() {
           { label: "Approved",       value: approved,         color: "#10b981", text: "text-emerald-600" },
           { label: "Total Paid Out", value: fmt(totalPaid),   color: "#3DBFA4", text: "text-[#3DBFA4]" },
         ].map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div key={c.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
             <p className={`text-xl font-bold ${c.text}`}>{c.value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{c.label}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{c.label}</p>
           </div>
         ))}
       </div>

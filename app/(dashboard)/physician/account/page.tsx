@@ -2,7 +2,7 @@ import { requirePhysician } from "@/lib/auth/dal";
 import { prisma }           from "@/lib/db/prisma";
 import { PhysicianAccountClient } from "@/components/physician/account-client";
 
-export const metadata = { title: "Account – Pronuvia" };
+export const metadata = { title: "Account -“ Pronuvia" };
 
 export default async function PhysicianAccountPage() {
   const session = await requirePhysician();

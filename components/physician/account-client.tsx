@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useState } from "react";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
@@ -28,8 +28,8 @@ type Physician = {
   salesRep: { firstName: string; lastName: string; email: string; phone: string | null } | null;
 };
 
-const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
-const inpErr = "w-full border border-red-400 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
+const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
+const inpErr = "w-full border border-red-400 rounded-lg px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
 const lbl    = "block text-xs font-semibold text-gray-500 mb-1";
 
 const statusStyle = {
@@ -42,7 +42,7 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
   return (
     <div className="py-3 border-b border-gray-50 last:border-0 flex flex-col sm:flex-row sm:items-start gap-1">
       <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider sm:w-44 shrink-0 pt-0.5">{label}</dt>
-      <dd className="text-sm text-gray-800 break-words">
+      <dd className="text-sm text-gray-800 dark:text-gray-100 break-words">
         {value !== null && value !== undefined && value !== ""
           ? String(value)
           : <span className="text-gray-300 italic text-xs">Not provided</span>}
@@ -53,8 +53,8 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
         <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
       </div>
       <dl className="px-6 py-1">{children}</dl>
@@ -72,7 +72,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-// ─── View mode ────────────────────────────────────────────────────────────────
+// --- View mode ----------------------------------------------------------------
 
 function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
   const status = statusStyle[p.isApproved];
@@ -82,14 +82,14 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
   return (
     <div className="space-y-6">
       {/* Identity card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center gap-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 flex items-center gap-5">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#5BB8D4] to-[#3a90a8] flex items-center justify-center shrink-0 text-white text-2xl font-black select-none">
           {p.firstName.charAt(0)}{p.lastName.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-semibold text-gray-900">Dr. {p.firstName} {p.lastName}</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-white">Dr. {p.firstName} {p.lastName}</p>
           <p className="text-sm text-gray-400">{p.email}</p>
-          {p.nameOfPractice && <p className="text-xs text-gray-400 mt-0.5">{p.nameOfPractice}</p>}
+          {p.nameOfPractice && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{p.nameOfPractice}</p>}
           <p className="text-xs text-gray-300 mt-0.5">Member since {memberSince}</p>
         </div>
         <div className="shrink-0 flex flex-col items-end gap-2">
@@ -162,7 +162,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
   );
 }
 
-// ─── Edit mode ────────────────────────────────────────────────────────────────
+// --- Edit mode ----------------------------------------------------------------
 
 function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
   const [state, action, pending] = useActionState<UpdateProfileState, FormData>(updatePhysicianProfile, undefined);
@@ -212,7 +212,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Edit Profile</h1>
           <p className="text-sm text-gray-400 mt-0.5">Email cannot be changed</p>
         </div>
         <div className="flex items-center gap-3">
@@ -240,11 +240,11 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
         </div>
       )}
 
-      {/* ── Personal Information ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100">Personal Information</h2>
+      {/* -- Personal Information -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100 dark:border-gray-700">Personal Information</h2>
 
-        {/* Email — read only */}
+        {/* Email - read only */}
         <div>
           <label className={lbl}>Email <span className="text-gray-300 font-normal">(cannot be changed)</span></label>
           <input value={p.email} disabled className={inp} />
@@ -273,9 +273,9 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
         </Field>
       </div>
 
-      {/* ── Practice Information ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100">Practice Information</h2>
+      {/* -- Practice Information -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100 dark:border-gray-700">Practice Information</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Practice Name *" error={e.nameOfPractice?.[0]}>
@@ -323,10 +323,10 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
         </div>
       </div>
 
-      {/* ── Address ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100">Address</h2>
-        {/* Hidden inputs map AddressFields state → server action fields */}
+      {/* -- Address -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100 dark:border-gray-700">Address</h2>
+        {/* Hidden inputs map AddressFields state ? server action fields */}
         <input type="hidden" name="addressOne" value={addrData.address1} />
         <input type="hidden" name="addressTwo" value={addrData.address2} />
         <input type="hidden" name="city"       value={addrData.city} />
@@ -338,10 +338,10 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
         <AddressFields value={addrData} onChange={setAddrData} showName={false} />
       </div>
 
-      {/* ── Bank Details ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100">Bank Details</h2>
-        <p className="text-xs text-gray-400">Used for commission payouts. All fields are optional.</p>
+      {/* -- Bank Details -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-700 pb-3 border-b border-gray-100 dark:border-gray-700">Bank Details</h2>
+        <p className="text-xs text-gray-400 dark:text-gray-500">Used for commission payouts. All fields are optional.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Bank Name">
@@ -395,7 +395,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
   );
 }
 
-// ─── Root export ──────────────────────────────────────────────────────────────
+// --- Root export --------------------------------------------------------------
 
 export function PhysicianAccountClient({ physician }: { physician: Physician }) {
   const [editing, setEditing] = useState(false);

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import {
@@ -34,7 +34,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-100 shadow-xl rounded-xl px-4 py-3 text-sm min-w-[140px]">
+    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl rounded-xl px-4 py-3 text-sm min-w-[140px]">
       <p className="text-gray-400 font-medium mb-2 text-xs">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center justify-between gap-4">
@@ -42,7 +42,7 @@ function ChartTooltip({ active, payload, label }: {
             <div className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
             <span className="text-gray-500 text-xs">{p.name}</span>
           </div>
-          <span className="font-bold text-gray-800 text-xs">
+          <span className="font-bold text-gray-800 dark:text-gray-100 text-xs">
             {p.name === "Revenue" ? fmtMoney(p.value) : p.value}
           </span>
         </div>
@@ -107,7 +107,7 @@ function StatusDonut({ data }: { data: { status: string; count: number }[] }) {
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-bold text-gray-800">{total}</span>
+          <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{total}</span>
           <span className="text-[11px] text-gray-400">orders</span>
         </div>
       </div>
@@ -141,7 +141,7 @@ function CommissionDonut({ data }: { data: { name: string; value: number }[] }) 
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-sm font-bold text-gray-800">{fmtMoney(total)}</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmtMoney(total)}</span>
           <span className="text-[10px] text-gray-400">total</span>
         </div>
       </div>
@@ -151,15 +151,15 @@ function CommissionDonut({ data }: { data: { name: string; value: number }[] }) 
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: COMMISSION_COLORS[i] }} />
-                <span className="text-xs text-gray-500">{d.name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{d.name}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-gray-800 text-xs">{fmtMoney(d.value)}</span>
-                <span className="text-gray-300 text-xs">·</span>
+                <span className="font-bold text-gray-800 dark:text-gray-100 text-xs">{fmtMoney(d.value)}</span>
+                <span className="text-gray-300 text-xs">�</span>
                 <span className="text-gray-400 text-xs">{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
               </div>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
@@ -186,30 +186,30 @@ export function DashboardChartsPanel({ charts }: { charts: DashboardStats["chart
       {/* Revenue & Orders + Status donut */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-5">
         {/* Main chart */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 px-6 pt-5 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-gray-800">Revenue &amp; Orders</h3>
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Revenue &amp; Orders</h3>
               <div className="flex items-center gap-4 mt-1.5">
-                <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                   <span className="w-2.5 h-2.5 rounded-sm bg-gray-900/75 inline-block" />
-                  <span className="font-semibold text-gray-700">{totalOrders.toLocaleString()}</span> orders
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">{totalOrders.toLocaleString()}</span> orders
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                   <span className="w-3 h-0.5 bg-gray-900 inline-block rounded-full" />
-                  <span className="font-semibold text-gray-700">{fmtMoney(totalRevenue)}</span> revenue
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">{fmtMoney(totalRevenue)}</span> revenue
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 self-start">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-xl p-1 self-start">
               {(["daily", "weekly", "monthly"] as Period[]).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all capitalize ${
                     period === p
-                      ? "bg-white text-gray-800 shadow-sm"
-                      : "text-gray-400 hover:text-gray-600"
+                      ? "bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-100 shadow-sm"
+                      : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                   }`}
                 >
                   {p}
@@ -223,9 +223,9 @@ export function DashboardChartsPanel({ charts }: { charts: DashboardStats["chart
         </div>
 
         {/* Status donut */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">
-          <h3 className="text-sm font-bold text-gray-800">Order Status</h3>
-          <p className="text-xs text-gray-400 mt-0.5 mb-4">Last 12 months</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col">
+          <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Order Status</h3>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 mb-4">Last 12 months</p>
           <div className="flex-1 flex flex-col justify-center">
             <StatusDonut data={charts.statusBreakdown} />
           </div>
@@ -233,10 +233,10 @@ export function DashboardChartsPanel({ charts }: { charts: DashboardStats["chart
       </div>
 
       {/* Commission split */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-5">
         <div className="mb-4">
-          <h3 className="text-sm font-bold text-gray-800">Commission Split</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Sales Rep vs Physician · last 12 months</p>
+          <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Commission Split</h3>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sales Rep vs Physician � last 12 months</p>
         </div>
         <CommissionDonut data={charts.commissionBreakdown} />
       </div>

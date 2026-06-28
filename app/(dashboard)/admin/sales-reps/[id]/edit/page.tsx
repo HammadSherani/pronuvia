@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { getSalesRepById, updateSalesRep } from "@/actions/admin/manage-sales-reps";
 import { SalesRepForm } from "@/components/admin/sales-rep-form";
 
-export const metadata = { title: "Edit Sales Rep – Pronuvia Admin" };
+export const metadata = { title: "Edit Sales Rep -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 

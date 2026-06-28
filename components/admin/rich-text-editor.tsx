@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit                   from "@tiptap/starter-kit";
@@ -42,7 +42,7 @@ export function RichTextEditor({ value, onChange }: Props) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "min-h-[320px] px-4 py-3 text-sm text-gray-800 leading-relaxed focus:outline-none prose prose-sm max-w-none",
+        class: "min-h-[320px] px-4 py-3 text-sm text-gray-800 dark:text-gray-100 leading-relaxed focus:outline-none prose prose-sm max-w-none",
       },
     },
   });
@@ -59,7 +59,7 @@ export function RichTextEditor({ value, onChange }: Props) {
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gray-900/30 focus-within:border-gray-900">
 
-      {/* ── Toolbar ── */}
+      {/* -- Toolbar -- */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 bg-gray-50">
 
         {/* Headings */}
@@ -155,7 +155,7 @@ export function RichTextEditor({ value, onChange }: Props) {
         </ToolbarBtn>
       </div>
 
-      {/* ── Editor area ── */}
+      {/* -- Editor area -- */}
       <EditorContent editor={editor} />
     </div>
   );

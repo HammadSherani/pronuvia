@@ -1,4 +1,4 @@
-﻿import { requireSalesRep } from "@/lib/auth/dal";
+import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { Role } from "@/generated/prisma/enums";
 import Link from "next/link";
@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Withdrawal History – Pronuvia" };
+export const metadata = { title: "Withdrawal History -“ Pronuvia" };
 
 const statusStyle: Record<string, string> = {
   PENDING:  "bg-amber-50 text-amber-700 border-amber-200",
@@ -51,7 +51,7 @@ export default async function SalesWithdrawalsPage({
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Withdrawal Requests</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Withdrawal Requests</h1>
           <p className="text-sm text-gray-400 mt-0.5">Your withdrawal request history and status ({total} total)</p>
         </div>
         {!hasPending && (
@@ -74,10 +74,10 @@ export default async function SalesWithdrawalsPage({
           { label: "Total Withdrawn", value: fmt(totalPaid),      color: "#5BB8D4" },
           { label: "Total Requests",  value: String(total),       color: "#8b5cf6" },
         ].map((c) => (
-          <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div key={c.label} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
-            <p className="text-xl font-bold text-gray-800">{c.value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{c.label}</p>
+            <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{c.value}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{c.label}</p>
           </div>
         ))}
       </div>
@@ -108,7 +108,7 @@ export default async function SalesWithdrawalsPage({
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -117,10 +117,10 @@ export default async function SalesWithdrawalsPage({
               </svg>
             </div>
             <p className="text-sm font-medium text-gray-500">No withdrawal requests yet</p>
-            <p className="text-xs text-gray-400 mt-1">Your requests will appear here once submitted.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Your requests will appear here once submitted.</p>
             {rep?.bankName && (
               <Link href="/sales/withdrawals/new" className="mt-4 text-sm text-[#3DBFA4] hover:underline font-medium">
-                Submit your first request →
+                Submit your first request ?
               </Link>
             )}
           </div>
@@ -128,23 +128,23 @@ export default async function SalesWithdrawalsPage({
           <>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Reply</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admin Reply</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {requests.map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                  <tr key={r.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-5 py-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                       {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
-                    <td className="px-5 py-4 font-bold text-gray-800">{fmt(r.amount)}</td>
-                    <td className="px-5 py-4 text-xs text-gray-500 italic max-w-[200px]">
-                      {r.note ?? <span className="text-gray-300 not-italic">—</span>}
+                    <td className="px-5 py-4 font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</td>
+                    <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400 italic max-w-[200px]">
+                      {r.note ?? <span className="text-gray-300 not-italic">-</span>}
                     </td>
                     <td className="px-5 py-4 max-w-[220px]">
                       {r.adminNote ? (
@@ -157,7 +157,7 @@ export default async function SalesWithdrawalsPage({
                           </p>
                         </div>
                       ) : (
-                        <span className="text-gray-300 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-5 py-4">

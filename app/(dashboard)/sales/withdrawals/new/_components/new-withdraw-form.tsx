@@ -53,7 +53,7 @@ export function NewWithdrawForm({ maxAmount }: { maxAmount: number }) {
       </button>
 
       <p className="text-xs text-center text-gray-400">
-        Requests are typically processed within 2–5 business days.
+        Requests are typically processed within 2-“5 business days.
       </p>
     </form>
   );

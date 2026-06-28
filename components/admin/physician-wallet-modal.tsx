@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { getPhysicianWalletDetails } from "@/actions/admin/get-physician-wallet";
@@ -60,11 +60,11 @@ export function PhysicianWalletModal({
           onClick={(e) => { if (e.target === overlayRef.current) setOpen(false); }}
         >
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 shrink-0">
               <div>
-                <h2 className="text-base font-bold text-gray-800">Wallet — {physicianName}</h2>
+                <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">Wallet - {physicianName}</h2>
                 {data?.physician && (
-                  <p className="text-xs text-gray-400 mt-0.5">{data.physician.email}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{data.physician.email}</p>
                 )}
               </div>
               <button type="button" onClick={() => setOpen(false)}
@@ -93,10 +93,10 @@ export function PhysicianWalletModal({
                       <p className="text-xs font-semibold text-gray-500 mb-2">Bank Account</p>
                       {data.physician.bankName ? (
                         <div className="space-y-1">
-                          <p className="text-sm font-bold text-gray-800">{data.physician.bankAccountName}</p>
+                          <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{data.physician.bankAccountName}</p>
                           <p className="text-xs text-gray-600">{data.physician.bankName}</p>
                           {data.physician.bankAccountNumber && (
-                            <p className="text-sm font-mono font-bold text-gray-800 tracking-wide">
+                            <p className="text-sm font-mono font-bold text-gray-800 dark:text-gray-100 tracking-wide">
                               {data.physician.bankAccountNumber}
                             </p>
                           )}
@@ -112,9 +112,9 @@ export function PhysicianWalletModal({
                     {data.transactions.length === 0 ? (
                       <p className="text-sm text-gray-400 text-center py-6 bg-gray-50 rounded-xl">No transactions yet</p>
                     ) : (
-                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
+                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
                         {data.transactions.map((tx) => (
-                          <div key={tx.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50/60">
+                          <div key={tx.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50/60 dark:bg-gray-700/40">
                             <div className="flex items-center gap-3">
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${tx.type === "CREDIT" ? "bg-emerald-50" : "bg-red-50"}`}>
                                 {tx.type === "CREDIT" ? (
@@ -136,7 +136,7 @@ export function PhysicianWalletModal({
                             </div>
                             <div className="text-right">
                               <p className={`text-sm font-bold ${tx.type === "CREDIT" ? "text-emerald-600" : "text-red-500"}`}>
-                                {tx.type === "CREDIT" ? "+" : "−"}{fmt(tx.amount)}
+                                {tx.type === "CREDIT" ? "+" : "-"}{fmt(tx.amount)}
                               </p>
                               <p className="text-[10px] text-gray-400">Bal: {fmt(tx.balance)}</p>
                             </div>
@@ -149,16 +149,16 @@ export function PhysicianWalletModal({
                   {data.withdrawRequests.length > 0 && (
                     <div>
                       <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">Withdrawal Requests</h3>
-                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
+                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
                         {data.withdrawRequests.map((r) => (
                           <div key={r.id} className="flex items-center justify-between px-4 py-3">
                             <div>
-                              <p className="text-sm font-bold text-gray-800">{fmt(r.amount)}</p>
+                              <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</p>
                               <p className="text-[10px] text-gray-400">
                                 {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                               </p>
-                              {r.note      && <p className="text-xs text-gray-500 italic mt-0.5">"{r.note}"</p>}
-                              {r.adminNote && <p className="text-xs text-[#3DBFA4] mt-0.5">↳ {r.adminNote}</p>}
+                              {r.note      && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-0.5">"{r.note}"</p>}
+                              {r.adminNote && <p className="text-xs text-[#3DBFA4] mt-0.5">? {r.adminNote}</p>}
                             </div>
                             <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${wdStyle[r.status] ?? wdStyle["PENDING"]}`}>
                               {r.status.charAt(0) + r.status.slice(1).toLowerCase()}

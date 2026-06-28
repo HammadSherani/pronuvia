@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { OrderStatus } from "@/generated/prisma/enums";
@@ -42,7 +42,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
           </svg>
         </div>
         <p className="text-sm font-semibold text-gray-500">No orders yet</p>
-        <p className="text-xs text-gray-400 mt-1">Orders placed by sales reps or doctors will appear here</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Orders placed by sales reps or doctors will appear here</p>
       </div>
     );
   }
@@ -51,36 +51,36 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/70">
+          <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-700/40">
             {["Order", "Date", "Status", "Total", "Origin"].map((h) => (
               <th key={h}
-                className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                 {h}
               </th>
             ))}
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
           {orders.map((o) => {
             const isReturned = !!o.returnedAt;
             return (
               <tr
                 key={o.id}
                 onClick={() => router.push(`/admin/orders/${o.id}`)}
-                className={`hover:bg-gray-900/5 transition-colors cursor-pointer select-none ${isReturned ? "opacity-60" : ""}`}
+                className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer select-none ${isReturned ? "opacity-60" : ""}`}
               >
-                {/* ── Order # + physician ── */}
+                {/* -- Order # + physician -- */}
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
                       <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                         <path strokeLinecap="round" strokeLinejoin="round"
                           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800 text-sm">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">
                         {o.orderNumber}
                         {o.physician
                           ? <span className="font-normal text-gray-500"> · Dr. {o.physician.firstName} {o.physician.lastName}</span>
@@ -98,26 +98,26 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                   </div>
                 </td>
 
-                {/* ── Date ── */}
-                <td className="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
+                {/* -- Date -- */}
+                <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {new Date(o.createdAt).toLocaleDateString("en-US", {
                     month: "short", day: "numeric", year: "numeric",
                   })}
                 </td>
 
-                {/* ── Status ── */}
+                {/* -- Status -- */}
                 <td className="px-5 py-4">
                   <span className={`inline-flex px-2.5 py-0.5 border rounded-full text-xs font-semibold ${statusBadge[o.status]}`}>
                     {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                   </span>
                 </td>
 
-                {/* ── Total ── */}
+                {/* -- Total -- */}
                 <td className="px-5 py-4">
-                  <span className="text-sm font-bold text-gray-800">{fmt(o.total)}</span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(o.total)}</span>
                 </td>
 
-                {/* ── Origin ── */}
+                {/* -- Origin -- */}
                 <td className="px-5 py-4">
                   {o.placedByAdmin ? (
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">

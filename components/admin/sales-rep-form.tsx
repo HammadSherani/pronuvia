@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,14 +18,14 @@ interface SalesRepFormProps {
   };
 }
 
-const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
+const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
+const ok     = "border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
 const icls   = (e?: string) => `${base} ${e ? errCls : ok}`;
 
-const sec  = "bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5";
-const head = "text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100";
-const lbl  = "block text-sm font-medium text-gray-700 mb-1.5";
+const sec  = "bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-5";
+const head = "text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4 pb-3 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700";
+const lbl  = "block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5";
 
 function FE({ msg }: { msg?: string }) {
   return msg ? <p className="text-xs text-red-500 mt-1">{msg}</p> : null;
@@ -75,7 +75,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
   return (
     <form ref={formRef} action={formAction} onSubmit={handleSubmit} noValidate>
 
-      {/* ── Personal Info ── */}
+      {/* -- Personal Info -- */}
       <div className={sec}>
         <p className={head}>Personal Information</p>
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -103,7 +103,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
         </div>
       </div>
 
-      {/* ── Financial Settings ── */}
+      {/* -- Financial Settings -- */}
       <div className={sec}>
         <p className={head}>Financial Settings</p>
         <div className="max-w-xs">
@@ -117,7 +117,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
         </div>
       </div>
 
-      {/* ── Logistics ── */}
+      {/* -- Logistics -- */}
       <div className={sec}>
         <p className={head}>Logistics</p>
         <div className="mb-4">
@@ -132,7 +132,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
         </div>
       </div>
 
-      {/* ── Payout Info ── */}
+      {/* -- Payout Info -- */}
       <div className={sec}>
         <p className={head}>Payout / Bank Details</p>
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -164,14 +164,14 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
         </div>
       </div>
 
-      {/* ── Actions ── */}
+      {/* -- Actions -- */}
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending}
           className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
           {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
           {pending ? "Saving…" : submitLabel}
         </button>
-        <a href={backHref} className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <a href={backHref} className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 transition-colors">
           Cancel
         </a>
       </div>

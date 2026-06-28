@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter }               from "next/navigation";
@@ -45,13 +45,13 @@ function CarrierLogo({ carrier }: { carrier: string }) {
   };
   const labels: Record<string, string> = { fedex: "FedEx", ups: "UPS", usps: "USPS" };
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black tracking-tight ${styles[carrier] ?? "bg-gray-200 text-gray-700"}`}>
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black tracking-tight ${styles[carrier] ?? "bg-gray-200 text-gray-700 dark:text-gray-300"}`}>
       {labels[carrier] ?? carrier.toUpperCase()}
     </span>
   );
 }
 
-// ── Existing shipment tab ─────────────────────────────────────────────────────
+// -- Existing shipment tab -----------------------------------------------------
 function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
   const [showLabel, setShowLabel] = useState(false);
   const trackUrl = (() => {
@@ -64,7 +64,7 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
 
   return (
     <div className="space-y-5">
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-xl p-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
           <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -77,15 +77,15 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Carrier</p>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">Carrier</p>
           <div className="flex items-center gap-2">
             <CarrierLogo carrier={s.carrier} />
-            <span className="text-sm text-gray-700">{s.service}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 dark:text-gray-300">{s.service}</span>
           </div>
         </div>
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</p>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">Tracking</p>
           <a href={trackUrl} target="_blank" rel="noopener noreferrer"
             className="text-sm font-mono font-semibold text-[#3DBFA4] hover:underline inline-flex items-center gap-1">
             {s.trackingNumber}
@@ -94,13 +94,13 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
             </svg>
           </a>
         </div>
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Shipping Cost</p>
-          <p className="text-sm font-bold text-gray-800">{fmt(s.cost)}</p>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">Shipping Cost</p>
+          <p className="text-sm font-bold text-gray-800 dark:text-gray-100 dark:text-gray-100">{fmt(s.cost)}</p>
         </div>
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Label Format</p>
-          <p className="text-sm text-gray-700">{s.labelFormat}</p>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">Label Format</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 dark:text-gray-300">{s.labelFormat}</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
           </button>
 
           {showLabel && s.labelFormat === "PNG" && (
-            <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden">
+            <div className="mt-4 border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
               <img src={`data:image/png;base64,${s.labelBase64}`} alt="Shipping Label" className="w-full max-w-sm" />
             </div>
           )}
@@ -136,7 +136,7 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
   );
 }
 
-// ── Add Shipment form ─────────────────────────────────────────────────────────
+// -- Add Shipment form ---------------------------------------------------------
 function AddShipmentForm({
   orderId, orderValue, itemCount, physician,
 }: { orderId: string; orderValue: number; itemCount: number; physician: Props["physician"] }) {
@@ -203,7 +203,7 @@ function AddShipmentForm({
   if (purchased) {
     return (
       <div className="space-y-5">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
+        <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-xl p-5 text-center">
           <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
             <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -215,7 +215,7 @@ function AddShipmentForm({
         </div>
 
         {purchased.labelBase64 && purchased.labelFormat === "PNG" && (
-          <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
             <img src={`data:image/png;base64,${purchased.labelBase64}`} alt="Shipping Label" className="w-full max-w-sm mx-auto block" />
           </div>
         )}
@@ -235,12 +235,12 @@ function AddShipmentForm({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
 
-      {/* ── LEFT ── */}
+      {/* -- LEFT -- */}
       <div className="space-y-6">
 
         {/* Carrier selection */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Select Carriers</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300 mb-3">Select Carriers</h4>
           <div className="flex gap-3">
             {CARRIERS.map(({ code, label, color }) => (
               <button
@@ -250,7 +250,7 @@ function AddShipmentForm({
                 className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${
                   selectedCarriers.includes(code)
                     ? "border-current text-white"
-                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    : "border-gray-200 text-gray-500 dark:text-gray-400 hover:border-gray-300"
                 }`}
                 style={selectedCarriers.includes(code) ? { backgroundColor: color, borderColor: color } : undefined}
               >
@@ -262,32 +262,32 @@ function AddShipmentForm({
 
         {/* Package dimensions */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Package Details</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300 mb-3">Package Details</h4>
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-gray-500 font-medium mb-1.5 block">Weight (lbs) *</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 font-medium mb-1.5 block">Weight (lbs) *</label>
               <input
                 type="number" min="0.01" step="0.01" value={weightLbs}
                 onChange={(e) => setWeightLbs(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900"
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium mb-1.5 block">
-                Dimensions (inches) — <span className="text-gray-400">optional but recommended</span>
+              <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-400 font-medium mb-1.5 block">
+                Dimensions (inches) - <span className="text-gray-400 dark:text-gray-500">optional but recommended</span>
               </label>
               <div className="flex items-center gap-2">
                 <input type="number" min="0" step="0.1" placeholder="Length" value={lengthIn}
                   onChange={(e) => setLengthIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 dark:bg-gray-700 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-gray-500" />
                 <span className="text-gray-300">×</span>
                 <input type="number" min="0" step="0.1" placeholder="Width" value={widthIn}
                   onChange={(e) => setWidthIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 dark:bg-gray-700 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-gray-500" />
                 <span className="text-gray-300">×</span>
                 <input type="number" min="0" step="0.1" placeholder="Height" value={heightIn}
                   onChange={(e) => setHeightIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 dark:bg-gray-700 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-gray-500" />
               </div>
             </div>
           </div>
@@ -309,7 +309,7 @@ function AddShipmentForm({
 
         {/* Error */}
         {rateError && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
+          <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40 rounded-xl p-4 text-sm text-red-600">
             {rateError}
           </div>
         )}
@@ -317,7 +317,7 @@ function AddShipmentForm({
         {/* Rates list */}
         {rates && rates.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Available Rates</h4>
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300 mb-3">Available Rates</h4>
             <div className="space-y-2">
               {rates.map((r, i) => (
                 <button
@@ -327,7 +327,7 @@ function AddShipmentForm({
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
                     selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier
                       ? "border-gray-900 bg-gray-900/5"
-                      : "border-gray-100 hover:border-gray-200 bg-white"
+                      : "border-gray-100 dark:border-gray-700 hover:border-gray-200 bg-white"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -343,14 +343,14 @@ function AddShipmentForm({
                     <div>
                       <div className="flex items-center gap-2">
                         <CarrierLogo carrier={r.carrier} />
-                        <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 dark:text-gray-100 dark:text-gray-100">{r.service}</span>
                       </div>
                       {r.deliveryDays && (
-                        <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
                       )}
                     </div>
                   </div>
-                  <span className="text-base font-bold text-gray-900">{fmt(r.totalCost)}</span>
+                  <span className="text-base font-bold text-gray-900 dark:text-gray-100">{fmt(r.totalCost)}</span>
                 </button>
               ))}
             </div>
@@ -364,49 +364,49 @@ function AddShipmentForm({
               >
                 {isPurchasing
                   ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Purchasing label…</>
-                  : <>Purchase Label — {fmt(selectedRate.totalCost)}</>}
+                  : <>Purchase Label - {fmt(selectedRate.totalCost)}</>}
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* ── RIGHT: Order summary ── */}
-      <div className="bg-gray-50 rounded-xl border border-gray-100 p-5 space-y-5 text-sm">
+      {/* -- RIGHT: Order summary -- */}
+      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700 dark:border-gray-700 p-5 space-y-5 text-sm">
         <div>
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Order details</h4>
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3">Order details</h4>
           <div className="space-y-2.5">
             <div className="flex justify-between gap-2">
-              <span className="text-gray-500">Ship to</span>
-              {/* <span className="text-gray-800 font-medium text-right">
+              <span className="text-gray-500 dark:text-gray-400">Ship to</span>
+              {/* <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium text-right">
                 {physician
                   ? `Dr. ${physician.firstName} ${physician.lastName}${physician.city ? `, ${physician.city}` : ""}${physician.state ? `, ${physician.state}` : ""}`
                   : "No address"}
               </span> */}
             </div>
             <div className="flex justify-between gap-2">
-              <span className="text-gray-500">Items</span>
-              <span className="text-gray-800 font-medium">{itemCount}</span>
+              <span className="text-gray-500 dark:text-gray-400">Items</span>
+              <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium">{itemCount}</span>
             </div>
             <div className="flex justify-between gap-2">
-              <span className="text-gray-500">Order value</span>
-              <span className="text-gray-800 font-medium">{fmt(orderValue)}</span>
+              <span className="text-gray-500 dark:text-gray-400">Order value</span>
+              <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium">{fmt(orderValue)}</span>
             </div>
           </div>
         </div>
 
         {(weightLbs || lengthIn) && (
           <div className="border-t border-gray-200 pt-4">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Package</h4>
+            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3">Package</h4>
             <div className="space-y-2">
               <div className="flex justify-between gap-2">
-                <span className="text-gray-500">Weight</span>
-                <span className="text-gray-800 font-medium">{parseFloat(weightLbs) || 0} lbs</span>
+                <span className="text-gray-500 dark:text-gray-400">Weight</span>
+                <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium">{parseFloat(weightLbs) || 0} lbs</span>
               </div>
               {lengthIn && widthIn && heightIn && (
                 <div className="flex justify-between gap-2">
-                  <span className="text-gray-500">Dimensions</span>
-                  <span className="text-gray-800 font-medium">{lengthIn} × {widthIn} × {heightIn} in</span>
+                  <span className="text-gray-500 dark:text-gray-400">Dimensions</span>
+                  <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium">{lengthIn} × {widthIn} × {heightIn} in</span>
                 </div>
               )}
             </div>
@@ -415,18 +415,18 @@ function AddShipmentForm({
 
         {selectedRate && (
           <div className="border-t border-gray-200 pt-4">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Selected rate</h4>
+            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3">Selected rate</h4>
             <div className="space-y-2">
               <div className="flex justify-between gap-2">
-                <span className="text-gray-500">Carrier</span>
+                <span className="text-gray-500 dark:text-gray-400">Carrier</span>
                 <CarrierLogo carrier={selectedRate.carrier} />
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-gray-500">Service</span>
-                <span className="text-gray-800 font-medium text-right">{selectedRate.service}</span>
+                <span className="text-gray-500 dark:text-gray-400">Service</span>
+                <span className="text-gray-800 dark:text-gray-100 dark:text-gray-100 font-medium text-right">{selectedRate.service}</span>
               </div>
               <div className="flex justify-between gap-2 pt-1 border-t border-gray-200">
-                <span className="font-semibold text-gray-700">Total</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300">Total</span>
                 <span className="font-bold text-gray-900">{fmt(selectedRate.totalCost)}</span>
               </div>
             </div>
@@ -437,7 +437,7 @@ function AddShipmentForm({
   );
 }
 
-// ── Main Panel (modal trigger + overlay) ─────────────────────────────────────
+// -- Main Panel (modal trigger + overlay) -------------------------------------
 export function ShippingPanel(props: Props) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<number | "add">(
@@ -460,13 +460,13 @@ export function ShippingPanel(props: Props) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto py-6 px-4">
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl">
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl">
 
             {/* Close button */}
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
+              className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:text-gray-300 hover:bg-gray-100 transition-colors z-10"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -474,7 +474,7 @@ export function ShippingPanel(props: Props) {
             </button>
 
             {/* Tabs */}
-            <div className="border-b border-gray-100 px-6">
+            <div className="border-b border-gray-100 dark:border-gray-700 dark:border-gray-700 dark:border-gray-700 px-6">
               <div className="flex items-center gap-1 overflow-x-auto">
                 {props.shipments.map((s, i) => (
                   <button
@@ -484,7 +484,7 @@ export function ShippingPanel(props: Props) {
                     className={`shrink-0 flex items-center gap-1.5 px-4 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
                       activeTab === i
                         ? "border-gray-900 text-[#3DBFA4]"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     Shipment {i + 1}/{props.shipments.length}
@@ -499,7 +499,7 @@ export function ShippingPanel(props: Props) {
                   className={`shrink-0 flex items-center gap-1.5 px-4 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
                     activeTab === "add"
                       ? "border-gray-900 text-[#3DBFA4]"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

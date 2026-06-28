@@ -15,7 +15,7 @@ export default async function DashboardLayout({
 
   return (
     <CartProviderWrapper userId={session.userId}>
-      <div className="min-h-screen flex flex-col bg-[#f9fafb]">
+      <div className="min-h-screen flex flex-col bg-[#f9fafb] dark:bg-gray-950">
         <ToastProvider />
         <MainHeader role={session.role} />
         <SubHeader role={session.role} />

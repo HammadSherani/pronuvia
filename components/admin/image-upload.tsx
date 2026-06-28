@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState } from "react";
 
@@ -50,7 +50,7 @@ export function ImageUpload({ name, value, onChange, compact = false }: ImageUpl
             </button>
             <button type="button" onClick={() => onChange("")}
               className="bg-white text-red-500 rounded text-[10px] font-medium px-1.5 py-0.5 hover:bg-gray-100 cursor-pointer">
-              ✕
+              ?
             </button>
           </div>
         </div>
@@ -71,7 +71,7 @@ export function ImageUpload({ name, value, onChange, compact = false }: ImageUpl
               </svg>
               {!compact && (
                 <>
-                  <span className="text-xs text-gray-400 font-medium">Click to upload</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">Click to upload</span>
                   <span className="text-[10px] text-gray-300">JPEG · PNG · WebP &nbsp;·&nbsp; max 5 MB</span>
                 </>
               )}

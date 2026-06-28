@@ -1,10 +1,10 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 
 
-export const metadata = { title: "Dashboard – Pronuvia" };
+export const metadata = { title: "Dashboard -“ Pronuvia" };
 
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -110,18 +110,18 @@ export default async function SalesDashboardPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
 
-        {/* ── LEFT: main content ── */}
+        {/* -- LEFT: main content -- */}
         <div className="space-y-6 min-w-0">
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 Welcome back, {rep?.firstName ?? session.email}!
               </h1>
               <p className="text-sm text-gray-400 mt-0.5">Here&apos;s an overview of your account activity.</p>
             </div>
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm shrink-0">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 shadow-sm shrink-0">
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -135,7 +135,7 @@ export default async function SalesDashboardPage() {
               <Link
                 key={card.label}
                 href={card.href}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
+                className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -144,8 +144,8 @@ export default async function SalesDashboardPage() {
                   <div style={{ color: card.color }}>{card.icon}</div>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-800 tracking-tight">{card.value}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">{card.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{card.label}</p>
                   <p className="text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
                 </div>
               </Link>
@@ -176,11 +176,11 @@ export default async function SalesDashboardPage() {
           )}
 
           {/* Recent Physicians table */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
               <div>
-                <h3 className="text-sm font-bold text-gray-800">My Physicians</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Recently added</p>
+                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">My Physicians</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Recently added</p>
               </div>
               <Link href="/sales/physicians" className="text-xs font-semibold text-[#3DBFA4] hover:underline">
                 View All
@@ -193,8 +193,8 @@ export default async function SalesDashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">No physicians yet</p>
-                <p className="text-xs text-gray-400 mt-1">Add your first physician to get started.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No physicians yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Add your first physician to get started.</p>
                 <Link
                   href="/sales/physicians"
                   className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-700 transition-colors"
@@ -208,22 +208,22 @@ export default async function SalesDashboardPage() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/60">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
+                  <tr className="bg-gray-50/60 dark:bg-gray-700/40">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                   {recentPhysicians.map((p) => {
                     const s = APPROVAL_STYLE[p.isApproved] ?? APPROVAL_STYLE.PENDING;
                     return (
-                      <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-3.5">
-                          <p className="text-xs font-semibold text-gray-800">{p.firstName} {p.lastName}</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">{p.firstName} {p.lastName}</p>
                         </td>
-                        <td className="px-6 py-3.5 text-xs text-gray-500 truncate max-w-[200px]">{p.email}</td>
+                        <td className="px-6 py-3.5 text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{p.email}</td>
                         <td className="px-6 py-3.5 text-center">
                           <span
                             className="inline-flex text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -232,7 +232,7 @@ export default async function SalesDashboardPage() {
                             {s.label}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">
+                        <td className="px-6 py-3.5 text-right text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                           {new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </td>
                       </tr>
@@ -244,12 +244,12 @@ export default async function SalesDashboardPage() {
           </div>
         </div>
 
-        {/* ── RIGHT: sidebar ── */}
+        {/* -- RIGHT: sidebar -- */}
         <div className="space-y-5">
 
           {/* Quick actions */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Quick Actions</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Quick Actions</h3>
             <div className="space-y-2">
               <Link
                 href="/sales/physicians"
@@ -281,8 +281,8 @@ export default async function SalesDashboardPage() {
           </div>
 
           {/* Stats summary */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-4">Account Summary</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-4">Account Summary</h3>
             <div className="space-y-3">
               {[
                 { label: "Commission Rate",  value: `${rep?.commission ?? 0}%`,        color: "#5BB8D4" },
@@ -293,9 +293,9 @@ export default async function SalesDashboardPage() {
                 <div key={item.label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
-                    <span className="text-xs text-gray-500">{item.label}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.label}</span>
                   </div>
-                  <span className="text-xs font-bold text-gray-800">{item.value}</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{item.value}</span>
                 </div>
               ))}
             </div>

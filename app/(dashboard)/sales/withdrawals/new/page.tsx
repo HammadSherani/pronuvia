@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
 import { NewWithdrawForm } from "./_components/new-withdraw-form";
 
-export const metadata = { title: "New Withdrawal Request – Pronuvia" };
+export const metadata = { title: "New Withdrawal Request -“ Pronuvia" };
 
 export default async function NewWithdrawPage() {
   const session = await requireSalesRep();
@@ -29,7 +29,7 @@ export default async function NewWithdrawPage() {
           Back
         </Link>
         <span className="text-gray-200">/</span>
-        <h1 className="text-xl font-bold text-gray-900">New Withdrawal Request</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">New Withdrawal Request</h1>
       </div>
 
       {/* Balance card */}
@@ -60,19 +60,19 @@ export default async function NewWithdrawPage() {
             You have a pending request. Please wait for it to be processed before submitting a new one.
           </p>
           <Link href="/sales/withdrawals" className="mt-3 inline-flex text-sm text-blue-700 font-medium hover:underline">
-            View status →
+            View status â†’
           </Link>
         </div>
       )}
 
-      {/* Form — only show if can submit */}
+      {/* Form - only show if can submit */}
       {rep?.bankName && !hasPending && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
           {/* Bank info preview */}
           <div className="bg-gray-50 rounded-xl px-4 py-3.5 space-y-1">
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">Payout destination</p>
-            <p className="text-sm font-semibold text-gray-800">{rep.bankAccountName}</p>
-            <p className="text-xs text-gray-500">{rep.bankName}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-2">Payout destination</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{rep.bankAccountName}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{rep.bankName}</p>
             {rep.bankAccountNumber && (
               <p className="text-xs font-mono text-gray-600">
                 ••••{rep.bankAccountNumber.slice(-4)}

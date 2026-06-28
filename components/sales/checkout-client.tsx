@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -27,14 +27,14 @@ import { validateCoupon }      from "@/actions/checkout/validate-coupon";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 
-// ── Address helpers ─────────────────────────────────────────────────────────
+// -- Address helpers ---------------------------------------------------------
 
 function parseAddr(raw: string): AddressData {
   if (!raw) return EMPTY_ADDRESS;
   try {
     const p = JSON.parse(raw);
     if (p && typeof p.firstName === "string") return migrateAddressData(p);
-  } catch { /* plain text — ignore */ }
+  } catch { /* plain text - ignore */ }
   return EMPTY_ADDRESS;
 }
 
@@ -54,7 +54,7 @@ function addrToString(a: AddressData): string {
   return formatAddress(a);
 }
 
-// ── Stripe inner form (must live inside <Elements>) ─────────────────────────
+// -- Stripe inner form (must live inside <Elements>) -------------------------
 
 type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
 
@@ -135,7 +135,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
   }
 );
 
-// ── Main component ──────────────────────────────────────────────────────────
+// -- Main component ----------------------------------------------------------
 
 type Props = {
   repEmail:             string;
@@ -184,7 +184,7 @@ export function CheckoutClient({
   const stripeRef    = useRef<StripeHandle>(null);
   const walletSubmit = useRef<HTMLButtonElement>(null);
 
-  // cart math — shipping is $0 at checkout; admin sets it at fulfillment
+  // cart math - shipping is $0 at checkout; admin sets it at fulfillment
   const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
   const shippingRate   = 0;
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
@@ -314,7 +314,7 @@ export function CheckoutClient({
 
       {/* Cashback banner */}
       {cashback > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded mb-6 text-sm text-gray-700">
+        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded mb-6 text-sm text-gray-700 dark:text-gray-300">
           <svg className="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
@@ -327,23 +327,23 @@ export function CheckoutClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
-        {/* ── LEFT COLUMN ───────────────────────────────────────── */}
+        {/* -- LEFT COLUMN ----------------------------------------- */}
         <div className="lg:col-span-3 space-y-8">
 
           {/* 1. Contact information */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded">
               <div className="px-4 py-3">
-                <p className="text-xs text-gray-400 mb-0.5">Email address</p>
-                <p className="text-sm text-gray-800">{repEmail}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Email address</p>
+                <p className="text-sm text-gray-800 dark:text-gray-100">{repEmail}</p>
               </div>
             </div>
           </section>
 
           {/* 2. Shipping address */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Shipping address</h2>
 
             {editShip ? (
               <div className="border border-gray-300 rounded p-4 space-y-4">
@@ -365,7 +365,7 @@ export function CheckoutClient({
                   {hasAddr(shipping) && (
                     <button
                       onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                      className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 transition-colors"
                     >
                       Cancel
                     </button>
@@ -375,8 +375,8 @@ export function CheckoutClient({
             ) : (
               <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-100">{shipDsp.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{shipDsp.line2}</p>
                 </div>
                 <button
                   onClick={() => setEditShip(true)}
@@ -400,7 +400,7 @@ export function CheckoutClient({
                 }}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
-              <span className="text-sm text-gray-700">Use same address for billing</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Use same address for billing</span>
             </label>
 
             {/* Billing address */}
@@ -420,8 +420,8 @@ export function CheckoutClient({
                 ) : (
                   <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-100">{billDsp.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{billDsp.line2}</p>
                     </div>
                     <button
                       onClick={() => setEditBill(true)}
@@ -437,7 +437,7 @@ export function CheckoutClient({
 
           {/* 3. Payment options */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Payment options</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Payment options</h2>
             <div className="border border-gray-300 rounded divide-y divide-gray-200">
 
               {/* Card */}
@@ -450,7 +450,7 @@ export function CheckoutClient({
                     onChange={() => setPayMethod("CARD")}
                     className="accent-gray-900"
                   />
-                  <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-100 font-medium">Credit / Debit Card</span>
                   <div className="ml-auto flex items-center gap-1">
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
@@ -462,7 +462,7 @@ export function CheckoutClient({
                   <div className="px-4 pb-4">
                     {!stripeReady ? (
                       <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
-                        Stripe is not configured — add <code className="font-mono text-xs bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>.
+                        Stripe is not configured - add <code className="font-mono text-xs bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>.
                       </div>
                     ) : fetchingIntent ? (
                       <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
@@ -519,7 +519,7 @@ export function CheckoutClient({
                     onChange={() => setPayMethod("WALLET")}
                     className="accent-gray-900"
                   />
-                  <span className="text-sm text-gray-800 font-medium">Wallet Balance</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-100 font-medium">Wallet Balance</span>
                   <span className={`ml-auto text-xs font-semibold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
                     ${walletBalance.toFixed(2)} available
                   </span>
@@ -543,7 +543,7 @@ export function CheckoutClient({
                 onChange={(e) => setShowNotes(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
-              <span className="text-sm text-gray-700">Add a note to your order</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Add a note to your order</span>
             </label>
             {showNotes && (
               <textarea
@@ -557,7 +557,7 @@ export function CheckoutClient({
           </div>
 
           {/* Terms */}
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             By proceeding with your purchase you agree to our{" "}
             <Link href="/terms" className="underline hover:text-gray-700">Terms and Conditions</Link>.
           </p>
@@ -592,14 +592,14 @@ export function CheckoutClient({
           </button>
         </div>
 
-        {/* ── RIGHT COLUMN – Order Summary ──────────────────────── */}
+        {/* -- RIGHT COLUMN -“ Order Summary ------------------------ */}
         <div className="lg:col-span-2">
           <div className="sticky top-24 space-y-4">
           <div className="border border-gray-200 rounded overflow-hidden">
 
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-800">Order summary</h2>
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Order summary</h2>
             </div>
 
             {/* Items */}
@@ -627,15 +627,15 @@ export function CheckoutClient({
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 font-medium truncate">{item.productTitle}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{item.productTitle}</p>
                     {item.variantSize && (
-                      <p className="text-xs text-gray-400">Size: {item.variantSize}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">Size: {item.variantSize}</p>
                     )}
                     <p className="text-[11px] text-orange-600 mt-1 leading-snug">
                       This product is distributed only through participating medical practitioners and not to patients directly.
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-gray-800 shrink-0">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 shrink-0">
                     ${(item.unitPrice * item.quantity).toFixed(2)}
                   </p>
                 </div>
@@ -652,7 +652,7 @@ export function CheckoutClient({
                     </svg>
                     <div>
                       <span className="text-xs font-bold text-emerald-700 font-mono">{appliedCoupon.code}</span>
-                      <span className="text-xs text-emerald-600 ml-1">— −${appliedCoupon.discountAmount.toFixed(2)}</span>
+                      <span className="text-xs text-emerald-600 ml-1">- -${appliedCoupon.discountAmount.toFixed(2)}</span>
                     </div>
                   </div>
                   <button type="button" onClick={() => setAppliedCoupon(null)}
@@ -684,7 +684,7 @@ export function CheckoutClient({
             </div>
 
             {/* Totals */}
-            <div className="px-4 py-4 space-y-3 border-b border-gray-200 text-sm text-gray-600">
+            <div className="px-4 py-4 space-y-3 border-b border-gray-200 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
@@ -692,7 +692,7 @@ export function CheckoutClient({
               {appliedCoupon && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span>Coupon ({appliedCoupon.code})</span>
-                  <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                  <span>-${appliedCoupon.discountAmount.toFixed(2)}</span>
                 </div>
               )}
               {walletBalance > 0 && (

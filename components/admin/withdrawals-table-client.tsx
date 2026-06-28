@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -82,7 +82,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
 
   return (
     <>
-      {/* ── Bulk action bar ─────────────────────────────────────── */}
+      {/* -- Bulk action bar --------------------------------------- */}
       {selected.size > 0 && (
         <div className="flex items-center justify-between gap-4 mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
           <span className="text-sm font-semibold text-blue-800">
@@ -122,7 +122,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
         </div>
       )}
 
-      {/* ── Table ───────────────────────────────────────────────── */}
+      {/* -- Table ------------------------------------------------- */}
       <table className="w-full text-sm table-fixed">
         <colgroup>
           <col className="w-8" />
@@ -137,7 +137,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
           <col className="w-[8%]" />
         </colgroup>
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50/60">
+          <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
             <th className="px-3 py-3">
               {pendingIds.length > 0 && (
                 <input
@@ -149,25 +149,25 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                 />
               )}
             </th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Wallet</th>
-            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sales Rep</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bank</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Balance</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Wallet</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
           {requests.map((r) => {
             const isPending = r.status === "PENDING";
             const isChecked = selected.has(r.id);
             return (
               <tr
                 key={r.id}
-                className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}
+                className={`hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}
               >
                 {/* Checkbox */}
                 <td className="px-3 py-3">
@@ -185,7 +185,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
 
                 {/* Sales rep */}
                 <td className="px-3 py-3">
-                  <p className="font-semibold text-gray-800 text-xs truncate">
+                  <p className="font-semibold text-gray-800 dark:text-gray-100 text-xs truncate">
                     {r.salesRep.firstName} {r.salesRep.lastName}
                   </p>
                   <p className="text-[11px] text-gray-400 truncate">{r.salesRep.email}</p>
@@ -195,7 +195,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                 <td className="px-3 py-3">
                   {r.salesRep.bankName ? (
                     <div>
-                      <p className="text-xs font-semibold text-gray-800 truncate">{r.salesRep.bankAccountName}</p>
+                      <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{r.salesRep.bankAccountName}</p>
                       <p className="text-[11px] text-gray-500 truncate">{r.salesRep.bankName}</p>
                       {r.salesRep.bankAccountNumber && (
                         <p className="text-[11px] font-mono text-gray-600 truncate">{r.salesRep.bankAccountNumber}</p>
@@ -208,7 +208,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
 
                 {/* Amount */}
                 <td className="px-3 py-3">
-                  <span className="text-sm font-bold text-gray-800">{fmt(r.amount)}</span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</span>
                 </td>
 
                 {/* Wallet balance */}
@@ -228,7 +228,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                   {r.note ? (
                     <p className="text-[11px] text-gray-500 italic line-clamp-2" title={r.note}>"{r.note}"</p>
                   ) : (
-                    <span className="text-gray-300 text-xs">—</span>
+                    <span className="text-gray-300 text-xs">-</span>
                   )}
                   {r.adminNote && (
                     <div className="mt-1">
@@ -269,7 +269,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                   {r.status === "PENDING" ? (
                     <WithdrawalActions requestId={r.id} />
                   ) : (
-                    <span className="text-xs text-gray-300">—</span>
+                    <span className="text-xs text-gray-300">-</span>
                   )}
                 </td>
               </tr>
@@ -278,15 +278,15 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
         </tbody>
       </table>
 
-      {/* ── Bulk confirm modal ──────────────────────────────────── */}
+      {/* -- Bulk confirm modal ------------------------------------ */}
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-1">
+            <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
               {confirmAction === "APPROVED" ? "Bulk Approve" : "Bulk Reject"}{" "}
               {selected.size} Request{selected.size !== 1 ? "s" : ""}
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               {confirmAction === "APPROVED"
                 ? "Amounts will be deducted from each user's wallet balance."
                 : "All selected requests will be marked as rejected."}

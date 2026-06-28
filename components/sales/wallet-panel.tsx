@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { WithdrawModal } from "./withdraw-modal";
@@ -34,7 +34,7 @@ export function WalletPanel({
     <>
       <div className="grid grid-cols-4 gap-5 mb-8">
 
-        {/* ── Wallet balance ── hero card */}
+        {/* -- Wallet balance -- hero card */}
         <div className="col-span-1 relative overflow-hidden bg-gradient-to-br from-[#3DBFA4] to-[#2a9f89] rounded-2xl p-6 text-white shadow-md">
           {/* decorative ring */}
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full border-[16px] border-white/10 pointer-events-none" />
@@ -61,8 +61,8 @@ export function WalletPanel({
           </button>
         </div>
 
-        {/* ── Total Earned ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
+        {/* -- Total Earned -- */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Paid Commissions</p>
             <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
@@ -72,8 +72,8 @@ export function WalletPanel({
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPaid)}</p>
-            <p className="text-xs text-gray-400 mt-1">Credited to wallet</p>
+            <p className="text-2xl font-black text-gray-800 dark:text-gray-100 tabular-nums">{fmt(totalPaid)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Credited to wallet</p>
             {totalPending > 0 && (
               <p className="text-xs text-amber-500 mt-1 font-medium">
                 + {fmt(totalPending)} pending
@@ -82,8 +82,8 @@ export function WalletPanel({
           </div>
         </div>
 
-        {/* ── Total Withdrawn ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
+        {/* -- Total Withdrawn -- */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Withdrawn</p>
             <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center">
@@ -93,13 +93,13 @@ export function WalletPanel({
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalWithdrawn)}</p>
-            <p className="text-xs text-gray-400 mt-1">Approved withdrawals</p>
+            <p className="text-2xl font-black text-gray-800 dark:text-gray-100 tabular-nums">{fmt(totalWithdrawn)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Approved withdrawals</p>
           </div>
         </div>
 
-        {/* ── Commission Orders ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
+        {/* -- Commission Orders -- */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Orders</p>
             <div className="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center">
@@ -109,8 +109,8 @@ export function WalletPanel({
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{commissionOrderCount}</p>
-            <p className="text-xs text-gray-400 mt-1">Orders earning commission</p>
+            <p className="text-2xl font-black text-gray-800 dark:text-gray-100 tabular-nums">{commissionOrderCount}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Orders earning commission</p>
           </div>
         </div>
       </div>

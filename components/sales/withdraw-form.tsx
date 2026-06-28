@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -25,11 +25,11 @@ export function WithdrawForm({
   return (
     <div>
       <h2 className="text-sm font-bold text-gray-700 mb-3">Request Withdrawal</h2>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
 
         {/* Balance hint */}
         <div className="flex items-center justify-between bg-gray-900/5 border border-gray-900/20 rounded-xl px-4 py-3 mb-4">
-          <p className="text-xs text-gray-500 font-medium">Available Balance</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Available Balance</p>
           <p className="text-base font-bold text-[#3DBFA4]">{fmt(balance)}</p>
         </div>
 
@@ -48,7 +48,7 @@ export function WithdrawForm({
             <svg className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Minimum withdrawal is $10.00. Your current balance is insufficient.
             </p>
           </div>
@@ -72,7 +72,7 @@ export function WithdrawForm({
                   className="w-full pl-7 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 Maximum: {fmt(balance)}
               </p>
             </div>

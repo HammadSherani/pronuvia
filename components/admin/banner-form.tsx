@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
 
       {/* Banner Image */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Banner Image</label>
         <ImageUpload name="__imageUrl" value={imageUrl} onChange={setImageUrl} />
         {state?.errors?.imageUrl && (
           <p className="text-xs text-red-500 mt-1">{state.errors.imageUrl[0]}</p>
@@ -51,12 +51,12 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
 
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Title</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">Title</label>
         <input
           name="title"
           defaultValue={defaultValues?.title}
           placeholder="e.g. Summer Promotion"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.title && (
           <p className="text-xs text-red-500 mt-1">{state.errors.title[0]}</p>
@@ -65,14 +65,14 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
 
       {/* Link URL */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">
           Link URL <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <input
           name="linkUrl"
           defaultValue={defaultValues?.linkUrl ?? ""}
           placeholder="https://example.com"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.linkUrl && (
           <p className="text-xs text-red-500 mt-1">{state.errors.linkUrl[0]}</p>
@@ -81,15 +81,15 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
 
       {/* Sort Order */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Sort Order</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">Sort Order</label>
         <input
           name="sortOrder"
           type="number"
           defaultValue={defaultValues?.sortOrder ?? 0}
           min={0}
-          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
+          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
-        <p className="text-xs text-gray-400 mt-1">Lower numbers appear first</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Lower numbers appear first</p>
       </div>
 
       {/* Published Toggle */}
@@ -105,8 +105,8 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
             isPublished ? "translate-x-6" : "translate-x-1"
           }`} />
         </button>
-        <span className="text-sm text-gray-700">
-          {isPublished ? "Published — visible to users" : "Draft — hidden from users"}
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          {isPublished ? "Published - visible to users" : "Draft - hidden from users"}
         </span>
       </div>
 

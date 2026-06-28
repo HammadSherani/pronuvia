@@ -1,20 +1,47 @@
 ﻿"use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { PronuviaLogoDark } from "./pronuvia-logo-dark";
 import { useCart } from "@/lib/cart/cart-context";
 import type { Role } from "@/generated/prisma/enums";
 import { logout } from "@/actions/auth/logout";
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="w-9 h-9" />;
+  const isDark = theme === "dark";
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      aria-label="Toggle theme"
+    >
+      {isDark ? (
+        <svg className="w-4.5 h-4.5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ) : (
+        <svg className="w-4.5 h-4.5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
 function CartIcon({ href }: { href: string }) {
   const { totalItems } = useCart();
   return (
     <Link
       href={href}
-      className="relative inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors"
+      className="relative inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     >
-      <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
       </svg>
       {totalItems > 0 && (
@@ -128,7 +155,7 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors cursor-pointer"
+        className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors cursor-pointer"
       >
         {item.label}
 
@@ -149,7 +176,7 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
       </button>
 
       {open && (
-        <div className="absolute top-full -left-20 mt-2 min-w-[180px] bg-white border border-gray-100 rounded-lg shadow-lg py-1 z-50">
+        <div className="absolute top-full -left-20 mt-2 min-w-[180px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
           {item.children.map((child) =>
             child.action ? (
               <button
@@ -159,7 +186,7 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
                   setOpen(false);
                   await child.action();
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm text-[#6b7280] hover:bg-gray-50 hover:text-[#374151] transition-colors"
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 {child.label}
               </button>
@@ -168,7 +195,7 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
                 key={child.href}
                 href={child.href}
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 text-sm text-[#6b7280] hover:bg-gray-50 hover:text-[#374151] transition-colors"
+                className="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 {child.label}
               </Link>
@@ -184,7 +211,7 @@ export function MainHeader({ role }: { role: Role }) {
   const navItems = buildNav(role);
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 h-[70px] flex items-center justify-between">
         <PronuviaLogoDark />
         <nav className="flex items-center gap-6 flex-wrap">
@@ -198,7 +225,7 @@ export function MainHeader({ role }: { role: Role }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors whitespace-nowrap"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors whitespace-nowrap"
               >
                 {item.label}
               </Link>
@@ -207,6 +234,7 @@ export function MainHeader({ role }: { role: Role }) {
 
           {role === "SALES_REP" && <CartIcon href="/sales/cart" />}
           {role === "PHYSICIAN" && <CartIcon href="/physician/cart" />}
+          <ThemeToggle />
         </nav>
       </div>
     </header>

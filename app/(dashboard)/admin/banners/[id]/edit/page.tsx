@@ -7,7 +7,7 @@ import { updateBanner } from "@/actions/admin/banners";
 
 type Props = { params: Promise<{ id: string }> };
 
-export const metadata = { title: "Edit Banner – Pronuvia Admin" };
+export const metadata = { title: "Edit Banner -“ Pronuvia Admin" };
 
 export default async function EditBannerPage({ params }: Props) {
   await requireAdmin();

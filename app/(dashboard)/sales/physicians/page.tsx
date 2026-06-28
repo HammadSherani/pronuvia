@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "My Physicians – Pronuvia" };
+export const metadata = { title: "My Physicians -“ Pronuvia" };
 
 const statusBadge: Record<ApprovalStatus, { label: string; cls: string }> = {
   APPROVED: { label: "Approved", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -48,8 +48,8 @@ export default async function SalesPhysiciansPage({
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">My Partnering Physicians</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">My Partnering Physicians</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Doctors added under your account ({total} total)
           </p>
         </div>
@@ -67,26 +67,26 @@ export default async function SalesPhysiciansPage({
       {/* Summary chips */}
       {total > 0 && (
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-1 rounded-full bg-gray-900" />
             <div>
-              <p className="text-lg font-bold text-gray-800">{total}</p>
-              <p className="text-xs text-gray-500">Total Physicians</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{total}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Total Physicians</p>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-1 rounded-full bg-emerald-400" />
             <div>
-              <p className="text-lg font-bold text-gray-800">{approvedCount}</p>
-              <p className="text-xs text-gray-500">Approved</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{approvedCount}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Approved</p>
             </div>
           </div>
           {pendingCount > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm px-4 py-3 flex items-center gap-3">
               <div className="w-8 h-1 rounded-full bg-amber-400" />
               <div>
-                <p className="text-lg font-bold text-gray-800">{pendingCount}</p>
-                <p className="text-xs text-gray-500">Pending Approval</p>
+                <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{pendingCount}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Pending Approval</p>
               </div>
             </div>
           )}
@@ -94,7 +94,7 @@ export default async function SalesPhysiciansPage({
       )}
 
       {/* Table / empty state */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -104,7 +104,7 @@ export default async function SalesPhysiciansPage({
               </svg>
             </div>
             <p className="text-sm font-semibold text-gray-600 mb-1">No physicians added yet</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Contact your admin to add partnering physicians under your account.
             </p>
           </div>
@@ -112,22 +112,22 @@ export default async function SalesPhysiciansPage({
           <>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Practice</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Speciality</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Added</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Physician</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Practice</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Speciality</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Commission</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Added</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {physicians.map((p) => {
                   const badge = statusBadge[p.isApproved];
                   return (
-                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
@@ -136,22 +136,22 @@ export default async function SalesPhysiciansPage({
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-800">Dr. {p.firstName} {p.lastName}</p>
-                            <p className="text-xs text-gray-400">{p.email}</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">Dr. {p.firstName} {p.lastName}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">{p.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4 text-gray-600">
-                        {p.nameOfPractice ?? <span className="text-gray-300">—</span>}
+                        {p.nameOfPractice ?? <span className="text-gray-300">-</span>}
                       </td>
                       <td className="px-5 py-4 text-gray-500 text-xs">
                         {p.city && p.state
                           ? `${p.city}, ${p.state}`
-                          : p.city || p.state || <span className="text-gray-300">—</span>
+                          : p.city || p.state || <span className="text-gray-300">-</span>
                         }
                       </td>
                       <td className="px-5 py-4 text-gray-500">
-                        {p.phone ?? <span className="text-gray-300">—</span>}
+                        {p.phone ?? <span className="text-gray-300">-</span>}
                       </td>
                       <td className="px-5 py-4">
                         {p.fieldsOfSpeciality.length > 0 ? (
@@ -168,7 +168,7 @@ export default async function SalesPhysiciansPage({
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-300">-</span>
                         )}
                       </td>
                       <td className="px-5 py-4">

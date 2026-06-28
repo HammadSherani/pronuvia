@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useTransition } from "react";
 import toast                       from "react-hot-toast";
@@ -46,7 +46,7 @@ function inp(extra = "") {
 }
 
 function fmtDate(d: Date | null) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
@@ -84,8 +84,8 @@ function CouponFormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-auto">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-800">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+          <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">
             {editId ? "Edit Coupon" : "Create Coupon"}
           </h2>
           <button type="button" onClick={onClose}
@@ -211,7 +211,7 @@ function CouponFormModal({
 
         <div className="px-6 pb-5 flex justify-end gap-3">
           <button type="button" onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+            className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
             Cancel
           </button>
           <button type="button" onClick={handleSubmit} disabled={isPending}
@@ -306,8 +306,8 @@ export function CouponsClient({ coupons: initial }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Coupons</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""} total</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Coupons</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""} total</p>
           </div>
           <button
             type="button"
@@ -323,43 +323,43 @@ export function CouponsClient({ coupons: initial }: Props) {
 
         {/* Table */}
         {coupons.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-16 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
               <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
               </svg>
             </div>
             <p className="text-sm font-semibold text-gray-600">No coupons yet</p>
-            <p className="text-xs text-gray-400 mt-1">Create your first coupon to offer discounts.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Create your first coupon to offer discounts.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50">
                   {["Code", "Discount", "Usage", "Expires", "Applicable To", "Status", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider first:pl-6 last:pr-6">
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {pagedCoupons.map((c) => {
                   const isExpired = c.expiresAt && new Date(c.expiresAt) < new Date();
                   const isExhausted = c.maxUses !== null && c.usedCount >= c.maxUses;
                   const effectivelyInactive = !c.isActive || isExpired || isExhausted;
 
                   return (
-                    <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={c.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="pl-6 pr-4 py-4">
                         <div>
-                          <span className="font-mono font-bold text-gray-800 tracking-wider">{c.code}</span>
+                          <span className="font-mono font-bold text-gray-800 dark:text-gray-100 tracking-wider">{c.code}</span>
                           {c.description && (
-                            <p className="text-xs text-gray-400 mt-0.5">{c.description}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{c.description}</p>
                           )}
                           {c.minOrderAmount && (
-                            <p className="text-xs text-gray-400 mt-0.5">Min. ${c.minOrderAmount.toFixed(2)}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Min. ${c.minOrderAmount.toFixed(2)}</p>
                           )}
                         </div>
                       </td>
@@ -433,7 +433,7 @@ export function CouponsClient({ coupons: initial }: Props) {
                                 Confirm
                               </button>
                               <button type="button" onClick={() => setDeleting(null)}
-                                className="px-2 py-1 text-xs text-gray-500 border border-gray-200 rounded hover:border-gray-300 transition-colors">
+                                className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400 border border-gray-200 rounded hover:border-gray-300 transition-colors">
                                 Cancel
                               </button>
                             </div>

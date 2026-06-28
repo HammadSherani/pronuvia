@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { PhysiciansPageClient } from "@/components/admin/physicians-page-client";
 
-export const metadata = { title: "Physicians – Pronuvia Admin" };
+export const metadata = { title: "Physicians -“ Pronuvia Admin" };
 
 export default async function PhysiciansPage() {
   await requireAdmin();

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -247,16 +247,16 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
 
           {/* 1. Contact */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded px-4 py-3">
-              <p className="text-xs text-gray-400 mb-0.5">Email address</p>
-              <p className="text-sm text-gray-800">{physicianEmail}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Email address</p>
+              <p className="text-sm text-gray-800 dark:text-gray-100">{physicianEmail}</p>
             </div>
           </section>
 
           {/* 2. Shipping address */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Shipping address</h2>
 
             {editShip ? (
               <div className="border border-gray-300 rounded p-4 space-y-4">
@@ -272,7 +272,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                   </button>
                   {hasAddr(shipping) && (
                     <button type="button" onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                      className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 transition-colors">
                       Cancel
                     </button>
                   )}
@@ -281,8 +281,8 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             ) : (
               <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-100">{shipDsp.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{shipDsp.line2}</p>
                 </div>
                 <button type="button" onClick={() => setEditShip(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
               </div>
@@ -301,10 +301,10 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                 }}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
-              <span className="text-sm text-gray-700">Use same address for billing</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Use same address for billing</span>
             </label>
 
-            {/* Billing address — shown when checkbox is unchecked */}
+            {/* Billing address - shown when checkbox is unchecked */}
             {!sameAsBilling && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
@@ -319,8 +319,8 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                 ) : (
                   <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-100">{billDsp.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{billDsp.line2}</p>
                     </div>
                     <button type="button" onClick={() => setEditBill(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
                   </div>
@@ -331,10 +331,10 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
 
           {/* 3. Payment */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Payment</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Payment</h2>
             <div className="border border-gray-300 rounded p-4">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
+                <span className="text-sm text-gray-800 dark:text-gray-100 font-medium">Credit / Debit Card</span>
                 <div className="ml-auto flex items-center gap-1">
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
@@ -387,7 +387,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" checked={showNotes} onChange={(e) => setShowNotes(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
-              <span className="text-sm text-gray-700">Add a note to your order</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Add a note to your order</span>
             </label>
             {showNotes && (
               <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
@@ -396,7 +396,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
             )}
           </div>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             By proceeding you agree to our{" "}
             <Link href="/terms" className="underline hover:text-gray-700">Terms and Conditions</Link>.
           </p>
@@ -413,12 +413,12 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
           </button>
         </div>
 
-        {/* RIGHT — Order summary */}
+        {/* RIGHT - Order summary */}
         <div className="lg:col-span-2">
           <div className="sticky top-24 space-y-4">
             <div className="border border-gray-200 rounded overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-200">
-                <h2 className="text-sm font-semibold text-gray-800">Order summary</h2>
+                <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Order summary</h2>
               </div>
               <div className="px-4 py-4 space-y-4 border-b border-gray-200">
                 {items.map((item) => (
@@ -439,10 +439,10 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 font-medium truncate">{item.productTitle}</p>
-                      {item.variantSize && <p className="text-xs text-gray-400">Size: {item.variantSize}</p>}
+                      <p className="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{item.productTitle}</p>
+                      {item.variantSize && <p className="text-xs text-gray-400 dark:text-gray-500">Size: {item.variantSize}</p>}
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 shrink-0">
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 shrink-0">
                       ${(item.unitPrice * item.quantity).toFixed(2)}
                     </p>
                   </div>
@@ -458,7 +458,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                       </svg>
                       <div>
                         <span className="text-xs font-bold text-emerald-700 font-mono">{appliedCoupon.code}</span>
-                        <span className="text-xs text-emerald-600 ml-1">— −${appliedCoupon.discountAmount.toFixed(2)}</span>
+                        <span className="text-xs text-emerald-600 ml-1">- -${appliedCoupon.discountAmount.toFixed(2)}</span>
                       </div>
                     </div>
                     <button type="button" onClick={() => setAppliedCoupon(null)}
@@ -486,7 +486,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                 )}
               </div>
 
-              <div className="px-4 py-4 space-y-2 border-b border-gray-200 text-sm text-gray-600">
+              <div className="px-4 py-4 space-y-2 border-b border-gray-200 text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
@@ -494,7 +494,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                 {appliedCoupon && (
                   <div className="flex justify-between text-emerald-600 font-medium">
                     <span>Coupon ({appliedCoupon.code})</span>
-                    <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                    <span>-${appliedCoupon.discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-gray-400">

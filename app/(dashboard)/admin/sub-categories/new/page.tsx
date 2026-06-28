@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { FormCard } from "@/components/admin/form-card";
 import { SubCategoryForm } from "./_components/sub-category-form";
 
-export const metadata = { title: "Add Sub-Category – Pronuvia Admin" };
+export const metadata = { title: "Add Sub-Category -“ Pronuvia Admin" };
 
 export default async function NewSubCategoryPage() {
   await requireAdmin();

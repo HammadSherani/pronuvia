@@ -2,7 +2,7 @@ import { requireSalesRep }   from "@/lib/auth/dal";
 import { prisma }             from "@/lib/db/prisma";
 import { SalesAccountClient } from "@/components/sales/account-client";
 
-export const metadata = { title: "My Account – Pronuvia" };
+export const metadata = { title: "My Account -“ Pronuvia" };
 
 export default async function SalesAccountPage() {
   const session = await requireSalesRep();

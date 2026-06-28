@@ -1,4 +1,4 @@
-﻿import Link         from "next/link";
+import Link         from "next/link";
 import { prisma }   from "@/lib/db/prisma";
 import { requireAdmin }    from "@/lib/auth/dal";
 import { PageHeader }      from "@/components/admin/page-header";
@@ -9,7 +9,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Website Banners – Pronuvia Admin" };
+export const metadata = { title: "Website Banners -“ Pronuvia Admin" };
 
 export default async function WebsiteBannersPage({
   searchParams,
@@ -38,7 +38,7 @@ export default async function WebsiteBannersPage({
         actionHref="/admin/website-banners/new"
       />
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -56,17 +56,17 @@ export default async function WebsiteBannersPage({
           <>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Banner</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Content</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Banner</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {banners.map((banner) => (
-                  <tr key={banner.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={banner.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="w-24 h-14 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -74,9 +74,9 @@ export default async function WebsiteBannersPage({
                       </div>
                     </td>
                     <td className="px-5 py-3.5 max-w-xs">
-                      <p className="font-medium text-gray-800 truncate">{banner.title}</p>
+                      <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{banner.title}</p>
                       {banner.subtitle && (
-                        <p className="text-xs text-gray-400 truncate mt-0.5">{banner.subtitle}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">{banner.subtitle}</p>
                       )}
                       {banner.linkUrl && (
                         <p className="text-xs text-gray-300 truncate mt-0.5">{banner.linkUrl}</p>

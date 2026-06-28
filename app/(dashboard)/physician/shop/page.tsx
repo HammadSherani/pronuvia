@@ -5,7 +5,7 @@ import { ShopProducts } from "@/components/sales/shop-products";
 import { BannerCarousel } from "@/components/dashboard/banner-carousel";
 import { getPublishedBanners } from "@/actions/admin/banners";
 
-export const metadata = { title: "Shop – Pronuvia" };
+export const metadata = { title: "Shop -“ Pronuvia" };
 
 export default async function PhysicianShopPage() {
   await requirePhysician();

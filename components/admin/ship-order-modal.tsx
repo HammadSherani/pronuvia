@@ -104,8 +104,8 @@ export function ShipOrderModal({ orderId, orderNumber, disabled }: Props) {
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-base font-bold text-gray-800">Ship Order</h2>
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">{orderNumber}</p>
+                <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">Ship Order</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">{orderNumber}</p>
               </div>
               <button type="button" onClick={() => !pending && setOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
@@ -151,7 +151,7 @@ export function ShipOrderModal({ orderId, orderNumber, disabled }: Props) {
                 placeholder="0.00"
                 className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-gray-400"
               />
-              <p className="text-[11px] text-gray-400">For internal records only — not charged to customer.</p>
+              <p className="text-[11px] text-gray-400">For internal records only - not charged to customer.</p>
             </div>
 
             {/* Estimated delivery */}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ type Props = {
   related: RelatedProduct[];
 };
 
-// ── Related product mini-card
+// -- Related product mini-card
 function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
   const variants  = p.variants as Variant[];
   const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 ? 0 : -1);
@@ -44,7 +44,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
         <Link href={`${basePath}/${p.slug}`}>
           <div className="aspect-square bg-[#f8f9fa] flex items-center justify-center overflow-hidden">
             {p.image
@@ -53,16 +53,16 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
             }
           </div>
         </Link>
-        <div className="px-3 pt-3 pb-1 border-b border-gray-100">
+        <div className="px-3 pt-3 pb-1 border-b border-gray-100 dark:border-gray-700">
           <p className="text-[9px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">
             {variants.length > 0 ? "Size" : " "}
           </p>
           {variants.length > 0 ? (
             <select value={selIdx} onChange={(e) => setSelIdx(parseInt(e.target.value))}
               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors text-gray-700">
-              <option value={-1}>— Size —</option>
+              <option value={-1}>- Size -</option>
               {variants.map((v, i) => (
-                <option key={i} value={i}>{v.size}{v.salePrice !== undefined ? ` — $${v.salePrice.toFixed(2)}` : ""}</option>
+                <option key={i} value={i}>{v.size}{v.salePrice !== undefined ? ` - $${v.salePrice.toFixed(2)}` : ""}</option>
               ))}
             </select>
           ) : <div className="h-7" />}
@@ -73,14 +73,14 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
             <p className="text-sm font-bold text-gray-900 hover:text-[#3DBFA4] transition-colors leading-snug">{p.title}</p>
           </Link>
           <p className="text-sm font-bold text-[#1a6b58] mt-0.5">
-            {displayPrice !== null ? `$${displayPrice.toFixed(2)}` : `$${min.toFixed(2)}${min !== max ? ` – $${max.toFixed(2)}` : ""}`}
+            {displayPrice !== null ? `$${displayPrice.toFixed(2)}` : `$${min.toFixed(2)}${min !== max ? ` -“ $${max.toFixed(2)}` : ""}`}
           </p>
         </div>
         <div className="px-3 pt-2 flex items-center gap-2">
           <span className="text-[9px] tracking-[0.15em] uppercase text-gray-400">QTY</span>
           <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-            <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-base leading-none">−</button>
-            <span className="w-8 text-center text-xs font-semibold text-gray-800">{qty}</span>
+            <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-base leading-none">-</button>
+            <span className="w-8 text-center text-xs font-semibold text-gray-800 dark:text-gray-100">{qty}</span>
             <button type="button" onClick={() => setQty((q) => q + 1)} className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-base leading-none">+</button>
           </div>
         </div>
@@ -111,7 +111,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
   );
 }
 
-// ── Main product detail client component
+// -- Main product detail client component
 export function ProductDetailClient({ product, related, basePath = "/sales/shop" }: Props & { basePath?: string }) {
   const variants = product.variants as Variant[];
 
@@ -156,10 +156,10 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
 
   return (
     <>
-      {/* ── Product detail ──────────────────────────────────── */}
+      {/* -- Product detail ------------------------------------ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
 
-        {/* Left — images */}
+        {/* Left - images */}
         <div className="space-y-3">
           <div className="relative rounded-2xl overflow-hidden bg-[#f8f9fa] border border-gray-100">
             <div className="aspect-square">
@@ -189,10 +189,10 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           )}
         </div>
 
-        {/* Right — info + buy */}
+        {/* Right - info + buy */}
         <div>
           {/* Breadcrumb */}
-          {/* <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
+          {/* <nav className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-3">
             {breadcrumb.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 {i > 0 && <span>/</span>}
@@ -210,11 +210,11 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           )}
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{product.title}</h1>
 
           {/* Base price */}
-          <p className="text-xl font-bold text-gray-900 mb-3">
-            {minPrice === maxPrice ? `$${minPrice.toFixed(2)}` : `$${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)}`}
+          <p className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+            {minPrice === maxPrice ? `$${minPrice.toFixed(2)}` : `$${minPrice.toFixed(2)} -“ $${maxPrice.toFixed(2)}`}
           </p>
 
           {/* Notice */}
@@ -248,14 +248,14 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           )}
 
           {/* Selected price */}
-          <p className="text-xl font-bold text-gray-900 mb-4">${displayPrice.toFixed(2)}</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white mb-4">${displayPrice.toFixed(2)}</p>
 
           {/* Qty + Add to cart */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-              <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none transition-colors">−</button>
+              <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none transition-colors">-</button>
               <input type="number" value={qty} min={1} onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-14 h-10 text-center text-sm font-semibold text-gray-800 border-0 focus:outline-none" />
+                className="w-14 h-10 text-center text-sm font-semibold text-gray-800 dark:text-gray-100 border-0 focus:outline-none" />
               <button type="button" onClick={() => setQty((q) => q + 1)} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none transition-colors">+</button>
             </div>
             <button type="button" onClick={handleAddToCart}
@@ -265,7 +265,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           </div>
 
           {/* Meta */}
-          <div className="text-xs hidden text-gray-500 space-y-1 pt-3 border-t border-gray-100">
+          <div className="text-xs hidden text-gray-500 space-y-1 pt-3 border-t border-gray-100 dark:border-gray-700">
             {selectedVariant?.sku && <p><span className="font-medium text-gray-700">SKU:</span> {selectedVariant.sku}</p>}
             {product.category && <p><span className="font-medium text-gray-700">Category:</span>{" "}
               <span className="text-[#3DBFA4]">{product.category.name}</span>
@@ -277,7 +277,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
         </div>
       </div>
 
-      {/* ── Tabs ─────────────────────────────────────────────── */}
+      {/* -- Tabs ----------------------------------------------- */}
       <div className="border-b border-gray-200 mb-6">
         <div className="flex gap-0">
           {(["info", "reviews"] as const).map((tab) => (
@@ -298,7 +298,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           {variants.length > 0 ? (
             <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
               <tbody>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-gray-700">
                   <td className="px-4 py-3 font-medium text-gray-700 bg-gray-50 w-40">Size</td>
                   <td className="px-4 py-3 text-gray-600">
                     {variants.map((v) => v.size).filter(Boolean).join(", ")}
@@ -313,21 +313,21 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
               </tbody>
             </table>
           ) : (
-            <p className="text-sm text-gray-500">{product.description ?? "No additional information available."}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{product.description ?? "No additional information available."}</p>
           )}
         </div>
       )}
 
       {activeTab === "reviews" && (
         <div className="mb-12">
-          <p className="text-sm text-gray-500">No reviews yet.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">No reviews yet.</p>
         </div>
       )}
 
-      {/* ── Related products ──────────────────────────────────── */}
+      {/* -- Related products ------------------------------------ */}
       {related.length > 0 && (
         <div>
-          <h2 className="text-lg font-bold text-gray-800 mb-5">Related products</h2>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5">Related products</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {related.map((p) => (
               <RelatedCard key={p.id} p={p} basePath={basePath} />

@@ -59,7 +59,7 @@ export function SubHeader({ role }: { role: Role }) {
   const { totalItems } = useCart();
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-[70px] z-30 overflow-x-auto">
+    <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-[70px] z-30 overflow-x-auto">
       <div className="max-w-7xl mx-auto px-6 h-11 flex items-center gap-8 min-w-max mx-auto">
         {items.map((item) => {
           if (item.action) {
@@ -80,8 +80,8 @@ export function SubHeader({ role }: { role: Role }) {
               href={item.href}
               className={`relative inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                 isActive
-                  ? "text-gray-900 border-b-2 border-gray-900 pb-0.5"
-                  : "text-gray-500 hover:text-gray-900"
+                  ? "text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white pb-0.5"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               {item.label}

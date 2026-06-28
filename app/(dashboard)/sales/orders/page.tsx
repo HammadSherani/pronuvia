@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { OrderStatus } from "@/generated/prisma/enums";
@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Order History – Pronuvia" };
+export const metadata = { title: "Order History -“ Pronuvia" };
 
 const statusStyle: Record<OrderStatus, string> = {
   PENDING:    "bg-amber-50 text-amber-700 border-amber-200",
@@ -65,8 +65,8 @@ export default async function SalesOrdersPage({
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Order History</h1>
-          <p className="text-sm text-gray-500 mt-0.5">All orders you have placed</p>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Order History</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">All orders you have placed</p>
         </div>
         <Link
           href="/sales/shop"
@@ -86,16 +86,16 @@ export default async function SalesOrdersPage({
           { label: "Total Spent",     value: fmt(totalSpent),      color: "#5BB8D4" },
           { label: "Your Commission", value: fmt(totalCommission), color: "#8b5cf6" },
         ].map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div key={c.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
-            <p className="text-xl font-bold text-gray-800">{c.value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{c.label}</p>
+            <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{c.value}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{c.label}</p>
           </div>
         ))}
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -104,7 +104,7 @@ export default async function SalesOrdersPage({
               </svg>
             </div>
             <p className="text-sm font-semibold text-gray-600 mb-1">No orders yet</p>
-            <p className="text-xs text-gray-400 mb-5">Browse the shop and place your first order.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Browse the shop and place your first order.</p>
             <Link
               href="/sales/shop"
               className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors"
@@ -114,38 +114,38 @@ export default async function SalesOrdersPage({
           </div>
         ) : (
           <>
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-700">
                 Orders <span className="text-gray-400 font-normal">({total})</span>
               </span>
               {paidCount > 0 && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
                   {paidCount} paid · {total - paidCount} pending
                 </span>
               )}
             </div>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order #</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Items</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tracking</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Commission</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {orders.map((o) => {
                   const itemCount = Array.isArray(o.items) ? o.items.length : 0;
                   const payStatus = o.paymentStatus ?? "PENDING";
                   const payCls    = payStatusStyle[payStatus] ?? payStatusStyle["PENDING"];
                   const stsCls    = statusStyle[o.status];
                   return (
-                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">
                         {o.orderNumber}
                       </td>
@@ -153,15 +153,15 @@ export default async function SalesOrdersPage({
                         {itemCount} item{itemCount !== 1 ? "s" : ""}
                       </td>
                       <td className="px-5 py-4">
-                        <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-100">{fmt(o.total)}</span>
                         {o.shippingRate > 0 && (
-                          <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">+{fmt(o.shippingRate)} shipping</p>
                         )}
                       </td>
                       <td className="px-5 py-4">
                         {o.trackingNumber ? (
                           <div>
-                            <p className="text-xs text-gray-500">{o.shippingCarrier}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{o.shippingCarrier}</p>
                             <p className="text-xs font-mono font-semibold text-indigo-600 mt-0.5">{o.trackingNumber}</p>
                           </div>
                         ) : (
@@ -170,13 +170,13 @@ export default async function SalesOrdersPage({
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-[#5BB8D4] font-semibold">{fmt(o.salesRepCommissionAmount)}</span>
-                        <span className="text-xs text-gray-400 ml-1">({o.salesRepCommissionRate}%)</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({o.salesRepCommissionRate}%)</span>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-1">
                           {o.paymentMethod && (
-                            <span className="text-xs text-gray-500">
-                              {o.paymentMethod === "CARD" ? "💳 Card" : "👛 Wallet"}
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {o.paymentMethod === "CARD" ? "?? Card" : "?? Wallet"}
                             </span>
                           )}
                           <span className={`inline-flex items-center px-2 py-0.5 border rounded-full text-xs font-medium w-fit ${payCls}`}>

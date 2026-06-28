@@ -5,7 +5,7 @@ import { PageHeader }   from "@/components/admin/page-header";
 import { BlogForm }     from "@/components/admin/blog-form";
 import { updateBlog }   from "@/actions/admin/blogs";
 
-export const metadata = { title: "Edit Blog Post – Pronuvia Admin" };
+export const metadata = { title: "Edit Blog Post -“ Pronuvia Admin" };
 
 export default async function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();

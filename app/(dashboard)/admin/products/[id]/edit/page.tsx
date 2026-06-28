@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getProductById, updateProduct } from "@/actions/admin/products";
 import { ProductForm } from "../../_components/product-form";
 
-export const metadata = { title: "Edit Product – Pronuvia Admin" };
+export const metadata = { title: "Edit Product -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 

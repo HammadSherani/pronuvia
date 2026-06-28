@@ -13,7 +13,7 @@ export default function DashboardLoading() {
       {/* Stats row skeleton */}
       <div className="grid grid-cols-4 gap-5 mb-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
             <div className="h-1 w-10 bg-gray-200 rounded-full mb-4" />
             <div className="h-8 w-20 bg-gray-200 rounded-lg mb-1" />
             <div className="h-3 w-24 bg-gray-100 rounded-lg" />
@@ -22,9 +22,9 @@ export default function DashboardLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Table header */}
-        <div className="flex gap-6 px-5 py-3.5 border-b border-gray-100 bg-gray-50/60">
+        <div className="flex gap-6 px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
           {[140, 180, 100, 80, 80, 80].map((w, i) => (
             <div key={i} className="h-3 bg-gray-200 rounded-full" style={{ width: w }} />
           ))}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -42,12 +42,12 @@ export function QuickOrderModal({ product, variantSize, variantSku, unitPrice, q
           </svg>
         </button>
 
-        <h3 className="text-lg font-bold text-gray-800 mb-1">Confirm Order</h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">Confirm Order</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           {product.title}
           {variantSize ? <span className="text-gray-400"> · {variantSize}</span> : null}
           {" "}× {qty}
-          <span className="font-bold text-gray-800 ml-2">${(unitPrice * qty).toFixed(2)}</span>
+          <span className="font-bold text-gray-800 dark:text-gray-100 ml-2">${(unitPrice * qty).toFixed(2)}</span>
         </p>
 
         <form action={action} className="space-y-4">
@@ -59,7 +59,7 @@ export function QuickOrderModal({ product, variantSize, variantSku, unitPrice, q
           <input type="hidden" name="quantity"    value={qty} />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">
               Notes <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea

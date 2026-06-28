@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -29,7 +29,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   const minPrice   = Math.min(...prices);
   const maxPrice   = Math.max(...prices);
   const priceLabel = variants.length > 1 && minPrice !== maxPrice
-    ? `$${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)}`
+    ? `$${minPrice.toFixed(2)} -“ $${maxPrice.toFixed(2)}`
     : `$${unitPrice.toFixed(2)}`;
 
   function handleAddToCart() {
@@ -49,7 +49,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group">
 
       {/* Image */}
       <div className="relative aspect-square bg-gray-50 overflow-hidden">
@@ -85,12 +85,12 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
         )}
 
         <Link href={`${basePath}/${product.slug}`}>
-          <p className="text-sm font-semibold text-gray-900 leading-snug hover:text-[#3DBFA4] transition-colors line-clamp-2">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug hover:text-[#3DBFA4] transition-colors line-clamp-2">
             {product.title}
           </p>
         </Link>
 
-        {/* Size chips — shown when product has multiple variants */}
+        {/* Size chips - shown when product has multiple variants */}
         {variants.length > 1 && (
           <div className="flex flex-wrap gap-1.5 mt-1">
             {variants.map((v, idx) => (
@@ -112,7 +112,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
 
         {/* Price + Add to Cart */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-          <p className="text-sm font-bold text-gray-800">
+          <p className="text-sm font-bold text-gray-800 dark:text-gray-100">
             {variants.length > 1 ? `$${unitPrice.toFixed(2)}` : priceLabel}
           </p>
 
@@ -169,7 +169,7 @@ export function ShopProducts({
               className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors shrink-0 ${
                 catId === cat.id
                   ? "text-gray-900 bg-gray-100 font-semibold"
-                  : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  : "text-gray-500 hover:text-gray-800 dark:text-gray-100 hover:bg-gray-50"
               }`}
             >
               {cat.name}
@@ -192,7 +192,7 @@ export function ShopProducts({
       </div>
 
       {(search || catId !== "all") && (
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
           {filtered.length} product{filtered.length !== 1 ? "s" : ""}
           {catId !== "all" && ` in ${categories.find((c) => c.id === catId)?.name ?? ""}`}
           {search && ` matching "${search}"`}
@@ -207,7 +207,7 @@ export function ShopProducts({
             </svg>
           </div>
           <p className="text-sm font-semibold text-gray-500">No products found</p>
-          <p className="text-xs text-gray-400 mt-1">Try a different search or category</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Try a different search or category</p>
           {(search || catId !== "all") && (
             <button
               onClick={() => { setSearch(""); setCatId("all"); }}

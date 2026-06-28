@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -67,7 +67,7 @@ export function CommissionEditor({
         onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEditing(false); }}
         className="w-16 px-2 py-1 text-xs border border-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 font-semibold text-center"
       />
-      <span className="text-xs text-gray-400">%</span>
+      <span className="text-xs text-gray-400 dark:text-gray-500">%</span>
       <button
         type="button"
         onClick={save}

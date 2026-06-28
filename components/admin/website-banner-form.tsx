@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useState, useEffect } from "react";
 import { useRouter }      from "next/navigation";
@@ -39,17 +39,17 @@ export function WebsiteBannerForm({ action, defaultValues }: Props) {
 
       {/* Image */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Banner Image</label>
         <ImageUpload name="__imageUrl" value={imageUrl} onChange={setImageUrl} />
         {state?.errors?.imageUrl && <p className="text-xs text-red-500 mt-1">{state.errors.imageUrl[0]}</p>}
       </div>
 
       {/* Sort Order */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Sort Order</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">Sort Order</label>
         <input name="sortOrder" type="number" defaultValue={defaultValues?.sortOrder ?? 0} min={0}
-          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900" />
-        <p className="text-xs text-gray-400 mt-1">Lower numbers appear first</p>
+          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900" />
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Lower numbers appear first</p>
       </div>
 
       {/* Published */}
@@ -58,8 +58,8 @@ export function WebsiteBannerForm({ action, defaultValues }: Props) {
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPublished ? "bg-gray-900" : "bg-gray-200"}`}>
           <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isPublished ? "translate-x-6" : "translate-x-1"}`} />
         </button>
-        <span className="text-sm text-gray-700">
-          {isPublished ? "Published — visible on website" : "Draft — hidden from website"}
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          {isPublished ? "Published - visible on website" : "Draft - hidden from website"}
         </span>
       </div>
 

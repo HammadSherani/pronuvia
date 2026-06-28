@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { BehalfCheckoutClient } from "@/components/admin/order-behalf-checkout-client";
 
-export const metadata = { title: "Checkout on Behalf – Pronuvia Admin" };
+export const metadata = { title: "Checkout on Behalf -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ physicianId: string }> };
 

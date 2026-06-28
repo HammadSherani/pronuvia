@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 interface PageHeaderProps {
   title: string;
@@ -11,8 +11,8 @@ export function PageHeader({ title, description, actionLabel, actionHref }: Page
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-800">{title}</h1>
-        {description && <p className="text-sm text-gray-500 mt-0.5">{description}</p>}
+        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h1>
+        {description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
       </div>
       {actionLabel && actionHref && (
         <Link

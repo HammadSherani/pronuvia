@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById, updatePhysician } from "@/actions/admin/manage-physicians";
 import { PhysicianForm } from "@/components/admin/physician-form";
 
-export const metadata = { title: "Edit Physician – Pronuvia Admin" };
+export const metadata = { title: "Edit Physician -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 

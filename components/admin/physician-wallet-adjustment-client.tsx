@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -72,32 +72,32 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">No physicians found.</div>
         ) : (
           <>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Physician</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet Balance</th>
                 <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
               {pagedPhysicians.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-[#3DBFA4]">{p.firstName[0]}{p.lastName[0]}</span>
                       </div>
-                      <p className="font-semibold text-gray-800 text-sm">Dr. {p.firstName} {p.lastName}</p>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">Dr. {p.firstName} {p.lastName}</p>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-500">{p.email}</td>
+                  <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{p.email}</td>
                   <td className="px-5 py-4">
                     <span className={`text-sm font-bold ${p.walletBalance > 0 ? "text-emerald-600" : "text-gray-400"}`}>
                       {fmt(p.walletBalance)}
@@ -132,8 +132,8 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
-                <p className="text-sm text-gray-500 mt-0.5">Dr. {selected.firstName} {selected.lastName}</p>
+                <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">Wallet Adjustment</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Dr. {selected.firstName} {selected.lastName}</p>
               </div>
               <button type="button" onClick={close} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -143,8 +143,8 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
             </div>
 
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl mb-5">
-              <span className="text-xs text-gray-500 font-medium">Current balance</span>
-              <span className="text-base font-bold text-gray-800">{fmt(selected.walletBalance)}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Current balance</span>
+              <span className="text-base font-bold text-gray-800 dark:text-gray-100">{fmt(selected.walletBalance)}</span>
             </div>
 
             <div className="flex gap-2 mb-4">
@@ -177,7 +177,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                   className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
               </div>
               {amount && parseFloat(amount) > 0 && (
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                   New balance:{" "}
                   <span className="font-semibold text-gray-700">
                     {fmt(type === "CREDIT" ? selected.walletBalance + parseFloat(amount) : Math.max(0, selected.walletBalance - parseFloat(amount)))}

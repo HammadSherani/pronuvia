@@ -25,7 +25,7 @@ export function OrderStatusSelector({ orderId, current }: Props) {
 
   return (
     <select value={current} onChange={onChange} disabled={pending}
-      className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition-colors disabled:opacity-50 cursor-pointer">
+      className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-300 bg-white outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition-colors disabled:opacity-50 cursor-pointer">
       {STATUSES.map((s) => (
         <option key={s} value={s}>
           {s.charAt(0) + s.slice(1).toLowerCase()}

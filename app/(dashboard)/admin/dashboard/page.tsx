@@ -1,9 +1,9 @@
-﻿import { requireAdmin } from "@/lib/auth/dal";
+import { requireAdmin } from "@/lib/auth/dal";
 import { getDashboardStats } from "@/actions/admin/dashboard";
 import { DashboardChartsPanel } from "@/components/admin/dashboard-charts";
 import Link from "next/link";
 
-export const metadata = { title: "Admin Dashboard – Pronuvia" };
+export const metadata = { title: "Admin Dashboard � Pronuvia" };
 
 function fmtMoney(n: number) {
   return new Intl.NumberFormat("en-US", {
@@ -110,23 +110,23 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* ── Two-column outer grid ── */}
+      {/* -- Two-column outer grid -- */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_296px] gap-6 items-start">
 
-        {/* ── LEFT: main content ── */}
+        {/* -- LEFT: main content -- */}
         <div className="space-y-6 min-w-0">
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Good Morning, Admin!</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Good Morning, Admin!</h1>
               <p className="text-sm text-gray-400 mt-0.5">Stay informed with live updates on your store&apos;s activity.</p>
             </div>
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm shrink-0">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 shadow-sm shrink-0">
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="text-xs font-medium text-gray-600">{today}</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{today}</span>
             </div>
           </div>
 
@@ -136,7 +136,7 @@ export default async function AdminDashboardPage() {
               <Link
                 key={card.label}
                 href={card.href}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
+                className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
               >
                 <div className="flex items-center justify-between">
                   <div
@@ -156,8 +156,8 @@ export default async function AdminDashboardPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-800 tracking-tight">{card.value}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">{card.label}</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">{card.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{card.label}</p>
                 </div>
               </Link>
             ))}
@@ -167,11 +167,11 @@ export default async function AdminDashboardPage() {
           <DashboardChartsPanel charts={stats.charts} />
 
           {/* Recent Orders table */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
               <div>
-                <h3 className="text-sm font-bold text-gray-800">Recent Orders</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Last 6 orders placed</p>
+                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Recent Orders</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Last 6 orders placed</p>
               </div>
               <Link href="/admin/orders" className="text-xs font-semibold text-[#3DBFA4] hover:underline">
                 View All
@@ -182,38 +182,38 @@ export default async function AdminDashboardPage() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/60">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                  <tr className="bg-gray-50/60 dark:bg-gray-700/40">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                   {latestOrders.map((o) => (
-                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-6 py-3.5">
-                        <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                        <span className="font-mono text-xs font-semibold text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-lg">
                           #{o.orderNumber}
                         </span>
                       </td>
                       <td className="px-6 py-3.5">
-                        <p className="text-xs font-semibold text-gray-700">{o.drName ?? o.repName ?? "—"}</p>
+                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{o.drName ?? o.repName ?? "�"}</p>
                         {o.drName && o.repName && (
                           <p className="text-[11px] text-gray-400">via {o.repName}</p>
                         )}
                       </td>
                       <td className="px-6 py-3.5 text-right">
-                        <span className="text-sm font-bold text-gray-800">{fmtMoney(o.total)}</span>
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmtMoney(o.total)}</span>
                       </td>
                       <td className="px-6 py-3.5 text-center">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
                           <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[o.status] ?? "bg-gray-400"}`} />
                           {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">
+                      <td className="px-6 py-3.5 text-right text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </td>
                     </tr>
@@ -224,14 +224,14 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* ── RIGHT: activity sidebar ── */}
+        {/* -- RIGHT: activity sidebar -- */}
         <div className="space-y-5">
 
           {/* Pending withdrawal alert */}
           {kpis.pendingWithdrawals > 0 && (
             <Link
               href="/admin/withdrawals"
-              className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-4 hover:bg-red-100 transition-colors group"
+              className="flex items-start gap-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl px-4 py-4 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors group"
             >
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                 <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -251,12 +251,12 @@ export default async function AdminDashboardPage() {
           )}
 
           {/* Activity feed */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-gray-800">Recent Activity</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Latest orders &amp; sign-ups</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Recent Activity</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Latest orders &amp; sign-ups</p>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-700">
               {latestOrders.slice(0, 4).map((o) => (
                 <div key={o.id} className="flex items-start gap-3 px-5 py-3.5">
                   <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -265,9 +265,9 @@ export default async function AdminDashboardPage() {
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-700 truncate">Order #{o.orderNumber}</p>
+                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">Order #{o.orderNumber}</p>
                     <p className="text-[11px] text-gray-400 truncate">
-                      {o.drName ?? o.repName ?? "—"} · {fmtMoney(o.total)}
+                      {o.drName ?? o.repName ?? "�"} � {fmtMoney(o.total)}
                     </p>
                     <p className="text-[10px] text-gray-300 mt-0.5">
                       {new Date(o.createdAt).toLocaleString("en-US", {
@@ -289,7 +289,7 @@ export default async function AdminDashboardPage() {
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-700 truncate">{p.name}</p>
+                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{p.name}</p>
                       <p className="text-[11px] text-gray-400">New physician sign-up</p>
                       <p className="text-[10px] text-gray-300 mt-0.5">
                         {new Date(p.createdAt).toLocaleString("en-US", {
@@ -307,16 +307,16 @@ export default async function AdminDashboardPage() {
                 );
               })}
             </div>
-            <div className="px-5 py-3 border-t border-gray-100">
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700">
               <Link href="/admin/physicians" className="text-xs font-semibold text-[#3DBFA4] hover:underline">
-                View all physicians →
+                View all physicians ?
               </Link>
             </div>
           </div>
 
           {/* Quick links */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Quick Access</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Quick Access</h3>
             <div className="space-y-1">
               {[
                 { label: "Manage Orders",     href: "/admin/orders",      color: "#3DBFA4" },
@@ -329,10 +329,10 @@ export default async function AdminDashboardPage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors group"
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: link.color }} />
-                  <span className="text-xs font-medium text-gray-600 group-hover:text-gray-900 transition-colors flex-1">
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors flex-1">
                     {link.label}
                   </span>
                   <svg className="w-3 h-3 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

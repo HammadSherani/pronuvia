@@ -35,7 +35,7 @@ function fmtAddress(raw: string | null | undefined): string {
 }
 
 function fmtDate(d: Date | string | null) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString("en-US", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
@@ -119,7 +119,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </span>
               {order.paymentMethod && (
                 <span className="text-xs text-white/80 font-medium">
-                  {order.paymentMethod === "CARD" ? "💳 Credit / Debit Card" : "👛 Wallet Balance"}
+                  {order.paymentMethod === "CARD" ? "ðŸ’³ Credit / Debit Card" : "ðŸ‘› Wallet Balance"}
                 </span>
               )}
             </div>
@@ -151,7 +151,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                     <p className="text-gray-500">{order.physician.email}</p>
                     {order.physician.phone && <p className="text-gray-500">{order.physician.phone}</p>}
                   </div>
-                ) : <p className="text-sm text-gray-400">—</p>}
+                ) : <p className="text-sm text-gray-400">-</p>}
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ship To</p>
@@ -214,7 +214,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                     <tr key={idx}>
                       <td className="px-4 py-3.5 font-medium text-gray-800">{item.title}</td>
                       <td className="px-4 py-3.5 text-gray-500">
-                        {item.variantSize || "—"}
+                        {item.variantSize || "-"}
                         {item.sku && <p className="text-xs text-gray-400">SKU: {item.sku}</p>}
                       </td>
                       <td className="px-4 py-3.5 text-center text-gray-700">{item.quantity}</td>
@@ -247,7 +247,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                       Coupon
                       <span className="font-mono font-semibold tracking-wide">{order.couponCode}</span>
                     </span>
-                    <span className="font-semibold">−{fmtMoney(order.discountAmount ?? 0)}</span>
+                    <span className="font-semibold">âˆ’{fmtMoney(order.discountAmount ?? 0)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">

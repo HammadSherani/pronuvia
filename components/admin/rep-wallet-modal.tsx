@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { getRepWalletDetails } from "@/actions/admin/get-rep-wallet";
@@ -49,7 +49,7 @@ export function RepWalletModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        title={`View wallet — ${repName}`}
+        title={`View wallet - ${repName}`}
          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-900/10 text-[#5BB8D4] border border-[#5BB8D4]/30 rounded-lg hover:bg-gray-900/20 transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -68,11 +68,11 @@ export function RepWalletModal({
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 shrink-0">
               <div>
-                <h2 className="text-base font-bold text-gray-800">Wallet — {repName}</h2>
+                <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">Wallet - {repName}</h2>
                 {data?.rep && (
-                  <p className="text-xs text-gray-400 mt-0.5">{data.rep.email}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{data.rep.email}</p>
                 )}
               </div>
               <button
@@ -110,7 +110,7 @@ export function RepWalletModal({
                             <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <p className="text-sm font-bold text-gray-800">{data.rep.bankAccountName}</p>
+                            <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{data.rep.bankAccountName}</p>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -123,7 +123,7 @@ export function RepWalletModal({
                               <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                               </svg>
-                              <p className="text-sm font-mono font-bold text-gray-800 tracking-wide">
+                              <p className="text-sm font-mono font-bold text-gray-800 dark:text-gray-100 tracking-wide">
                                 {data.rep.bankAccountNumber}
                               </p>
                             </div>
@@ -145,9 +145,9 @@ export function RepWalletModal({
                         No transactions yet
                       </p>
                     ) : (
-                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
+                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
                         {data.transactions.map((tx) => (
-                          <div key={tx.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50/60">
+                          <div key={tx.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50/60 dark:bg-gray-700/40">
                             <div className="flex items-center gap-3">
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                                 tx.type === "CREDIT" ? "bg-emerald-50" : "bg-red-50"
@@ -175,7 +175,7 @@ export function RepWalletModal({
                             </div>
                             <div className="text-right">
                               <p className={`text-sm font-bold ${tx.type === "CREDIT" ? "text-emerald-600" : "text-red-500"}`}>
-                                {tx.type === "CREDIT" ? "+" : "−"}{fmt(tx.amount)}
+                                {tx.type === "CREDIT" ? "+" : "-"}{fmt(tx.amount)}
                               </p>
                               <p className="text-[10px] text-gray-400">Bal: {fmt(tx.balance)}</p>
                             </div>
@@ -191,21 +191,21 @@ export function RepWalletModal({
                       <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">
                         Withdrawal Requests
                       </h3>
-                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
+                      <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
                         {data.withdrawRequests.map((r) => (
                           <div key={r.id} className="flex items-center justify-between px-4 py-3">
                             <div>
-                              <p className="text-sm font-bold text-gray-800">{fmt(r.amount)}</p>
+                              <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</p>
                               <p className="text-[10px] text-gray-400">
                                 {new Date(r.createdAt).toLocaleDateString("en-US", {
                                   month: "short", day: "numeric", year: "numeric",
                                 })}
                               </p>
                               {r.note && (
-                                <p className="text-xs text-gray-500 italic mt-0.5">"{r.note}"</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-0.5">"{r.note}"</p>
                               )}
                               {r.adminNote && (
-                                <p className="text-xs text-[#3DBFA4] mt-0.5">↳ {r.adminNote}</p>
+                                <p className="text-xs text-[#3DBFA4] mt-0.5">? {r.adminNote}</p>
                               )}
                             </div>
                             <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${wdStyle[r.status] ?? wdStyle["PENDING"]}`}>

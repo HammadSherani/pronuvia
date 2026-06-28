@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalDetailActions } from "@/components/admin/approval-detail-actions";
 
-export const metadata = { title: "Review Physician – Pronuvia Admin" };
+export const metadata = { title: "Review Physician -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -12,7 +12,7 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
   return (
     <div className="flex flex-col gap-0.5">
       <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-gray-800">{value ?? <span className="text-gray-300">—</span>}</p>
+      <p className="text-sm text-gray-800">{value ?? <span className="text-gray-300">-</span>}</p>
     </div>
   );
 }

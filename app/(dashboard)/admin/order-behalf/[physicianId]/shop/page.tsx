@@ -8,7 +8,7 @@ import { getPublishedBanners } from "@/actions/admin/banners";
 
 type Props = { params: Promise<{ physicianId: string }> };
 
-export const metadata = { title: "Order on Behalf – Pronuvia Admin" };
+export const metadata = { title: "Order on Behalf -“ Pronuvia Admin" };
 
 export default async function BehalfShopPage({ params }: Props) {
   await requireAdmin();

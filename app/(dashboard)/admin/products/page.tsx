@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { getProducts, deleteProduct } from "@/actions/admin/products";
 import { PageHeader } from "@/components/admin/page-header";
 import { DeleteButton } from "@/components/admin/delete-button";
@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Products – Pronuvia Admin" };
+export const metadata = { title: "Products -“ Pronuvia Admin" };
 
 const STATUS_STYLES = {
   ACTIVE:   "bg-emerald-50 text-emerald-700",
@@ -32,7 +32,7 @@ export default async function ProductsPage({
         actionHref="/admin/products/new"
       />
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -49,19 +49,19 @@ export default async function ProductsPage({
           <>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Qty</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {products.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
@@ -74,7 +74,7 @@ export default async function ProductsPage({
                             </svg>
                           )}
                         </div>
-                        <span className="font-medium text-gray-800 line-clamp-1">{p.title}</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-100 line-clamp-1">{p.title}</span>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-gray-400 font-mono text-xs">{p.sku}</td>
@@ -84,9 +84,9 @@ export default async function ProductsPage({
                           {p.category.name}
                           {p.subCategory && <span className="text-gray-400"> / {p.subCategory.name}</span>}
                         </span>
-                      ) : <span className="text-gray-300">—</span>}
+                      ) : <span className="text-gray-300">-</span>}
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">${p.salePrice.toFixed(2)}</td>
+                    <td className="px-5 py-3.5 font-medium text-gray-800 dark:text-gray-100">${p.salePrice.toFixed(2)}</td>
                     <td className="px-5 py-3.5 text-gray-600">{p.quantity}</td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[p.status]}`}>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState, useEffect, useTransition,
@@ -226,16 +226,16 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
           {/* Contact */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded px-4 py-3">
-              <p className="text-xs text-gray-400 mb-0.5">Email address</p>
-              <p className="text-sm text-gray-800">{physicianEmail}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Email address</p>
+              <p className="text-sm text-gray-800 dark:text-gray-100">{physicianEmail}</p>
             </div>
           </section>
 
           {/* Shipping address */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Shipping address</h2>
             {editShip ? (
               <div className="border border-gray-300 rounded p-4 space-y-4">
                 <AddressFields value={shipping} onChange={setShipping} />
@@ -246,7 +246,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   </button>
                   {hasAddr(shipping) && (
                     <button type="button" onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
+                      className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700">
                       Cancel
                     </button>
                   )}
@@ -255,8 +255,8 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             ) : (
               <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-100">{shipDsp.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{shipDsp.line2}</p>
                 </div>
                 <button type="button" onClick={() => setEditShip(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
               </div>
@@ -266,7 +266,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => { setSameAsBilling(e.target.checked); if (!e.target.checked && !hasAddr(billing)) setBilling({ ...shipping }); }}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
-              <span className="text-sm text-gray-700">Use same address for billing</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Use same address for billing</span>
             </label>
 
             {!sameAsBilling && (
@@ -283,8 +283,8 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                 ) : (
                   <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-100">{billDsp.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{billDsp.line2}</p>
                     </div>
                     <button type="button" onClick={() => setEditBill(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
                   </div>
@@ -295,10 +295,10 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
           {/* Payment */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Payment</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Payment</h2>
             <div className="border border-gray-300 rounded p-4">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
+                <span className="text-sm text-gray-800 dark:text-gray-100 font-medium">Credit / Debit Card</span>
                 <div className="ml-auto flex items-center gap-1">
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
@@ -339,12 +339,12 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
           {/* Coupon */}
           <div>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Coupon code</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Coupon code</h2>
             {appliedCoupon ? (
               <div className="flex items-center justify-between border border-emerald-200 bg-emerald-50 rounded px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-emerald-700">{appliedCoupon.code}</p>
-                  <p className="text-xs text-emerald-600">−${appliedCoupon.discountAmount.toFixed(2)} discount applied</p>
+                  <p className="text-xs text-emerald-600">-${appliedCoupon.discountAmount.toFixed(2)} discount applied</p>
                 </div>
                 <button type="button" onClick={() => setAppliedCoupon(null)} className="text-xs text-red-500 hover:underline">Remove</button>
               </div>
@@ -370,7 +370,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" checked={showNotes} onChange={(e) => setShowNotes(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
-              <span className="text-sm text-gray-700">Add a note to this order</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Add a note to this order</span>
             </label>
             {showNotes && (
               <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
@@ -391,12 +391,12 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
           </button>
         </div>
 
-        {/* RIGHT — Order summary */}
+        {/* RIGHT - Order summary */}
         <div className="lg:col-span-2">
           <div className="sticky top-24 space-y-4">
             <div className="border border-gray-200 rounded overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-200">
-                <h2 className="text-sm font-semibold text-gray-800">Order summary</h2>
+                <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Order summary</h2>
               </div>
               <div className="px-4 py-4 space-y-4 border-b border-gray-200">
                 {items.map((item) => (
@@ -412,27 +412,27 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                       }
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 leading-snug line-clamp-2">{item.productTitle}</p>
-                      {item.variantSize && <p className="text-xs text-gray-500 mt-0.5">{item.variantSize}</p>}
-                      <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">{item.productTitle}</p>
+                      {item.variantSize && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.variantSize}</p>}
+                      <p className="text-xs text-gray-400 dark:text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
               <div className="px-4 py-3 space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                   <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
-                    <span>Discount ({appliedCoupon?.code})</span><span>−${discountAmount.toFixed(2)}</span>
+                    <span>Discount ({appliedCoupon?.code})</span><span>-${discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                   <span>Shipping</span><span className="text-emerald-600 font-medium">Free</span>
                 </div>
-                <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
+                <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100 dark:border-gray-700">
                   <span>Total</span><span>${total.toFixed(2)}</span>
                 </div>
               </div>

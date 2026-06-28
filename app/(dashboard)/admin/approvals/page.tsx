@@ -1,11 +1,11 @@
-﻿import { requireAdmin } from "@/lib/auth/dal";
+import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalsClient } from "@/components/admin/approvals-client";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Pending Approvals – Pronuvia Admin" };
+export const metadata = { title: "Pending Approvals -“ Pronuvia Admin" };
 
 export default async function ApprovalsPage({
   searchParams,
@@ -38,7 +38,7 @@ export default async function ApprovalsPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Pending Approvals</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Pending Approvals</h1>
           <p className="text-sm text-gray-400 mt-0.5">Physician accounts awaiting review</p>
         </div>
         {total > 0 && (

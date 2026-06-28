@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -97,15 +97,15 @@ export function PhysicianApprovalActions({
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-gray-800">Approve {physicianName}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Set commission percentages and activate account</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100">Approve {physicianName}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Set commission percentages and activate account</p>
               </div>
             </div>
 
             <div className="space-y-4 mb-5">
               {/* Doctor commission */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">
                   Doctor&apos;s Commission %
                   <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
                 </label>
@@ -117,16 +117,16 @@ export function PhysicianApprovalActions({
                     placeholder="e.g. 15"
                     autoFocus
                     onKeyDown={(e) => { if (e.key === "Enter") handleApprove(); }}
-                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
+                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
                 </div>
               </div>
 
-              {/* Sales rep upline commission — only if doctor was added by a sales rep */}
+              {/* Sales rep upline commission - only if doctor was added by a sales rep */}
               {salesRep && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">
                     Sales Rep&apos;s Commission %
                     <span className="ml-1.5 text-xs font-normal text-gray-400">
                       earned by {salesRep.firstName} {salesRep.lastName} on this doctor&apos;s orders
@@ -138,7 +138,7 @@ export function PhysicianApprovalActions({
                       value={uplineComm}
                       onChange={(e) => setUplineComm(e.target.value)}
                       placeholder="e.g. 10"
-                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
+                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
                     />
                     <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
                   </div>
@@ -177,8 +177,8 @@ export function PhysicianApprovalActions({
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-gray-800">Reject this physician?</p>
-                <p className="text-xs text-gray-500 mt-0.5">{physicianName} will be marked as rejected.</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100">Reject this physician?</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{physicianName} will be marked as rejected.</p>
               </div>
             </div>
             <div className="flex gap-3">

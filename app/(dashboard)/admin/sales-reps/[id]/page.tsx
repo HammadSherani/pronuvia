@@ -10,7 +10,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <dt className="text-xs text-gray-400 font-medium mb-0.5">{label}</dt>
-      <dd className="text-sm text-gray-700">{value || <span className="text-gray-300">—</span>}</dd>
+      <dd className="text-sm text-gray-700">{value || <span className="text-gray-300">-</span>}</dd>
     </div>
   );
 }
@@ -28,7 +28,7 @@ function AddressDisplay({ label, raw }: { label: string; raw?: string | null }) 
       <dt className="text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">{label}</dt>
       <dd className="text-sm text-gray-700 leading-relaxed">
         {!addr ? (
-          raw ? <span>{raw}</span> : <span className="text-gray-300">—</span>
+          raw ? <span>{raw}</span> : <span className="text-gray-300">-</span>
         ) : (
           <span className="whitespace-pre-line">
             {[

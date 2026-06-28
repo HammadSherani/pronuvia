@@ -33,13 +33,13 @@ function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 function fmtDate(d: Date | string | null | undefined, opts?: Intl.DateTimeFormatOptions) {
-  if (!d) return "—";
+  if (!d) return "–";
   return new Date(d).toLocaleDateString("en-US", opts ?? {
     year: "numeric", month: "long", day: "numeric",
   });
 }
 function fmtDateTime(d: Date | string | null | undefined) {
-  if (!d) return "—";
+  if (!d) return "–";
   return new Date(d).toLocaleString("en-US", {
     year: "numeric", month: "short", day: "numeric",
     hour: "numeric", minute: "2-digit",
@@ -94,11 +94,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
       <div className="max-w-6xl mx-auto">
 
-        {/* ── Top nav ──────────────────────────────────────────────────── */}
+        {/* â"€â"€ Top nav â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
         <div className="no-print flex items-center justify-between mb-5 gap-3 flex-wrap">
           <Link
             href="/admin/orders"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -110,7 +110,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ── Return banner ─────────────────────────────────────────────── */}
+        {/* â"€â"€ Return banner â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
         {isReturned && (
           <div className="no-print mb-5 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
             <svg className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -118,14 +118,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             </svg>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-orange-700">
-                Return processed — {fmtDate(order.returnedAt)}
+                Return processed – {fmtDate(order.returnedAt)}
               </p>
               <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-xs text-orange-600">
                 {order.returnedTotal != null && (
                   <span>Returned: <strong>{fmtMoney(order.returnedTotal)}</strong></span>
                 )}
                 {(order.salesRepClawback ?? 0) > 0 && (
-                  <span>Rep clawback: <strong>−{fmtMoney(order.salesRepClawback!)}</strong></span>
+                  <span>Rep clawback: <strong>âˆ'{fmtMoney(order.salesRepClawback!)}</strong></span>
                 )}
               </div>
               {order.returnReason && (
@@ -135,16 +135,16 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* ── Two-column layout ─────────────────────────────────────────── */}
+        {/* â"€â"€ Two-column layout â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_288px] gap-5 items-start">
 
           {/* ════════ LEFT COLUMN ════════ */}
           <div className="space-y-4">
 
-            {/* ── Shipping Label card ──────────────────────────────────── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-              <div className="px-5 py-3 border-b border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700">Shipping Label</h3>
+            {/* â"€â"€ Shipping Label card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shipping Label</h3>
               </div>
               <div className="px-5 py-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -157,16 +157,16 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   <div>
                     {order.trackingNumber ? (
                       <>
-                        <p className="text-sm font-semibold text-gray-800">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                           {items.length} item{items.length !== 1 ? "s" : ""} fulfilled
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                           {order.shippingCarrier && <span>{order.shippingCarrier} · </span>}
                           <span className="font-mono">{order.trackingNumber}</span>
                         </p>
                       </>
                     ) : (
-                      <p className="text-sm text-gray-500">No shipment added yet</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No shipment added yet</p>
                     )}
                   </div>
                 </div>
@@ -188,17 +188,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* ── Order Details card ───────────────────────────────────── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            {/* â"€â"€ Order Details card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
 
               {/* Header */}
-              <div className="px-6 py-5 border-b border-gray-100">
+              <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800">Order {order.orderNumber} details</h2>
-                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white">Order {order.orderNumber} details</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                       Payment via{" "}
-                      <span className="font-medium text-gray-700">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
                         {order.paymentMethod === "CARD" ? "Credit / Debit Card" : "Wallet Balance"}
                       </span>
                       {order.transactionId && (
@@ -216,33 +216,33 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </div>
 
               {/* General / Billing / Shipping */}
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 border-b border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700 dark:divide-gray-700 border-b border-gray-100 dark:border-gray-700">
 
                 {/* General */}
                 <div className="px-6 py-5">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">General</h4>
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">General</h4>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-[11px] text-gray-400 mb-0.5">Date created:</p>
-                      <p className="text-sm text-gray-700">{fmtDate(order.createdAt, { year: "numeric", month: "short", day: "numeric" })}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Date created:</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{fmtDate(order.createdAt, { year: "numeric", month: "short", day: "numeric" })}</p>
                     </div>
                     <div>
-                      <p className="text-[11px] text-gray-400 mb-1">Status:</p>
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1">Status:</p>
                       <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-semibold ${statusStyle[order.status]}`}>
                         {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
                       </span>
                     </div>
                     {order.salesRep && (
                       <div>
-                        <p className="text-[11px] text-gray-400 mb-0.5">Sales Rep:</p>
-                        <p className="text-sm font-medium text-gray-700">{order.salesRep.name}</p>
-                        <p className="text-xs text-gray-400">{order.salesRep.email}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Sales Rep:</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{order.salesRep.name}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{order.salesRep.email}</p>
                       </div>
                     )}
                     {!order.salesRep && order.physician && (
                       <div>
-                        <p className="text-[11px] text-gray-400 mb-0.5">Ordered by:</p>
-                        <p className="text-sm text-gray-700">Dr. (Direct)</p>
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Ordered by:</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">Dr. (Direct)</p>
                       </div>
                     )}
                   </div>
@@ -250,17 +250,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
                 {/* Billing */}
                 <div className="px-6 py-5">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Billing</h4>
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Billing</h4>
                   {order.physician ? (
                     <div className="text-sm space-y-1">
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
                         Dr. {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {order.physician.nameOfPractice && (
-                        <p className="text-gray-600">{order.physician.nameOfPractice}</p>
+                        <p className="text-gray-600 dark:text-gray-300">{order.physician.nameOfPractice}</p>
                       )}
                       {physAddr && (
-                        <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">{physAddr}</p>
                       )}
                       <p className="text-[#3DBFA4] text-xs mt-1">{order.physician.email}</p>
                       {order.physician.phone && (
@@ -276,15 +276,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
                 {/* Shipping */}
                 <div className="px-6 py-5">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Shipping</h4>
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Shipping</h4>
                   {order.shippingAddress ? (
                     <div className="text-sm space-y-1">
                       {order.physician && (
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-gray-800 dark:text-gray-100">
                           Dr. {order.physician.firstName} {order.physician.lastName}
                         </p>
                       )}
-                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
                       {order.physician?.phone && (
                         <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
                           {order.physician.phone}
@@ -293,11 +293,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                     </div>
                   ) : order.physician ? (
                     <div className="text-sm space-y-1">
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
                         Dr. {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {physAddr && (
-                        <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">{physAddr}</p>
                       )}
                       {order.physician.phone && (
                         <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
@@ -311,19 +311,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 </div>
               </div>
 
-              {/* ── Items table ──────────────────────────────────────── */}
-              <div className="px-6 py-5 border-b border-gray-100">
+              {/* â"€â"€ Items table â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+              <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
-                      <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Size / SKU</th>
-                      <th className="text-center pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
-                      <th className="text-right pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Unit</th>
-                      <th className="text-right pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <th className="text-left pb-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
+                      <th className="text-left pb-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Size / SKU</th>
+                      <th className="text-center pb-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Qty</th>
+                      <th className="text-right pb-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit</th>
+                      <th className="text-right pb-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                     {items.map((item, idx) => {
                       const returnedIdxs = isReturned && Array.isArray(order.returnedItems)
                         ? (order.returnedItems as number[])
@@ -331,7 +331,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       const isItemReturned = returnedIdxs ? returnedIdxs.includes(idx) : isReturned;
                       return (
                         <tr key={idx} className={isItemReturned ? "opacity-50" : ""}>
-                          <td className="py-3.5 font-medium text-gray-800">
+                          <td className="py-3.5 font-medium text-gray-800 dark:text-gray-100">
                             {item.title}
                             {isItemReturned && (
                               <span className="ml-2 text-[10px] font-semibold text-orange-500 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">
@@ -339,15 +339,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 text-gray-500">
-                            {item.variantSize || "—"}
-                            {item.sku && <p className="text-xs text-gray-400">SKU: {item.sku}</p>}
+                          <td className="py-3.5 text-gray-500 dark:text-gray-400">
+                            {item.variantSize || "–"}
+                            {item.sku && <p className="text-xs text-gray-400 dark:text-gray-500">SKU: {item.sku}</p>}
                           </td>
-                          <td className="py-3.5 text-center text-gray-700">{item.quantity}</td>
-                          <td className="py-3.5 text-right text-gray-700">{fmtMoney(item.unitPrice)}</td>
-                          <td className="py-3.5 text-right font-semibold text-gray-900">
+                          <td className="py-3.5 text-center text-gray-700 dark:text-gray-300">{item.quantity}</td>
+                          <td className="py-3.5 text-right text-gray-700 dark:text-gray-300">{fmtMoney(item.unitPrice)}</td>
+                          <td className="py-3.5 text-right font-semibold text-gray-900 dark:text-gray-100">
                             {isItemReturned
-                              ? <span className="line-through text-gray-300">{fmtMoney(item.lineTotal)}</span>
+                              ? <span className="line-through text-gray-300 dark:text-gray-600">{fmtMoney(item.lineTotal)}</span>
                               : fmtMoney(item.lineTotal)}
                           </td>
                         </tr>
@@ -357,10 +357,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 </table>
 
                 {/* Totals */}
-                <div className="mt-4 pt-4 border-t border-gray-100 space-y-1.5">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-1.5">
                   <div className="flex justify-end gap-8">
                     <div className="w-48 space-y-1.5">
-                      <div className="flex justify-between text-sm text-gray-500">
+                      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                         <span>Subtotal</span><span>{fmtMoney(order.subtotal)}</span>
                       </div>
                       {(order.discountAmount ?? 0) > 0 && (
@@ -373,10 +373,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                               </span>
                             )}
                           </span>
-                          <span>−{fmtMoney(order.discountAmount ?? 0)}</span>
+                          <span>âˆ'{fmtMoney(order.discountAmount ?? 0)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between text-sm text-gray-500">
+                      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                         <span>Shipping</span>
                         <span>
                           {(order.shippingRate ?? 0) === 0
@@ -386,10 +386,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       </div>
                       {isReturned && order.returnedTotal != null && (
                         <div className="flex justify-between text-sm text-orange-500 font-medium">
-                          <span>Returned</span><span>−{fmtMoney(order.returnedTotal)}</span>
+                          <span>Returned</span><span>âˆ'{fmtMoney(order.returnedTotal)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
+                      <div className="flex justify-between text-base font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-600">
                         <span>Order Total</span>
                         <span>
                           {isReturned && order.returnedTotal != null
@@ -404,31 +404,31 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
               {/* Notes */}
               {order.notes && (
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Order Notes</p>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{order.notes}</p>
+                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Order Notes</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{order.notes}</p>
                 </div>
               )}
             </div>
 
-            {/* ── Commission summary ───────────────────────────────────── */}
+            {/* â"€â"€ Commission summary â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
             <div className="no-print grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <p className="text-xs text-gray-400 font-medium mb-1">Order Total</p>
-                <p className="text-xl font-bold text-gray-800">{fmtMoney(order.total)}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-1">Order Total</p>
+                <p className="text-xl font-bold text-gray-800 dark:text-white">{fmtMoney(order.total)}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 border-l-2 border-l-[#5BB8D4]">
-                <p className="text-xs text-gray-400 font-medium mb-1">Rep Commission</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 border-l-2 border-l-[#5BB8D4]">
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-1">Rep Commission</p>
                 <p className="text-xl font-bold text-[#5BB8D4]">{fmtMoney(order.salesRepCommissionAmount)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{order.salesRepCommissionRate}%</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{order.salesRepCommissionRate}%</p>
                 {(order.salesRepClawback ?? 0) > 0 && (
-                  <p className="text-xs text-orange-500 font-medium mt-0.5">−{fmtMoney(order.salesRepClawback!)} clawed back</p>
+                  <p className="text-xs text-orange-500 font-medium mt-0.5">âˆ'{fmtMoney(order.salesRepClawback!)} clawed back</p>
                 )}
               </div>
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 border-l-2 border-l-[#8b5cf6]">
-                <p className="text-xs text-gray-400 font-medium mb-1">Dr. Commission</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 border-l-2 border-l-[#8b5cf6]">
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-1">Dr. Commission</p>
                 <p className="text-xl font-bold text-[#8b5cf6]">{fmtMoney(order.physicianCommissionAmount)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{order.physicianCommissionRate}%</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{order.physicianCommissionRate}%</p>
               </div>
             </div>
           </div>
@@ -440,14 +440,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <SendOrderEmailPanel orderId={id} />
 
             {/* Shipment Tracking */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700">Shipment Tracking</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shipment Tracking</h3>
               </div>
               <div className="p-4">
                 {order.trackingNumber ? (
                   <div className="space-y-3">
-                    <p className="text-sm font-semibold text-gray-700">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                       {fmtDate(order.updatedAt, { month: "long", day: "numeric", year: "numeric" })}
                     </p>
                     <div className="flex items-start gap-3">
@@ -470,10 +470,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           </svg>
                         </a>
                         {order.shippingCarrier && (
-                          <p className="text-xs text-gray-400 mt-0.5">({order.shippingCarrier})</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">({order.shippingCarrier})</p>
                         )}
                         {order.estimatedDelivery && (
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                             Est. delivery: {fmtDate(order.estimatedDelivery, { month: "short", day: "numeric" })}
                           </p>
                         )}
@@ -495,7 +495,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
             {/* Return action */}
             {!isReturned && (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
                 <ReturnOrderModal />
               </div>
             )}

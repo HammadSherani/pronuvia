@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -81,24 +81,24 @@ function RowActions({ requestId }: { requestId: string }) {
 
       {open && action && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
               {action === "APPROVED" ? "Approve" : "Reject"} Withdrawal
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               {action === "APPROVED" ? "Amount will be deducted from the wallet." : "Request will be marked as rejected."}
             </p>
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                Note <span className="font-normal text-gray-400">(optional)</span>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+                Note <span className="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
               </label>
               <textarea rows={2} value={adminNote} onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Reason or message…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none" />
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 dark:focus:ring-gray-500/40 focus:border-gray-900 dark:focus:border-gray-500 resize-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" />
             </div>
             <div className="flex gap-3">
               <button type="button" onClick={() => { setOpen(false); setAdminNote(""); }}
-                className="flex-1 py-2.5 text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
                 Cancel
               </button>
               <button type="button" onClick={handle} disabled={isPending}
@@ -145,7 +145,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
 
   if (requests.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-20 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center py-20 text-center">
         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
           <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -185,7 +185,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <table className="w-full text-sm table-fixed">
           <colgroup>
             <col className="w-8" />
@@ -201,26 +201,26 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
             <col className="w-[9%]" />
           </colgroup>
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
+            <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
               <th className="px-3 py-3">
                 {pendingIds.length > 0 && (
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} title="Select all pending"
                     className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                 )}
               </th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Wallet</th>
-              <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bank</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Balance</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Wallet</th>
+              <th className="px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {pagedRequests.map((r) => {
               const isRep       = r.userRole === "SALES_REP";
               const user        = isRep ? repMap.get(r.userId) : drMap.get(r.userId);
@@ -228,7 +228,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
               const isChecked   = selected.has(r.id);
 
               return (
-                <tr key={r.id} className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
+                <tr key={r.id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
                   <td className="px-3 py-3">
                     {isPendingRow
                       ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
@@ -251,7 +251,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   <td className="px-3 py-3">
                     {user ? (
                       <>
-                        <p className="font-semibold text-gray-800 text-xs truncate">{user.firstName} {user.lastName}</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-100 text-xs truncate">{user.firstName} {user.lastName}</p>
                         <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
                       </>
                     ) : <span className="text-xs text-gray-300">Unknown</span>}
@@ -260,7 +260,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   <td className="px-3 py-3">
                     {user?.bankName ? (
                       <div>
-                        <p className="text-xs font-semibold text-gray-800 truncate">{user.bankAccountName}</p>
+                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{user.bankAccountName}</p>
                         <p className="text-[11px] text-gray-500 truncate">{user.bankName}</p>
                         {user.bankAccountNumber && <p className="text-[11px] font-mono text-gray-600 truncate">{user.bankAccountNumber}</p>}
                       </div>
@@ -268,7 +268,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   </td>
 
                   <td className="px-3 py-3">
-                    <span className="text-sm font-bold text-gray-800">{fmt(r.amount)}</span>
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</span>
                   </td>
 
                   <td className="px-3 py-3">
@@ -283,7 +283,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   <td className="px-3 py-3 space-y-1">
                     {r.note
                       ? <p className="text-[11px] text-gray-500 italic line-clamp-2" title={r.note}>"{r.note}"</p>
-                      : <span className="text-gray-300 text-xs">—</span>}
+                      : <span className="text-gray-300 text-xs">-</span>}
                     {r.adminNote && (
                       <div className="mt-1">
                         <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
@@ -315,7 +315,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   <td className="px-3 py-3 text-right">
                     {isPendingRow
                       ? <RowActions requestId={r.id} />
-                      : <span className="text-xs text-gray-300">—</span>}
+                      : <span className="text-xs text-gray-300">-</span>}
                   </td>
                 </tr>
               );
@@ -334,10 +334,10 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-1">
+            <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
               {confirmAction === "APPROVED" ? "Bulk Approve" : "Bulk Reject"} {selected.size} Request{selected.size !== 1 ? "s" : ""}
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               {confirmAction === "APPROVED"
                 ? "Amounts will be deducted from each wallet balance."
                 : "All selected requests will be marked as rejected."}

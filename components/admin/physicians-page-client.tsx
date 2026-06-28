@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { PhysicianApprovalActions } from "@/components/admin/physician-approval-
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { ClientPagination } from "@/components/shared/pagination";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type Physician = {
   id: string; isApproved: ApprovalStatus;
@@ -20,7 +20,7 @@ type Physician = {
   createdAt: Date;
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 const statusBadge: Record<ApprovalStatus, { label: string; cls: string }> = {
   APPROVED: { label: "Approved", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -32,33 +32,33 @@ function match(text: string, q: string) {
   return text.toLowerCase().includes(q.toLowerCase());
 }
 
-// ─── Doctor table row ─────────────────────────────────────────────────────────
+// --- Doctor table row ---------------------------------------------------------
 
 function DoctorTableRow({ p }: { p: Physician }) {
   const badge = statusBadge[p.isApproved];
 
   return (
-    <tr className="hover:bg-gray-50/50 transition-colors">
+    <tr className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
       <td className="px-3 py-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
             <span className="text-[10px] font-semibold text-[#5BB8D4]">{p.firstName[0]}{p.lastName[0]}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-gray-800 truncate">Dr. {p.firstName} {p.lastName}</p>
+            <p className="text-xs font-medium text-gray-800 dark:text-gray-100 truncate">Dr. {p.firstName} {p.lastName}</p>
             <p className="text-[10px] text-gray-400 truncate">{p.email}</p>
           </div>
         </div>
       </td>
-      <td className="px-3 py-3 text-gray-500 text-xs truncate">{p.nameOfPractice ?? "—"}</td>
+      <td className="px-3 py-3 text-gray-500 text-xs truncate">{p.nameOfPractice ?? "-"}</td>
       <td className="px-3 py-3">
         {p.salesRep ? (
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-gray-800 truncate">{p.salesRep.name}</p>
+            <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{p.salesRep.name}</p>
             <p className="text-[10px] text-gray-400 truncate">{p.salesRep.email}</p>
           </div>
         ) : (
-          <span className="text-xs text-gray-300 italic">—</span>
+          <span className="text-xs text-gray-300 italic">-</span>
         )}
       </td>
       <td className="px-3 py-3">
@@ -100,7 +100,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// --- Main component -----------------------------------------------------------
 
 export function PhysiciansPageClient({
   physicians,
@@ -137,11 +137,11 @@ export function PhysiciansPageClient({
 
   return (
     <div>
-      {/* ── Header ── */}
+      {/* -- Header -- */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Physicians &amp; Sales Reps</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Physicians &amp; Sales Reps</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Manage doctors, downline structure, and commission rates ({total} total)
           </p>
         </div>
@@ -156,7 +156,7 @@ export function PhysiciansPageClient({
         </Link>
       </div>
 
-      {/* ── Search Bar ── */}
+      {/* -- Search Bar -- */}
       <div className="relative mb-6">
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
           <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -184,7 +184,7 @@ export function PhysiciansPageClient({
       </div>
 
       {isSearching && (
-        <div className="flex items-center gap-3 mb-4 text-xs text-gray-500">
+        <div className="flex items-center gap-3 mb-4 text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-gray-900" />
             {filteredPhysicians.length} doctor{filteredPhysicians.length !== 1 ? "s" : ""}
@@ -193,7 +193,7 @@ export function PhysiciansPageClient({
         </div>
       )}
 
-      {/* ── Doctor List ── */}
+      {/* -- Doctor List -- */}
       <div className="mb-8">
         <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gray-900" />
@@ -203,7 +203,7 @@ export function PhysiciansPageClient({
           </span>
         </h2>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           {filteredPhysicians.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <p className="text-sm font-medium text-gray-400">
@@ -219,15 +219,15 @@ export function PhysiciansPageClient({
             <>
               <table className="w-full text-sm table-fixed">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[30%]">Doctor</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">Practice</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[24%]">Sales Rep</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">Status</th>
+                  <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[30%]">Doctor</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[22%]">Practice</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[24%]">Sales Rep</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[12%]">Status</th>
                     <th className="px-3 py-3 w-[12%]" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                   {pagedPhysicians.map((p) => (
                     <DoctorTableRow key={p.id} p={p} />
                   ))}

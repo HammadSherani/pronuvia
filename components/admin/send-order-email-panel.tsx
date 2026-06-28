@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -26,15 +26,15 @@ export function SendOrderEmailPanel({ orderId }: { orderId: string }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-700">Send order email</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 dark:text-gray-300">Send order email</h3>
       </div>
       <div className="p-4 space-y-3">
         <select
           value={emailType}
           onChange={(e) => setEmailType(e.target.value as OrderEmailType)}
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white text-gray-700"
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white dark:bg-gray-700 dark:text-gray-200 text-gray-700 dark:text-gray-300"
         >
           <option value="">Choose an email to send...</option>
           {EMAIL_OPTIONS.map((o) => (

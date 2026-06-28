@@ -1,4 +1,4 @@
-﻿import Link            from "next/link";
+import Link            from "next/link";
 import { prisma }      from "@/lib/db/prisma";
 import { requireAdmin }       from "@/lib/auth/dal";
 import { PageHeader }         from "@/components/admin/page-header";
@@ -9,7 +9,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Blog Posts – Pronuvia Admin" };
+export const metadata = { title: "Blog Posts -“ Pronuvia Admin" };
 
 export default async function BlogsPage({
   searchParams,
@@ -34,7 +34,7 @@ export default async function BlogsPage({
         actionHref="/admin/blogs/new"
       />
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {total === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -52,17 +52,17 @@ export default async function BlogsPage({
           <>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Post</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Post</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Slug</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {posts.map((post) => (
-                  <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={post.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {post.imageUrl ? (
@@ -78,18 +78,18 @@ export default async function BlogsPage({
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-gray-800 line-clamp-1">{post.title}</p>
-                          {post.excerpt && <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{post.excerpt}</p>}
+                          <p className="font-medium text-gray-800 dark:text-gray-100 line-clamp-1">{post.title}</p>
+                          {post.excerpt && <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1 mt-0.5">{post.excerpt}</p>}
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className="font-mono text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">{post.slug}</span>
+                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400 bg-gray-50 px-2 py-1 rounded">{post.slug}</span>
                     </td>
                     <td className="px-5 py-3.5">
                       <BlogPublishToggle id={post.id} isPublished={post.isPublished} />
                     </td>
-                    <td className="px-5 py-3.5 text-xs text-gray-400">
+                    <td className="px-5 py-3.5 text-xs text-gray-400 dark:text-gray-500">
                       {new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td className="px-5 py-3.5">

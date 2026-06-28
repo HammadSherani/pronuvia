@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -33,14 +33,14 @@ interface ProductFormProps {
   };
 }
 
-const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
+const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
+const ok     = "border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
 const icls   = (hasErr?: string) => `${base} ${hasErr ? errCls : ok}`;
 
-const labelCls    = "block text-sm font-medium text-gray-700 mb-1.5";
-const sectionCls  = "bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5";
-const sectionHead = "text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100";
+const labelCls    = "block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5";
+const sectionCls  = "bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-5";
+const sectionHead = "text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4 pb-3 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700";
 
 function FE({ msg }: { msg?: string }) {
   return msg ? <p className="text-xs text-red-500 mt-1">{msg}</p> : null;
@@ -88,7 +88,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
   return (
     <form action={formAction} noValidate>
 
-      {/* ── Basic Info ── */}
+      {/* -- Basic Info -- */}
       <div className={sectionCls}>
         <p className={sectionHead}>Product Information</p>
 
@@ -118,7 +118,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
         </div>
       </div>
 
-      {/* ── Media ── */}
+      {/* -- Media -- */}
       <div className={sectionCls}>
         <p className={sectionHead}>Media</p>
 
@@ -139,7 +139,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
                 />
                 <button type="button" onClick={() => setGallery((prev) => prev.filter((_, idx) => idx !== i))}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow hover:bg-red-600 cursor-pointer">
-                  ✕
+                  ?
                 </button>
               </div>
             ))}
@@ -154,7 +154,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
         </div>
       </div>
 
-      {/* ── Organisation ── */}
+      {/* -- Organisation -- */}
       <div className={sectionCls}>
         <p className={sectionHead}>Organisation</p>
         <div className="grid grid-cols-2 gap-4">
@@ -176,12 +176,12 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
         </div>
       </div>
 
-      {/* ── Variants / Sizes ── */}
+      {/* -- Variants / Sizes -- */}
       <div className={sectionCls}>
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
           <div>
             <p className="text-sm font-semibold text-gray-700">Sizes / Variants<Req /></p>
-            <p className="text-xs text-gray-400 mt-0.5">At least one size is required. Each size has its own price, stock and SKU.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">At least one size is required. Each size has its own price, stock and SKU.</p>
           </div>
         </div>
 

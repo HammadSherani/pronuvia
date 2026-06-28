@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -94,24 +94,24 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">No users found.</div>
         ) : (
           <>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet Balance</th>
                 <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
               {pagedPersons.map((person) => (
-                <tr key={`${person.userType}-${person.id}`} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={`${person.userType}-${person.id}`} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
 
                   {/* Type */}
                   <td className="px-5 py-4">
@@ -136,14 +136,14 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                           {person.firstName[0]}{person.lastName[0]}
                         </span>
                       </div>
-                      <p className="font-semibold text-gray-800 text-sm">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">
                         {person.userType === "DR" ? "Dr. " : ""}{person.firstName} {person.lastName}
                       </p>
                     </div>
                   </td>
 
                   {/* Email */}
-                  <td className="px-5 py-4 text-sm text-gray-500">{person.email}</td>
+                  <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{person.email}</td>
 
                   {/* Balance */}
                   <td className="px-5 py-4">
@@ -183,14 +183,14 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
+                <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">Wallet Adjustment</h3>
                 <div className="flex items-center gap-2 mt-1">
                   {selected.userType === "REP" ? (
                     <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">Sales Rep</span>
                   ) : (
                     <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">Doctor</span>
                   )}
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {selected.userType === "DR" ? "Dr. " : ""}{selected.firstName} {selected.lastName}
                   </p>
                 </div>
@@ -203,8 +203,8 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
             </div>
 
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl mb-5 mt-4">
-              <span className="text-xs text-gray-500 font-medium">Current balance</span>
-              <span className="text-base font-bold text-gray-800">{fmt(selected.walletBalance)}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Current balance</span>
+              <span className="text-base font-bold text-gray-800 dark:text-gray-100">{fmt(selected.walletBalance)}</span>
             </div>
 
             <div className="flex gap-2 mb-4">
@@ -237,7 +237,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                   className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
               </div>
               {amount && parseFloat(amount) > 0 && (
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                   New balance:{" "}
                   <span className="font-semibold text-gray-700">
                     {fmt(adjType === "CREDIT"

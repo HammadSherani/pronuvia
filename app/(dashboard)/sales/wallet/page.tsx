@@ -1,8 +1,8 @@
-﻿import { requireSalesRep } from "@/lib/auth/dal";
+import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { WalletPanel } from "@/components/sales/wallet-panel";
 
-export const metadata = { title: "Wallet – Pronuvia" };
+export const metadata = { title: "Wallet -“ Pronuvia" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -90,8 +90,8 @@ export default async function WalletPage() {
   return (
     <div className="max-w-6xl">
       <div className="mb-7">
-        <h1 className="text-xl font-bold text-gray-800">Wallet</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Revenue performance and earnings overview</p>
+        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Wallet</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Revenue performance and earnings overview</p>
       </div>
 
       <WalletPanel
@@ -106,7 +106,7 @@ export default async function WalletPage() {
         bankAccountName={rep?.bankAccountName}
       />
 
-      {/* ── Earning History Table ── */}
+      {/* -- Earning History Table -- */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-gray-700">Earning History</h2>
@@ -116,11 +116,11 @@ export default async function WalletPage() {
                 {pendingOrders.length} pending commission{pendingOrders.length > 1 ? "s" : ""}
               </span>
             )}
-            <span className="text-xs text-gray-400">{earningOrders.length} orders</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">{earningOrders.length} orders</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           {earningOrders.length === 0 && adminTxns.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
@@ -130,22 +130,22 @@ export default async function WalletPage() {
                 </svg>
               </div>
               <p className="text-sm font-semibold text-gray-500">No earnings yet</p>
-              <p className="text-xs text-gray-400 mt-1">Commission earnings will appear here once orders are placed.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Commission earnings will appear here once orders are placed.</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Number</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Source</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission Applied</th>
-                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net Earnings</th>
-                  <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order Number</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order Source</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Commission Applied</th>
+                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Net Earnings</th>
+                  <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {allEntries.map((entry) => {
                   if (entry.kind === "order") {
                     const o          = entry.data;
@@ -154,14 +154,14 @@ export default async function WalletPage() {
                       ? `Dr. ${o.physician.firstName} ${o.physician.lastName}`
                       : "Doctor";
                     return (
-                      <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-5 py-4 text-gray-500 text-xs whitespace-nowrap">
                           {new Date(o.createdAt).toLocaleDateString("en-US", {
                             month: "short", day: "numeric", year: "numeric",
                           })}
                         </td>
                         <td className="px-5 py-4">
-                          <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                          <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">
                             #{o.orderNumber}
                           </span>
                         </td>
@@ -186,7 +186,7 @@ export default async function WalletPage() {
                             </div>
                           )}
                         </td>
-                        <td className="px-5 py-4"><span className="text-gray-300 text-xs">—</span></td>
+                        <td className="px-5 py-4"><span className="text-gray-300 text-xs">-</span></td>
                         <td className="px-5 py-4 text-right">
                           <span className="inline-flex px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-semibold">
                             {o.salesRepCommissionRate}%
@@ -223,7 +223,7 @@ export default async function WalletPage() {
                   const isCredit = t.type === "CREDIT";
                   const note     = t.description?.replace("Admin adjustment:", "").trim() ?? "";
                   return (
-                    <tr key={t.id} className="hover:bg-gray-50/50 transition-colors bg-blue-50/20">
+                    <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors bg-blue-50/20">
                       <td className="px-5 py-4 text-gray-500 text-xs whitespace-nowrap">
                         {new Date(t.createdAt).toLocaleDateString("en-US", {
                           month: "short", day: "numeric", year: "numeric",
@@ -237,14 +237,14 @@ export default async function WalletPage() {
                           Admin
                         </span>
                       </td>
-                      <td className="px-5 py-4"><span className="text-gray-300 text-xs">—</span></td>
+                      <td className="px-5 py-4"><span className="text-gray-300 text-xs">-</span></td>
                       <td className="px-5 py-4 max-w-[180px]">
                         {note
                           ? <p className="text-xs text-gray-700 line-clamp-2" title={note}>{note}</p>
-                          : <span className="text-gray-300 text-xs">—</span>}
+                          : <span className="text-gray-300 text-xs">-</span>}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-xs text-gray-300">-</span>
                       </td>
                       <td className="px-5 py-4 text-right">
                         <span className={`text-sm font-bold ${isCredit ? "text-emerald-600" : "text-red-500"}`}>
@@ -267,7 +267,7 @@ export default async function WalletPage() {
 
               {/* Footer */}
               <tfoot>
-                <tr className="border-t-2 border-gray-100 bg-gray-50/60">
+                <tr className="border-t-2 border-gray-100 bg-gray-50/60 dark:bg-gray-700/40">
                   <td colSpan={5} className="px-5 py-3.5 text-xs font-bold text-gray-500 text-right">
                     Paid to Wallet
                   </td>
@@ -286,34 +286,34 @@ export default async function WalletPage() {
         </div>
       </div>
 
-      {/* ── Withdrawal Request History ── */}
+      {/* -- Withdrawal Request History -- */}
       {withdrawRequests.length > 0 && (
         <div>
           <h2 className="text-sm font-bold text-gray-700 mb-3">Withdrawal Requests</h2>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Reply</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admin Reply</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {withdrawRequests.map((r) => {
                   const cls = wdStatusStyle[r.status] ?? wdStatusStyle["PENDING"];
                   return (
-                    <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-5 py-3.5 text-xs text-gray-400 whitespace-nowrap">
+                    <tr key={r.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                      <td className="px-5 py-3.5 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {new Date(r.createdAt).toLocaleDateString("en-US", {
                           month: "short", day: "numeric", year: "numeric",
                         })}
                       </td>
-                      <td className="px-5 py-3.5 font-bold text-gray-800">{fmt(r.amount)}</td>
-                      <td className="px-5 py-3.5 text-xs text-gray-500 italic max-w-[180px] truncate">
-                        {r.note ?? <span className="text-gray-300 not-italic">—</span>}
+                      <td className="px-5 py-3.5 font-bold text-gray-800 dark:text-gray-100">{fmt(r.amount)}</td>
+                      <td className="px-5 py-3.5 text-xs text-gray-500 dark:text-gray-400 italic max-w-[180px] truncate">
+                        {r.note ?? <span className="text-gray-300 not-italic">-</span>}
                       </td>
                       <td className="px-5 py-3.5 max-w-[220px]">
                         {r.adminNote ? (
@@ -326,7 +326,7 @@ export default async function WalletPage() {
                             </p>
                           </div>
                         ) : (
-                          <span className="text-gray-300 text-xs">—</span>
+                          <span className="text-gray-300 text-xs">-</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5">

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useState } from "react";
 import { updateSalesRepProfile, type ProfileState } from "@/actions/sales-rep/profile";
@@ -15,8 +15,8 @@ type Rep = {
   _count: { physicians: number };
 };
 
-const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
-const inpErr = "w-full border border-red-400 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
+const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
+const inpErr = "w-full border border-red-400 rounded-lg px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
 const lbl    = "block text-xs font-semibold text-gray-500 mb-1";
 
 function fmt(n: number) {
@@ -27,7 +27,7 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
   return (
     <div className="py-3 border-b border-gray-50 last:border-0 flex flex-col sm:flex-row sm:items-start gap-1">
       <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider sm:w-44 shrink-0 pt-0.5">{label}</dt>
-      <dd className="text-sm text-gray-800 break-words">
+      <dd className="text-sm text-gray-800 dark:text-gray-100 break-words">
         {value !== null && value !== undefined && value !== ""
           ? String(value)
           : <span className="text-gray-300 italic text-xs">Not provided</span>}
@@ -55,7 +55,7 @@ function AddressRow({ label, raw }: { label: string; raw?: string | null }) {
   return (
     <div className="py-3 border-b border-gray-50 last:border-0 flex flex-col sm:flex-row sm:items-start gap-1">
       <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider sm:w-44 shrink-0 pt-0.5">{label}</dt>
-      <dd className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+      <dd className="text-sm text-gray-800 dark:text-gray-100 whitespace-pre-line leading-relaxed">
         {formatted || <span className="text-gray-300 italic text-xs">Not provided</span>}
       </dd>
     </div>
@@ -64,8 +64,8 @@ function AddressRow({ label, raw }: { label: string; raw?: string | null }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
         <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
       </div>
       <dl className="px-6 py-1">{children}</dl>
@@ -83,7 +83,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-// ─── View mode ────────────────────────────────────────────────────────────────
+// --- View mode ----------------------------------------------------------------
 
 function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
   const memberSince = new Date(r.createdAt).toLocaleDateString("en-US", {
@@ -93,12 +93,12 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
   return (
     <div className="space-y-6">
       {/* Identity card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center gap-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 flex items-center gap-5">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3DBFA4] to-[#2a8f7a] flex items-center justify-center shrink-0 text-white text-2xl font-black select-none">
           {r.firstName.charAt(0)}{r.lastName.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-semibold text-gray-900">{r.name}</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-white">{r.name}</p>
           <p className="text-sm text-gray-400">{r.email}</p>
           <p className="text-xs text-gray-300 mt-0.5">Member since {memberSince}</p>
         </div>
@@ -125,10 +125,10 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
           { label: "Total Orders",         value: String(r.ordersCount), color: "#5BB8D4" },
           { label: "Downline Physicians",  value: String(r._count.physicians), color: "#8b5cf6" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: color }} />
-            <p className="text-xl font-bold text-gray-800">{value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+            <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{value}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
@@ -156,7 +156,7 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
   );
 }
 
-// ─── Edit mode ────────────────────────────────────────────────────────────────
+// --- Edit mode ----------------------------------------------------------------
 
 function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(updateSalesRepProfile, undefined);
@@ -187,7 +187,7 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Edit Profile</h1>
           <p className="text-sm text-gray-400 mt-0.5">Update your details and bank information</p>
         </div>
         <button type="button" onClick={onCancel}
@@ -211,8 +211,8 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
       )}
 
       {/* Personal info */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 border-b border-gray-100">Personal Info</p>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 border-b border-gray-100 dark:border-gray-700">Personal Info</p>
         <div className="grid grid-cols-2 gap-4">
           <Field label="First Name" error={errs.firstName?.[0]}>
             <input name="firstName" defaultValue={r.firstName}
@@ -239,8 +239,8 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
       </div>
 
       {/* Addresses */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 border-b border-gray-100">Addresses</p>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-5">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 border-b border-gray-100 dark:border-gray-700">Addresses</p>
         {/* Hidden inputs carry the JSON to the server action */}
         <input type="hidden" name="billingAddress"  value={JSON.stringify(billingAddr)} />
         <input type="hidden" name="shippingAddress" value={JSON.stringify(shippingAddr)} />
@@ -249,17 +249,17 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
           <p className="text-xs font-semibold text-gray-500 mb-3">Billing Address</p>
           <AddressFields value={billingAddr} onChange={setBillingAddr} showName={false} />
         </div>
-        <div className="pt-4 border-t border-gray-100">
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
           <p className="text-xs font-semibold text-gray-500 mb-3">Shipping Address</p>
           <AddressFields value={shippingAddr} onChange={setShippingAddr} showName={false} />
         </div>
       </div>
 
       {/* Bank details */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <div className="pb-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
+        <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Bank Details</p>
-          <p className="text-xs text-gray-400 mt-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
             Required for withdrawal requests. Keep this up to date.
           </p>
         </div>
@@ -309,7 +309,7 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
   );
 }
 
-// ─── Root export ──────────────────────────────────────────────────────────────
+// --- Root export --------------------------------------------------------------
 
 export function SalesAccountClient({ rep }: { rep: Rep }) {
   const [editing, setEditing] = useState(false);
@@ -318,7 +318,7 @@ export function SalesAccountClient({ rep }: { rep: Rep }) {
     <div className="">
       {!editing && (
         <div>
-          <h1 className="text-xl font-bold text-gray-900">My Account</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">My Account</h1>
           <p className="text-sm text-gray-400 mt-0.5">View your profile and account details</p>
         </div>
       )}

@@ -1,4 +1,4 @@
-﻿interface FormFieldProps {
+interface FormFieldProps {
   label: string;
   name: string;
   type?: string;
@@ -21,7 +21,7 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className="mb-5">
-      <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor={name}>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5" htmlFor={name}>
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
@@ -32,7 +32,7 @@ export function FormField({
           type={type}
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white"
         />
       )}
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -60,7 +60,7 @@ export function FormActions({
       </button>
       <a
         href={backHref}
-        className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+        className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 font-medium transition-colors"
       >
         Cancel
       </a>

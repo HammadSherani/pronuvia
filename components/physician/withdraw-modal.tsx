@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useRef } from "react";
 import { createPhysicianWithdrawRequest } from "@/actions/physician/withdraw-request";
@@ -47,10 +47,10 @@ export function PhysicianWithdrawModal({
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-700">
           <div>
-            <h2 className="text-base font-bold text-gray-800">Request Withdrawal</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Funds will be sent to your linked bank account</p>
+            <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">Request Withdrawal</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Funds will be sent to your linked bank account</p>
           </div>
           <button type="button" onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-colors">
@@ -76,9 +76,9 @@ export function PhysicianWithdrawModal({
               <div>
                 <p className="text-xs font-semibold text-gray-700">Sending to</p>
                 {bankAccountName  && <p className="text-xs text-gray-600 mt-0.5">{bankAccountName}</p>}
-                {bankName         && <p className="text-xs text-gray-400">{bankName}</p>}
+                {bankName         && <p className="text-xs text-gray-400 dark:text-gray-500">{bankName}</p>}
                 {bankAccountNumber && (
-                  <p className="text-xs text-gray-400 font-mono tracking-wider">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">
                     ••••&nbsp;{bankAccountNumber.slice(-4)}
                   </p>
                 )}
@@ -108,7 +108,7 @@ export function PhysicianWithdrawModal({
             </div>
           ) : balance < 10 ? (
             <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-              <p className="text-xs text-gray-500 text-center">Minimum withdrawal is $10.00. Your current balance is insufficient.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">Minimum withdrawal is $10.00. Your current balance is insufficient.</p>
             </div>
           ) : (
             <form action={action} className="space-y-4">
@@ -129,7 +129,7 @@ export function PhysicianWithdrawModal({
                     }}
                   >MAX</button>
                 </div>
-                <p className="text-xs text-gray-400 mt-1.5 flex justify-between">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex justify-between">
                   <span>Minimum: $10.00</span>
                   <span>Maximum: {fmt(balance)}</span>
                 </p>

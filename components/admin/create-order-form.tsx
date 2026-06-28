@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-const base = "w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-gray-900 focus:ring-gray-900 transition bg-white";
+const base = "w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-gray-900 focus:ring-gray-900 transition bg-white";
 
 export function CreateOrderForm({ physicians, products }: Props) {
   const [state, formAction, pending] = useActionState(createOrder, undefined);
@@ -98,19 +98,19 @@ export function CreateOrderForm({ physicians, products }: Props) {
       <input type="hidden" name="items"       value={JSON.stringify(lines)} />
       <input type="hidden" name="notes"       value={notes} />
 
-      {/* ── Physician ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
-        <p className="text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100">Physician</p>
+      {/* -- Physician -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-5">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4 pb-3 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700">Physician</p>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1.5">
             Select Physician <span className="text-red-400">*</span>
           </label>
           <select value={physicianId} onChange={(e) => setPhysicianId(e.target.value)} className={base}>
-            <option value="">— choose a physician —</option>
+            <option value="">- choose a physician -</option>
             {physicians.map((p) => (
               <option key={p.id} value={p.id}>
                 Dr. {p.firstName} {p.lastName}
-                {p.nameOfPractice ? ` — ${p.nameOfPractice}` : ""}
+                {p.nameOfPractice ? ` - ${p.nameOfPractice}` : ""}
               </option>
             ))}
           </select>
@@ -120,16 +120,16 @@ export function CreateOrderForm({ physicians, products }: Props) {
         {physician && (
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg bg-gray-900/5 border border-gray-900/20 p-3">
-              <p className="text-xs text-gray-500 mb-1">Physician Commission (current rate)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Physician Commission (current rate)</p>
               <p className="text-lg font-bold text-[#8b5cf6]">{physician.commission}%</p>
-              <p className="text-xs text-gray-400 mt-0.5">Projected: {fmt(projectedDrAmt)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Projected: {fmt(projectedDrAmt)}</p>
             </div>
             <div className="rounded-lg bg-gray-900/5 border border-[#5BB8D4]/20 p-3">
-              <p className="text-xs text-gray-500 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Sales Rep Commission {physician.salesRep ? `(${physician.salesRep.name})` : "(none linked)"}
               </p>
               <p className="text-lg font-bold text-[#5BB8D4]">{salesRepCommission}%</p>
-              <p className="text-xs text-gray-400 mt-0.5">Projected: {fmt(projectedRepAmt)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Projected: {fmt(projectedRepAmt)}</p>
             </div>
           </div>
         )}
@@ -140,9 +140,9 @@ export function CreateOrderForm({ physicians, products }: Props) {
         )}
       </div>
 
-      {/* ── Products ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+      {/* -- Products -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-5">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
           <p className="text-sm font-semibold text-gray-700">Products</p>
           <button type="button" onClick={addLine}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900/10 text-[#3DBFA4] text-xs font-medium rounded-lg hover:bg-gray-900/20 transition-colors cursor-pointer">
@@ -173,9 +173,9 @@ export function CreateOrderForm({ physicians, products }: Props) {
                   <div className="grid grid-cols-12 gap-3 items-start">
                     {/* Product select */}
                     <div className="col-span-4">
-                      <label className="text-xs text-gray-500 mb-1 block">Product</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Product</label>
                       <select value={line.productId} onChange={(e) => selectProduct(idx, e.target.value)} className={base}>
-                        <option value="">— select —</option>
+                        <option value="">- select -</option>
                         {products.map((p) => (
                           <option key={p.id} value={p.id}>{p.title}</option>
                         ))}
@@ -184,7 +184,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
 
                     {/* Variant / size */}
                     <div className="col-span-2">
-                      <label className="text-xs text-gray-500 mb-1 block">Size</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Size</label>
                       {variants.length > 1 ? (
                         <select value={line.variantSize}
                           onChange={(e) => prod && selectVariant(idx, prod, e.target.value)}
@@ -194,13 +194,13 @@ export function CreateOrderForm({ physicians, products }: Props) {
                           ))}
                         </select>
                       ) : (
-                        <input readOnly value={line.variantSize || "—"} className={`${base} bg-gray-50`} />
+                        <input readOnly value={line.variantSize || "-"} className={`${base} bg-gray-50`} />
                       )}
                     </div>
 
                     {/* Unit price */}
                     <div className="col-span-2">
-                      <label className="text-xs text-gray-500 mb-1 block">Unit Price</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Unit Price</label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                         <input type="number" step="0.01" min="0"
@@ -212,7 +212,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
 
                     {/* Qty */}
                     <div className="col-span-2">
-                      <label className="text-xs text-gray-500 mb-1 block">Qty</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Qty</label>
                       <input type="number" min="1"
                         value={line.quantity}
                         onChange={(e) => updateLine(idx, { quantity: parseInt(e.target.value) || 1 })}
@@ -221,8 +221,8 @@ export function CreateOrderForm({ physicians, products }: Props) {
 
                     {/* Line total */}
                     <div className="col-span-1">
-                      <label className="text-xs text-gray-500 mb-1 block">Total</label>
-                      <p className="text-sm font-medium text-gray-800 py-2.5">{fmt(line.lineTotal)}</p>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Total</label>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 py-2.5">{fmt(line.lineTotal)}</p>
                     </div>
 
                     {/* Remove */}
@@ -240,31 +240,31 @@ export function CreateOrderForm({ physicians, products }: Props) {
             })}
 
             {/* Subtotal row */}
-            <div className="flex justify-end pt-2 border-t border-gray-100">
+            <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700">
               <div className="text-right">
-                <p className="text-xs text-gray-400">Order Total</p>
-                <p className="text-xl font-bold text-gray-800">{fmt(subtotal)}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Order Total</p>
+                <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{fmt(subtotal)}</p>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Notes ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5">
-        <p className="text-sm font-semibold text-gray-700 mb-3 pb-3 border-b border-gray-100">Notes (optional)</p>
+      {/* -- Notes -- */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-5">
+        <p className="text-sm font-semibold text-gray-700 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">Notes (optional)</p>
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
           className={`${base} resize-none`} placeholder="Internal notes for this order…" />
       </div>
 
-      {/* ── Actions ── */}
+      {/* -- Actions -- */}
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending || lines.length === 0 || !physicianId}
           className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
           {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
           {pending ? "Creating…" : "Create Order"}
         </button>
-        <a href="/admin/orders" className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <a href="/admin/orders" className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 transition-colors">
           Cancel
         </a>
       </div>

@@ -11,7 +11,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <dt className="text-xs text-gray-400 font-medium mb-0.5">{label}</dt>
-      <dd className="text-sm text-gray-700">{value || <span className="text-gray-300">—</span>}</dd>
+      <dd className="text-sm text-gray-700">{value || <span className="text-gray-300">-</span>}</dd>
     </div>
   );
 }
@@ -161,8 +161,8 @@ export default async function PhysicianViewPage({ params }: Props) {
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <InfoRow label="Assigned Sales Rep" value={p.salesRep?.name ?? "—"} />
-          <InfoRow label="Sales Rep Email"     value={p.salesRep?.email ?? "—"} />
+          <InfoRow label="Assigned Sales Rep" value={p.salesRep?.name ?? "-"} />
+          <InfoRow label="Sales Rep Email"     value={p.salesRep?.email ?? "-"} />
         </dl>
       </div>
 

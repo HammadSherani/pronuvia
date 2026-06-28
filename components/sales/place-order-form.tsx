@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -89,7 +89,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
           {physicians.map((p) => (
             <option key={p.id} value={p.id}>
               Dr. {p.firstName} {p.lastName}
-              {p.nameOfPractice ? ` — ${p.nameOfPractice}` : ""}
+              {p.nameOfPractice ? ` - ${p.nameOfPractice}` : ""}
             </option>
           ))}
         </select>
@@ -121,7 +121,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
             ))}
           </div>
           {selectedVariant?.stock !== undefined && (
-            <p className="text-xs text-gray-400 mt-1.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
               {selectedVariant.stock > 0 ? `${selectedVariant.stock} in stock` : "Out of stock"}
             </p>
           )}
@@ -137,14 +137,14 @@ export function PlaceOrderForm({ product, physicians }: Props) {
               type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               className="px-3.5 py-2 text-gray-500 hover:bg-gray-50 transition-colors text-lg leading-none"
-            >−</button>
+            >-</button>
             <input
               type="number"
               name="quantity"
               min={1}
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-14 py-2 text-center text-sm font-medium text-gray-800 focus:outline-none border-0"
+              className="w-14 py-2 text-center text-sm font-medium text-gray-800 dark:text-gray-100 focus:outline-none border-0"
             />
             <button
               type="button"
@@ -152,8 +152,8 @@ export function PlaceOrderForm({ product, physicians }: Props) {
               className="px-3.5 py-2 text-gray-500 hover:bg-gray-50 transition-colors text-lg leading-none"
             >+</button>
           </div>
-          <span className="text-sm text-gray-500">
-            Total: <span className="font-bold text-gray-800">${(unitPrice * quantity).toFixed(2)}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Total: <span className="font-bold text-gray-800 dark:text-gray-100">${(unitPrice * quantity).toFixed(2)}</span>
           </span>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { fmtSize } from "@/lib/utils/format";
 
-export const metadata = { title: "Catalog – Pronuvia Admin" };
+export const metadata = { title: "Catalog -“ Pronuvia Admin" };
 
 export default async function AdminDownloadsPage() {
   const docs = await listDocuments();
@@ -11,8 +11,8 @@ export default async function AdminDownloadsPage() {
   return (
     <div className="max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Catalog Management</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Catalog Management</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           Upload PDFs for sales representatives and physicians to download.
           Deleting a file removes access for everyone.
         </p>
@@ -24,10 +24,10 @@ export default async function AdminDownloadsPage() {
       </div>
 
       {/* Document list */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-700">Uploaded Documents</h2>
-          <span className="text-xs text-gray-400">{docs.length} file{docs.length !== 1 ? "s" : ""}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">{docs.length} file{docs.length !== 1 ? "s" : ""}</span>
         </div>
 
         {docs.length === 0 ? (
@@ -38,12 +38,12 @@ export default async function AdminDownloadsPage() {
               </svg>
             </div>
             <p className="text-sm font-medium text-gray-500">No documents yet</p>
-            <p className="text-xs text-gray-400 mt-1">Upload your first PDF above</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Upload your first PDF above</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-50">
+          <ul className="divide-y divide-gray-50 dark:divide-gray-700">
             {docs.map((doc) => (
-              <li key={doc.id} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/50 transition-colors group">
+              <li key={doc.id} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors group">
                 {/* PDF icon */}
                 <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -53,8 +53,8 @@ export default async function AdminDownloadsPage() {
 
                 {/* Name + meta */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{doc.fileName}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{doc.fileName}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                     {fmtSize(doc.fileSize)} · Uploaded{" "}
                     {new Date(doc.createdAt).toLocaleDateString("en-US", {
                       month: "short", day: "numeric", year: "numeric",

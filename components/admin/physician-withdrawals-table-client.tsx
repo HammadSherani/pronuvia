@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -99,7 +99,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
+            <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/40">
               <th className="px-4 py-3.5">
                 {pendingIds.length > 0 && (
                   <input type="checkbox" checked={allSelected} onChange={toggleAll}
@@ -107,23 +107,23 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                     className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                 )}
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Details</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Physician</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bank Details</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet Balance</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Note</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet</th>
               <th className="px-5 py-3.5" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {requests.map((r) => {
               const rowPending = r.status === "PENDING";
               const isChecked  = selected.has(r.id);
               return (
-                <tr key={r.id} className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
+                <tr key={r.id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
                   <td className="px-4 py-4">
                     {rowPending
                       ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
@@ -139,8 +139,8 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                         </span>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800 text-xs">Dr. {r.physician.firstName} {r.physician.lastName}</p>
-                        <p className="text-xs text-gray-400">{r.physician.email}</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-100 text-xs">Dr. {r.physician.firstName} {r.physician.lastName}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{r.physician.email}</p>
                       </div>
                     </div>
                   </td>
@@ -148,8 +148,8 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                   <td className="px-5 py-4">
                     {r.physician.bankName ? (
                       <div>
-                        <p className="text-xs font-semibold text-gray-800">{r.physician.bankAccountName}</p>
-                        <p className="text-xs text-gray-500">{r.physician.bankName}</p>
+                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">{r.physician.bankAccountName}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{r.physician.bankName}</p>
                         {r.physician.bankAccountNumber && (
                           <p className="text-xs font-mono font-semibold text-gray-700 mt-0.5">{r.physician.bankAccountNumber}</p>
                         )}
@@ -160,7 +160,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                   </td>
 
                   <td className="px-5 py-4">
-                    <span className="text-base font-black text-gray-800">{fmt(r.amount)}</span>
+                    <span className="text-base font-black text-gray-800 dark:text-gray-100">{fmt(r.amount)}</span>
                   </td>
 
                   <td className="px-5 py-4">
@@ -174,14 +174,14 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
 
                   <td className="px-5 py-4 max-w-[160px]">
                     {r.note
-                      ? <p className="text-xs text-gray-500 italic truncate" title={r.note}>"{r.note}"</p>
-                      : <span className="text-gray-300 text-xs">—</span>}
+                      ? <p className="text-xs text-gray-500 dark:text-gray-400 italic truncate" title={r.note}>"{r.note}"</p>
+                      : <span className="text-gray-300 text-xs">-</span>}
                     {r.adminNote && (
-                      <p className="text-xs text-[#3DBFA4] mt-0.5 truncate" title={r.adminNote}>↳ {r.adminNote}</p>
+                      <p className="text-xs text-[#3DBFA4] mt-0.5 truncate" title={r.adminNote}>? {r.adminNote}</p>
                     )}
                   </td>
 
-                  <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                  <td className="px-5 py-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                     {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
 
@@ -198,7 +198,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                   <td className="px-5 py-4">
                     {r.status === "PENDING"
                       ? <PhysicianWithdrawalActions requestId={r.id} />
-                      : <span className="text-xs text-gray-300">—</span>}
+                      : <span className="text-xs text-gray-300">-</span>}
                   </td>
                 </tr>
               );
@@ -210,10 +210,10 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-base font-bold text-gray-800 mb-1">
+            <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
               {confirmAction === "APPROVED" ? "Bulk Approve" : "Bulk Reject"} {selected.size} Request{selected.size !== 1 ? "s" : ""}
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               {confirmAction === "APPROVED"
                 ? "Amounts will be deducted from each physician's wallet balance."
                 : "All selected requests will be marked as rejected."}

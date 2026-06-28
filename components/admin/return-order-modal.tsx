@@ -11,7 +11,7 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-// ─── Shared modal shell ───────────────────────────────────────────────────────
+// â”€â”€â”€ Shared modal shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ModalShell({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +28,7 @@ function ModalShell({ onClose, children }: { onClose: () => void; children: Reac
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden"
+        className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden"
         style={{ maxHeight: "min(90vh, 700px)" }}
       >
         <button
@@ -46,7 +46,7 @@ function ModalShell({ onClose, children }: { onClose: () => void; children: Reac
   );
 }
 
-// ─── Step 1 — Lookup ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 1 - Lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LookupStep({ onFound, initialOrderNumber }: { onFound: (o: OrderData) => void; initialOrderNumber?: string }) {
   const [num, setNum]      = useState(initialOrderNumber ?? "");
   const [err, setErr]      = useState("");
@@ -69,8 +69,8 @@ function LookupStep({ onFound, initialOrderNumber }: { onFound: (o: OrderData) =
 
   return (
     <div className="p-6 shrink-0">
-      <h3 className="text-base font-bold text-gray-800 mb-1">Process Return</h3>
-      <p className="text-sm text-gray-500 mb-5">Enter the order number to begin a return.</p>
+      <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">Process Return</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Enter the order number to begin a return.</p>
       <label className="block text-xs font-semibold text-gray-600 mb-1.5">Order Number</label>
       <div className="flex gap-2">
         <input
@@ -80,7 +80,7 @@ function LookupStep({ onFound, initialOrderNumber }: { onFound: (o: OrderData) =
           onChange={(e) => setNum(e.target.value.toUpperCase())}
           onKeyDown={(e) => { if (e.key === "Enter") lookup(); }}
           placeholder="ORD-20240101-XXXXXX"
-          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 font-mono uppercase transition-colors"
+          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 font-mono uppercase transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
         />
         <button
           type="button"
@@ -102,7 +102,7 @@ function LookupStep({ onFound, initialOrderNumber }: { onFound: (o: OrderData) =
   );
 }
 
-// ─── Step 2 — Select items + confirm ─────────────────────────────────────────
+// â”€â”€â”€ Step 2 - Select items + confirm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () => void; onDone: () => void }) {
   const items                        = order.items as unknown as OrderItem[];
   const [fullReturn,  setFullReturn]  = useState(true);
@@ -147,7 +147,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
     <div className="flex flex-col flex-1 min-h-0">
 
       {/* Fixed header */}
-      <div className="px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+      <div className="px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 shrink-0">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack} className="text-gray-400 hover:text-gray-600 shrink-0">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -155,17 +155,17 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
             </svg>
           </button>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-gray-800 truncate">
-              Return — <span className="font-mono">{order.orderNumber}</span>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">
+              Return - <span className="font-mono">{order.orderNumber}</span>
             </h3>
-            <div className="flex flex-wrap gap-x-3 text-xs text-gray-400 mt-0.5">
+            <div className="flex flex-wrap gap-x-3 text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               {order.salesRep && (
                 <span>Rep: <span className="text-gray-600 font-medium">{order.salesRep.name}</span></span>
               )}
               {order.physician && (
                 <span>Dr: <span className="text-gray-600 font-medium">{order.physician.firstName} {order.physician.lastName}</span></span>
               )}
-              <span>Total: <span className="text-gray-800 font-bold">{fmt(order.total)}</span></span>
+              <span>Total: <span className="text-gray-800 dark:text-gray-100 font-bold">{fmt(order.total)}</span></span>
             </div>
           </div>
         </div>
@@ -184,7 +184,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
           />
           <div>
             <p className="text-sm font-bold text-orange-700">Full Invoice Return</p>
-            <p className="text-xs text-orange-500">Returns all items — order marked as Refunded</p>
+            <p className="text-xs text-orange-500">Returns all items - order marked as Refunded</p>
           </div>
         </label>
 
@@ -193,14 +193,14 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
             {fullReturn ? "Items (all selected)" : "Select items to return"}
           </p>
-          <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
+          <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50 dark:divide-gray-700">
             {items.map((item, idx) => {
               const isChecked = fullReturn || selected.has(idx);
               return (
                 <label
                   key={idx}
                   className={`flex items-center gap-3 px-4 py-3 cursor-pointer select-none transition-colors ${
-                    isChecked ? "bg-orange-50/50" : "hover:bg-gray-50/60"
+                    isChecked ? "bg-orange-50/50" : "hover:bg-gray-50/60 dark:bg-gray-700/40"
                   }`}
                 >
                   <input
@@ -211,7 +211,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
                     className="w-4 h-4 accent-orange-500 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 truncate">{item.title}</p>
+                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{item.title}</p>
                     <p className="text-[10px] text-gray-400">
                       {item.variantSize && <span>{item.variantSize} · </span>}
                       Qty {item.quantity} · {fmt(item.unitPrice)} each
@@ -230,32 +230,32 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Clawback Preview</p>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">Returned value</span>
-            <span className="text-sm font-bold text-gray-800">{fmt(returnedTotal)}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Returned value</span>
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmt(returnedTotal)}</span>
           </div>
           <div className="border-t border-gray-200 pt-3 space-y-2.5">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-semibold text-gray-700">Sales Rep Commission</p>
                 <p className="text-[10px] text-gray-400 mt-0.5">
-                  {fmt(order.salesRepCommissionAmount)} × {(ratio * 100).toFixed(1)}%
+                  {fmt(order.salesRepCommissionAmount)} Ã- {(ratio * 100).toFixed(1)}%
                   {!commissionPaid && <span className="text-amber-500 ml-1">· not yet paid</span>}
                 </p>
               </div>
               <span className={`text-sm font-bold shrink-0 ${commissionPaid ? "text-red-500" : "text-gray-300 line-through"}`}>
-                −{fmt(salesRepClawback)}
+                âˆ’{fmt(salesRepClawback)}
               </span>
             </div>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-semibold text-gray-700">Doctor Commission</p>
                 <p className="text-[10px] text-gray-400 mt-0.5">
-                  {fmt(order.physicianCommissionAmount)} × {(ratio * 100).toFixed(1)}%
+                  {fmt(order.physicianCommissionAmount)} Ã- {(ratio * 100).toFixed(1)}%
                   <span className="ml-1">· tracked only</span>
                 </p>
               </div>
               <span className="text-sm font-bold shrink-0 text-gray-400">
-                −{fmt(physicianClawback)}
+                âˆ’{fmt(physicianClawback)}
               </span>
             </div>
           </div>
@@ -292,7 +292,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
       </div>
 
       {/* Fixed footer */}
-      <div className="px-6 pb-5 pt-3 border-t border-gray-100 shrink-0 flex gap-3">
+      <div className="px-6 pb-5 pt-3 border-t border-gray-100 dark:border-gray-700 shrink-0 flex gap-3">
         <button
           type="button"
           onClick={onBack}
@@ -319,7 +319,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
   );
 }
 
-// ─── Standalone header button ─────────────────────────────────────────────────
+// â”€â”€â”€ Standalone header button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function ReturnOrderModal({ initialOrderNumber }: { initialOrderNumber?: string }) {
   const [open,  setOpen]  = useState(false);
   const [order, setOrder] = useState<OrderData | null>(null);
@@ -331,7 +331,7 @@ export function ReturnOrderModal({ initialOrderNumber }: { initialOrderNumber?: 
       <button
         type="button"
         onClick={() => { setOrder(null); setOpen(true); }}
-        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-lg transition-colors"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -351,7 +351,7 @@ export function ReturnOrderModal({ initialOrderNumber }: { initialOrderNumber?: 
   );
 }
 
-// ─── Per-row return button ────────────────────────────────────────────────────
+// â”€â”€â”€ Per-row return button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function ReturnRowButton({ orderId, orderNumber, alreadyReturned }: {
   orderId:         string;
   orderNumber:     string;

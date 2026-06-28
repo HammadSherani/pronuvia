@@ -1,9 +1,9 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 
 
-export const metadata = { title: "Dashboard – Pronuvia" };
+export const metadata = { title: "Dashboard -“ Pronuvia" };
 
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -111,13 +111,13 @@ export default async function PhysicianDashboardPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
 
-        {/* ── LEFT: main content ── */}
+        {/* -- LEFT: main content -- */}
         <div className="space-y-6 min-w-0">
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 Welcome back, {physician?.firstName ?? session.email}!
               </h1>
               <p className="text-sm text-gray-400 mt-0.5">
@@ -127,7 +127,7 @@ export default async function PhysicianDashboardPage() {
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm shrink-0">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 shadow-sm shrink-0">
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -141,7 +141,7 @@ export default async function PhysicianDashboardPage() {
               <Link
                 key={card.label}
                 href={card.href}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
+                className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -150,8 +150,8 @@ export default async function PhysicianDashboardPage() {
                   <div style={{ color: card.color }}>{card.icon}</div>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-800 tracking-tight">{card.value}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
+                  <p className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">{card.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{card.label}</p>
                   <p className="text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
                 </div>
               </Link>
@@ -159,11 +159,11 @@ export default async function PhysicianDashboardPage() {
           </div>
 
           {/* Recent Orders table */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
               <div>
-                <h3 className="text-sm font-bold text-gray-800">Recent Orders</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Your last 5 orders</p>
+                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Recent Orders</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Your last 5 orders</p>
               </div>
               <Link href="/physician/orders" className="text-xs font-semibold text-[#3DBFA4] hover:underline">
                 View All
@@ -176,8 +176,8 @@ export default async function PhysicianDashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">No orders yet</p>
-                <p className="text-xs text-gray-400 mt-1">Your orders will appear here once placed.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No orders yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Your orders will appear here once placed.</p>
                 <Link
                   href="/physician/shop"
                   className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-700 transition-colors"
@@ -188,16 +188,16 @@ export default async function PhysicianDashboardPage() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/60">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                  <tr className="bg-gray-50/60 dark:bg-gray-700/40">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order</th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                    <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                   {recentOrders.map((o) => (
-                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-6 py-3.5">
                         <Link href={`/physician/invoice/${o.orderNumber}`}>
                           <span className="font-mono text-xs font-semibold text-[#3DBFA4] hover:underline bg-gray-900/10 px-2 py-1 rounded-lg cursor-pointer">
@@ -206,7 +206,7 @@ export default async function PhysicianDashboardPage() {
                         </Link>
                       </td>
                       <td className="px-6 py-3.5 text-right">
-                        <span className="text-sm font-bold text-gray-800">{fmtMoney(o.total)}</span>
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{fmtMoney(o.total)}</span>
                       </td>
                       <td className="px-6 py-3.5 text-center">
                         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">
@@ -214,7 +214,7 @@ export default async function PhysicianDashboardPage() {
                           {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">
+                      <td className="px-6 py-3.5 text-right text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </td>
                     </tr>
@@ -225,12 +225,12 @@ export default async function PhysicianDashboardPage() {
           </div>
         </div>
 
-        {/* ── RIGHT: sidebar ── */}
+        {/* -- RIGHT: sidebar -- */}
         <div className="space-y-5">
 
           {/* Quick actions */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Quick Actions</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">Quick Actions</h3>
             <div className="space-y-2">
               <Link
                 href="/physician/shop"
@@ -261,8 +261,8 @@ export default async function PhysicianDashboardPage() {
           </div>
 
           {/* Stats summary */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-4">Account Summary</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-4">Account Summary</h3>
             <div className="space-y-3">
               {[
                 { label: "Total Orders",        value: totalOrders.toString(),      color: "#3DBFA4" },
@@ -273,17 +273,17 @@ export default async function PhysicianDashboardPage() {
                 <div key={item.label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
-                    <span className="text-xs text-gray-500">{item.label}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.label}</span>
                   </div>
-                  <span className="text-xs font-bold text-gray-800">{item.value}</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{item.value}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {repName && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-bold text-gray-800 mb-2">Your Sales Rep</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Your Sales Rep</h3>
               <div className="flex items-center gap-3 mt-3">
                 <div className="w-10 h-10 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -291,8 +291,8 @@ export default async function PhysicianDashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">{repName}</p>
-                  <p className="text-xs text-gray-400">Sales Representative</p>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{repName}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Sales Representative</p>
                 </div>
               </div>
             </div>

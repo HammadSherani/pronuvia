@@ -5,7 +5,7 @@ import { FormCard } from "@/components/admin/form-card";
 import { getSubCategoryById } from "@/actions/admin/sub-categories";
 import { EditSubCategoryForm } from "./_components/edit-sub-category-form";
 
-export const metadata = { title: "Edit Sub-Category – Pronuvia Admin" };
+export const metadata = { title: "Edit Sub-Category -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 

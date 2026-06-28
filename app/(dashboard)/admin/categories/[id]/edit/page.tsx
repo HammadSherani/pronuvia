@@ -3,7 +3,7 @@ import { FormCard } from "@/components/admin/form-card";
 import { getCategoryById } from "@/actions/admin/categories";
 import { EditCategoryForm } from "./_components/edit-category-form";
 
-export const metadata = { title: "Edit Category – Pronuvia Admin" };
+export const metadata = { title: "Edit Category -“ Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 

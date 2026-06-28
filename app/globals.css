@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
@@ -48,6 +49,19 @@ body {
 .tiptap code { background: #f3f4f6; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.875em; }
 .tiptap hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
 .tiptap a { color: #3DBFA4; text-decoration: underline; }
+
+/* Dark mode: autofill input background */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px rgb(55 65 81) inset;
+  -webkit-text-fill-color: rgb(243 244 246);
+}
+
+/* Dark mode: Tiptap editor */
+.dark .tiptap { color: rgb(229 231 235); }
+.dark .tiptap code { background: rgb(55 65 81); }
+.dark .tiptap hr { border-color: rgb(75 85 99); }
 
 /* Hide scrollbar for social strip */
 .hide-scrollbar::-webkit-scrollbar { display: none; }

@@ -2,7 +2,7 @@ import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PhysicianCheckoutClient } from "@/components/physician/checkout-client";
 
-export const metadata = { title: "Checkout – Pronuvia" };
+export const metadata = { title: "Checkout -“ Pronuvia" };
 
 export default async function PhysicianCheckoutPage() {
   const session = await requirePhysician();
