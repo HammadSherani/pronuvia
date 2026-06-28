@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -145,7 +145,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                   checked={allSelected}
                   onChange={toggleAll}
                   title="Select all pending"
-                  className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
+                  className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer"
                 />
               )}
             </th>
@@ -176,7 +176,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => toggle(r.id)}
-                      className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer"
+                      className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer"
                     />
                   ) : (
                     <span className="block w-4 h-4" />
@@ -232,7 +232,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                   )}
                   {r.adminNote && (
                     <div className="mt-1">
-                      <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
                         Admin
                       </span>
                       <p className="text-[11px] text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>

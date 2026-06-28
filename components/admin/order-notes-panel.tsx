@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useOptimistic } from "react";
 import toast from "react-hot-toast";
@@ -150,7 +150,7 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={type === "private" ? "Add a private note…" : "Write a message to the customer…"}
-          className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] resize-none text-gray-700 placeholder:text-gray-300"
+          className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 resize-none text-gray-700 placeholder:text-gray-300"
           onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleAdd(); }}
         />
         <button
@@ -158,7 +158,7 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
           onClick={handleAdd}
           disabled={isPending || !content.trim()}
           className={`mt-2 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white rounded-lg transition-colors disabled:opacity-50 ${
-            type === "private" ? "bg-gray-700 hover:bg-gray-800" : "bg-[#3DBFA4] hover:bg-[#35a993]"
+            type === "private" ? "bg-gray-700 hover:bg-gray-800" : "bg-gray-900 hover:bg-gray-700"
           }`}
         >
           {type === "private" ? "Add Private Note" : "Send to Customer"}

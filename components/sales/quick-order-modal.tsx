@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -66,7 +66,7 @@ export function QuickOrderModal({ product, variantSize, variantSku, unitPrice, q
               name="notes"
               rows={3}
               placeholder="Special instructions…"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors"
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors"
             />
           </div>
 
@@ -76,7 +76,7 @@ export function QuickOrderModal({ product, variantSize, variantSku, unitPrice, q
               Cancel
             </button>
             <button type="submit" disabled={pending}
-              className="flex-1 py-3 bg-[#3DBFA4] text-white text-sm font-bold rounded-xl hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+              className="flex-1 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
               {pending
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 : null}

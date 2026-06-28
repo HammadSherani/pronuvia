@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit                   from "@tiptap/starter-kit";
@@ -22,7 +22,7 @@ function ToolbarBtn({
   return (
     <button type="button" onMouseDown={(e) => { e.preventDefault(); onClick(); }} title={title}
       className={`w-8 h-8 flex items-center justify-center rounded text-sm transition-colors ${
-        active ? "bg-[#3DBFA4] text-white" : "text-gray-600 hover:bg-gray-100"
+        active ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
       }`}>
       {children}
     </button>
@@ -57,7 +57,7 @@ export function RichTextEditor({ value, onChange }: Props) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#3DBFA4]/30 focus-within:border-[#3DBFA4]">
+    <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gray-900/30 focus-within:border-gray-900">
 
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 bg-gray-50">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useState,
@@ -224,7 +224,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
       <div className="max-w-lg mx-auto text-center py-24">
         <p className="text-lg font-semibold text-gray-700 mb-2">Nothing to checkout</p>
         <p className="text-sm text-gray-400 mb-6">Add products to your cart first.</p>
-        <Link href="/physician/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] transition-colors">
+        <Link href="/physician/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
           Go to Shop
         </Link>
       </div>
@@ -238,7 +238,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   return (
     <div className="max-w-5xl">
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
-      <div className="h-0.5 bg-[#3DBFA4] mb-6" />
+      <div className="h-0.5 bg-gray-900 mb-6" />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
@@ -263,7 +263,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                 <AddressFields value={shipping} onChange={setShipping} />
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => setEditShip(false)}
-                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors">
+                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
                     Use this address
                   </button>
                   <button type="button" onClick={handleSaveForLater} disabled={savingAddr}
@@ -299,7 +299,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                     setBilling({ ...shipping });
                   }
                 }}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]"
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
               <span className="text-sm text-gray-700">Use same address for billing</span>
             </label>
@@ -312,7 +312,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                   <div className="border border-gray-300 rounded p-4 space-y-3">
                     <AddressFields value={billing} onChange={setBilling} />
                     <button type="button" onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors">
+                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
                       Done
                     </button>
                   </div>
@@ -386,7 +386,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
           <div>
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" checked={showNotes} onChange={(e) => setShowNotes(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]" />
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
               <span className="text-sm text-gray-700">Add a note to your order</span>
             </label>
             {showNotes && (

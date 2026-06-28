@@ -59,7 +59,7 @@ export default async function CategoriesPage({
                     <td className="px-5 py-4 font-medium text-gray-800">{cat.name}</td>
                     <td className="px-5 py-4 text-gray-400 font-mono text-xs">{cat.slug}</td>
                     <td className="px-5 py-4">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#3DBFA4]/10 text-[#3DBFA4] text-xs font-semibold">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-900/10 text-[#3DBFA4] text-xs font-semibold">
                         {cat._count.subCategories}
                       </span>
                     </td>

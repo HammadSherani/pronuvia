@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
@@ -33,8 +33,8 @@ function CommissionCell({
 
   const dirty = value !== saved;
 
-  const ring    = color === "emerald" ? "focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4]" : "focus:ring-blue-300/40 focus:border-blue-400";
-  const btnBg   = color === "emerald" ? "bg-[#3DBFA4] hover:bg-[#35a993]" : "bg-blue-500 hover:bg-blue-600";
+  const ring    = color === "emerald" ? "focus:ring-gray-900/40 focus:border-gray-900" : "focus:ring-blue-300/40 focus:border-blue-400";
+  const btnBg   = color === "emerald" ? "bg-gray-900 hover:bg-gray-700" : "bg-blue-500 hover:bg-blue-600";
 
   function handleSave() {
     startTransition(async () => {

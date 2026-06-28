@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter }               from "next/navigation";
@@ -124,7 +124,7 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
               <a
                 href={`data:application/pdf;base64,${s.labelBase64}`}
                 download={`label-${s.trackingNumber}.pdf`}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#3DBFA4] border border-[#3DBFA4] rounded-lg hover:bg-[#3DBFA4]/5 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#3DBFA4] border border-gray-900 rounded-lg hover:bg-gray-900/5 transition-colors"
               >
                 Download PDF Label
               </a>
@@ -223,7 +223,7 @@ function AddShipmentForm({
           <a
             href={`data:application/pdf;base64,${purchased.labelBase64}`}
             download={`label-${purchased.trackingNumber}.pdf`}
-            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-xl transition-colors"
           >
             Download PDF Label
           </a>
@@ -269,7 +269,7 @@ function AddShipmentForm({
               <input
                 type="number" min="0.01" step="0.01" value={weightLbs}
                 onChange={(e) => setWeightLbs(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4]"
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900"
               />
             </div>
             <div>
@@ -279,15 +279,15 @@ function AddShipmentForm({
               <div className="flex items-center gap-2">
                 <input type="number" min="0" step="0.1" placeholder="Length" value={lengthIn}
                   onChange={(e) => setLengthIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
                 <span className="text-gray-300">×</span>
                 <input type="number" min="0" step="0.1" placeholder="Width" value={widthIn}
                   onChange={(e) => setWidthIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
                 <span className="text-gray-300">×</span>
                 <input type="number" min="0" step="0.1" placeholder="Height" value={heightIn}
                   onChange={(e) => setHeightIn(e.target.value)}
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] placeholder:text-gray-300" />
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 placeholder:text-gray-300" />
               </div>
             </div>
           </div>
@@ -298,7 +298,7 @@ function AddShipmentForm({
           type="button"
           onClick={handleGetRates}
           disabled={isGettingRates || selectedCarriers.length === 0}
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 rounded-xl transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 rounded-xl transition-colors"
         >
           {isGettingRates
             ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Getting rates…</>
@@ -326,18 +326,18 @@ function AddShipmentForm({
                   onClick={() => setSelectedRate(r)}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
                     selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier
-                      ? "border-[#3DBFA4] bg-[#3DBFA4]/5"
+                      ? "border-gray-900 bg-gray-900/5"
                       : "border-gray-100 hover:border-gray-200 bg-white"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
                       selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier
-                        ? "border-[#3DBFA4]"
+                        ? "border-gray-900"
                         : "border-gray-300"
                     }`}>
                       {selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier && (
-                        <div className="w-2 h-2 rounded-full bg-[#3DBFA4]" />
+                        <div className="w-2 h-2 rounded-full bg-gray-900" />
                       )}
                     </div>
                     <div>
@@ -449,7 +449,7 @@ export function ShippingPanel(props: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg shadow-sm transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-lg shadow-sm transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -483,7 +483,7 @@ export function ShippingPanel(props: Props) {
                     onClick={() => setActiveTab(i)}
                     className={`shrink-0 flex items-center gap-1.5 px-4 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
                       activeTab === i
-                        ? "border-[#3DBFA4] text-[#3DBFA4]"
+                        ? "border-gray-900 text-[#3DBFA4]"
                         : "border-transparent text-gray-500 hover:text-gray-700"
                     }`}
                   >
@@ -498,7 +498,7 @@ export function ShippingPanel(props: Props) {
                   onClick={() => setActiveTab("add")}
                   className={`shrink-0 flex items-center gap-1.5 px-4 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
                     activeTab === "add"
-                      ? "border-[#3DBFA4] text-[#3DBFA4]"
+                      ? "border-gray-900 text-[#3DBFA4]"
                       : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
                 >

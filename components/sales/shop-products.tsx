@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -100,8 +100,8 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
                 onClick={() => setSelectedIdx(idx)}
                 className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
                   selectedIdx === idx
-                    ? "bg-[#3DBFA4] text-white border-[#3DBFA4]"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-[#3DBFA4] hover:text-[#3DBFA4]"
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-[#3DBFA4]"
                 }`}
               >
                 {v.size ?? `Option ${idx + 1}`}
@@ -121,8 +121,8 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
             onClick={handleAddToCart}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
               inCart || pulse
-                ? "bg-[#3DBFA4] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-[#3DBFA4] hover:text-white"
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
             }`}
           >
             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -186,7 +186,7 @@ export function ShopProducts({
             placeholder="Search products…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] transition-colors w-52"
+            className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 transition-colors w-52"
           />
         </div>
       </div>

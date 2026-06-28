@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -59,7 +59,7 @@ export function SubHeader({ role }: { role: Role }) {
   const { totalItems } = useCart();
 
   return (
-    <nav className="bg-[#f3f4f5] border-b border-gray-200 sticky top-[70px] z-30 overflow-x-auto">
+    <nav className="bg-white border-b border-gray-200 sticky top-[70px] z-30 overflow-x-auto">
       <div className="max-w-7xl mx-auto px-6 h-11 flex items-center gap-8 min-w-max mx-auto">
         {items.map((item) => {
           if (item.action) {
@@ -67,7 +67,7 @@ export function SubHeader({ role }: { role: Role }) {
               <button
                 key={item.label}
                 onClick={item.action}
-                className="text-[13px] text-[#6b7280] hover:text-[#374151] font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="text-[13px] text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
               >
                 {item.label}
               </button>
@@ -80,13 +80,13 @@ export function SubHeader({ role }: { role: Role }) {
               href={item.href}
               className={`relative inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                 isActive
-                  ? "text-[#3DBFA4] border-b-2 border-[#3DBFA4] pb-0.5"
-                  : "text-[#6b7280] hover:text-[#374151]"
+                  ? "text-gray-900 border-b-2 border-gray-900 pb-0.5"
+                  : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {item.label}
               {item.isCart && totalItems > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-[#3DBFA4] text-white rounded-full leading-none">
+                <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-gray-900 text-white rounded-full leading-none">
                   {totalItems > 9 ? "9+" : totalItems}
                 </span>
               )}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState } from "react";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
@@ -28,7 +28,7 @@ type Physician = {
   salesRep: { firstName: string; lastName: string; email: string; phone: string | null } | null;
 };
 
-const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
+const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
 const inpErr = "w-full border border-red-400 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
 const lbl    = "block text-xs font-semibold text-gray-500 mb-1";
 
@@ -98,7 +98,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
           </span>
           <button
             onClick={onEdit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l-4 1 1-4L14.768 1.768a2 2 0 012.828 0l1.636 1.636a2 2 0 010 2.828L9 13z" />
@@ -221,7 +221,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
             Cancel
           </button>
           <button type="submit" disabled={pending || accountMismatch}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg disabled:opacity-50 transition-colors">
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition-colors">
             {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
             {pending ? "Saving…" : "Save Changes"}
           </button>
@@ -307,8 +307,8 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
               <button key={s} type="button" onClick={() => toggle(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   specialties.includes(s)
-                    ? "bg-[#3DBFA4] text-white border-[#3DBFA4]"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-[#3DBFA4]"
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-900"
                 }`}>
                 {s}
               </button>
@@ -386,7 +386,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           Cancel
         </button>
         <button type="submit" disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg disabled:opacity-50 transition-colors">
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition-colors">
           {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
           {pending ? "Saving…" : "Save Changes"}
         </button>

@@ -58,7 +58,7 @@ export default async function SalesRepsPage({
                   <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                           <span className="text-xs font-semibold text-[#3DBFA4]">
                             {r.firstName[0]}{r.lastName[0]}
                           </span>

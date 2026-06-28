@@ -18,7 +18,7 @@ function CartIcon({ href }: { href: string }) {
         <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
       </svg>
       {totalItems > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[#3DBFA4] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-gray-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
@@ -128,7 +128,7 @@ function DropdownMenu({ item }: { item: NavItem & { children: NavChild[] } }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-[#6b7280] hover:text-[#374151] text-sm font-medium transition-colors cursor-pointer"
+        className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors cursor-pointer"
       >
         {item.label}
 
@@ -198,7 +198,7 @@ export function MainHeader({ role }: { role: Role }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[#6b7280] hover:text-[#374151] text-sm font-medium transition-colors whitespace-nowrap"
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors whitespace-nowrap"
               >
                 {item.label}
               </Link>

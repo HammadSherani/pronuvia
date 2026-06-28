@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -94,7 +94,7 @@ function RowActions({ requestId }: { requestId: string }) {
               </label>
               <textarea rows={2} value={adminNote} onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Reason or message…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none" />
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none" />
             </div>
             <div className="flex gap-3">
               <button type="button" onClick={() => { setOpen(false); setAdminNote(""); }}
@@ -205,7 +205,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
               <th className="px-3 py-3">
                 {pendingIds.length > 0 && (
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} title="Select all pending"
-                    className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer" />
+                    className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                 )}
               </th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
@@ -232,13 +232,13 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                   <td className="px-3 py-3">
                     {isPendingRow
                       ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
-                          className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer" />
+                          className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                       : <span className="block w-4 h-4" />}
                   </td>
 
                   <td className="px-3 py-3">
                     {isRep ? (
-                      <span className="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30 whitespace-nowrap">
+                      <span className="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30 whitespace-nowrap">
                         Sales Rep
                       </span>
                     ) : (
@@ -286,7 +286,7 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                       : <span className="text-gray-300 text-xs">—</span>}
                     {r.adminNote && (
                       <div className="mt-1">
-                        <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                        <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
                           Admin
                         </span>
                         <p className="text-[11px] text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>

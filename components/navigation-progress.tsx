@@ -82,13 +82,13 @@ export function NavigationProgress() {
       aria-hidden
     >
       <div
-        className="h-full bg-[#3DBFA4]"
+        className="h-full bg-gray-900"
         style={{
           width: `${width}%`,
           transition: done
             ? "width 200ms ease-out, opacity 200ms ease-out"
             : "width 200ms linear",
-          boxShadow: "0 0 8px #3DBFA4aa",
+          boxShadow: "0 0 8px rgba(17,24,39,0.6)",
         }}
       />
     </div>

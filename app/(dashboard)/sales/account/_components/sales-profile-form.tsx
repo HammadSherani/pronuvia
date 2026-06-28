@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useRef, useState } from "react";
 import { updateSalesRepProfile } from "@/actions/sales-rep/profile";
@@ -28,7 +28,7 @@ function Field({
             ? "bg-gray-50 text-gray-400 cursor-default border-gray-100"
             : error
             ? "border-red-300 bg-red-50"
-            : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+            : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
         }`}
       />
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -119,7 +119,7 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
               type="text" name="bankAccountNumber" placeholder="Bank account number"
               value={accNum} onChange={(e) => onAccNumChange(e.target.value)}
               className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
-                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
               }`}
             />
           </div>
@@ -129,7 +129,7 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
               type="text" placeholder="Re-enter account number"
               value={confirmAccNum} onChange={(e) => onConfirmChange(e.target.value)}
               className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
-                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+                accNumError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
               }`}
             />
             {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
@@ -139,7 +139,7 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
 
       <button
         type="submit" disabled={pending}
-        className="w-full py-2.5 bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
+        className="w-full py-2.5 bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
       >
         {pending ? "Saving…" : "Save Changes"}
       </button>

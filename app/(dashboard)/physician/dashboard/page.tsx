@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 
@@ -180,7 +180,7 @@ export default async function PhysicianDashboardPage() {
                 <p className="text-xs text-gray-400 mt-1">Your orders will appear here once placed.</p>
                 <Link
                   href="/physician/shop"
-                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#3DBFA4] text-white text-xs font-semibold rounded-xl hover:bg-[#35a993] transition-colors"
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-700 transition-colors"
                 >
                   Browse Shop
                 </Link>
@@ -200,7 +200,7 @@ export default async function PhysicianDashboardPage() {
                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-3.5">
                         <Link href={`/physician/invoice/${o.orderNumber}`}>
-                          <span className="font-mono text-xs font-semibold text-[#3DBFA4] hover:underline bg-[#3DBFA4]/10 px-2 py-1 rounded-lg cursor-pointer">
+                          <span className="font-mono text-xs font-semibold text-[#3DBFA4] hover:underline bg-gray-900/10 px-2 py-1 rounded-lg cursor-pointer">
                             #{o.orderNumber}
                           </span>
                         </Link>
@@ -234,7 +234,7 @@ export default async function PhysicianDashboardPage() {
             <div className="space-y-2">
               <Link
                 href="/physician/shop"
-                className="flex items-center gap-3 px-4 py-3 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors"
+                className="flex items-center gap-3 px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -285,7 +285,7 @@ export default async function PhysicianDashboardPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <h3 className="text-sm font-bold text-gray-800 mb-2">Your Sales Rep</h3>
               <div className="flex items-center gap-3 mt-3">
-                <div className="w-10 h-10 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>

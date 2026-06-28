@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -83,7 +83,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
           value={physicianId}
           onChange={(e) => setPhysicianId(e.target.value)}
           required
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors"
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
         >
           <option value="">Select a physician…</option>
           {physicians.map((p) => (
@@ -107,8 +107,8 @@ export function PlaceOrderForm({ product, physicians }: Props) {
                 onClick={() => setVariantIdx(i)}
                 className={`px-3.5 py-2 rounded-xl text-sm font-medium border transition-all ${
                   i === variantIdx
-                    ? "bg-[#3DBFA4] text-white border-[#3DBFA4] shadow-sm"
-                    : "bg-white text-gray-700 border-gray-200 hover:border-[#3DBFA4]/50"
+                    ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                    : "bg-white text-gray-700 border-gray-200 hover:border-gray-900/50"
                 }`}
               >
                 {v.size}
@@ -165,7 +165,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
           name="notes"
           rows={3}
           placeholder="Any special instructions…"
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors resize-none"
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors resize-none"
         />
       </div>
 
@@ -173,7 +173,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
       <button
         type="submit"
         disabled={pending || !physicianId}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+        className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
       >
         {pending ? (
           <>

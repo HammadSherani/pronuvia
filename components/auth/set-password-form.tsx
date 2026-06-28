@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -28,7 +28,7 @@ export function SetPasswordForm({ action }: Props) {
 
   const e = state?.errors ?? {};
   const base  = "w-full border rounded-lg px-3.5 py-2.5 pr-11 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-  const ok    = "border-gray-200 focus:border-[#3DBFA4] focus:ring-[#3DBFA4]";
+  const ok    = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
   const err   = "border-red-300 focus:border-red-400 focus:ring-red-300";
   const icls  = (hasErr?: string) => `${base} ${hasErr ? err : ok}`;
   const lbl   = "block text-sm font-medium text-gray-700 mb-1.5";
@@ -89,7 +89,7 @@ export function SetPasswordForm({ action }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2"
+        className="w-full py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2"
       >
         {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
         {pending ? "Saving…" : "Save New Password"}

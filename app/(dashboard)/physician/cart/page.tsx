@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
@@ -17,7 +17,7 @@ export default function PhysicianCartPage() {
         <h1 className="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h1>
         <p className="text-sm text-gray-500 mb-6">Add products from the shop to get started.</p>
         <Link href="/physician/shop"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors">
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -117,7 +117,7 @@ export default function PhysicianCartPage() {
               <span className="text-lg font-bold text-gray-900">${totalPrice.toFixed(2)}</span>
             </div>
             <Link href="/physician/checkout"
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#3DBFA4] text-white text-sm font-bold rounded-xl hover:bg-[#35a993] transition-colors shadow-sm">
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 transition-colors shadow-sm">
               Proceed to Checkout
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -63,7 +63,7 @@ export function OrderActionsPanel({
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as OrderStatus)}
-              className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] bg-white text-gray-700"
+              className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white text-gray-700"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -73,7 +73,7 @@ export function OrderActionsPanel({
               type="button"
               onClick={handleUpdate}
               disabled={isPending}
-              className="shrink-0 flex items-center justify-center w-[72px] py-2.5 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 rounded-lg transition-colors"
+              className="shrink-0 flex items-center justify-center w-[72px] py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 rounded-lg transition-colors"
             >
               {isPending
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

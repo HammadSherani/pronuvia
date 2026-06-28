@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -77,7 +77,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search sales reps…"
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
           />
         </div>
       </div>
@@ -102,7 +102,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
                   {/* Avatar + name */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-[#3DBFA4]">
                           {rep.firstName[0]}{rep.lastName[0]}
                         </span>
@@ -128,7 +128,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
                     <button
                       type="button"
                       onClick={() => open(rep)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30 rounded-lg hover:bg-[#3DBFA4]/20 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30 rounded-lg hover:bg-gray-900/20 transition-colors"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -217,7 +217,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors"
+                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
                 />
               </div>
               {/* Preview new balance */}
@@ -245,7 +245,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Reason for adjustment…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors"
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors"
               />
             </div>
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -59,7 +59,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
           </p>
           {variants.length > 0 ? (
             <select value={selIdx} onChange={(e) => setSelIdx(parseInt(e.target.value))}
-              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#3DBFA4] transition-colors text-gray-700">
+              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors text-gray-700">
               <option value={-1}>— Size —</option>
               {variants.map((v, i) => (
                 <option key={i} value={i}>{v.size}{v.salePrice !== undefined ? ` — $${v.salePrice.toFixed(2)}` : ""}</option>
@@ -91,7 +91,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
             Add to Cart
           </Link>
           <button type="button" onClick={handleBuy}
-            className="flex-1 flex items-center justify-center gap-1 py-2 bg-[#3DBFA4] text-white text-xs font-semibold rounded-xl hover:bg-[#35a993] transition-colors">
+            className="flex-1 flex items-center justify-center gap-1 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-700 transition-colors">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             Buy Now
           </button>
@@ -181,7 +181,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
             <div className="flex gap-2">
               {allImages.map((img, i) => (
                 <button key={i} type="button" onClick={() => setActiveImage(img)}
-                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors shrink-0 ${activeImage === img ? "border-[#3DBFA4]" : "border-gray-100 hover:border-gray-300"}`}>
+                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors shrink-0 ${activeImage === img ? "border-gray-900" : "border-gray-100 hover:border-gray-300"}`}>
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
@@ -259,7 +259,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
               <button type="button" onClick={() => setQty((q) => q + 1)} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none transition-colors">+</button>
             </div>
             <button type="button" onClick={handleAddToCart}
-              className="flex-1 py-2.5 bg-[#3DBFA4] text-white text-sm font-bold rounded-lg hover:bg-[#35a993] transition-colors">
+              className="flex-1 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-gray-700 transition-colors">
               Add to cart
             </button>
           </div>
@@ -284,7 +284,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
             <button key={tab} type="button" onClick={() => setActiveTab(tab)}
               className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab
-                  ? "border-[#3DBFA4] text-[#3DBFA4]"
+                  ? "border-gray-900 text-[#3DBFA4]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}>
               {tab === "info" ? "Additional information" : "Reviews (0)"}

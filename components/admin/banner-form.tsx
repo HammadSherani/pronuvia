@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -56,7 +56,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
           name="title"
           defaultValue={defaultValues?.title}
           placeholder="e.g. Summer Promotion"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4]"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.title && (
           <p className="text-xs text-red-500 mt-1">{state.errors.title[0]}</p>
@@ -72,7 +72,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
           name="linkUrl"
           defaultValue={defaultValues?.linkUrl ?? ""}
           placeholder="https://example.com"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4]"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.linkUrl && (
           <p className="text-xs text-red-500 mt-1">{state.errors.linkUrl[0]}</p>
@@ -87,7 +87,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
           type="number"
           defaultValue={defaultValues?.sortOrder ?? 0}
           min={0}
-          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4]"
+          className="w-32 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         <p className="text-xs text-gray-400 mt-1">Lower numbers appear first</p>
       </div>
@@ -98,7 +98,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
           type="button"
           onClick={() => setIsPublished((p) => !p)}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            isPublished ? "bg-[#3DBFA4]" : "bg-gray-200"
+            isPublished ? "bg-gray-900" : "bg-gray-200"
           }`}
         >
           <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
@@ -115,7 +115,7 @@ export function BannerForm({ action, defaultValues }: BannerFormProps) {
         <button
           type="submit"
           disabled={pending || !imageUrl}
-          className="px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {pending ? "Saving…" : "Save Banner"}
         </button>

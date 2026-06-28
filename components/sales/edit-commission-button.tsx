@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -74,7 +74,7 @@ export function EditCommissionButton({
 
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex items-center border border-[#3DBFA4] rounded-lg overflow-hidden shadow-sm">
+      <div className="flex items-center border border-gray-900 rounded-lg overflow-hidden shadow-sm">
         <input
           ref={inputRef}
           type="number"
@@ -94,7 +94,7 @@ export function EditCommissionButton({
         type="button"
         onClick={save}
         disabled={saving}
-        className="w-6 h-6 flex items-center justify-center rounded-md bg-[#3DBFA4] text-white hover:bg-[#35a993] disabled:opacity-50 transition-colors"
+        className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
         title="Save"
       >
         {saving ? (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import { changeSalesRepPassword } from "@/actions/sales-rep/profile";
@@ -39,7 +39,7 @@ export function SalesPasswordForm() {
             className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
               state?.errors?.[name]
                 ? "border-red-300 bg-red-50"
-                : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+                : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
             }`}
           />
           {state?.errors?.[name] && (
@@ -49,7 +49,7 @@ export function SalesPasswordForm() {
       ))}
       <button
         type="submit" disabled={pending}
-        className="w-full py-2.5 bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
+        className="w-full py-2.5 bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
       >
         {pending ? "Updating…" : "Update Password"}
       </button>

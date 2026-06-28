@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -104,7 +104,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                 {pendingIds.length > 0 && (
                   <input type="checkbox" checked={allSelected} onChange={toggleAll}
                     title="Select all pending"
-                    className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer" />
+                    className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                 )}
               </th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
@@ -127,13 +127,13 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                   <td className="px-4 py-4">
                     {rowPending
                       ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
-                          className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4] cursor-pointer" />
+                          className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
                       : <span className="block w-4 h-4" />}
                   </td>
 
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-[#3DBFA4]">
                           {r.physician.firstName[0]}{r.physician.lastName[0]}
                         </span>

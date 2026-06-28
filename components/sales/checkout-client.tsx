@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useState,
@@ -295,7 +295,7 @@ export function CheckoutClient({
       <div className="max-w-lg mx-auto text-center py-24">
         <p className="text-lg font-semibold text-gray-700 mb-2">Nothing to checkout</p>
         <p className="text-sm text-gray-400 mb-6">Add products to your cart first.</p>
-        <Link href="/sales/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] transition-colors">
+        <Link href="/sales/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
           Go to Shop
         </Link>
       </div>
@@ -351,7 +351,7 @@ export function CheckoutClient({
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={handleUseAddress}
-                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors"
+                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors"
                   >
                     Use this address
                   </button>
@@ -398,7 +398,7 @@ export function CheckoutClient({
                     setBilling({ ...shipping });
                   }
                 }}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]"
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
               <span className="text-sm text-gray-700">Use same address for billing</span>
             </label>
@@ -412,7 +412,7 @@ export function CheckoutClient({
                     <AddressFields value={billing} onChange={setBilling} />
                     <button
                       onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors"
+                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors"
                     >
                       Done
                     </button>
@@ -448,7 +448,7 @@ export function CheckoutClient({
                     name="payMethod"
                     checked={payMethod === "CARD"}
                     onChange={() => setPayMethod("CARD")}
-                    className="accent-[#3DBFA4]"
+                    className="accent-gray-900"
                   />
                   <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
                   <div className="ml-auto flex items-center gap-1">
@@ -517,7 +517,7 @@ export function CheckoutClient({
                     name="payMethod"
                     checked={payMethod === "WALLET"}
                     onChange={() => setPayMethod("WALLET")}
-                    className="accent-[#3DBFA4]"
+                    className="accent-gray-900"
                   />
                   <span className="text-sm text-gray-800 font-medium">Wallet Balance</span>
                   <span className={`ml-auto text-xs font-semibold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
@@ -541,7 +541,7 @@ export function CheckoutClient({
                 type="checkbox"
                 checked={showNotes}
                 onChange={(e) => setShowNotes(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]"
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
               <span className="text-sm text-gray-700">Add a note to your order</span>
             </label>

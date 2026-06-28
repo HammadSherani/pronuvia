@@ -71,7 +71,7 @@ export default async function PhysicianOrdersPage({
         <div className="flex items-center gap-3">
           <DownloadOrdersButton />
           <Link href="/physician/shop"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors shadow-sm">
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors shadow-sm">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -106,7 +106,7 @@ export default async function PhysicianOrdersPage({
             <p className="text-sm font-semibold text-gray-600 mb-1">No orders yet</p>
             <p className="text-xs text-gray-400 mb-5">Browse the shop and place your first order.</p>
             <Link href="/physician/shop"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors">
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors">
               Browse Shop
             </Link>
           </div>

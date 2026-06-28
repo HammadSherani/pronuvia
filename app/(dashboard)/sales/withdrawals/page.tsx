@@ -57,7 +57,7 @@ export default async function SalesWithdrawalsPage({
         {!hasPending && (
           <Link
             href="/sales/withdrawals/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -149,7 +149,7 @@ export default async function SalesWithdrawalsPage({
                     <td className="px-5 py-4 max-w-[220px]">
                       {r.adminNote ? (
                         <div>
-                          <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                          <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
                             Admin
                           </span>
                           <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>

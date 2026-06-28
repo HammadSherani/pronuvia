@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -41,10 +41,10 @@ function DoctorRow({ doctor }: { doctor: Physician }) {
   };
 
   return (
-    <tr className="hover:bg-[#3DBFA4]/[0.02] transition-colors">
+    <tr className="hover:bg-gray-900/[0.02] transition-colors">
       <td className="pl-16 pr-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
             <span className="text-[10px] font-bold text-[#5BB8D4]">
               {doctor.firstName[0]}{doctor.lastName[0]}
             </span>
@@ -104,7 +104,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
   return (
     <>
       <tr
-        className={`cursor-pointer select-none transition-colors ${open ? "bg-[#3DBFA4]/5" : "hover:bg-gray-50/60"}`}
+        className={`cursor-pointer select-none transition-colors ${open ? "bg-gray-900/5" : "hover:bg-gray-50/60"}`}
         onClick={() => setOpen((o) => !o)}
       >
         <td className="px-5 py-4">
@@ -115,7 +115,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
               <span className="text-xs font-bold text-[#3DBFA4]">{rep.firstName[0]}{rep.lastName[0]}</span>
             </div>
             <div>
@@ -130,7 +130,7 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
         </td>
         <td className="px-5 py-4">
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-            rep.physicians.length > 0 ? "bg-[#5BB8D4]/10 text-[#5BB8D4] border-[#5BB8D4]/20" : "bg-gray-50 text-gray-400 border-gray-200"
+            rep.physicians.length > 0 ? "bg-gray-900/10 text-[#5BB8D4] border-[#5BB8D4]/20" : "bg-gray-50 text-gray-400 border-gray-200"
           }`}>
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -153,15 +153,15 @@ function SalesRepRow({ rep, searchQuery }: { rep: SalesRep; searchQuery: string 
 
       {open && (
         <tr>
-          <td colSpan={6} className="p-0 bg-[#3DBFA4]/[0.03]">
+          <td colSpan={6} className="p-0 bg-gray-900/[0.03]">
             {rep.physicians.length === 0 ? (
-              <div className="pl-16 pr-5 py-4 text-xs text-gray-400 italic border-t border-[#3DBFA4]/10">
+              <div className="pl-16 pr-5 py-4 text-xs text-gray-400 italic border-t border-gray-900/10">
                 No downline doctors assigned to this sales rep yet.
               </div>
             ) : (
-              <table className="w-full border-t border-[#3DBFA4]/10">
+              <table className="w-full border-t border-gray-900/10">
                 <thead>
-                  <tr className="bg-[#3DBFA4]/[0.06]">
+                  <tr className="bg-gray-900/[0.06]">
                     <th className="text-left pl-16 pr-4 py-2.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Doctor</th>
                     <th className="text-left px-4 py-2.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Practice</th>
                     <th className="text-left px-4 py-2.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Rep Commission</th>

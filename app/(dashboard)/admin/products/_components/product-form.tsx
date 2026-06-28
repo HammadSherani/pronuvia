@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ interface ProductFormProps {
 }
 
 const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-[#3DBFA4] focus:ring-[#3DBFA4]";
+const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
 const icls   = (hasErr?: string) => `${base} ${hasErr ? errCls : ok}`;
 
@@ -144,7 +144,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
               </div>
             ))}
             <button type="button" onClick={() => setGallery((prev) => [...prev, ""])}
-              className="h-36 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#3DBFA4] hover:bg-[#3DBFA4]/5 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer">
+              className="h-36 rounded-xl border-2 border-dashed border-gray-200 hover:border-gray-900 hover:bg-gray-900/5 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer">
               <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
               </svg>

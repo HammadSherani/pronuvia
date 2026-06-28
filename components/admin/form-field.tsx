@@ -1,4 +1,4 @@
-interface FormFieldProps {
+﻿interface FormFieldProps {
   label: string;
   name: string;
   type?: string;
@@ -32,7 +32,7 @@ export function FormField({
           type={type}
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4] transition bg-white"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition bg-white"
         />
       )}
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -54,7 +54,7 @@ export function FormActions({
       <button
         type="submit"
         disabled={pending}
-        className="bg-[#3DBFA4] hover:bg-[#35ab93] disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors cursor-pointer"
+        className="bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors cursor-pointer"
       >
         {pending ? "Saving…" : submitLabel}
       </button>

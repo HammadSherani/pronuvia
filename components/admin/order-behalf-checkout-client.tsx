@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useState, useEffect, useTransition,
@@ -194,7 +194,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
         <p className="text-lg font-semibold text-gray-700 mb-2">Nothing to checkout</p>
         <p className="text-sm text-gray-400 mb-6">Add products to the cart first.</p>
         <Link href={`/admin/order-behalf/${physicianId}/shop`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg hover:bg-[#35a993] transition-colors">
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
           Go to Shop
         </Link>
       </div>
@@ -217,7 +217,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
       </div>
 
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
-      <div className="h-0.5 bg-[#3DBFA4] mb-6" />
+      <div className="h-0.5 bg-gray-900 mb-6" />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
@@ -241,7 +241,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                 <AddressFields value={shipping} onChange={setShipping} />
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => setEditShip(false)}
-                    className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors">
+                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
                     Use this address
                   </button>
                   {hasAddr(shipping) && (
@@ -265,7 +265,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => { setSameAsBilling(e.target.checked); if (!e.target.checked && !hasAddr(billing)) setBilling({ ...shipping }); }}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]" />
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
               <span className="text-sm text-gray-700">Use same address for billing</span>
             </label>
 
@@ -276,7 +276,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   <div className="border border-gray-300 rounded p-4 space-y-3">
                     <AddressFields value={billing} onChange={setBilling} />
                     <button type="button" onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded hover:bg-[#35a993] transition-colors">
+                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
                       Done
                     </button>
                   </div>
@@ -353,7 +353,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                 <input
                   type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value)}
                   placeholder="Enter coupon code"
-                  className="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4]"
+                  className="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                   onKeyDown={(e) => { if (e.key === "Enter") handleApplyCoupon(); }}
                 />
                 <button type="button" onClick={handleApplyCoupon} disabled={couponPending || !couponInput.trim()}
@@ -369,7 +369,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
           <div>
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" checked={showNotes} onChange={(e) => setShowNotes(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 accent-[#3DBFA4]" />
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
               <span className="text-sm text-gray-700">Add a note to this order</span>
             </label>
             {showNotes && (

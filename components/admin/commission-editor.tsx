@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -33,7 +33,7 @@ export function CommissionEditor({
 
   const badgeCls =
     badgeColor === "emerald" ? "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100" :
-    badgeColor === "blue"    ? "bg-[#5BB8D4]/10 text-[#5BB8D4] group-hover:bg-[#5BB8D4]/20" :
+    badgeColor === "blue"    ? "bg-gray-900/10 text-[#5BB8D4] group-hover:bg-gray-900/20" :
                                "bg-violet-50 text-violet-700 group-hover:bg-violet-100";
 
   if (!editing) {
@@ -65,14 +65,14 @@ export function CommissionEditor({
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEditing(false); }}
-        className="w-16 px-2 py-1 text-xs border border-[#3DBFA4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 font-semibold text-center"
+        className="w-16 px-2 py-1 text-xs border border-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 font-semibold text-center"
       />
       <span className="text-xs text-gray-400">%</span>
       <button
         type="button"
         onClick={save}
         disabled={isPending}
-        className="w-6 h-6 flex items-center justify-center bg-[#3DBFA4] text-white rounded-md hover:bg-[#35ab93] disabled:opacity-50"
+        className="w-6 h-6 flex items-center justify-center bg-gray-900 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
       >
         {isPending
           ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />

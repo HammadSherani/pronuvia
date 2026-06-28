@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -192,11 +192,11 @@ export function DashboardChartsPanel({ charts }: { charts: DashboardStats["chart
               <h3 className="text-sm font-bold text-gray-800">Revenue &amp; Orders</h3>
               <div className="flex items-center gap-4 mt-1.5">
                 <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#5BB8D4]/75 inline-block" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-gray-900/75 inline-block" />
                   <span className="font-semibold text-gray-700">{totalOrders.toLocaleString()}</span> orders
                 </span>
                 <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span className="w-3 h-0.5 bg-[#3DBFA4] inline-block rounded-full" />
+                  <span className="w-3 h-0.5 bg-gray-900 inline-block rounded-full" />
                   <span className="font-semibold text-gray-700">{fmtMoney(totalRevenue)}</span> revenue
                 </span>
               </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState, useEffect } from "react";
 import { useRouter }       from "next/navigation";
@@ -70,7 +70,7 @@ export function BlogForm({ action, defaultValues }: Props) {
           onChange={(e) => {
             if (!slugTouched) setSlug(toSlug(e.target.value));
           }}
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4]"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.title && <p className="text-xs text-red-500 mt-1">{state.errors.title[0]}</p>}
       </div>
@@ -82,7 +82,7 @@ export function BlogForm({ action, defaultValues }: Props) {
           value={slug}
           onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
           placeholder="e.g. sac-formula-bone-health"
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 font-mono placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4]"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 font-mono placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900"
         />
         {state?.errors?.slug && <p className="text-xs text-red-500 mt-1">{state.errors.slug[0]}</p>}
         <p className="text-xs text-gray-400 mt-1">Auto-generated from title. Used in the URL.</p>
@@ -98,7 +98,7 @@ export function BlogForm({ action, defaultValues }: Props) {
           defaultValue={defaultValues?.excerpt}
           rows={3}
           placeholder="Short summary shown on the blog listing..."
-          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] resize-none"
+          className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 resize-none"
         />
       </div>
 
@@ -113,7 +113,7 @@ export function BlogForm({ action, defaultValues }: Props) {
       {/* Published */}
       <div className="flex items-center gap-3">
         <button type="button" onClick={() => setIsPublished((p) => !p)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPublished ? "bg-[#3DBFA4]" : "bg-gray-200"}`}>
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPublished ? "bg-gray-900" : "bg-gray-200"}`}>
           <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isPublished ? "translate-x-6" : "translate-x-1"}`} />
         </button>
         <span className="text-sm text-gray-700">
@@ -124,7 +124,7 @@ export function BlogForm({ action, defaultValues }: Props) {
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
         <button type="submit" disabled={pending}
-          className="px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           {pending ? "Saving…" : "Save Post"}
         </button>
         <button type="button" onClick={() => router.push("/admin/blogs")}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -89,7 +89,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
           </svg>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or email…"
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors" />
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
         </div>
       </div>
 
@@ -116,7 +116,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                   {/* Type */}
                   <td className="px-5 py-4">
                     {person.userType === "REP" ? (
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30">
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">
                         Sales Rep
                       </span>
                     ) : (
@@ -130,7 +130,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                        person.userType === "REP" ? "bg-[#3DBFA4]/10" : "bg-indigo-50"
+                        person.userType === "REP" ? "bg-gray-900/10" : "bg-indigo-50"
                       }`}>
                         <span className={`text-xs font-bold ${person.userType === "REP" ? "text-[#3DBFA4]" : "text-indigo-600"}`}>
                           {person.firstName[0]}{person.lastName[0]}
@@ -155,7 +155,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                   {/* Action */}
                   <td className="px-5 py-4 text-right">
                     <button type="button" onClick={() => open(person)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30 rounded-lg hover:bg-[#3DBFA4]/20 transition-colors">
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30 rounded-lg hover:bg-gray-900/20 transition-colors">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
@@ -186,7 +186,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                 <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
                 <div className="flex items-center gap-2 mt-1">
                   {selected.userType === "REP" ? (
-                    <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30">Sales Rep</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">Sales Rep</span>
                   ) : (
                     <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">Doctor</span>
                   )}
@@ -234,7 +234,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
                 <input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors" />
+                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
               </div>
               {amount && parseFloat(amount) > 0 && (
                 <p className="text-xs text-gray-400 mt-1.5">
@@ -254,7 +254,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
               </label>
               <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)}
                 placeholder="Reason for adjustment…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors" />
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors" />
             </div>
 
             <div className="flex gap-3">

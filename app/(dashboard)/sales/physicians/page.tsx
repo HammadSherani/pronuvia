@@ -55,7 +55,7 @@ export default async function SalesPhysiciansPage({
         </div>
         <Link
           href="/sales/physicians/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -68,7 +68,7 @@ export default async function SalesPhysiciansPage({
       {total > 0 && (
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
-            <div className="w-8 h-1 rounded-full bg-[#3DBFA4]" />
+            <div className="w-8 h-1 rounded-full bg-gray-900" />
             <div>
               <p className="text-lg font-bold text-gray-800">{total}</p>
               <p className="text-xs text-gray-500">Total Physicians</p>
@@ -130,7 +130,7 @@ export default async function SalesPhysiciansPage({
                     <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                             <span className="text-xs font-bold text-[#5BB8D4]">
                               {p.firstName[0]}{p.lastName[0]}
                             </span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { getRepWalletDetails } from "@/actions/admin/get-rep-wallet";
@@ -50,7 +50,7 @@ export function RepWalletModal({
         type="button"
         onClick={() => setOpen(true)}
         title={`View wallet — ${repName}`}
-         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#5BB8D4]/10 text-[#5BB8D4] border border-[#5BB8D4]/30 rounded-lg hover:bg-[#5BB8D4]/20 transition-colors"
+         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-900/10 text-[#5BB8D4] border border-[#5BB8D4]/30 rounded-lg hover:bg-gray-900/20 transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round"

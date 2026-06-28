@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -64,7 +64,7 @@ export function PhysicianWithdrawalActions({ requestId }: { requestId: string })
               </label>
               <textarea rows={2} value={adminNote} onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Reason or message…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors" />
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors" />
             </div>
             <div className="flex gap-3">
               <button type="button" onClick={() => { setOpen(false); setAdminNote(""); }}

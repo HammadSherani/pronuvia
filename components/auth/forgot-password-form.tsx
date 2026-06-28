@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import Link from "next/link";
@@ -10,7 +10,7 @@ export function ForgotPasswordForm() {
   if (state?.success) {
     return (
       <div className="text-center py-4">
-        <div className="w-14 h-14 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 rounded-full bg-gray-900/10 flex items-center justify-center mx-auto mb-4">
           <svg className="w-7 h-7 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
@@ -26,7 +26,7 @@ export function ForgotPasswordForm() {
     );
   }
 
-  const inp    = "w-full border border-gray-200 rounded-md bg-white px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4] transition";
+  const inp    = "w-full border border-gray-200 rounded-md bg-white px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition";
   const inpErr = "w-full border border-red-300 rounded-md bg-white px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition";
 
   return (
@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-[#3DBFA4] hover:bg-[#35ab93] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-md text-sm transition-colors flex items-center justify-center gap-2"
+        className="w-full bg-gray-900 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-md text-sm transition-colors flex items-center justify-center gap-2"
       >
         {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
         {pending ? "Sending…" : "Send Reset Link"}

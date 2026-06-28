@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter }  from "next/navigation";
@@ -346,7 +346,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
           )}
           {showLabel && s.labelFormat === "PDF" && (
             <a href={`data:application/pdf;base64,${s.labelBase64}`} download={`label-${s.trackingNumber}.pdf`}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#3DBFA4] border border-[#3DBFA4] rounded-lg hover:bg-[#3DBFA4]/5 transition-colors">
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#3DBFA4] border border-gray-900 rounded-lg hover:bg-gray-900/5 transition-colors">
               Download PDF Label
             </a>
           )}
@@ -551,7 +551,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               </button>
               {purchased.labelFormat === "PDF" ? (
                 <a href={`data:application/pdf;base64,${purchased.labelBase64}`} download={`label-${purchased.trackingNumber}.pdf`}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
@@ -559,7 +559,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 </a>
               ) : (
                 <a href={`data:image/png;base64,${purchased.labelBase64}`} download={`label-${purchased.trackingNumber}.png`}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl transition-colors">
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
@@ -667,7 +667,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 <button key={t} type="button" onClick={() => setPkgTab(t)}
                   className={`flex-1 px-4 py-3 text-xs font-semibold transition-colors ${
                     pkgTab === t
-                      ? "bg-[#3DBFA4] text-white"
+                      ? "bg-gray-900 text-white"
                       : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                   }`}>
                   {label}
@@ -683,7 +683,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Package Type</label>
                     <select value={pkgType} onChange={e => setPkgType(e.target.value as PkgType)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] bg-white">
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white">
                       {(["Box", "Envelope", "Tube", "Pak", "Other"] as PkgType[]).map(t => (
                         <option key={t} value={t}>{t}</option>
                       ))}
@@ -699,7 +699,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                       ].map(({ p, v, s }) => (
                         <input key={p} type="number" min="0" step="0.1" placeholder={p} value={v}
                           onChange={e => s(e.target.value)}
-                          className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] placeholder:text-gray-300 bg-white" />
+                          className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 placeholder:text-gray-300 bg-white" />
                       ))}
                     </div>
                   </div>
@@ -713,9 +713,9 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                     <div className="flex gap-2">
                       <input type="text" placeholder="Template name" value={templateName}
                         onChange={e => setTemplateName(e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] bg-white" />
+                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white" />
                       <button type="button" onClick={saveTemplate}
-                        className="px-3 py-2 text-xs font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg transition-colors">
+                        className="px-3 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg transition-colors">
                         Save
                       </button>
                     </div>
@@ -752,10 +752,10 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                             return (
                               <button key={pkg.id} type="button" onClick={() => setSelectedCarrierPkg(active ? null : pkg)}
                                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-left transition-all text-sm ${
-                                  active ? "border-[#3DBFA4] bg-[#3DBFA4]/5" : "border-gray-100 hover:border-gray-200"}`}>
+                                  active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200"}`}>
                                 <div className="flex items-center gap-2.5">
-                                  <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-[#3DBFA4]" : "border-gray-300"}`}>
-                                    {active && <div className="w-1.5 h-1.5 rounded-full bg-[#3DBFA4]" />}
+                                  <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                                    {active && <div className="w-1.5 h-1.5 rounded-full bg-gray-900" />}
                                   </div>
                                   <span className="font-medium text-gray-800">{pkg.name}</span>
                                 </div>
@@ -786,10 +786,10 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                     {savedTemplates.map(t => {
                       const active = selectedTemplate?.id === t.id;
                       return (
-                        <div key={t.id} className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${active ? "border-[#3DBFA4] bg-[#3DBFA4]/5" : "border-gray-100 hover:border-gray-200"}`}>
+                        <div key={t.id} className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200"}`}>
                           <button type="button" className="flex items-center gap-2.5 flex-1 text-left" onClick={() => setSelectedTemplate(active ? null : t)}>
-                            <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-[#3DBFA4]" : "border-gray-300"}`}>
-                              {active && <div className="w-1.5 h-1.5 rounded-full bg-[#3DBFA4]" />}
+                            <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                              {active && <div className="w-1.5 h-1.5 rounded-full bg-gray-900" />}
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-800">{t.name}</p>
@@ -817,9 +817,9 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 <div className="flex gap-2">
                   <input type="number" min="0.01" step="0.01" value={weight}
                     onChange={e => setWeight(e.target.value)}
-                    className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] bg-white" />
+                    className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white" />
                   <select value={weightUnit} onChange={e => setWeightUnit(e.target.value as WeightUnit)}
-                    className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/30 focus:border-[#3DBFA4] bg-white">
+                    className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 bg-white">
                     <option value="lbs">lbs</option>
                     <option value="kg">kg</option>
                     <option value="oz">oz</option>
@@ -853,7 +853,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               {/* Get rates button */}
               <button type="button" onClick={handleGetRates}
                 disabled={isGettingRates || selectedCarriers.length === 0}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 rounded-xl transition-colors">
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 rounded-xl transition-colors">
                 {isGettingRates
                   ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Getting rates…</>
                   : <>
@@ -887,10 +887,10 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 return (
                   <button key={i} type="button" onClick={() => setSelectedRate(r)}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
-                      active ? "border-[#3DBFA4] bg-[#3DBFA4]/5" : "border-gray-100 hover:border-gray-200 bg-white"}`}>
+                      active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200 bg-white"}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-[#3DBFA4]" : "border-gray-300"}`}>
-                        {active && <div className="w-2 h-2 rounded-full bg-[#3DBFA4]" />}
+                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                        {active && <div className="w-2 h-2 rounded-full bg-gray-900" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -959,7 +959,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
             <div className="flex justify-between items-center gap-2">
               <span className="text-gray-500 shrink-0">Ship date</span>
               <input type="date" value={shipDate} onChange={e => setShipDate(e.target.value)}
-                className="text-xs text-gray-800 font-medium border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#3DBFA4] bg-white" />
+                className="text-xs text-gray-800 font-medium border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white" />
             </div>
             <div className="border-t border-gray-200 pt-2.5 space-y-2">
               <Row label="Subtotal" value={fmt(subtotal)} />
@@ -1021,7 +1021,7 @@ export function ShippingPageClient(props: Props) {
             {props.shipments.map((s, i) => (
               <button key={s.id} type="button" onClick={() => setActiveTab(i)}
                 className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === i ? "border-[#3DBFA4] text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                  activeTab === i ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1030,7 +1030,7 @@ export function ShippingPageClient(props: Props) {
             ))}
             <button type="button" onClick={() => setActiveTab("add")}
               className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
-                activeTab === "add" ? "border-[#3DBFA4] text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                activeTab === "add" ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -114,7 +114,7 @@ export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Prop
                     value={commission}
                     onChange={(e) => setCommission(e.target.value)}
                     placeholder="e.g. 15"
-                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] transition bg-white"
+                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
                     autoFocus
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
@@ -136,7 +136,7 @@ export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Prop
                       value={uplineComm}
                       onChange={(e) => setUplineComm(e.target.value)}
                       placeholder="e.g. 10"
-                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-[#3DBFA4] focus:border-[#3DBFA4] transition bg-white"
+                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
                     />
                     <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
                   </div>

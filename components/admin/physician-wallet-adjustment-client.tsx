@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -68,7 +68,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
           </svg>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search physicians…"
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors" />
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-[#3DBFA4]">{p.firstName[0]}{p.lastName[0]}</span>
                       </div>
                       <p className="font-semibold text-gray-800 text-sm">Dr. {p.firstName} {p.lastName}</p>
@@ -105,7 +105,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                   </td>
                   <td className="px-5 py-4 text-right">
                     <button type="button" onClick={() => open(p)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#3DBFA4]/10 text-[#3DBFA4] border border-[#3DBFA4]/30 rounded-lg hover:bg-[#3DBFA4]/20 transition-colors">
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30 rounded-lg hover:bg-gray-900/20 transition-colors">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
@@ -174,7 +174,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
                 <input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors" />
+                  className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors" />
               </div>
               {amount && parseFloat(amount) > 0 && (
                 <p className="text-xs text-gray-400 mt-1.5">
@@ -192,7 +192,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
               </label>
               <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)}
                 placeholder="Reason for adjustment…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors" />
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors" />
             </div>
 
             <div className="flex gap-3">

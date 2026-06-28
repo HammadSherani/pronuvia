@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ interface PhysicianFormProps {
 }
 
 const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-[#3DBFA4] focus:ring-[#3DBFA4]";
+const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
 const icls   = (e?: string) => `${base} ${e ? errCls : ok}`;
 const sec    = "bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5";
@@ -305,8 +305,8 @@ export function PhysicianForm({
             <button key={s} type="button" onClick={() => toggleSpecialty(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                 specialties.includes(s)
-                  ? "bg-[#3DBFA4] text-white border-[#3DBFA4]"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-[#3DBFA4]"
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-900"
               }`}>
               {s}
             </button>
@@ -324,7 +324,7 @@ export function PhysicianForm({
         {specialties.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {specialties.map((s) => (
-              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#3DBFA4]/10 text-[#3DBFA4] text-xs rounded-full font-medium">
+              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-900/10 text-[#3DBFA4] text-xs rounded-full font-medium">
                 {s}
                 <button type="button" onClick={() => toggleSpecialty(s)}
                   className="hover:text-red-500 transition-colors cursor-pointer">×</button>
@@ -343,7 +343,7 @@ export function PhysicianForm({
               name="approvalAction"
               value="approve"
               disabled={pending}
-              className="px-5 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+              className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
             >
               {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
               Create &amp; Approve
@@ -361,7 +361,7 @@ export function PhysicianForm({
           </>
         ) : (
           <button type="submit" disabled={pending}
-            className="px-6 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
+            className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
             {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
             {pending ? "Saving…" : submitLabel}
           </button>

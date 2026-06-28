@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { WithdrawModal } from "./withdraw-modal";
@@ -86,7 +86,7 @@ export function WalletPanel({
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Withdrawn</p>
-            <div className="w-8 h-8 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
               </svg>

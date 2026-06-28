@@ -1,4 +1,4 @@
-import { requirePhysician } from "@/lib/auth/dal";
+﻿import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PhysicianWalletPanel } from "@/components/physician/wallet-panel";
 
@@ -270,7 +270,7 @@ export default async function PhysicianWalletPage() {
                       <td className="px-5 py-3.5 max-w-[220px]">
                         {r.adminNote ? (
                           <div>
-                            <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 px-1.5 py-0.5 rounded mb-0.5">
+                            <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
                               Admin
                             </span>
                             <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>

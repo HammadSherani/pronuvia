@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -41,7 +41,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
     <tr className="hover:bg-gray-50/50 transition-colors">
       <td className="px-3 py-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#5BB8D4]/10 flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
             <span className="text-[10px] font-semibold text-[#5BB8D4]">{p.firstName[0]}{p.lastName[0]}</span>
           </div>
           <div className="min-w-0">
@@ -147,7 +147,7 @@ export function PhysiciansPageClient({
         </div>
         <Link
           href="/admin/physicians/new"
-          className="inline-flex items-center gap-2 bg-[#3DBFA4] hover:bg-[#35ab93] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -168,7 +168,7 @@ export function PhysiciansPageClient({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search doctors or sales reps by name, email, or ID…"
-          className="w-full pl-10 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors placeholder:text-gray-400"
+          className="w-full pl-10 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors placeholder:text-gray-400"
         />
         {query && (
           <button
@@ -186,7 +186,7 @@ export function PhysiciansPageClient({
       {isSearching && (
         <div className="flex items-center gap-3 mb-4 text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#5BB8D4]" />
+            <span className="w-2 h-2 rounded-full bg-gray-900" />
             {filteredPhysicians.length} doctor{filteredPhysicians.length !== 1 ? "s" : ""}
           </span>
           <span className="text-gray-300">for "{query}"</span>
@@ -196,7 +196,7 @@ export function PhysiciansPageClient({
       {/* ── Doctor List ── */}
       <div className="mb-8">
         <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#5BB8D4]" />
+          <span className="w-2 h-2 rounded-full bg-gray-900" />
           Partnering Doctors
           <span className="text-gray-300 font-normal normal-case tracking-normal">
             ({filteredPhysicians.length}{isSearching ? " found" : ""})

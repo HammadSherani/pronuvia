@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -28,7 +28,7 @@ export function WithdrawForm({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
 
         {/* Balance hint */}
-        <div className="flex items-center justify-between bg-[#3DBFA4]/5 border border-[#3DBFA4]/20 rounded-xl px-4 py-3 mb-4">
+        <div className="flex items-center justify-between bg-gray-900/5 border border-gray-900/20 rounded-xl px-4 py-3 mb-4">
           <p className="text-xs text-gray-500 font-medium">Available Balance</p>
           <p className="text-base font-bold text-[#3DBFA4]">{fmt(balance)}</p>
         </div>
@@ -69,7 +69,7 @@ export function WithdrawForm({
                   step={0.01}
                   required
                   placeholder="0.00"
-                  className="w-full pl-7 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors"
+                  className="w-full pl-7 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
                 />
               </div>
               <p className="text-xs text-gray-400 mt-1">
@@ -86,7 +86,7 @@ export function WithdrawForm({
                 name="note"
                 rows={2}
                 placeholder="Bank account details or any message for admin…"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors"
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors"
               />
             </div>
 
@@ -100,7 +100,7 @@ export function WithdrawForm({
             <button
               type="submit"
               disabled={pending}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#3DBFA4] text-white text-sm font-bold rounded-xl hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               {pending ? (
                 <>

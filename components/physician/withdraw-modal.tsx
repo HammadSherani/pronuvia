@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useRef } from "react";
 import { createPhysicianWithdrawRequest } from "@/actions/physician/withdraw-request";
@@ -61,14 +61,14 @@ export function PhysicianWithdrawModal({
         </div>
 
         <div className="px-6 py-5 space-y-5">
-          <div className="flex items-center justify-between bg-[#3DBFA4]/8 border border-[#3DBFA4]/25 rounded-xl px-4 py-3">
+          <div className="flex items-center justify-between bg-gray-900/8 border border-gray-900/25 rounded-xl px-4 py-3">
             <span className="text-xs font-medium text-gray-500">Available Balance</span>
             <span className="text-lg font-black text-[#3DBFA4]">{fmt(balance)}</span>
           </div>
 
           {hasBankDetails && (
             <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#5BB8D4]/15 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-8 h-8 rounded-full bg-gray-900/15 flex items-center justify-center shrink-0 mt-0.5">
                 <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
                 </svg>
@@ -118,10 +118,10 @@ export function PhysicianWithdrawModal({
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">$</span>
                   <input
                     type="number" name="amount" min={10} max={balance} step={0.01} required placeholder="0.00"
-                    className="w-full pl-8 pr-20 py-3 text-sm font-medium border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] transition-colors"
+                    className="w-full pl-8 pr-20 py-3 text-sm font-medium border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors"
                   />
                   <button type="button"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#3DBFA4] hover:text-[#35a993] px-2 py-1 rounded-lg hover:bg-[#3DBFA4]/8 transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#3DBFA4] hover:text-[#35a993] px-2 py-1 rounded-lg hover:bg-gray-900/8 transition-colors"
                     onClick={(e) => {
                       const input = (e.currentTarget.closest("div")!.querySelector("input") as HTMLInputElement);
                       input.value = String(balance);
@@ -140,7 +140,7 @@ export function PhysicianWithdrawModal({
                   Note <span className="font-normal text-gray-400">(optional)</span>
                 </label>
                 <textarea name="note" rows={2} placeholder="Any message for the admin…"
-                  className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] resize-none transition-colors" />
+                  className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 resize-none transition-colors" />
               </div>
 
               {state && !state.success && (
@@ -167,7 +167,7 @@ export function PhysicianWithdrawModal({
                   Cancel
                 </button>
                 <button type="submit" disabled={pending || !hasBankDetails}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {pending
                     ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}

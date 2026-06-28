@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useTransition } from "react";
 import toast                       from "react-hot-toast";
@@ -42,7 +42,7 @@ const BLANK: CouponInput = {
 };
 
 function inp(extra = "") {
-  return `w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] ${extra}`;
+  return `w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 ${extra}`;
 }
 
 function fmtDate(d: Date | null) {
@@ -215,7 +215,7 @@ function CouponFormModal({
             Cancel
           </button>
           <button type="button" onClick={handleSubmit} disabled={isPending}
-            className="px-5 py-2 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 rounded-lg transition-colors">
+            className="px-5 py-2 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 rounded-lg transition-colors">
             {isPending ? "Saving…" : editId ? "Save Changes" : "Create Coupon"}
           </button>
         </div>
@@ -312,7 +312,7 @@ export function CouponsClient({ coupons: initial }: Props) {
           <button
             type="button"
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-xl shadow-sm transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-xl shadow-sm transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

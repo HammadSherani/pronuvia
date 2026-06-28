@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalStatus } from "@/generated/prisma/enums";
@@ -197,7 +197,7 @@ export default async function SalesDashboardPage() {
                 <p className="text-xs text-gray-400 mt-1">Add your first physician to get started.</p>
                 <Link
                   href="/sales/physicians"
-                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#3DBFA4] text-white text-xs font-semibold rounded-xl hover:bg-[#35a993] transition-colors"
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-700 transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -253,7 +253,7 @@ export default async function SalesDashboardPage() {
             <div className="space-y-2">
               <Link
                 href="/sales/physicians"
-                className="flex items-center gap-3 px-4 py-3 bg-[#3DBFA4] text-white text-sm font-semibold rounded-xl hover:bg-[#35a993] transition-colors"
+                className="flex items-center gap-3 px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

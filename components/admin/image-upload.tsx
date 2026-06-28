@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -59,10 +59,10 @@ export function ImageUpload({ name, value, onChange, compact = false }: ImageUpl
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className={`${boxCls} flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-gray-200 hover:border-[#3DBFA4] hover:bg-[#3DBFA4]/5 transition-colors cursor-pointer disabled:opacity-50`}
+          className={`${boxCls} flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-gray-200 hover:border-gray-900 hover:bg-gray-900/5 transition-colors cursor-pointer disabled:opacity-50`}
         >
           {uploading ? (
-            <div className="w-4 h-4 border-2 border-[#3DBFA4] border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
               <svg className={`${compact ? "w-4 h-4" : "w-7 h-7"} text-gray-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

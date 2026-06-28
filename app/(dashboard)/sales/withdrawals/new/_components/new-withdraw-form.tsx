@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import { createWithdrawRequest } from "@/actions/sales-rep/withdrawals";
@@ -26,7 +26,7 @@ export function NewWithdrawForm({ maxAmount }: { maxAmount: number }) {
             className={`w-full pl-8 pr-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
               state?.errors?.amount
                 ? "border-red-300 bg-red-50"
-                : "border-gray-200 bg-gray-50 focus:border-[#3DBFA4] focus:bg-white"
+                : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
             }`}
           />
         </div>
@@ -41,13 +41,13 @@ export function NewWithdrawForm({ maxAmount }: { maxAmount: number }) {
         </label>
         <textarea
           name="note" rows={3} placeholder="Any notes for the admin…"
-          className="w-full px-3.5 py-2.5 text-sm border border-gray-200 bg-gray-50 rounded-xl outline-none resize-none focus:border-[#3DBFA4] focus:bg-white transition-colors"
+          className="w-full px-3.5 py-2.5 text-sm border border-gray-200 bg-gray-50 rounded-xl outline-none resize-none focus:border-gray-900 focus:bg-white transition-colors"
         />
       </div>
 
       <button
         type="submit" disabled={pending || maxAmount <= 0}
-        className="w-full py-3 bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors"
+        className="w-full py-3 bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors"
       >
         {pending ? "Submitting…" : "Submit Withdrawal Request"}
       </button>

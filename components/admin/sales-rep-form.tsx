@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ interface SalesRepFormProps {
 }
 
 const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-[#3DBFA4] focus:ring-[#3DBFA4]";
+const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
 const icls   = (e?: string) => `${base} ${e ? errCls : ok}`;
 
@@ -167,7 +167,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
       {/* ── Actions ── */}
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending}
-          className="px-6 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
+          className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
           {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
           {pending ? "Saving…" : submitLabel}
         </button>

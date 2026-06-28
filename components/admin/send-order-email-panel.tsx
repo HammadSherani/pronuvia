@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -34,7 +34,7 @@ export function SendOrderEmailPanel({ orderId }: { orderId: string }) {
         <select
           value={emailType}
           onChange={(e) => setEmailType(e.target.value as OrderEmailType)}
-          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3DBFA4]/40 focus:border-[#3DBFA4] bg-white text-gray-700"
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 bg-white text-gray-700"
         >
           <option value="">Choose an email to send...</option>
           {EMAIL_OPTIONS.map((o) => (
@@ -46,7 +46,7 @@ export function SendOrderEmailPanel({ orderId }: { orderId: string }) {
           type="button"
           onClick={handleSend}
           disabled={isPending || !emailType}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-white bg-gray-900 hover:bg-gray-700 disabled:opacity-50 rounded-lg transition-colors"
         >
           {isPending
             ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

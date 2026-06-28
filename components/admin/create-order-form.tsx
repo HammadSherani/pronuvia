@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-const base = "w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-[#3DBFA4] focus:ring-[#3DBFA4] transition bg-white";
+const base = "w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:border-gray-900 focus:ring-gray-900 transition bg-white";
 
 export function CreateOrderForm({ physicians, products }: Props) {
   const [state, formAction, pending] = useActionState(createOrder, undefined);
@@ -119,12 +119,12 @@ export function CreateOrderForm({ physicians, products }: Props) {
 
         {physician && (
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-[#3DBFA4]/5 border border-[#3DBFA4]/20 p-3">
+            <div className="rounded-lg bg-gray-900/5 border border-gray-900/20 p-3">
               <p className="text-xs text-gray-500 mb-1">Physician Commission (current rate)</p>
               <p className="text-lg font-bold text-[#8b5cf6]">{physician.commission}%</p>
               <p className="text-xs text-gray-400 mt-0.5">Projected: {fmt(projectedDrAmt)}</p>
             </div>
-            <div className="rounded-lg bg-[#5BB8D4]/5 border border-[#5BB8D4]/20 p-3">
+            <div className="rounded-lg bg-gray-900/5 border border-[#5BB8D4]/20 p-3">
               <p className="text-xs text-gray-500 mb-1">
                 Sales Rep Commission {physician.salesRep ? `(${physician.salesRep.name})` : "(none linked)"}
               </p>
@@ -145,7 +145,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <p className="text-sm font-semibold text-gray-700">Products</p>
           <button type="button" onClick={addLine}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#3DBFA4]/10 text-[#3DBFA4] text-xs font-medium rounded-lg hover:bg-[#3DBFA4]/20 transition-colors cursor-pointer">
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900/10 text-[#3DBFA4] text-xs font-medium rounded-lg hover:bg-gray-900/20 transition-colors cursor-pointer">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -260,7 +260,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
       {/* ── Actions ── */}
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending || lines.length === 0 || !physicianId}
-          className="px-6 py-2.5 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
+          className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2">
           {pending && <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />}
           {pending ? "Creating…" : "Create Order"}
         </button>
