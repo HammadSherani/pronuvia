@@ -237,13 +237,13 @@ export async function purchaseLabel(
     select: { status: true, items: true },
   });
 
-  // Update order with latest tracking info
+  // Update order with tracking info — shippingRate is NOT overwritten here
+  // because it stores what the customer paid at checkout; label cost lives in Shipment.cost
   await prisma.order.update({
     where: { id: orderId },
     data: {
       trackingNumber:  result.trackingNumber,
       shippingCarrier: `${result.carrierLabel} - ${result.service}`,
-      shippingRate:    result.cost,
       status:          "SHIPPED",
     },
   });

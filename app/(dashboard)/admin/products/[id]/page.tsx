@@ -29,7 +29,7 @@ export default async function ProductViewPage({ params }: Props) {
   const variants = (product.variants ?? []) as SizeVariant[];
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       {/* Breadcrumb / actions */}
       <div className="flex items-center justify-between mb-6">
         <Link href="/admin/products"

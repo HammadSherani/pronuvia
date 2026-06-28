@@ -989,7 +989,7 @@ export function ShippingPageClient(props: Props) {
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 px-4 py-6">
+    <div className=" mx-auto space-y-5 px-4 py-6">
 
       <Link href={`/admin/orders/${props.orderId}`}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 hover:text-gray-700 transition-colors">

@@ -24,10 +24,13 @@ import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
 import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
 import { validateCoupon }      from "@/actions/checkout/validate-coupon";
+import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 
-// -- Address helpers ---------------------------------------------------------
+type ShippingOption = { id: string; method: string; label: string; cost: number };
+
+// ── Address helpers ─────────────────────────────────────────────────────────
 
 function parseAddr(raw: string): AddressData {
   if (!raw) return EMPTY_ADDRESS;
@@ -166,6 +169,30 @@ export function CheckoutClient({
   const [editBill,      setEditBill]      = useState(false);
   const [savingAddr,    setSavingAddr]    = useState(false);
 
+  // shipping options
+  const [shippingOptions,  setShippingOptions]  = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [loadingShipping,  setLoadingShipping]  = useState(false);
+
+  useEffect(() => {
+    if (!shipping.country) {
+      setShippingOptions([]);
+      setSelectedShipping(null);
+      return;
+    }
+    setLoadingShipping(true);
+    getShippingOptionsForCountry(shipping.country, shipping.state || undefined)
+      .then((opts) => {
+        setShippingOptions(opts);
+        setSelectedShipping(opts.length > 0 ? opts[0] : null);
+      })
+      .catch(() => {
+        setShippingOptions([]);
+        setSelectedShipping(null);
+      })
+      .finally(() => setLoadingShipping(false));
+  }, [shipping.country, shipping.state]);
+
   // coupon
   const [couponInput,    setCouponInput]    = useState("");
   const [appliedCoupon,  setAppliedCoupon]  = useState<AppliedCoupon | null>(null);
@@ -184,15 +211,14 @@ export function CheckoutClient({
   const stripeRef    = useRef<StripeHandle>(null);
   const walletSubmit = useRef<HTMLButtonElement>(null);
 
-  // cart math - shipping is $0 at checkout; admin sets it at fulfillment
   const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
-  const shippingRate   = 0;
+  const shippingCost   = selectedShipping?.cost ?? 0;
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
-  const total          = parseFloat(Math.max(0, subtotal - discountAmount).toFixed(2));
-  const cashback       = commission > 0 ? parseFloat((total * commission / 100).toFixed(2)) : 0;
-  const canWallet    = walletBalance >= total;
+  const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
+  const cashback       = commission > 0 ? parseFloat((subtotal * commission / 100).toFixed(2)) : 0;
+  const canWallet      = walletBalance >= total;
 
-  const itemsJson       = JSON.stringify(items.map((i) => ({
+  const itemsJson = JSON.stringify(items.map((i) => ({
     productId:   i.productId,
     title:       i.productTitle,
     variantSize: i.variantSize,
@@ -276,6 +302,10 @@ export function CheckoutClient({
       toast.error("Please enter a shipping address.");
       return;
     }
+    if (shippingOptions.length > 0 && !selectedShipping) {
+      toast.error("Please select a shipping method.");
+      return;
+    }
     if (payMethod === "CARD") {
       stripeRef.current?.submit();
     } else {
@@ -307,7 +337,7 @@ export function CheckoutClient({
   const billDsp     = displayAddr(billing);
 
   return (
-    <div className="max-w-5xl">
+    <div className="">
       {/* Title */}
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-blue-500 mb-6" />
@@ -435,7 +465,44 @@ export function CheckoutClient({
             )}
           </section>
 
-          {/* 3. Payment options */}
+          {/* 3. Shipping method */}
+          {shipping.country && !editShip && (
+            <section>
+              <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
+              {loadingShipping ? (
+                <div className="flex items-center gap-2 py-4 text-sm text-gray-400 border border-gray-200 rounded px-4">
+                  <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                  Loading shipping options…
+                </div>
+              ) : shippingOptions.length === 0 ? (
+                <div className="border border-amber-200 bg-amber-50 rounded px-4 py-3 text-sm text-amber-700">
+                  No shipping options available for {shipping.countryName}. Please contact us.
+                </div>
+              ) : (
+                <div className="border border-gray-300 rounded divide-y divide-gray-100">
+                  {shippingOptions.map((opt) => (
+                    <label key={opt.id} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="shippingMethod"
+                        checked={selectedShipping?.id === opt.id}
+                        onChange={() => setSelectedShipping(opt)}
+                        className="accent-gray-900"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{opt.label}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : `$${opt.cost.toFixed(2)}`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* 4. Payment options */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">Payment options</h2>
             <div className="border border-gray-300 rounded divide-y divide-gray-200">
@@ -485,7 +552,7 @@ export function CheckoutClient({
                           itemsJson={itemsJson}
                           shippingAddress={shipStr}
                           notes={notes}
-                          shippingRate={shippingRate}
+                          shippingRate={shippingCost}
                           total={total}
                           couponId={appliedCoupon?.couponId}
                           couponCode={appliedCoupon?.code}
@@ -566,7 +633,7 @@ export function CheckoutClient({
           <form action={walletAction} className="hidden">
             <input type="hidden" name="items"           value={itemsJson} />
             <input type="hidden" name="shippingAddress" value={shipStr} />
-            <input type="hidden" name="shippingRate"    value={shippingRate} />
+            <input type="hidden" name="shippingRate"    value={shippingCost} />
             <input type="hidden" name="total"           value={total} />
             <input type="hidden" name="notes"           value={notes} />
             <input type="hidden" name="couponCode"      value={appliedCoupon?.code      ?? ""} />
@@ -684,7 +751,7 @@ export function CheckoutClient({
             </div>
 
             {/* Totals */}
-            <div className="px-4 py-4 space-y-3 border-b border-gray-200 text-sm text-gray-600 dark:text-gray-400">
+            <div className="px-4 py-4 space-y-2 border-b border-gray-200 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
@@ -702,14 +769,21 @@ export function CheckoutClient({
                     <span className="text-blue-600 font-semibold">${walletBalance.toFixed(2)}</span>{" "}
                     in your wallet to spend!
                   </span>
-                  <svg className="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
                 </div>
               )}
-              <div className="flex justify-between text-gray-400">
+              <div className="flex justify-between">
                 <span>Shipping</span>
-                <span className="italic text-xs">Calculated at fulfillment</span>
+                {loadingShipping ? (
+                  <span className="text-gray-400 italic text-xs">Calculating…</span>
+                ) : selectedShipping ? (
+                  <span className={selectedShipping.cost === 0 ? "text-emerald-600 font-medium" : ""}>
+                    {selectedShipping.cost === 0 ? "Free" : `$${selectedShipping.cost.toFixed(2)}`}
+                  </span>
+                ) : !shipping.country ? (
+                  <span className="italic text-xs text-gray-400">Enter address first</span>
+                ) : (
+                  <span className="italic text-xs text-amber-600">Not available</span>
+                )}
               </div>
             </div>
 
@@ -720,15 +794,6 @@ export function CheckoutClient({
                 <span>${total.toFixed(2)}</span>
               </div>
             </div>
-          </div>
-
-          <div className="border border-blue-50 bg-blue-50 rounded-xl px-4 py-3 flex items-start gap-3">
-            <svg className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xs text-blue-700 leading-relaxed">
-              Shipping charges are calculated by our team after the order is placed and will be visible in your order tracking once shipped.
-            </p>
           </div>
           </div>{/* end sticky wrapper */}
         </div>
