@@ -11,14 +11,18 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendMail(opts: {
-  to: string;
-  subject: string;
-  html: string;
+  to:          string;
+  subject:     string;
+  html:        string;
+  attachments?: { filename: string; path: string }[];
 }) {
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
-    to:   opts.to,
-    subject: opts.subject,
-    html: opts.html,
+  const info = await transporter.sendMail({
+    from:        process.env.SMTP_FROM ?? process.env.SMTP_USER,
+    to:          opts.to,
+    subject:     opts.subject,
+    html:        opts.html,
+    attachments: opts.attachments,
   });
+  console.log("[mailer] sent to", opts.to, "| subject:", opts.subject, "| msgId:", info.messageId);
+  return info;
 }

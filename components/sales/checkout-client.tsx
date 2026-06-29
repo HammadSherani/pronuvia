@@ -89,28 +89,28 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
       onProcessing(true);
       onError("");
 
+      sessionStorage.setItem("sr_order", JSON.stringify({
+        itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+      }));
+
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
         elements,
         redirect: "if_required",
+        confirmParams: { return_url: `${window.location.origin}${window.location.pathname}` },
       });
 
       if (stripeError) {
+        sessionStorage.removeItem("sr_order");
         onError(stripeError.message ?? "Payment failed.");
         onProcessing(false);
         return;
       }
 
       if (paymentIntent?.status === "succeeded") {
+        sessionStorage.removeItem("sr_order");
         const result = await confirmCardOrder({
           paymentIntentId: paymentIntent.id,
-          itemsJson,
-          shippingAddress,
-          notes,
-          shippingRate,
-          total,
-          couponId,
-          couponCode,
-          discountAmount,
+          itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
         });
         if (result.success && result.orderNumber) {
           onSuccess(result.orderNumber);
@@ -130,7 +130,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
       <PaymentElement
         options={{
           layout: "tabs",
-          wallets: { applePay: "never", googlePay: "never" },
+          wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
           terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
         }}
       />
@@ -281,6 +281,30 @@ export function CheckoutClient({
     clearCart();
     router.push(`/sales/invoice/${orderNumber}`);
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const piId   = params.get("payment_intent");
+    const status = params.get("redirect_status");
+    if (!piId || status !== "succeeded") return;
+
+    const saved = sessionStorage.getItem("sr_order");
+    if (!saved) return;
+    const data = JSON.parse(saved) as {
+      itemsJson: string; shippingAddress: string; notes: string;
+      shippingRate: number; total: number;
+      couponId?: string; couponCode?: string; discountAmount?: number;
+    };
+    sessionStorage.removeItem("sr_order");
+    window.history.replaceState({}, "", window.location.pathname);
+
+    setCardProcessing(true);
+    confirmCardOrder({ paymentIntentId: piId, ...data }).then((r) => {
+      if (r.success && r.orderNumber) handleCardSuccess(r.orderNumber);
+      else { setStripeError(r.message ?? "Order creation failed."); setCardProcessing(false); }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleApplyCoupon = () => {
     setCouponError("");

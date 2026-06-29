@@ -10,6 +10,7 @@ import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
 import { physicianApprovalEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
+import { doctorRegistrationEmail } from "@/lib/email/templates";
 
 export type PhysicianActionState = {
   errors?:  Record<string, string[]>;
@@ -100,6 +101,19 @@ export async function adminCreatePhysician(
       passwordResetExpiry: expiry,
     },
   });
+
+  // Registration confirmation for PENDING accounts (approval email covers the APPROVED path)
+  if (isApproved === ApprovalStatus.PENDING) {
+    try {
+      const { subject, html } = doctorRegistrationEmail({
+        firstName: rest.firstName,
+        lastName:  rest.lastName,
+      });
+      await sendMail({ to: rest.email, subject, html });
+    } catch (err) {
+      console.error("[email] signup confirmation FAILED for", rest.email, err);
+    }
+  }
 
   // Send approval welcome email only when approving immediately
   if (isApproved === ApprovalStatus.APPROVED && token) {

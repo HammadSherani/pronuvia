@@ -1,10 +1,12 @@
 "use server";
 
-import { prisma }                    from "@/lib/db/prisma";
-import { hashPassword }              from "@/lib/auth/password";
-import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
-import { Role, ApprovalStatus }      from "@/generated/prisma/enums";
-import { z }                         from "zod";
+import { prisma }                       from "@/lib/db/prisma";
+import { hashPassword }                 from "@/lib/auth/password";
+import { randomPlaceholderPassword }    from "@/lib/auth/reset-token";
+import { Role, ApprovalStatus }         from "@/generated/prisma/enums";
+import { z }                            from "zod";
+import { sendMail }                     from "@/lib/email/mailer";
+import { doctorRegistrationEmail }      from "@/lib/email/templates";
 
 const Schema = z.object({
   email:               z.string().email("Valid email is required"),
@@ -94,6 +96,16 @@ export async function registerPhysician(
       uplineCommission:  0,
     },
   });
+
+  try {
+    const { subject, html } = doctorRegistrationEmail({
+      firstName: validated.data.firstName,
+      lastName:  validated.data.lastName,
+    });
+    await sendMail({ to: validated.data.email, subject, html });
+  } catch (err) {
+    console.error("[email] signup confirmation FAILED for", validated.data.email, err);
+  }
 
   return {
     success: true,

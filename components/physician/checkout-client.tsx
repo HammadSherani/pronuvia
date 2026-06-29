@@ -69,26 +69,31 @@ const StripeInnerForm = forwardRef<StripeHandle, {
     if (!stripe || !elements) return;
     onProcessing(true);
     onError("");
+
+    // Save order data before potential redirect (e.g. PayPal)
+    sessionStorage.setItem("ph_order", JSON.stringify({
+      itemsJson, billingAddress, shippingAddress, notes,
+      shippingRate, total, couponId, couponCode, discountAmount,
+    }));
+
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-      elements, redirect: "if_required",
+      elements,
+      redirect: "if_required",
+      confirmParams: { return_url: `${window.location.origin}${window.location.pathname}` },
     });
+
     if (stripeError) {
+      sessionStorage.removeItem("ph_order");
       onError(stripeError.message ?? "Payment failed.");
       onProcessing(false);
       return;
     }
     if (paymentIntent?.status === "succeeded") {
+      sessionStorage.removeItem("ph_order");
       const result = await confirmPhysicianCardOrder({
         paymentIntentId: paymentIntent.id,
-        itemsJson,
-        billingAddress,
-        shippingAddress,
-        notes,
-        shippingRate,
-        total,
-        couponId,
-        couponCode,
-        discountAmount,
+        itemsJson, billingAddress, shippingAddress, notes,
+        shippingRate, total, couponId, couponCode, discountAmount,
       });
       if (result.success && result.orderNumber) {
         onSuccess(result.orderNumber);
@@ -107,7 +112,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
     <PaymentElement
       options={{
         layout: "tabs",
-        wallets: { applePay: "never", googlePay: "never" },
+        wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
         terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
       }}
     />
@@ -229,6 +234,31 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
     clearCart();
     router.push(`/physician/invoice/${orderNumber}`);
   };
+
+  // Handle return from PayPal redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const piId   = params.get("payment_intent");
+    const status = params.get("redirect_status");
+    if (!piId || status !== "succeeded") return;
+
+    const saved = sessionStorage.getItem("ph_order");
+    if (!saved) return;
+    const data = JSON.parse(saved) as {
+      itemsJson: string; billingAddress: string; shippingAddress: string;
+      notes: string; shippingRate: number; total: number;
+      couponId?: string; couponCode?: string; discountAmount?: number;
+    };
+    sessionStorage.removeItem("ph_order");
+    window.history.replaceState({}, "", window.location.pathname);
+
+    setCardProcessing(true);
+    confirmPhysicianCardOrder({ paymentIntentId: piId, ...data }).then((r) => {
+      if (r.success && r.orderNumber) handleCardSuccess(r.orderNumber);
+      else { setStripeError(r.message ?? "Order creation failed."); setCardProcessing(false); }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleApplyCoupon = () => {
     setCouponError("");

@@ -8,6 +8,8 @@ import { hashPassword } from "@/lib/auth/password";
 import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
+import { sendMail }               from "@/lib/email/mailer";
+import { doctorRegistrationEmail } from "@/lib/email/templates";
 
 export type AddPhysicianState = {
   errors?:  Record<string, string[]>;
@@ -82,6 +84,16 @@ export async function salesRepAddPhysician(
       websiteLink: rest.websiteLink || null,
     },
   });
+
+  try {
+    const { subject, html } = doctorRegistrationEmail({
+      firstName: validated.data.firstName,
+      lastName:  validated.data.lastName,
+    });
+    await sendMail({ to: validated.data.email, subject, html });
+  } catch (err) {
+    console.error("[email] signup confirmation FAILED for", validated.data.email, err);
+  }
 
   revalidatePath("/sales/physicians");
   revalidatePath("/admin/approvals");
