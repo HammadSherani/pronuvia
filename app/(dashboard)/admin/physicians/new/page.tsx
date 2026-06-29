@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { adminCreatePhysician } from "@/actions/admin/manage-physicians";
+import { listSalesReps } from "@/actions/admin/manage-sales-reps";
 import { PhysicianForm } from "@/components/admin/physician-form";
 
 export const metadata = { title: "Add Physician – Pronuvia Admin" };
 
 export default async function NewPhysicianPage() {
   await requireAdmin();
+  const { reps } = await listSalesReps();
 
   return (
     <div className="max-w-3xl">
@@ -29,6 +31,7 @@ export default async function NewPhysicianPage() {
         showDualCreate
         backHref="/admin/physicians"
         successRedirect="/admin/physicians"
+        salesReps={reps.map((r) => ({ id: r.id, name: r.name, email: r.email }))}
       />
     </div>
   );

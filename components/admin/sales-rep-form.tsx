@@ -14,7 +14,7 @@ interface SalesRepFormProps {
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     commission?: number; billingAddress?: string; shippingAddress?: string;
-    bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string;
+    bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string; routingNumber?: string;
   };
 }
 
@@ -149,7 +149,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
           <label className={lbl}>Account Name</label>
           <input name="bankAccountName" className={icls()} placeholder="John Smith" defaultValue={defaults?.bankAccountName} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Account Number</label>
             <input name="bankAccountNumber" className={icls(accNumError)} placeholder="000000000"
@@ -161,6 +161,11 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
               value={confirmAccNum} onChange={(e) => onConfirmChange(e.target.value)} />
             {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
           </div>
+        </div>
+        <div>
+          <label className={lbl}>Routing Number</label>
+          <input name="routingNumber" className={icls()} placeholder="e.g. 021000021"
+            defaultValue={defaults?.routingNumber} />
         </div>
       </div>
 

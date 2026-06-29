@@ -25,6 +25,7 @@ export const CreatePhysicianSchema = z.object({
   bankAccountNumber:   z.string().optional(),
   bankAccountName:     z.string().optional(),
   swiftCode:           z.string().optional(),
+  routingNumber:       z.string().optional(),
 });
 
 export const UpdatePhysicianSchema = z.object({
@@ -52,6 +53,7 @@ export const UpdatePhysicianSchema = z.object({
   bankAccountNumber:   z.string().optional(),
   bankAccountName:     z.string().optional(),
   swiftCode:           z.string().optional(),
+  routingNumber:       z.string().optional(),
 });
 
 export type CreatePhysicianInput = z.infer<typeof CreatePhysicianSchema>;

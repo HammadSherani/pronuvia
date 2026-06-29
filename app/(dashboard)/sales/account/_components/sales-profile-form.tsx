@@ -8,7 +8,7 @@ type Rep = {
   phone?: string | null; website?: string | null;
   billingAddress?: string | null; shippingAddress?: string | null;
   bankName?: string | null; bankAccountName?: string | null; bankAccountNumber?: string | null;
-  swiftCode?: string | null;
+  swiftCode?: string | null; routingNumber?: string | null;
 };
 
 function Field({
@@ -133,6 +133,9 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
               }`}
             />
             {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
+          </div>
+          <div className="col-span-2">
+            <Field label="Routing Number" name="routingNumber" defaultValue={rep.routingNumber} placeholder="e.g. 021000021" />
           </div>
         </div>
       </div>

@@ -54,6 +54,7 @@ export async function adminCreatePhysician(
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName") as string) || undefined,
     swiftCode:         (formData.get("swiftCode") as string) || undefined,
+    routingNumber:     (formData.get("routingNumber") as string) || undefined,
   };
 
   const strValues: Record<string, string> = Object.fromEntries(
@@ -193,6 +194,7 @@ export async function updatePhysician(
     bankAccountNumber: (formData.get("bankAccountNumber")  as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")    as string) || undefined,
     swiftCode:         (formData.get("swiftCode")          as string) || undefined,
+    routingNumber:     (formData.get("routingNumber")      as string) || undefined,
   };
 
   const validated = UpdatePhysicianSchema.safeParse(raw);
@@ -205,9 +207,14 @@ export async function updatePhysician(
     return { message: "Physician not found." };
   }
 
+  const salesRepIdToSet = (formData.get("salesRepId") as string)?.trim() || null;
+
   await prisma.partneringPhysician.update({
     where: { id },
-    data: validated.data,
+    data: {
+      ...validated.data,
+      salesRepId: salesRepIdToSet,
+    },
   });
 
   revalidatePath("/admin/physicians");
@@ -285,7 +292,7 @@ export async function getPhysicianById(id: string) {
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
       nameOfPractice: true, yearsInPractice: true, fieldsOfSpeciality: true,
       commission: true, uplineCommission: true,
-      bankName: true, bankAccountNumber: true, bankAccountName: true,
+      bankName: true, bankAccountNumber: true, bankAccountName: true, swiftCode: true, routingNumber: true,
       addedByRole: true, salesRepId: true,
       salesRep: { select: { name: true, email: true, firstName: true, lastName: true } },
       createdAt: true, updatedAt: true,

@@ -24,6 +24,7 @@ const Schema = z.object({
   bankAccountName:     z.string().optional(),
   bankAccountNumber:   z.string().optional(),
   swiftCode:           z.string().optional(),
+  routingNumber:       z.string().optional(),
 });
 
 export type UpdateProfileState = {
@@ -58,6 +59,7 @@ export async function updatePhysicianProfile(
     bankAccountName:     (formData.get("bankAccountName") as string)?.trim() || undefined,
     bankAccountNumber:   (formData.get("bankAccountNumber") as string)?.trim() || undefined,
     swiftCode:           (formData.get("swiftCode") as string)?.trim() || undefined,
+    routingNumber:       (formData.get("routingNumber") as string)?.trim() || undefined,
   };
 
   const validated = Schema.safeParse(raw);

@@ -46,6 +46,7 @@ model SalesRepresentative {
   bankAccountNumber String?
   bankAccountName   String?
   swiftCode         String?
+  routingNumber     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -147,6 +148,7 @@ model PartneringPhysician {
   bankAccountNumber   String?
   bankAccountName     String?
   swiftCode           String?
+  routingNumber       String?
   walletBalance       Float          @default(0)
   ordersCount         Int            @default(0)
   addedByRole         Role

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById, updatePhysician } from "@/actions/admin/manage-physicians";
+import { listSalesReps } from "@/actions/admin/manage-sales-reps";
 import { PhysicianForm } from "@/components/admin/physician-form";
 
 export const metadata = { title: "Edit Physician – Pronuvia Admin" };
@@ -12,7 +13,10 @@ export default async function EditPhysicianPage({ params }: Props) {
   await requireAdmin();
   const { id } = await params;
 
-  const p = await getPhysicianById(id);
+  const [p, { reps }] = await Promise.all([
+    getPhysicianById(id),
+    listSalesReps(),
+  ]);
   if (!p) notFound();
 
   const boundUpdate = updatePhysician.bind(null, id);
@@ -33,6 +37,7 @@ export default async function EditPhysicianPage({ params }: Props) {
         submitLabel="Save Changes"
         backHref="/admin/physicians"
         successRedirect="/admin/physicians"
+        salesReps={reps.map((r) => ({ id: r.id, name: r.name, email: r.email }))}
         defaults={{
           firstName:           p.firstName,
           lastName:            p.lastName,
@@ -53,10 +58,13 @@ export default async function EditPhysicianPage({ params }: Props) {
           fieldsOfSpeciality:  p.fieldsOfSpeciality,
           commission:          p.commission,
           uplineCommission:    p.uplineCommission,
-          salesRepName:        p.salesRep ? p.salesRep.name : undefined,
+          salesRepId:          p.salesRepId           ?? undefined,
+          salesRepName:        p.salesRep?.name,
           bankName:            p.bankName            ?? undefined,
           bankAccountNumber:   p.bankAccountNumber   ?? undefined,
           bankAccountName:     p.bankAccountName      ?? undefined,
+          swiftCode:           p.swiftCode            ?? undefined,
+          routingNumber:       p.routingNumber        ?? undefined,
         }}
       />
     </div>

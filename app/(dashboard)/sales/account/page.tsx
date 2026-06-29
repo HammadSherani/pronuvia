@@ -14,7 +14,7 @@ export default async function SalesAccountPage() {
       phone: true, website: true,
       commission: true, walletBalance: true, ordersCount: true,
       billingAddress: true, shippingAddress: true,
-      bankName: true, bankAccountName: true, bankAccountNumber: true, swiftCode: true,
+      bankName: true, bankAccountName: true, bankAccountNumber: true, swiftCode: true, routingNumber: true,
       createdAt: true,
       _count: { select: { physicians: true } },
     },

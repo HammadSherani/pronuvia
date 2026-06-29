@@ -29,6 +29,7 @@ function parseCreate(formData: FormData) {
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")   as string) || undefined,
     swiftCode:         (formData.get("swiftCode")         as string) || undefined,
+    routingNumber:     (formData.get("routingNumber")     as string) || undefined,
   };
 }
 
@@ -46,6 +47,7 @@ function parseUpdate(formData: FormData) {
     bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
     bankAccountName:   (formData.get("bankAccountName")   as string) || undefined,
     swiftCode:         (formData.get("swiftCode")         as string) || undefined,
+    routingNumber:     (formData.get("routingNumber")     as string) || undefined,
   };
 }
 
@@ -181,7 +183,7 @@ export async function getSalesRepById(id: string) {
       id: true, name: true, firstName: true, lastName: true, email: true,
       phone: true, commission: true, ordersCount: true,
       billingAddress: true, shippingAddress: true,
-      bankName: true, bankAccountNumber: true, bankAccountName: true,
+      bankName: true, bankAccountNumber: true, bankAccountName: true, swiftCode: true, routingNumber: true,
       createdAt: true, updatedAt: true,
       physicians: {
         select: {

@@ -1,4 +1,4 @@
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "http://localhost:3000";
 
 const base = (content: string) => `
 <!DOCTYPE html>
@@ -56,7 +56,7 @@ export function passwordSetupEmail(opts: {
   resetToken: string;
   role: "salesRep" | "physician";
 }) {
-  const resetLink = `${APP_URL}/reset-password/${opts.resetToken}`;
+  const resetLink = `${getAppUrl()}/reset-password/${opts.resetToken}`;
   const roleLabel = opts.role === "salesRep" ? "Sales Representative" : "Partnering Physician";
   const subject = "Welcome to Pronuvia — Set Your Password";
   const html = base(`
@@ -102,7 +102,7 @@ export function physicianApprovalEmail(opts: {
   email:     string;
   resetToken: string;
 }) {
-  const resetLink = `${APP_URL}/reset-password/${opts.resetToken}`;
+  const resetLink = `${getAppUrl()}/reset-password/${opts.resetToken}`;
   const subject   = "Welcome to Pronuvia — Your Account is Approved";
 
   const row = (label: string, value: string) =>
@@ -282,7 +282,7 @@ export function salesRepWelcomeEmail(opts: {
       </table>
     </div>
     <div style="text-align:center;margin-bottom:28px;">
-      <a href="${APP_URL}/login"
+      <a href="${getAppUrl()}/login"
         style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
         Log In to Your Account
       </a>
@@ -337,7 +337,7 @@ export function physicianWelcomeEmail(opts: {
 
     <!-- CTA -->
     <div style="text-align:center;margin-bottom:28px;">
-      <a href="${APP_URL}/login"
+      <a href="${getAppUrl()}/login"
         style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
         Log In to Your Account
       </a>
@@ -410,7 +410,7 @@ export function salesRepPhysicianAssignedEmail(opts: {
 
     <!-- CTA -->
     <div style="text-align:center;margin-bottom:28px;">
-      <a href="${APP_URL}/sales/physicians"
+      <a href="${getAppUrl()}/sales/physicians"
         style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
         View My Physicians
       </a>
@@ -479,7 +479,7 @@ export function orderConfirmationEmail(d: OrderEmailData) {
       </div>
       ${orderItemsTable(d.items)}
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
       </div>`),
   };
 }
@@ -497,7 +497,7 @@ export function orderProcessingEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#1d4ed8;font-weight:600;">We'll notify you once your order ships.</p>
       </div>
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
       </div>`),
   };
 }
@@ -515,7 +515,7 @@ export function orderCompletedEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Total paid: $${d.total.toFixed(2)}</p>
       </div>
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order History</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order History</a>
       </div>`),
   };
 }
@@ -534,7 +534,7 @@ export function orderCancelledEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#dc2626;font-weight:600;">For questions, please contact support.</p>
       </div>
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
       </div>`),
   };
 }
@@ -575,7 +575,7 @@ export function orderDetailsEmail(d: OrderEmailData) {
       </div>
       ${orderItemsTable(d.items)}
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
       </div>`),
   };
 }
@@ -783,7 +783,7 @@ export function orderNoteEmail(opts: { firstName: string; orderNumber: string; n
         <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
       </div>
       <div style="text-align:center;">
-        <a href="${APP_URL}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
       </div>
       <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
         If you have questions, please contact your administrator.

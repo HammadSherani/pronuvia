@@ -10,7 +10,7 @@ type Rep = {
   commission: number; walletBalance: number; ordersCount: number;
   billingAddress: string | null; shippingAddress: string | null;
   bankName: string | null; bankAccountName: string | null;
-  bankAccountNumber: string | null; swiftCode: string | null;
+  bankAccountNumber: string | null; swiftCode: string | null; routingNumber: string | null;
   createdAt: Date;
   _count: { physicians: number };
 };
@@ -151,6 +151,7 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
         <InfoRow label="Account Name"   value={r.bankAccountName} />
         <InfoRow label="Account Number" value={r.bankAccountNumber} />
         <InfoRow label="SWIFT / IBAN"   value={r.swiftCode} />
+        <InfoRow label="Routing Number" value={r.routingNumber} />
       </Section>
     </div>
   );
@@ -292,6 +293,11 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
               className={mismatch ? inpErr : inp}
             />
           </Field>
+          <div className="col-span-2">
+            <Field label="Routing Number">
+              <input name="routingNumber" defaultValue={r.routingNumber ?? ""} placeholder="e.g. 021000021" className={inp} />
+            </Field>
+          </div>
         </div>
       </div>
 

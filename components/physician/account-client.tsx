@@ -21,7 +21,7 @@ type Physician = {
   addressOne: string | null; addressTwo: string | null;
   city: string | null; state: string | null; zipCode: string | null;
   bankName: string | null; bankAccountName: string | null;
-  bankAccountNumber: string | null; swiftCode: string | null;
+  bankAccountNumber: string | null; swiftCode: string | null; routingNumber: string | null;
   commission: number; uplineCommission: number;
   isApproved: "APPROVED" | "PENDING" | "REJECTED";
   createdAt: Date;
@@ -144,6 +144,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="Account Name"    value={p.bankAccountName} />
         <InfoRow label="Account Number"  value={p.bankAccountNumber} />
         <InfoRow label="SWIFT / IBAN"    value={p.swiftCode} />
+        <InfoRow label="Routing Number"  value={p.routingNumber} />
       </Section>
 
       <Section title="Commission">
@@ -376,6 +377,10 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
 
         <Field label="SWIFT">
           <input name="swiftCode" defaultValue={p.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
+        </Field>
+
+        <Field label="Routing Number">
+          <input name="routingNumber" defaultValue={p.routingNumber ?? ""} placeholder="e.g. 021000021" className={inp} />
         </Field>
       </div>
 

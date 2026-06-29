@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import type { PhysicianActionState } from "@/actions/admin/manage-physicians";
 
+type SalesRepOption = { id: string; name: string; email: string };
+
 interface PhysicianFormProps {
   action: (state: PhysicianActionState, formData: FormData) => Promise<PhysicianActionState>;
   submitLabel: string;
@@ -13,6 +15,7 @@ interface PhysicianFormProps {
   hideCommission?: boolean;
   showNoteField?: boolean;
   showDualCreate?: boolean;
+  salesReps?: SalesRepOption[];
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     officeContactNumber?: string; fax?: string;
@@ -20,8 +23,8 @@ interface PhysicianFormProps {
     addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string;
     nameOfPractice?: string; yearsInPractice?: number;
     fieldsOfSpeciality?: string[]; commission?: number; uplineCommission?: number;
-    salesRepName?: string;
-    bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string;
+    salesRepId?: string; salesRepName?: string;
+    bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string; routingNumber?: string;
   };
 }
 
@@ -47,7 +50,7 @@ const SPECIALTIES = [
 
 // ── Main form ──────────────────────────────────────────────────────
 export function PhysicianForm({
-  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, showDualCreate, defaults,
+  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, showDualCreate, defaults, salesReps = [],
 }: PhysicianFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const router = useRouter();
@@ -58,6 +61,19 @@ export function PhysicianForm({
   const [confirmAccNum, setConfirmAccNum] = useState(defaults?.bankAccountNumber ?? "");
   const [accNumError,   setAccNumError]   = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+
+  const initRepId = state?.values?.salesRepId ?? defaults?.salesRepId ?? "";
+  const [hasUpline,     setHasUpline]     = useState(!!initRepId);
+  const [selectedRepId, setSelectedRepId] = useState(initRepId);
+  const [repSearch,     setRepSearch]     = useState("");
+
+  const selectedRep = salesReps.find((r) => r.id === selectedRepId);
+  const filteredReps = repSearch
+    ? salesReps.filter((r) =>
+        r.name.toLowerCase().includes(repSearch.toLowerCase()) ||
+        r.email.toLowerCase().includes(repSearch.toLowerCase())
+      )
+    : salesReps;
 
   function validateAccNums(a: string, b: string) {
     if (b && a !== b) setAccNumError("Account numbers do not match");
@@ -151,38 +167,124 @@ export function PhysicianForm({
       {!hideCommission && (
         <div className={sec}>
           <p className={head}>Commission Settings</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={lbl}>
-                Doctor&apos;s Commission %
-                <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
-              </label>
-              <div className="relative">
-                <input name="commission" type="number" step="0.01" min="0" max="100"
-                  className={icls(e.commission?.[0])} placeholder="0.00"
-                  defaultValue={state?.values?.commission ?? defaults?.commission ?? 0} />
-                <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-              </div>
-              <FE msg={e.commission?.[0]} />
-            </div>
 
-            <div>
-              <label className={lbl}>
-                Sales Rep&apos;s Commission %
-                {defaults?.salesRepName
-                  ? <span className="ml-1.5 text-xs font-normal text-gray-400">earned by {defaults.salesRepName} on this doctor&apos;s orders</span>
-                  : <span className="ml-1.5 text-xs font-normal text-gray-400">upline commission on this doctor&apos;s orders</span>
-                }
-              </label>
-              <div className="relative">
-                <input name="uplineCommission" type="number" step="0.01" min="0" max="100"
-                  className={icls(e.uplineCommission?.[0])} placeholder="0.00"
-                  defaultValue={state?.values?.uplineCommission ?? defaults?.uplineCommission ?? 0} />
-                <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-              </div>
-              <FE msg={e.uplineCommission?.[0]} />
+          {/* Doctor's commission */}
+          <div className="mb-5">
+            <label className={lbl}>
+              Doctor&apos;s Commission %
+              <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
+            </label>
+            <div className="relative">
+              <input name="commission" type="number" step="0.01" min="0" max="100"
+                className={icls(e.commission?.[0])} placeholder="0.00"
+                defaultValue={state?.values?.commission ?? defaults?.commission ?? 0} />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
             </div>
+            <FE msg={e.commission?.[0]} />
           </div>
+
+          {/* Has Upline toggle */}
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                const next = !hasUpline;
+                setHasUpline(next);
+                if (!next) { setSelectedRepId(""); setRepSearch(""); }
+              }}
+              className="flex items-center gap-3 group cursor-pointer"
+            >
+              <div className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${hasUpline ? "bg-gray-900" : "bg-gray-300"}`}>
+                <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${hasUpline ? "translate-x-5" : "translate-x-0"}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                Assign Sales Representative (Upline)
+              </span>
+            </button>
+          </div>
+
+          {/* Hidden salesRepId — always submitted */}
+          <input type="hidden" name="salesRepId" value={hasUpline ? selectedRepId : ""} />
+
+          {/* Sales Rep selector */}
+          {hasUpline && (
+            <div className="border border-gray-100 rounded-xl bg-gray-50 p-4 mb-4 space-y-3">
+              <label className={lbl}>Select Sales Representative<Req /></label>
+
+              {/* Selected rep display */}
+              {selectedRep && (
+                <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2.5">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">{selectedRep.name}</p>
+                    <p className="text-xs text-gray-500">{selectedRep.email}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedRepId(""); setRepSearch(""); }}
+                    className="text-xs text-red-500 hover:text-red-700 font-medium cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+
+              {/* Search input */}
+              {!selectedRep && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Search by name or email…"
+                    value={repSearch}
+                    onChange={(e) => setRepSearch(e.target.value)}
+                    className={`${base} ${ok}`}
+                  />
+                  {salesReps.length === 0 ? (
+                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                      No Sales Representatives found. Add one first under Admin → Sales Reps.
+                    </p>
+                  ) : filteredReps.length === 0 ? (
+                    <p className="text-xs text-gray-400 px-1">No results for &ldquo;{repSearch}&rdquo;</p>
+                  ) : (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto bg-white">
+                      {filteredReps.map((rep) => (
+                        <button
+                          key={rep.id}
+                          type="button"
+                          onClick={() => { setSelectedRepId(rep.id); setRepSearch(""); }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors cursor-pointer"
+                        >
+                          <p className="text-sm font-medium text-gray-800">{rep.name}</p>
+                          <p className="text-xs text-gray-500">{rep.email}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Upline commission — only when rep is selected */}
+              {selectedRepId && (
+                <div className="pt-1">
+                  <label className={lbl}>
+                    Sales Rep&apos;s Upline Commission %
+                    <span className="ml-1.5 text-xs font-normal text-gray-400">
+                      earned by {selectedRep?.name ?? "this rep"} on this doctor&apos;s orders
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <input name="uplineCommission" type="number" step="0.01" min="0" max="100"
+                      className={icls(e.uplineCommission?.[0])} placeholder="0.00"
+                      defaultValue={state?.values?.uplineCommission ?? defaults?.uplineCommission ?? 0} />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
+                  </div>
+                  <FE msg={e.uplineCommission?.[0]} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* uplineCommission hidden = 0 when no upline */}
+          {!hasUpline && <input type="hidden" name="uplineCommission" value="0" />}
         </div>
       )}
 
@@ -282,7 +384,7 @@ export function PhysicianForm({
           <label className={lbl}>Account Name</label>
           <input name="bankAccountName" className={icls()} placeholder="Jane Doe" defaultValue={state?.values?.bankAccountName ?? defaults?.bankAccountName} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Account Number</label>
             <input name="bankAccountNumber" className={icls(accNumError)} placeholder="000000000"
@@ -294,6 +396,11 @@ export function PhysicianForm({
               value={confirmAccNum} onChange={(e) => onConfirmChange(e.target.value)} />
             {accNumError && <p className="text-xs text-red-500 mt-1">{accNumError}</p>}
           </div>
+        </div>
+        <div>
+          <label className={lbl}>Routing Number</label>
+          <input name="routingNumber" className={icls()} placeholder="e.g. 021000021"
+            defaultValue={state?.values?.routingNumber ?? defaults?.routingNumber} />
         </div>
       </div>
 
