@@ -12,7 +12,7 @@ const NAV = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   // { label: "Account",              href: "/account" },
-  { label: "Partnering Physician", href: "/account" },
+  // { label: "Sign Up", href: "/account" },
 ];
 
 export function SiteHeader({ variant = "overlay", dashboardHref }: { variant?: "overlay" | "solid"; dashboardHref?: string }) {
@@ -81,7 +81,7 @@ export function SiteHeader({ variant = "overlay", dashboardHref }: { variant?: "
           ) : (
             <Link href="/login"
               className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
-              Login
+              Login / Sign Up
             </Link>
           )}
         </div>
