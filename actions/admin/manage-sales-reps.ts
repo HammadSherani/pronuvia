@@ -82,7 +82,7 @@ export async function createSalesRep(
 
   // Send password setup email
   const { subject, html } = passwordSetupEmail({
-    firstName: data.firstName,
+    firstName: data.firstName + " " +data.lastName,
     email:     data.email,
     resetToken: token,
     role:      "salesRep",
