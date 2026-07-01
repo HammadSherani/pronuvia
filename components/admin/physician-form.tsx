@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Country, State } from "country-state-city";
 import type { PhysicianActionState } from "@/actions/admin/manage-physicians";
 
 type SalesRepOption = { id: string; name: string; email: string };
@@ -15,12 +16,13 @@ interface PhysicianFormProps {
   hideCommission?: boolean;
   showNoteField?: boolean;
   showDualCreate?: boolean;
+  requirePracticeFields?: boolean;
   salesReps?: SalesRepOption[];
   defaults?: {
     firstName?: string; lastName?: string; email?: string; phone?: string;
     officeContactNumber?: string; fax?: string;
     aictherapy?: string; license?: string; websiteLink?: string;
-    addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string;
+    addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string; country?: string;
     nameOfPractice?: string; yearsInPractice?: number;
     fieldsOfSpeciality?: string[]; commission?: number; uplineCommission?: number;
     salesRepId?: string; salesRepName?: string;
@@ -28,13 +30,13 @@ interface PhysicianFormProps {
   };
 }
 
-const base   = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
-const ok     = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
+const base = "w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 transition bg-white";
+const ok = "border-gray-200 focus:border-gray-900 focus:ring-gray-900";
 const errCls = "border-red-300 focus:border-red-400 focus:ring-red-300";
-const icls   = (e?: string) => `${base} ${e ? errCls : ok}`;
-const sec    = "bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5";
-const head   = "text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100";
-const lbl    = "block text-sm font-medium text-gray-700 mb-1.5";
+const icls = (e?: string) => `${base} ${e ? errCls : ok}`;
+const sec = "bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-5";
+const head = "text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100";
+const lbl = "block text-sm font-medium text-gray-700 mb-1.5";
 
 function FE({ msg }: { msg?: string }) {
   return msg ? <p className="text-xs text-red-500 mt-1">{msg}</p> : null;
@@ -42,37 +44,47 @@ function FE({ msg }: { msg?: string }) {
 function Req() { return <span className="text-red-400"> *</span>; }
 
 const SPECIALTIES = [
-  "Cardiology","Dermatology","Endocrinology","Family Medicine","Gastroenterology",
-  "General Practice","Internal Medicine","Neurology","Obstetrics & Gynecology",
-  "Oncology","Ophthalmology","Orthopedics","Pediatrics","Psychiatry",
-  "Pulmonology","Radiology","Rheumatology","Surgery","Urology",
+  "Cardiology", "Dermatology", "Endocrinology", "Family Medicine", "Gastroenterology",
+  "General Practice", "Internal Medicine", "Neurology", "Obstetrics & Gynecology",
+  "Oncology", "Ophthalmology", "Orthopedics", "Pediatrics", "Psychiatry",
+  "Pulmonology", "Radiology", "Rheumatology", "Surgery", "Urology",
 ];
 
 // ── Main form ──────────────────────────────────────────────────────
 export function PhysicianForm({
-  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, showDualCreate, defaults, salesReps = [],
+  action, submitLabel, backHref, successRedirect, hideCommission, showNoteField, showDualCreate, requirePracticeFields, defaults, salesReps = [],
 }: PhysicianFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const router = useRouter();
 
   const [specialties, setSpecialties] = useState<string[]>(defaults?.fieldsOfSpeciality ?? []);
   const [customSpecialty, setCustom] = useState("");
-  const [accNum,        setAccNum]   = useState(defaults?.bankAccountNumber ?? "");
+  const [accNum, setAccNum] = useState(defaults?.bankAccountNumber ?? "");
   const [confirmAccNum, setConfirmAccNum] = useState(defaults?.bankAccountNumber ?? "");
-  const [accNumError,   setAccNumError]   = useState("");
+  const [accNumError, setAccNumError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
+  const [selectedCountry, setSelectedCountry] = useState(
+    state?.values?.country ?? defaults?.country ?? ""
+  );
+  const [selectedState, setSelectedState] = useState(
+    state?.values?.state ?? defaults?.state ?? ""
+  );
+
+  const allCountries = Country.getAllCountries();
+  const statesForCountry = selectedCountry ? State.getStatesOfCountry(selectedCountry) : [];
+
   const initRepId = state?.values?.salesRepId ?? defaults?.salesRepId ?? "";
-  const [hasUpline,     setHasUpline]     = useState(!!initRepId);
+  const [hasUpline, setHasUpline] = useState(!!initRepId);
   const [selectedRepId, setSelectedRepId] = useState(initRepId);
-  const [repSearch,     setRepSearch]     = useState("");
+  const [repSearch, setRepSearch] = useState("");
 
   const selectedRep = salesReps.find((r) => r.id === selectedRepId);
   const filteredReps = repSearch
     ? salesReps.filter((r) =>
-        r.name.toLowerCase().includes(repSearch.toLowerCase()) ||
-        r.email.toLowerCase().includes(repSearch.toLowerCase())
-      )
+      r.name.toLowerCase().includes(repSearch.toLowerCase()) ||
+      r.email.toLowerCase().includes(repSearch.toLowerCase())
+    )
     : salesReps;
 
   function validateAccNums(a: string, b: string) {
@@ -88,7 +100,7 @@ export function PhysicianForm({
     } else if (state.message && !state.errors) {
       toast.error(state.message);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   const e = state?.errors ?? {};
@@ -131,7 +143,7 @@ export function PhysicianForm({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>First Name<Req /></label>
-            <input name="firstName" className={icls(e.firstName?.[0])} placeholder="Dr. Jane" defaultValue={state?.values?.firstName ?? defaults?.firstName} />
+            <input name="firstName" className={icls(e.firstName?.[0])} placeholder="Jane" defaultValue={state?.values?.firstName ?? defaults?.firstName} />
             <FE msg={e.firstName?.[0]} />
           </div>
           <div>
@@ -147,8 +159,9 @@ export function PhysicianForm({
             <FE msg={e.email?.[0]} />
           </div>
           <div>
-            <label className={lbl}>Mobile Phone</label>
-            <input name="phone" className={icls()} placeholder="+1 555 000 0000" defaultValue={state?.values?.phone ?? defaults?.phone} />
+            <label className={lbl}>Phone<Req /></label>
+            <input name="phone" className={icls(e.phone?.[0])} placeholder="+1 555 000 0000" defaultValue={state?.values?.phone ?? defaults?.phone} />
+            <FE msg={e.phone?.[0]} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -288,35 +301,14 @@ export function PhysicianForm({
         </div>
       )}
 
-      {/* ── Commission Note (sales rep only) ──────────────── */}
-      {showNoteField && (
-        <div className={sec}>
-          <p className={head}>Commission Note</p>
-          <div>
-            <label className={lbl}>
-              Suggested Commission
-              <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
-            </label>
-            <textarea
-              name="salesRepNote"
-              rows={3}
-              className={`${base} ${ok} resize-none`}
-              placeholder="e.g. Please set 15% commission for this doctor"
-            />
-            <p className="text-xs text-gray-400 mt-1.5">
-              Admin will review your note and set the final commission when approving.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* ── Practice Info ─────────────────────────────────── */}
       <div className={sec}>
         <p className={head}>Practice Information</p>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className={lbl}>Name of Practice</label>
-            <input name="nameOfPractice" className={icls()} placeholder="City Health Clinic" defaultValue={state?.values?.nameOfPractice ?? defaults?.nameOfPractice} />
+            <label className={lbl}>Name of Practice{requirePracticeFields && <Req />}</label>
+            <input name="nameOfPractice" className={icls(e.nameOfPractice?.[0])} placeholder="City Health Clinic" defaultValue={state?.values?.nameOfPractice ?? defaults?.nameOfPractice} />
+            <FE msg={e.nameOfPractice?.[0]} />
           </div>
           <div>
             <label className={lbl}>Years in Practice</label>
@@ -325,12 +317,13 @@ export function PhysicianForm({
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className={lbl}>License Number</label>
-            <input name="license" className={icls()} placeholder="LIC-000000" defaultValue={state?.values?.license ?? defaults?.license} />
+            <label className={lbl}>License Number{requirePracticeFields && <Req />}</label>
+            <input name="license" className={icls(e.license?.[0])} placeholder="LIC-000000" defaultValue={state?.values?.license ?? defaults?.license} />
+            <FE msg={e.license?.[0]} />
           </div>
           <div>
-            <label className={lbl}>How did you hear about AIC Therapy? </label>
-            <input name="aictherapy" className={icls()} placeholder="AIC-000" defaultValue={state?.values?.aictherapy ?? defaults?.aictherapy} />
+            <label className={lbl}>How did you hear about AIC Therapy?</label>
+            <input name="aictherapy" className={icls()} placeholder="Referral, Online, etc." defaultValue={state?.values?.aictherapy ?? defaults?.aictherapy} />
           </div>
         </div>
         <div>
@@ -344,25 +337,70 @@ export function PhysicianForm({
       <div className={sec}>
         <p className={head}>Practice Address</p>
         <div className="mb-4">
-          <label className={lbl}>Address Line 1</label>
-          <input name="addressOne" className={icls()} placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne ?? defaults?.addressOne} />
+          <label className={lbl}>Address Line 1{requirePracticeFields && <Req />}</label>
+          <input name="addressOne" className={icls(e.addressOne?.[0])} placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne ?? defaults?.addressOne} />
+          <FE msg={e.addressOne?.[0]} />
         </div>
         <div className="mb-4">
-          <label className={lbl}>Address Line 2</label>
+          <label className={lbl}>Address Line 2 <span className="text-xs font-normal text-gray-400">(Optional)</span></label>
           <input name="addressTwo" className={icls()} placeholder="Suite 400" defaultValue={state?.values?.addressTwo ?? defaults?.addressTwo} />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className={lbl}>City</label>
-            <input name="city" className={icls()} placeholder="Los Angeles" defaultValue={state?.values?.city ?? defaults?.city} />
+            <label className={lbl}>City{requirePracticeFields && <Req />}</label>
+            <input name="city" className={icls(e.city?.[0])} placeholder="Los Angeles" defaultValue={state?.values?.city ?? defaults?.city} />
+            <FE msg={e.city?.[0]} />
           </div>
           <div>
-            <label className={lbl}>State</label>
-            <input name="state" className={icls()} placeholder="CA" defaultValue={state?.values?.state ?? defaults?.state} />
+            <label className={lbl}>ZIP Code{requirePracticeFields && <Req />}</label>
+            <input name="zipCode" className={icls(e.zipCode?.[0])} placeholder="90001" defaultValue={state?.values?.zipCode ?? defaults?.zipCode} />
+            <FE msg={e.zipCode?.[0]} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={lbl}>Country{requirePracticeFields && <Req />}</label>
+            <select
+              name="country"
+              value={selectedCountry}
+              onChange={(ev) => { setSelectedCountry(ev.target.value); setSelectedState(""); }}
+              className={icls(e.country?.[0])}
+            >
+              <option value="">Select Country</option>
+              {allCountries.map((c) => (
+                <option key={c.isoCode} value={c.isoCode}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <FE msg={e.country?.[0]} />
           </div>
           <div>
-            <label className={lbl}>ZIP Code</label>
-            <input name="zipCode" className={icls()} placeholder="90001" defaultValue={state?.values?.zipCode ?? defaults?.zipCode} />
+            <label className={lbl}>State / Province{requirePracticeFields && <Req />}</label>
+            {statesForCountry.length > 0 ? (
+              <select
+                name="state"
+                value={selectedState}
+                onChange={(ev) => setSelectedState(ev.target.value)}
+                className={icls(e.state?.[0])}
+              >
+                <option value="">Select State</option>
+                {statesForCountry.map((s) => (
+                  <option key={s.isoCode} value={s.isoCode}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="state"
+                value={selectedState}
+                onChange={(ev) => setSelectedState(ev.target.value)}
+                className={icls(e.state?.[0])}
+                placeholder="State / Province"
+              />
+            )}
+            <FE msg={e.state?.[0]} />
           </div>
         </div>
       </div>
@@ -410,11 +448,10 @@ export function PhysicianForm({
         <div className="flex flex-wrap gap-2 mb-4">
           {SPECIALTIES.map((s) => (
             <button key={s} type="button" onClick={() => toggleSpecialty(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                specialties.includes(s)
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${specialties.includes(s)
                   ? "bg-gray-900 text-white border-gray-900"
                   : "bg-white text-gray-600 border-gray-200 hover:border-gray-900"
-              }`}>
+                }`}>
               {s}
             </button>
           ))}

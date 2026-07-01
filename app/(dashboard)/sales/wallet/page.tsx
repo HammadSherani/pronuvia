@@ -151,7 +151,7 @@ export default async function WalletPage() {
                     const o          = entry.data;
                     const isDoctor   = !!o.physicianId;
                     const doctorName = o.physician
-                      ? `Dr. ${o.physician.firstName} ${o.physician.lastName}`
+                      ? ` ${o.physician.firstName} ${o.physician.lastName}`
                       : "Doctor";
                     return (
                       <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">

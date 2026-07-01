@@ -21,7 +21,7 @@ export default async function BehalfCartPage({ params }: Props) {
   return (
     <BehalfCartClient
       physicianId={physicianId}
-      physicianName={`Dr. ${physician.firstName} ${physician.lastName}`}
+      physicianName={` ${physician.firstName} ${physician.lastName}`}
       physicianEmail={physician.email}
     />
   );

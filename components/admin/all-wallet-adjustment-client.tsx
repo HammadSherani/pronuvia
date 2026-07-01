@@ -137,7 +137,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                         </span>
                       </div>
                       <p className="font-semibold text-gray-800 text-sm">
-                        {person.userType === "DR" ? "Dr. " : ""}{person.firstName} {person.lastName}
+                        {person.userType === "DR" ? " " : ""}{person.firstName} {person.lastName}
                       </p>
                     </div>
                   </td>
@@ -191,7 +191,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                     <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">Doctor</span>
                   )}
                   <p className="text-sm text-gray-500">
-                    {selected.userType === "DR" ? "Dr. " : ""}{selected.firstName} {selected.lastName}
+                    {selected.userType === "DR" ? " " : ""}{selected.firstName} {selected.lastName}
                   </p>
                 </div>
               </div>

@@ -65,9 +65,8 @@ export default async function AdminDownloadsPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                   <a
-                    href={doc.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`/api/download?url=${encodeURIComponent(doc.fileUrl)}&filename=${encodeURIComponent(doc.fileName)}`}
+                    download={doc.fileName}
                     className="inline-flex items-center gap-1.5 text-xs font-medium text-[#3DBFA4] hover:text-[#35a993] transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

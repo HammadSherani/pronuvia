@@ -83,7 +83,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                       <p className="font-semibold text-gray-800 text-sm">
                         {o.orderNumber}
                         {o.physician
-                          ? <span className="font-normal text-gray-500"> · Dr. {o.physician.firstName} {o.physician.lastName}</span>
+                          ? <span className="font-normal text-gray-500"> ·  {o.physician.firstName} {o.physician.lastName}</span>
                           : null}
                       </p>
                       {isReturned && (

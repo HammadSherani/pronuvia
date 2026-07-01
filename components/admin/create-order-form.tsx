@@ -109,7 +109,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
             <option value="">— choose a physician —</option>
             {physicians.map((p) => (
               <option key={p.id} value={p.id}>
-                Dr. {p.firstName} {p.lastName}
+                 {p.firstName} {p.lastName}
                 {p.nameOfPractice ? ` — ${p.nameOfPractice}` : ""}
               </option>
             ))}

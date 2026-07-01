@@ -23,7 +23,7 @@ export default async function OrderBehalfLayout({ children, params }: Props) {
       <div className="sticky top-0 z-30 -mx-4 px-4 pb-3 pt-1 bg-white/80 backdrop-blur-sm">
         <OrderBehalfBar
           physicianId={physicianId}
-          physicianName={`Dr. ${physician.firstName} ${physician.lastName}`}
+          physicianName={` ${physician.firstName} ${physician.lastName}`}
           physicianEmail={physician.email}
         />
       </div>

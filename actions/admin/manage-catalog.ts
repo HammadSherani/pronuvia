@@ -1,10 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { unlink } from "fs/promises";
-import path from "path";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
+import { cloudinary } from "@/lib/cloudinary";
 
 export type CatalogActionState = {
   message?: string;
@@ -37,12 +36,14 @@ export async function deleteDocument(id: string): Promise<CatalogActionState> {
   const doc = await prisma.catalogDocument.findUnique({ where: { id } });
   if (!doc) return { message: "Document not found." };
 
-  // Remove file from disk
+  // Delete from Cloudinary
   try {
-    const filePath = path.join(process.cwd(), "public", doc.fileUrl);
-    await unlink(filePath);
+    const match = doc.fileUrl.match(/\/upload\/(?:v\d+\/)?(.+)$/);
+    if (match) {
+      await cloudinary.uploader.destroy(match[1], { resource_type: "raw" });
+    }
   } catch {
-    // File may already be missing — still remove DB record
+    // Continue even if Cloudinary delete fails — remove DB record regardless
   }
 
   await prisma.catalogDocument.delete({ where: { id } });

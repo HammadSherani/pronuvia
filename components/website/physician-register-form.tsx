@@ -95,7 +95,7 @@ export function PhysicianRegisterForm() {
           <input required name="email" type="email" placeholder="doctor@clinic.com" defaultValue={state?.values?.email} className={e.email ? inpErr : inp} />
         </Field>
         <Field label="First Name" error={e.firstName?.[0]}>
-          <input required name="firstName" placeholder="Dr. Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
+          <input required name="firstName" placeholder=" Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
         </Field>
       </div>
 

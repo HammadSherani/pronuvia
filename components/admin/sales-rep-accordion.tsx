@@ -50,7 +50,7 @@ function DoctorRow({ doctor }: { doctor: Physician }) {
             </span>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-800">Dr. {doctor.firstName} {doctor.lastName}</p>
+            <p className="text-xs font-semibold text-gray-800"> {doctor.firstName} {doctor.lastName}</p>
             <p className="text-[10px] text-gray-400">{doctor.email}</p>
           </div>
         </div>

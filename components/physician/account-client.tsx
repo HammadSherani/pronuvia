@@ -87,7 +87,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
           {p.firstName.charAt(0)}{p.lastName.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-semibold text-gray-900">Dr. {p.firstName} {p.lastName}</p>
+          <p className="text-lg font-semibold text-gray-900"> {p.firstName} {p.lastName}</p>
           <p className="text-sm text-gray-400">{p.email}</p>
           {p.nameOfPractice && <p className="text-xs text-gray-400 mt-0.5">{p.nameOfPractice}</p>}
           <p className="text-xs text-gray-300 mt-0.5">Member since {memberSince}</p>

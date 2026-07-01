@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Country, State } from "country-state-city";
 import type { SalesRepActionState } from "@/actions/admin/manage-sales-reps";
 
 interface SalesRepFormProps {
@@ -32,6 +33,19 @@ function FE({ msg }: { msg?: string }) {
 }
 function Req() { return <span className="text-red-400"> *</span>; }
 
+type AddrFields = { line1: string; line2: string; city: string; zipCode: string; country: string; state: string };
+const emptyAddr = (): AddrFields => ({ line1: "", line2: "", city: "", zipCode: "", country: "", state: "" });
+
+function parseAddr(raw?: string | null): AddrFields {
+  if (!raw) return emptyAddr();
+  try {
+    const p = JSON.parse(raw);
+    if (p && typeof p === "object" && "line1" in p)
+      return { line1: p.line1 ?? "", line2: p.line2 ?? "", city: p.city ?? "", zipCode: p.zipCode ?? "", country: p.country ?? "", state: p.state ?? "" };
+  } catch { /* fall through */ }
+  return { line1: raw, line2: "", city: "", zipCode: "", country: "", state: "" };
+}
+
 export function SalesRepForm({ action, submitLabel, backHref, successRedirect, isEdit, defaults }: SalesRepFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const router   = useRouter();
@@ -39,6 +53,13 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
   const [accNum,        setAccNum]        = useState(defaults?.bankAccountNumber ?? "");
   const [confirmAccNum, setConfirmAccNum] = useState(defaults?.bankAccountNumber ?? "");
   const [accNumError,   setAccNumError]   = useState("");
+
+  const [billing,  setBilling]  = useState<AddrFields>(() => parseAddr(defaults?.billingAddress));
+  const [shipping, setShipping] = useState<AddrFields>(() => parseAddr(defaults?.shippingAddress));
+
+  const billingStates  = billing.country  ? State.getStatesOfCountry(billing.country)  : [];
+  const shippingStates = shipping.country ? State.getStatesOfCountry(shipping.country) : [];
+  const allCountries   = Country.getAllCountries();
 
   useEffect(() => {
     if (!state) return;
@@ -107,7 +128,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
       <div className={sec}>
         <p className={head}>Financial Settings</p>
         <div className="max-w-xs">
-          <label className={lbl}>Base Commission (%)<Req /></label>
+          <label className={lbl}>Self Commission (%)<Req /></label>
           <div className="relative">
             <input name="commission" type="number" step="0.01" min="0" max="100"
               className={icls(e.commission?.[0])} placeholder="0.00" defaultValue={defaults?.commission ?? 0} />
@@ -118,17 +139,113 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
       </div>
 
       {/* ── Logistics ── */}
+      {/* Serialize structured address as JSON into hidden inputs */}
+      <input type="hidden" name="billingAddress"  value={JSON.stringify(billing)} />
+      <input type="hidden" name="shippingAddress" value={JSON.stringify(shipping)} />
+
       <div className={sec}>
-        <p className={head}>Logistics</p>
+        <p className={head}>Billing Address</p>
         <div className="mb-4">
-          <label className={lbl}>Billing Address</label>
-          <textarea name="billingAddress" rows={2} className={`${icls()} resize-none`}
-            placeholder="123 Main St, City, State, ZIP" defaultValue={defaults?.billingAddress} />
+          <label className={lbl}>Address Line 1</label>
+          <input className={icls()} placeholder="123 Main St" value={billing.line1}
+            onChange={e => setBilling(p => ({ ...p, line1: e.target.value }))} />
         </div>
-        <div>
-          <label className={lbl}>Shipping Address</label>
-          <textarea name="shippingAddress" rows={2} className={`${icls()} resize-none`}
-            placeholder="123 Main St, City, State, ZIP" defaultValue={defaults?.shippingAddress} />
+        <div className="mb-4">
+          <label className={lbl}>Address Line 2 <span className="text-xs font-normal text-gray-400">(Optional)</span></label>
+          <input className={icls()} placeholder="Suite 400" value={billing.line2}
+            onChange={e => setBilling(p => ({ ...p, line2: e.target.value }))} />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className={lbl}>City</label>
+            <input className={icls()} placeholder="Los Angeles" value={billing.city}
+              onChange={e => setBilling(p => ({ ...p, city: e.target.value }))} />
+          </div>
+          <div>
+            <label className={lbl}>ZIP Code</label>
+            <input className={icls()} placeholder="90001" value={billing.zipCode}
+              onChange={e => setBilling(p => ({ ...p, zipCode: e.target.value }))} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={lbl}>Country</label>
+            <select className={icls()} value={billing.country}
+              onChange={e => setBilling(p => ({ ...p, country: e.target.value, state: "" }))}>
+              <option value="">Select Country</option>
+              {allCountries.map(c => (
+                <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={lbl}>State / Province</label>
+            {billingStates.length > 0 ? (
+              <select className={icls()} value={billing.state}
+                onChange={e => setBilling(p => ({ ...p, state: e.target.value }))}>
+                <option value="">Select State</option>
+                {billingStates.map(s => (
+                  <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                ))}
+              </select>
+            ) : (
+              <input className={icls()} placeholder="State / Province" value={billing.state}
+                onChange={e => setBilling(p => ({ ...p, state: e.target.value }))} />
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={sec}>
+        <p className={head}>Shipping Address</p>
+        <div className="mb-4">
+          <label className={lbl}>Address Line 1</label>
+          <input className={icls()} placeholder="123 Main St" value={shipping.line1}
+            onChange={e => setShipping(p => ({ ...p, line1: e.target.value }))} />
+        </div>
+        <div className="mb-4">
+          <label className={lbl}>Address Line 2 <span className="text-xs font-normal text-gray-400">(Optional)</span></label>
+          <input className={icls()} placeholder="Suite 400" value={shipping.line2}
+            onChange={e => setShipping(p => ({ ...p, line2: e.target.value }))} />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className={lbl}>City</label>
+            <input className={icls()} placeholder="Los Angeles" value={shipping.city}
+              onChange={e => setShipping(p => ({ ...p, city: e.target.value }))} />
+          </div>
+          <div>
+            <label className={lbl}>ZIP Code</label>
+            <input className={icls()} placeholder="90001" value={shipping.zipCode}
+              onChange={e => setShipping(p => ({ ...p, zipCode: e.target.value }))} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={lbl}>Country</label>
+            <select className={icls()} value={shipping.country}
+              onChange={e => setShipping(p => ({ ...p, country: e.target.value, state: "" }))}>
+              <option value="">Select Country</option>
+              {allCountries.map(c => (
+                <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={lbl}>State / Province</label>
+            {shippingStates.length > 0 ? (
+              <select className={icls()} value={shipping.state}
+                onChange={e => setShipping(p => ({ ...p, state: e.target.value }))}>
+                <option value="">Select State</option>
+                {shippingStates.map(s => (
+                  <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                ))}
+              </select>
+            ) : (
+              <input className={icls()} placeholder="State / Province" value={shipping.state}
+                onChange={e => setShipping(p => ({ ...p, state: e.target.value }))} />
+            )}
+          </div>
         </div>
       </div>
 

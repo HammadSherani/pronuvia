@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -8,31 +8,17 @@ import { approvePhysician, rejectPhysician } from "@/actions/admin/manage-approv
 type Props = {
   id: string;
   name: string;
-  salesRepNote: string | null;
-  salesRep?: { firstName: string; lastName: string } | null;
 };
 
-export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Props) {
+export function ApprovalDetailActions({ id, name }: Props) {
   const router = useRouter();
-  const [showApprove,  setShowApprove]  = useState(false);
-  const [showReject,   setShowReject]   = useState(false);
-  const [commission,   setCommission]   = useState("");
-  const [uplineComm,   setUplineComm]   = useState("");
-  const [isPending,    startTransition] = useTransition();
+  const [showApprove, setShowApprove] = useState(false);
+  const [showReject,  setShowReject]  = useState(false);
+  const [isPending,   startTransition] = useTransition();
 
   function handleApprove() {
-    const docPct    = parseFloat(commission);
-    const uplinePct = parseFloat(uplineComm || "0");
-    if (isNaN(docPct) || docPct < 0 || docPct > 100) {
-      toast.error("Enter a valid doctor commission between 0 and 100");
-      return;
-    }
-    if (isNaN(uplinePct) || uplinePct < 0 || uplinePct > 100) {
-      toast.error("Enter a valid sales rep commission between 0 and 100");
-      return;
-    }
     startTransition(async () => {
-      const res = await approvePhysician(id, docPct, uplinePct);
+      const res = await approvePhysician(id);
       if (res?.success) {
         toast.success("Physician approved successfully");
         router.push("/admin/approvals");
@@ -59,7 +45,7 @@ export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Prop
       {/* Action buttons */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => { setCommission(""); setUplineComm(""); setShowApprove(true); }}
+          onClick={() => setShowApprove(true)}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white text-sm font-semibold rounded-lg hover:bg-emerald-600 transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -78,79 +64,28 @@ export function ApprovalDetailActions({ id, name, salesRepNote, salesRep }: Prop
         </button>
       </div>
 
-      {/* Approve modal */}
+      {/* Approve confirm modal */}
       {showApprove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <div className="flex items-start gap-3 mb-5">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                 <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-gray-800">Approve {name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Set commission percentages before approving</p>
+                <p className="font-semibold text-gray-800">Approve this physician?</p>
+                <p className="text-xs text-gray-500 mt-0.5">{name} will be approved and sent a setup email.</p>
               </div>
             </div>
-
-            {salesRepNote && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-xs font-semibold text-amber-700 mb-1">Sales Rep Note</p>
-                <p className="text-xs text-amber-800 italic">{salesRepNote}</p>
-              </div>
-            )}
-
-            <div className="space-y-4 mb-5">
-              {/* Doctor commission */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Doctor&apos;s Commission %
-                  <span className="ml-1.5 text-xs font-normal text-gray-400">earned on their own orders</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number" step="0.01" min="0" max="100"
-                    value={commission}
-                    onChange={(e) => setCommission(e.target.value)}
-                    placeholder="e.g. 15"
-                    className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
-                    autoFocus
-                  />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-                </div>
-              </div>
-
-              {/* Sales rep upline commission — only if doctor was added by a sales rep */}
-              {salesRep && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Sales Rep&apos;s Commission %
-                    <span className="ml-1.5 text-xs font-normal text-gray-400">
-                      earned by {salesRep.firstName} {salesRep.lastName} on this doctor&apos;s orders
-                    </span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number" step="0.01" min="0" max="100"
-                      value={uplineComm}
-                      onChange={(e) => setUplineComm(e.target.value)}
-                      placeholder="e.g. 10"
-                      className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition bg-white"
-                    />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">%</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="flex gap-3">
               <button
                 onClick={handleApprove}
                 disabled={isPending}
                 className="flex-1 py-2.5 bg-emerald-500 text-white text-sm font-semibold rounded-lg hover:bg-emerald-600 disabled:opacity-50 transition-colors cursor-pointer"
               >
-                {isPending ? "Approving…" : "Approve & Set Commission"}
+                {isPending ? "Approving…" : "Yes, Approve"}
               </button>
               <button
                 onClick={() => setShowApprove(false)}

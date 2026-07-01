@@ -8,8 +8,8 @@ import { hashPassword } from "@/lib/auth/password";
 import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
-import { sendMail }               from "@/lib/email/mailer";
-import { doctorRegistrationEmail } from "@/lib/email/templates";
+import { sendMail }                                              from "@/lib/email/mailer";
+import { doctorRegistrationEmail, salesRepDoctorSignupEmail }   from "@/lib/email/templates";
 
 export type AddPhysicianState = {
   errors?:  Record<string, string[]>;
@@ -36,6 +36,7 @@ export async function salesRepAddPhysician(
     city: (formData.get("city") as string) || undefined,
     state: (formData.get("state") as string) || undefined,
     zipCode: (formData.get("zipCode") as string) || undefined,
+    country: (formData.get("country") as string) || undefined,
     phone: (formData.get("phone") as string) || undefined,
     officeContactNumber: (formData.get("officeContactNumber") as string) || undefined,
     fax: (formData.get("fax") as string) || undefined,
@@ -54,8 +55,21 @@ export async function salesRepAddPhysician(
   );
 
   const validated = CreatePhysicianSchema.safeParse(raw);
-  if (!validated.success) {
-    return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
+  const allErrors: Record<string, string[]> = validated.success
+    ? {}
+    : (z.flattenError(validated.error).fieldErrors as Record<string, string[]>);
+
+  if (!raw.phone?.trim())          allErrors.phone          ??= ["Phone number is required."];
+  if (!raw.nameOfPractice?.trim()) allErrors.nameOfPractice ??= ["Name of practice is required."];
+  if (!raw.license?.trim())        allErrors.license        ??= ["License number is required."];
+  if (!raw.addressOne?.trim())     allErrors.addressOne     ??= ["Address line 1 is required."];
+  if (!raw.city?.trim())           allErrors.city           ??= ["City is required."];
+  if (!raw.country?.trim())        allErrors.country        ??= ["Country is required."];
+  if (!raw.state?.trim())          allErrors.state          ??= ["State is required."];
+  if (!raw.zipCode?.trim())        allErrors.zipCode        ??= ["ZIP code is required."];
+
+  if (Object.keys(allErrors).length > 0 || !validated.success) {
+    return { errors: allErrors, values: strValues };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -86,13 +100,28 @@ export async function salesRepAddPhysician(
   });
 
   try {
+    const salesRep = await prisma.salesRepresentative.findUnique({
+      where: { id: session.userId },
+      select: { firstName: true, lastName: true },
+    });
     const { subject, html } = doctorRegistrationEmail({
-      firstName: validated.data.firstName,
-      lastName:  validated.data.lastName,
+      firstName:    validated.data.firstName,
+      lastName:     validated.data.lastName,
+      salesRepName: salesRep ? `${salesRep.firstName} ${salesRep.lastName}` : undefined,
     });
     await sendMail({ to: validated.data.email, subject, html });
   } catch (err) {
     console.error("[email] signup confirmation FAILED for", validated.data.email, err);
+  }
+
+  try {
+    const { subject, html } = salesRepDoctorSignupEmail({
+      doctorFirstName: validated.data.firstName,
+      doctorLastName:  validated.data.lastName,
+    });
+    await sendMail({ to: session.email, subject, html });
+  } catch (err) {
+    console.error("[email] salesRep doctor signup notification FAILED for", session.email, err);
   }
 
   revalidatePath("/sales/physicians");

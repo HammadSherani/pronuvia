@@ -27,7 +27,7 @@ export default function TermsPage() {
           <p>
             On this website, Advanced Calcium Research Institute (ACRI) shares information on ionic calcium therapy.
             The therapy itself involves the use of specialized products, namely AIC calcium products manufactured by
-            Marahdeo in Canada and distributed by Pronuvia in the US and NutraPeak in Europe. Both manufacturing and
+            Marahdeo in Canada and distributed by Pronuvia in the US. Both manufacturing and
             distribution companies do not make any claims about disease treatments and sell AIC calcium product as
             what it is, a calcium supplement with a higher ionic absorption rate. ACRI believes, however, that AIC
             ionic calcium has manifold health benefits if taken in multiple daily doses, enough to trigger calcium
@@ -142,8 +142,7 @@ export default function TermsPage() {
 
         <Section title="Location and Governing Law">
           <p>
-            This website is operated by ACRI from its offices in Cyprus. The law of Cyprus shall govern these terms
-            and conditions without reference to its choice of law rules. ACRI makes no representation that the
+            ACRI makes no representation that the
             information on the website is appropriate or available for use in other locations, and access to the
             ACRI website from territories where the content of the ACRI website may be illegal is prohibited. Those
             who choose to access the ACRI website from other locations do so on their initiative and are responsible

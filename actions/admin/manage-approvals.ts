@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { generateResetToken } from "@/lib/auth/reset-token";
 import { sendMail } from "@/lib/email/mailer";
-import { physicianApprovalEmail, welcomeAboardEmail } from "@/lib/email/templates";
+import { physicianApprovalEmail, welcomeAboardEmail, salesRepDoctorApprovedEmail } from "@/lib/email/templates";
 
 const APPROVAL_ATTACHMENTS_DIR = path.join(process.cwd(), "lib/email/attachments/application-approval");
 const WELCOME_ATTACHMENTS_DIR  = path.join(process.cwd(), "lib/email/attachments/welcome-aboard");
@@ -53,21 +53,13 @@ export async function listPendingPhysicians() {
   });
 }
 
-export async function approvePhysician(
-  id: string,
-  commission: number,
-  uplineCommission: number,
-): Promise<ApprovalActionState> {
+export async function approvePhysician(id: string): Promise<ApprovalActionState> {
   await requireAdmin();
 
-  if (commission < 0 || commission > 100) {
-    return { message: "Doctor commission must be between 0 and 100." };
-  }
-  if (uplineCommission < 0 || uplineCommission > 100) {
-    return { message: "Sales rep upline commission must be between 0 and 100." };
-  }
-
-  const physician = await prisma.partneringPhysician.findUnique({ where: { id } });
+  const physician = await prisma.partneringPhysician.findUnique({
+    where: { id },
+    include: { salesRep: { select: { email: true } } },
+  });
   if (!physician) {
     return { message: "Physician not found." };
   }
@@ -82,8 +74,6 @@ export async function approvePhysician(
     where: { id },
     data: {
       isApproved:          ApprovalStatus.APPROVED,
-      commission,
-      uplineCommission,
       passwordResetToken:  token,
       passwordResetExpiry: expiry,
     },
@@ -108,6 +98,17 @@ export async function approvePhysician(
   sendMail({ to: physician.email, subject: boardEmail.subject, html: boardEmail.html, attachments: welcomeAttachments }).catch((err) =>
     console.error("[email] welcomeAboardEmail failed:", err)
   );
+
+  // Email 3: Notify sales rep if this doctor was added by one
+  if (physician.salesRep?.email) {
+    const srEmail = salesRepDoctorApprovedEmail({
+      doctorFirstName: physician.firstName,
+      doctorLastName:  physician.lastName,
+    });
+    sendMail({ to: physician.salesRep.email, subject: srEmail.subject, html: srEmail.html }).catch((err) =>
+      console.error("[email] salesRepDoctorApprovedEmail failed:", err)
+    );
+  }
 
   revalidatePath("/admin/approvals");
   revalidatePath("/admin/physicians");

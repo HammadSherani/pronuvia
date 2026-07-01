@@ -136,7 +136,7 @@ export default async function SalesPhysiciansPage({
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-800">Dr. {p.firstName} {p.lastName}</p>
+                            <p className="font-semibold text-gray-800"> {p.firstName} {p.lastName}</p>
                             <p className="text-xs text-gray-400">{p.email}</p>
                           </div>
                         </div>

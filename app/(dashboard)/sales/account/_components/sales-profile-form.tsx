@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useActionState, useRef, useState } from "react";
+import { Country, State } from "country-state-city";
 import { updateSalesRepProfile } from "@/actions/sales-rep/profile";
 
 type Rep = {
@@ -36,12 +37,38 @@ function Field({
   );
 }
 
+type AddrFields = { line1: string; line2: string; city: string; zipCode: string; country: string; state: string };
+const emptyAddr = (): AddrFields => ({ line1: "", line2: "", city: "", zipCode: "", country: "", state: "" });
+
+function parseAddr(raw?: string | null): AddrFields {
+  if (!raw) return emptyAddr();
+  try {
+    const p = JSON.parse(raw);
+    if (p && typeof p === "object" && "line1" in p)
+      return { line1: p.line1 ?? "", line2: p.line2 ?? "", city: p.city ?? "", zipCode: p.zipCode ?? "", country: p.country ?? "", state: p.state ?? "" };
+  } catch { /* fall through */ }
+  return { line1: raw, line2: "", city: "", zipCode: "", country: "", state: "" };
+}
+
+const inputCls = (err?: boolean) =>
+  `w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
+    err ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-gray-900 focus:bg-white"
+  }`;
+const lbl = "block text-xs font-medium text-gray-500 mb-1.5";
+
 export function SalesProfileForm({ rep }: { rep: Rep }) {
   const [state, action, pending]          = useActionState(updateSalesRepProfile, undefined);
   const formRef                           = useRef<HTMLFormElement>(null);
   const [accNum,        setAccNum]        = useState(rep.bankAccountNumber ?? "");
   const [confirmAccNum, setConfirmAccNum] = useState(rep.bankAccountNumber ?? "");
   const [accNumError,   setAccNumError]   = useState("");
+
+  const [billing,  setBilling]  = useState<AddrFields>(() => parseAddr(rep.billingAddress));
+  const [shipping, setShipping] = useState<AddrFields>(() => parseAddr(rep.shippingAddress));
+
+  const allCountries   = Country.getAllCountries();
+  const billingStates  = billing.country  ? State.getStatesOfCountry(billing.country)  : [];
+  const shippingStates = shipping.country ? State.getStatesOfCountry(shipping.country) : [];
 
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
     if (accNum && accNum !== confirmAccNum) {
@@ -92,12 +119,119 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
         </div>
       </div>
 
-      {/* Addresses */}
+      {/* Serialize structured addresses as JSON */}
+      <input type="hidden" name="billingAddress"  value={JSON.stringify(billing)} />
+      <input type="hidden" name="shippingAddress" value={JSON.stringify(shipping)} />
+
+      {/* Billing Address */}
       <div>
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Addresses</p>
-        <div className="grid grid-cols-1 gap-4">
-          <Field label="Billing Address"  name="billingAddress"  defaultValue={rep.billingAddress}  placeholder="123 Main St, City, State 12345" />
-          <Field label="Shipping Address" name="shippingAddress" defaultValue={rep.shippingAddress} placeholder="Same as billing or different" />
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Billing Address</p>
+        <div className="grid grid-cols-1 gap-3">
+          <div>
+            <label className={lbl}>Address Line 1</label>
+            <input className={inputCls()} placeholder="123 Main St" value={billing.line1}
+              onChange={e => setBilling(p => ({ ...p, line1: e.target.value }))} />
+          </div>
+          <div>
+            <label className={lbl}>Address Line 2 <span className="font-normal text-gray-400">(Optional)</span></label>
+            <input className={inputCls()} placeholder="Suite 400" value={billing.line2}
+              onChange={e => setBilling(p => ({ ...p, line2: e.target.value }))} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>City</label>
+              <input className={inputCls()} placeholder="Los Angeles" value={billing.city}
+                onChange={e => setBilling(p => ({ ...p, city: e.target.value }))} />
+            </div>
+            <div>
+              <label className={lbl}>ZIP Code</label>
+              <input className={inputCls()} placeholder="90001" value={billing.zipCode}
+                onChange={e => setBilling(p => ({ ...p, zipCode: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>Country</label>
+              <select className={inputCls()} value={billing.country}
+                onChange={e => setBilling(p => ({ ...p, country: e.target.value, state: "" }))}>
+                <option value="">Select Country</option>
+                {allCountries.map(c => (
+                  <option key={c.isoCode} value={c.isoCode}>{c.isoCode} — {c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={lbl}>State / Province</label>
+              {billingStates.length > 0 ? (
+                <select className={inputCls()} value={billing.state}
+                  onChange={e => setBilling(p => ({ ...p, state: e.target.value }))}>
+                  <option value="">Select State</option>
+                  {billingStates.map(s => (
+                    <option key={s.isoCode} value={s.isoCode}>{s.isoCode} — {s.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input className={inputCls()} placeholder="State / Province" value={billing.state}
+                  onChange={e => setBilling(p => ({ ...p, state: e.target.value }))} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Shipping Address */}
+      <div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Shipping Address</p>
+        <div className="grid grid-cols-1 gap-3">
+          <div>
+            <label className={lbl}>Address Line 1</label>
+            <input className={inputCls()} placeholder="123 Main St" value={shipping.line1}
+              onChange={e => setShipping(p => ({ ...p, line1: e.target.value }))} />
+          </div>
+          <div>
+            <label className={lbl}>Address Line 2 <span className="font-normal text-gray-400">(Optional)</span></label>
+            <input className={inputCls()} placeholder="Suite 400" value={shipping.line2}
+              onChange={e => setShipping(p => ({ ...p, line2: e.target.value }))} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>City</label>
+              <input className={inputCls()} placeholder="Los Angeles" value={shipping.city}
+                onChange={e => setShipping(p => ({ ...p, city: e.target.value }))} />
+            </div>
+            <div>
+              <label className={lbl}>ZIP Code</label>
+              <input className={inputCls()} placeholder="90001" value={shipping.zipCode}
+                onChange={e => setShipping(p => ({ ...p, zipCode: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>Country</label>
+              <select className={inputCls()} value={shipping.country}
+                onChange={e => setShipping(p => ({ ...p, country: e.target.value, state: "" }))}>
+                <option value="">Select Country</option>
+                {allCountries.map(c => (
+                  <option key={c.isoCode} value={c.isoCode}>{c.isoCode} — {c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={lbl}>State / Province</label>
+              {shippingStates.length > 0 ? (
+                <select className={inputCls()} value={shipping.state}
+                  onChange={e => setShipping(p => ({ ...p, state: e.target.value }))}>
+                  <option value="">Select State</option>
+                  {shippingStates.map(s => (
+                    <option key={s.isoCode} value={s.isoCode}>{s.isoCode} — {s.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input className={inputCls()} placeholder="State / Province" value={shipping.state}
+                  onChange={e => setShipping(p => ({ ...p, state: e.target.value }))} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

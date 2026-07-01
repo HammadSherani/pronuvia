@@ -35,7 +35,7 @@ export default async function BehalfCheckoutPage({ params }: Props) {
   return (
     <BehalfCheckoutClient
       physicianId={physicianId}
-      physicianName={`Dr. ${physician.firstName} ${physician.lastName}`}
+      physicianName={` ${physician.firstName} ${physician.lastName}`}
       physicianEmail={physician.email}
       initialAddress={initialAddress}
     />

@@ -67,7 +67,7 @@ export async function getReportFilterOptions() {
     }),
   ]);
   return {
-    doctors:   doctors.map(d => ({ id: d.id, name: `Dr. ${d.firstName} ${d.lastName}` })),
+    doctors:   doctors.map(d => ({ id: d.id, name: ` ${d.firstName} ${d.lastName}` })),
     salesReps: salesReps.map(r => ({ id: r.id, name: r.name })),
   };
 }
@@ -99,7 +99,7 @@ export async function getOverallSalesReport(f: ReportFilters): Promise<SalesRow[
     id:            o.id,
     orderNumber:   o.orderNumber,
     date:          o.createdAt.toISOString().slice(0, 10),
-    doctor:        o.physician ? `Dr. ${o.physician.firstName} ${o.physician.lastName}` : "–",
+    doctor:        o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:      o.salesRep?.name ?? "–",
     status:        o.status,
     subtotal:      o.subtotal,
@@ -185,7 +185,7 @@ export async function getReturnOrdersReport(f: ReportFilters): Promise<ReturnRow
     orderNumber:       o.orderNumber,
     orderDate:         o.createdAt.toISOString().slice(0, 10),
     returnDate:        o.returnedAt!.toISOString().slice(0, 10),
-    doctor:            o.physician ? `Dr. ${o.physician.firstName} ${o.physician.lastName}` : "–",
+    doctor:            o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:          o.salesRep?.name ?? "–",
     originalTotal:     o.total,
     returnedTotal:     o.returnedTotal ?? 0,
@@ -285,7 +285,7 @@ export async function getOverallCommissionReport(f: ReportFilters): Promise<Over
     id:              o.id,
     orderNumber:     o.orderNumber,
     date:            o.createdAt.toISOString().slice(0, 10),
-    doctor:          o.physician ? `Dr. ${o.physician.firstName} ${o.physician.lastName}` : "–",
+    doctor:          o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:        o.salesRep?.name ?? "–",
     orderTotal:      o.total,
     srCommRate:      o.salesRepCommissionRate,
@@ -342,7 +342,7 @@ export async function getDoctorCommissionReport(f: ReportFilters): Promise<Docto
         rateSum: o.physicianCommissionRate,
         row: {
           doctorId:          o.physician.id,
-          doctorName:        `Dr. ${o.physician.firstName} ${o.physician.lastName}`,
+          doctorName:        ` ${o.physician.firstName} ${o.physician.lastName}`,
           practice:          o.physician.nameOfPractice ?? "–",
           orderCount:        1,
           totalSales:        o.total,
@@ -391,7 +391,7 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
       id:              o.id,
       orderNumber:     o.orderNumber,
       date:            o.createdAt.toISOString().slice(0, 10),
-      doctor:          o.physician ? `Dr. ${o.physician.firstName} ${o.physician.lastName}` : "–",
+      doctor:          o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
       salesRep:        o.salesRep?.name ?? "–",
       status:          o.status,
       itemsSummary,

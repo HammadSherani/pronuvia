@@ -61,7 +61,7 @@ export function passwordSetupEmail(opts: {
   const subject = "Welcome to Pronuvia — Set Your Password";
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
-      Welcome, ${opts.firstName}!
+      Dear , ${opts.firstName}!
     </h1>
     <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
       Your Pronuvia ${roleLabel} account has been created.
@@ -94,6 +94,60 @@ export function passwordSetupEmail(opts: {
 }
 
 // ─────────────────────────────────────────────
+// Sales rep notification — doctor approved by admin
+// ─────────────────────────────────────────────
+export function salesRepDoctorApprovedEmail(opts: {
+  doctorFirstName: string;
+  doctorLastName:  string;
+}) {
+  const subject = ` ${opts.doctorFirstName} ${opts.doctorLastName} has been approved`;
+  const html = base(`
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">
+      Physician Approved
+    </h1>
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      We are glad to inform you that
+      <strong> ${opts.doctorFirstName} ${opts.doctorLastName}</strong>
+      has been confirmed and their account is now active.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;font-weight:700;color:#15803d;">&#10003; Account Confirmed</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#166534;line-height:1.5;">
+         ${opts.doctorFirstName} ${opts.doctorLastName} can now log in and place orders through the Pronuvia portal.
+      </p>
+    </div>
+    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
+      Thank you for bringing them on board. Any orders they place will be reflected in your commission.
+    </p>
+  `);
+  return { subject, html };
+}
+
+// ─────────────────────────────────────────────
+// Sales rep notification — doctor signed up
+// ─────────────────────────────────────────────
+export function salesRepDoctorSignupEmail(opts: {
+  doctorFirstName: string;
+  doctorLastName:  string;
+}) {
+  const subject = ` ${opts.doctorFirstName} ${opts.doctorLastName} has signed up`;
+  const html = base(`
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">
+      New Physician Sign-Up
+    </h1>
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      We are glad to inform you that
+      <strong>${opts.doctorFirstName} ${opts.doctorLastName}</strong>
+      signed up for you.
+    </p>
+    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
+      Their application is now pending admin approval. You will be notified once it is reviewed.
+    </p>
+  `);
+  return { subject, html };
+}
+
+// ─────────────────────────────────────────────
 // Physician approval welcome email (detailed onboarding)
 // ─────────────────────────────────────────────
 export function physicianApprovalEmail(opts: {
@@ -115,7 +169,7 @@ export function physicianApprovalEmail(opts: {
     `<p style="margin:24px 0 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3DBFA4;">${t}</p>`;
 
   const html = base(`
-    <p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.6;">Dear Dr. ${opts.firstName} ${opts.lastName},</p>
+    <p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.6;">Dear  ${opts.firstName} ${opts.lastName},</p>
     <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.7;">
       I am Jason from Pronuvia and am glad to welcome you as a participating physician for AIC Therapy.
     </p>
@@ -307,7 +361,7 @@ export function physicianWelcomeEmail(opts: {
   const subject = "Welcome to Pronuvia — Your Physician Account is Ready";
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
-      Welcome, Dr. ${opts.firstName} ${opts.lastName}!
+      Welcome,  ${opts.firstName} ${opts.lastName}!
     </h1>
     <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
       Your Pronuvia Partnering Physician account has been created and
@@ -362,7 +416,7 @@ export function salesRepPhysicianAssignedEmail(opts: {
   physicianEmail: string;
   nameOfPractice?: string | null;
 }) {
-  const subject = `Great news! Dr. ${opts.physicianFirstName} ${opts.physicianLastName} has joined through your referral`;
+  const subject = `Great news!  ${opts.physicianFirstName} ${opts.physicianLastName} has joined through your referral`;
   const html = base(`
     <!-- Green badge -->
     <div style="display:inline-block;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:6px 14px;margin-bottom:20px;">
@@ -374,7 +428,7 @@ export function salesRepPhysicianAssignedEmail(opts: {
     </h1>
     <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
       Hi ${opts.salesRepFirstName}, great news!
-      The administrator has added <strong style="color:#111827;">Dr. ${opts.physicianFirstName} ${opts.physicianLastName}</strong>
+      The administrator has added <strong style="color:#111827;"> ${opts.physicianFirstName} ${opts.physicianLastName}</strong>
       to Pronuvia under your account. Their account is already active and approved.
     </p>
 
@@ -385,7 +439,7 @@ export function salesRepPhysicianAssignedEmail(opts: {
         <tr>
           <td style="padding:6px 0;font-size:13px;color:#6b7280;width:130px;">Name</td>
           <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">
-            Dr. ${opts.physicianFirstName} ${opts.physicianLastName}
+             ${opts.physicianFirstName} ${opts.physicianLastName}
           </td>
         </tr>
         <tr>
@@ -472,7 +526,7 @@ export function orderConfirmationEmail(d: OrderEmailData) {
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Confirmed!</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${d.firstName}, thank you for your order. We've received it and will start processing shortly.
+        Hi  ${d.firstName}, thank you for your order. We've received it and will start processing shortly.
       </p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
         <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Order #${d.orderNumber} · Total: $${d.total.toFixed(2)}</p>
@@ -490,7 +544,7 @@ export function orderProcessingEmail(d: OrderEmailData) {
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order In Progress</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> is being processed and prepared for shipment.
+        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> is being processed and prepared for shipment.
       </p>
       ${orderItemsTable(d.items)}
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
@@ -508,7 +562,7 @@ export function orderCompletedEmail(d: OrderEmailData) {
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Completed!</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
+        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
       </p>
       ${orderItemsTable(d.items)}
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
@@ -526,7 +580,7 @@ export function orderCancelledEmail(d: OrderEmailData) {
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Cancelled</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been cancelled.
+        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been cancelled.
         If you believe this is an error, please contact your administrator.
       </p>
       ${orderItemsTable(d.items)}
@@ -545,7 +599,7 @@ export function orderDetailsEmail(d: OrderEmailData) {
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Details</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${d.firstName}, here are the details for your order <strong>${d.orderNumber}</strong>.
+        Hi  ${d.firstName}, here are the details for your order <strong>${d.orderNumber}</strong>.
       </p>
       <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
         <table width="100%" cellpadding="0" cellspacing="0">
@@ -605,8 +659,9 @@ export function forgotPasswordEmail(opts: { firstName: string; resetLink: string
 // Sent immediately on account creation (all flows, PENDING status only)
 // ─────────────────────────────────────────────
 export function doctorRegistrationEmail(opts: {
-  firstName: string;
-  lastName:  string;
+  firstName:    string;
+  lastName:     string;
+  salesRepName?: string;
 }) {
   const subject = "Thank You for Signing Up – Registration Received";
   const html = base(`
@@ -614,10 +669,13 @@ export function doctorRegistrationEmail(opts: {
       Thank You for Registering!
     </h1>
     <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-      Dear Dr. ${opts.firstName} ${opts.lastName},
+      Dear  ${opts.firstName} ${opts.lastName},
     </p>
     <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
-      Thank you for signing up with us.
+      ${opts.salesRepName
+        ? `We are glad to inform you that ${opts.salesRepName} signed up for you.`
+        : "Thank you for signing up with us."
+      }
     </p>
     <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
       We have successfully received your registration information. Our team is currently
@@ -666,7 +724,7 @@ export function welcomeAboardEmail(opts: {
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Welcome Aboard!</h1>
     <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
-      Dear Dr. ${opts.firstName} ${opts.lastName},
+      Dear  ${opts.firstName} ${opts.lastName},
     </p>
     <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
       Thank you for your interest in AIC (Anti-orbital Ionic Calcium) Therapy.
@@ -696,7 +754,7 @@ export function welcomeAboardEmail(opts: {
       <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111827;">AIC for Calcium Signaling (Book)</p>
       <p style="margin:0;font-size:13px;color:#374151;line-height:1.65;">
         More technical information on AIC can be found from the book <em>"AIC for Calcium Signaling"</em>
-        written by the inventor of AIC, Dr. Paul Lee.
+        written by the inventor of AIC,  Paul Lee.
       </p>
     </div>
 
@@ -777,7 +835,7 @@ export function orderNoteEmail(opts: { firstName: string; orderNumber: string; n
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">A note about your order</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi Dr. ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong>${opts.orderNumber}</strong>.
+        Hi  ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong>${opts.orderNumber}</strong>.
       </p>
       <div style="background:#f9fafb;border-left:4px solid #3DBFA4;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
         <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;white-space:pre-wrap;">${opts.note}</p>

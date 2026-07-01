@@ -139,7 +139,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                         </span>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800 text-xs">Dr. {r.physician.firstName} {r.physician.lastName}</p>
+                        <p className="font-semibold text-gray-800 text-xs"> {r.physician.firstName} {r.physician.lastName}</p>
                         <p className="text-xs text-gray-400">{r.physician.email}</p>
                       </div>
                     </div>

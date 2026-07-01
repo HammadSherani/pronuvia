@@ -101,7 +101,7 @@ async function buildToAddress(orderId: string): Promise<[ShipAddress, null] | [n
       const ph  = order.physician;
       const rep = order.salesRep;
       const name = ph
-        ? `Dr. ${ph.firstName} ${ph.lastName}`
+        ? ` ${ph.firstName} ${ph.lastName}`
         : rep ? `${rep.firstName ?? ""} ${rep.lastName ?? ""}`.trim() : "Recipient";
       const phone = ph?.phone ?? rep?.phone ?? undefined;
 

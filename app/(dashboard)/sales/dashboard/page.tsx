@@ -62,7 +62,7 @@ export default async function SalesDashboardPage() {
       ),
     },
     {
-      label: "Commission Rate",
+      label: "Self Commission Rate",
       value: `${rep?.commission ?? 0}%`,
       sub: "Per order",
       href: "/sales/account",

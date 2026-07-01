@@ -55,9 +55,7 @@ export default async function PhysicianViewPage({ params }: Props) {
           {p.isApproved === ApprovalStatus.PENDING && (
             <PhysicianApprovalActions
               physicianId={id}
-              physicianName={`Dr. ${p.firstName} ${p.lastName}`}
-              existingCommission={p.commission}
-              salesRep={p.salesRep ? { firstName: p.salesRep.firstName, lastName: p.salesRep.lastName } : null}
+              physicianName={` ${p.firstName} ${p.lastName}`}
             />
           )}
           <Link href={`/admin/physicians/${id}/edit`}
@@ -78,7 +76,7 @@ export default async function PhysicianViewPage({ params }: Props) {
           </span>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Dr. {p.firstName} {p.lastName}</h1>
+          <h1 className="text-xl font-bold text-gray-900"> {p.firstName} {p.lastName}</h1>
           <p className="text-sm text-gray-500">{p.email}</p>
           {p.nameOfPractice && <p className="text-xs text-gray-400 mt-0.5">{p.nameOfPractice}</p>}
         </div>
@@ -172,6 +170,8 @@ export default async function PhysicianViewPage({ params }: Props) {
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
           <InfoRow label="Bank Name"       value={p.bankName} />
           <InfoRow label="Account Name"    value={p.bankAccountName} />
+          <InfoRow label="Swift Code"      value={p.swiftCode} />
+          <InfoRow label="Routing Number"  value={p.routingNumber} />
           <div className="col-span-2">
             <InfoRow label="Account Number" value={p.bankAccountNumber} />
           </div>

@@ -21,7 +21,7 @@ export default async function OrderShipmentPage({ params }: Props) {
   const items = order.items as unknown as OrderItem[];
 
   const recipientName = order.physician
-    ? `Dr. ${order.physician.firstName} ${order.physician.lastName}`
+    ? ` ${order.physician.firstName} ${order.physician.lastName}`
     : order.salesRep
     ? `${order.salesRep.firstName} ${order.salesRep.lastName}`
     : null;

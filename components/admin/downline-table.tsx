@@ -135,7 +135,7 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
                   </div>
                   <div>
                     <p className="font-medium text-gray-800 group-hover:text-[#3DBFA4] transition-colors leading-tight">
-                      Dr. {doc.firstName} {doc.lastName}
+                       {doc.firstName} {doc.lastName}
                     </p>
                     <p className="text-xs text-gray-400">{doc.email}</p>
                   </div>

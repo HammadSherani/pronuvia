@@ -380,7 +380,7 @@ function AddShipmentForm({
               <span className="text-gray-500">Ship to</span>
               {/* <span className="text-gray-800 font-medium text-right">
                 {physician
-                  ? `Dr. ${physician.firstName} ${physician.lastName}${physician.city ? `, ${physician.city}` : ""}${physician.state ? `, ${physician.state}` : ""}`
+                  ? ` ${physician.firstName} ${physician.lastName}${physician.city ? `, ${physician.city}` : ""}${physician.state ? `, ${physician.state}` : ""}`
                   : "No address"}
               </span> */}
             </div>

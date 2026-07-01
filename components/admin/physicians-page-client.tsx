@@ -45,7 +45,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
             <span className="text-[10px] font-semibold text-[#5BB8D4]">{p.firstName[0]}{p.lastName[0]}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-gray-800 truncate">Dr. {p.firstName} {p.lastName}</p>
+            <p className="text-xs font-medium text-gray-800 truncate">{p.firstName} {p.lastName}</p>
             <p className="text-[10px] text-gray-400 truncate">{p.email}</p>
           </div>
         </div>
@@ -71,7 +71,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
           {p.isApproved === ApprovalStatus.PENDING && (
             <PhysicianApprovalActions
               physicianId={p.id}
-              physicianName={`Dr. ${p.firstName} ${p.lastName}`}
+              physicianName={` ${p.firstName} ${p.lastName}`}
               existingCommission={p.commission}
               salesRep={p.salesRep ? { firstName: p.salesRep.firstName, lastName: p.salesRep.lastName } : null}
             />
@@ -92,7 +92,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
           <DeleteButton
             action={deletePhysician.bind(null, p.id)}
             modalTitle="Delete this physician?"
-            modalDescription={`Dr. ${p.firstName} ${p.lastName}'s account will be permanently removed.`}
+            modalDescription={` ${p.firstName} ${p.lastName}'s account will be permanently removed.`}
           />
         </div>
       </td>

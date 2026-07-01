@@ -80,7 +80,7 @@ export default async function AccountPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-lg font-semibold text-gray-900">
-                    Dr. {physician.firstName} {physician.lastName}
+                     {physician.firstName} {physician.lastName}
                   </p>
                   <p className="text-sm text-gray-400">{physician.email}</p>
                   {physician.nameOfPractice && (

@@ -242,7 +242,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                     {!order.salesRep && order.physician && (
                       <div>
                         <p className="text-[11px] text-gray-400 mb-0.5">Ordered by:</p>
-                        <p className="text-sm text-gray-700">Dr. (Direct)</p>
+                        <p className="text-sm text-gray-700"> (Direct)</p>
                       </div>
                     )}
                   </div>
@@ -254,7 +254,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   {order.physician ? (
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
-                        Dr. {order.physician.firstName} {order.physician.lastName}
+                         {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {order.physician.nameOfPractice && (
                         <p className="text-gray-600">{order.physician.nameOfPractice}</p>
@@ -281,7 +281,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                     <div className="text-sm space-y-1">
                       {order.physician && (
                         <p className="font-semibold text-gray-800">
-                          Dr. {order.physician.firstName} {order.physician.lastName}
+                           {order.physician.firstName} {order.physician.lastName}
                         </p>
                       )}
                       <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
@@ -294,7 +294,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   ) : order.physician ? (
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
-                        Dr. {order.physician.firstName} {order.physician.lastName}
+                         {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {physAddr && (
                         <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>
@@ -432,7 +432,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 )}
               </div>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 border-l-2 border-l-[#8b5cf6]">
-                <p className="text-xs text-gray-400 font-medium mb-1">Dr. Commission</p>
+                <p className="text-xs text-gray-400 font-medium mb-1"> Commission</p>
                 <p className="text-xl font-bold text-[#8b5cf6]">{fmtMoney(order.physicianCommissionAmount)}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{order.physicianCommissionRate}%</p>
               </div>

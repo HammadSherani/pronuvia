@@ -73,7 +73,7 @@ export default async function OrdersPage({
           color="#5BB8D4"
         />
         <SummaryCard
-          label="Dr. Commissions Earned"
+          label=" Commissions Earned"
           value={fmt(totalDrComm)}
           sub={`${pendingCount} pending`}
           color="#8b5cf6"

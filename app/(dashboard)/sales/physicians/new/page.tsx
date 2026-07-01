@@ -9,7 +9,7 @@ export default async function SalesRepNewPhysicianPage() {
   await requireSalesRep();
 
   return (
-    <div className="max-w-3xl">
+    <div className="">
       <Link
         href="/sales/physicians"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-5 transition-colors"
@@ -41,7 +41,7 @@ export default async function SalesRepNewPhysicianPage() {
         backHref="/sales/physicians"
         successRedirect="/sales/physicians"
         hideCommission
-        showNoteField
+        requirePracticeFields
       />
     </div>
   );
