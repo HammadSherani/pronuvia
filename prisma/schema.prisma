@@ -220,6 +220,8 @@ model Order {
   couponId                  String?              @db.ObjectId
   discountAmount            Float                @default(0)
 
+  customerEmail             String?
+
   placedByAdmin             Boolean              @default(false)
 
   // Return / clawback fields

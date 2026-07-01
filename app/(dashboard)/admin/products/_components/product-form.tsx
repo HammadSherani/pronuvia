@@ -11,6 +11,7 @@ type SubCategory = { id: string; name: string; categoryId: string };
 type SizeRow = {
   size: string; sku: string; gtin: string; image: string;
   costPrice: string; salePrice: string; stock: string; weight: string;
+  status: string;
 };
 
 type ActionState = { errors?: Record<string, string[]>; message?: string; success?: boolean } | undefined;
@@ -29,6 +30,7 @@ interface ProductFormProps {
     variants?: {
       size: string; sku?: string; gtin?: string; image?: string;
       costPrice?: number; salePrice?: number; stock?: number; weight?: number;
+      status?: string;
     }[];
   };
 }
@@ -47,7 +49,7 @@ function FE({ msg }: { msg?: string }) {
 }
 function Req() { return <span className="text-red-400"> *</span>; }
 
-const blankSize = (): SizeRow => ({ size: "", sku: "", gtin: "", image: "", costPrice: "", salePrice: "", stock: "", weight: "" });
+const blankSize = (): SizeRow => ({ size: "", sku: "", gtin: "", image: "", costPrice: "", salePrice: "", stock: "", weight: "", status: "in_stock" });
 
 export function ProductForm({ action, submitLabel, backHref, successRedirect, categories, subCategories, defaults }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -78,6 +80,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
           salePrice: v.salePrice != null ? String(v.salePrice) : "",
           stock:     v.stock     != null ? String(v.stock)     : "",
           weight:    v.weight    != null ? String(v.weight)    : "",
+          status:    v.status    ?? "in_stock",
         }))
       : [blankSize()]
   );
@@ -197,10 +200,17 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
               setSizes((prev) => prev.map((x, idx) => idx === i ? { ...x, [field]: ev.target.value } : x));
             const canRemove = sizes.length > 1;
 
+            const statusColor = {
+              in_stock:     "text-emerald-700 bg-emerald-50 border-emerald-200",
+              out_of_stock: "text-amber-700 bg-amber-50 border-amber-200",
+              discontinued: "text-red-700 bg-red-50 border-red-200",
+              inactive:     "text-gray-500 bg-gray-100 border-gray-200",
+            }[row.status] ?? "text-gray-500 bg-gray-100 border-gray-200";
+
             return (
               <div key={i} className="border border-gray-100 rounded-xl p-4 bg-gray-50/40">
 
-                {/* Row 1: image + size name + remove */}
+                {/* Row 1: image + size name + status badge + remove */}
                 <div className="flex items-start gap-4 mb-4">
                   <div className="shrink-0">
                     <p className="text-xs font-medium text-gray-500 mb-1.5">Image</p>
@@ -212,6 +222,21 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
                     <label className="block text-xs font-medium text-gray-500 mb-1.5">Size Name<span className="text-red-400"> *</span></label>
                     <input name="sizeName[]" className={icls()} placeholder="e.g. Small / 30ml / 100 capsules"
                       value={row.size} onChange={upd("size")} />
+                  </div>
+
+                  <div className="shrink-0 min-w-[140px]">
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Variant Status</label>
+                    <select
+                      name="sizeStatus[]"
+                      value={row.status}
+                      onChange={(e) => setSizes((prev) => prev.map((x, idx) => idx === i ? { ...x, status: e.target.value } : x))}
+                      className={`w-full border rounded-lg px-2.5 py-2 text-xs font-semibold outline-none focus:ring-1 transition ${statusColor}`}
+                    >
+                      <option value="in_stock">In Stock</option>
+                      <option value="out_of_stock">Out of Stock</option>
+                      <option value="discontinued">Discontinued</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
                   </div>
 
                   <button type="button" disabled={!canRemove}

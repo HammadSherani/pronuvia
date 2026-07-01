@@ -158,6 +158,8 @@ export function CheckoutClient({
   const { items, clearCart } = useCart();
   const router = useRouter();
 
+  const [email,         setEmail]         = useState(repEmail);
+
   // address
   const [shipping,      setShipping]      = useState<AddressData>(() => parseAddr(savedShippingAddress));
   const [billing,       setBilling]       = useState<AddressData>(() => {
@@ -389,8 +391,13 @@ export function CheckoutClient({
             <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded">
               <div className="px-4 py-3">
-                <p className="text-xs text-gray-400 mb-0.5">Email address</p>
-                <p className="text-sm text-gray-800">{repEmail}</p>
+                <label className="text-xs text-gray-400 mb-0.5 block">Email address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="text-sm text-gray-800 w-full outline-none bg-transparent"
+                />
               </div>
             </div>
           </section>
@@ -796,7 +803,7 @@ export function CheckoutClient({
                 </div>
               )}
               <div className="flex justify-between">
-                <span>Shipping</span>
+                <span>{selectedShipping?.label ?? "Shipping"}</span>
                 {loadingShipping ? (
                   <span className="text-gray-400 italic text-xs">Calculating…</span>
                 ) : selectedShipping ? (

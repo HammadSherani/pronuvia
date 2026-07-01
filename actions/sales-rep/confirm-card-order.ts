@@ -6,6 +6,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { stripe } from "@/lib/stripe/server";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
+import { generateOrderNumber } from "@/lib/orders/order-number";
+import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 
 type CartItem = {
   productId:   string;
@@ -34,13 +36,6 @@ export type ConfirmCardOrderResult = {
   orderNumber?: string;
   message?:    string;
 };
-
-function generateOrderNumber(): string {
-  const d   = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${ymd}-${rnd}`;
-}
 
 export async function confirmCardOrder(
   payload: ConfirmCardOrderPayload,
@@ -79,6 +74,9 @@ export async function confirmCardOrder(
     return { success: false, message: "Invalid cart data." };
   }
 
+  const availability = await validateCartItemsAvailability(items);
+  if (!availability.valid) return { success: false, message: availability.message };
+
   const subtotal = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
 
   const rep = await prisma.salesRepresentative.findUnique({
@@ -88,10 +86,7 @@ export async function confirmCardOrder(
   const commissionRate   = rep?.commission ?? 0;
   const commissionAmount = parseFloat(((subtotal * commissionRate) / 100).toFixed(2));
 
-  let orderNumber = generateOrderNumber();
-  while (await prisma.order.findUnique({ where: { orderNumber } })) {
-    orderNumber = generateOrderNumber();
-  }
+  const orderNumber = await generateOrderNumber();
 
   const deliveryDate = estimatedDeliveryDate(7);
 

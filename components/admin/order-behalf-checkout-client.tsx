@@ -113,6 +113,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const router = useRouter();
 
   const migrated = migrateAddressData({ ...EMPTY_ADDRESS, ...initialAddress });
+  const [email,         setEmail]         = useState(physicianEmail);
   const [shipping,      setShipping]      = useState<AddressData>(migrated);
   const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
@@ -287,8 +288,13 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded px-4 py-3">
-              <p className="text-xs text-gray-400 mb-0.5">Email address</p>
-              <p className="text-sm text-gray-800">{physicianEmail}</p>
+              <label className="text-xs text-gray-400 mb-0.5 block">Email address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="text-sm text-gray-800 w-full outline-none bg-transparent"
+              />
             </div>
           </section>
 
@@ -527,7 +533,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Shipping</span>
+                  <span>{selectedShipping?.label ?? "Shipping"}</span>
                   {loadingShipping ? (
                     <span className="text-gray-400 italic text-xs">Calculating…</span>
                   ) : selectedShipping ? (

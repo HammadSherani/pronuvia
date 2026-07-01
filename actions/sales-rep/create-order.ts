@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { requireSalesRep } from "@/lib/auth/dal";
+import { generateOrderNumber } from "@/lib/orders/order-number";
+import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 
 export type SalesOrderState = {
   message?: string;
@@ -20,13 +22,6 @@ const SingleSchema = z.object({
   quantity:    z.number().int().min(1),
   notes:       z.string().optional(),
 });
-
-function generateOrderNumber(): string {
-  const d = new Date();
-  const yyyymmdd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${yyyymmdd}-${rand}`;
-}
 
 async function getSalesRepCommission(salesRepId: string) {
   const rep = await prisma.salesRepresentative.findUnique({
@@ -59,14 +54,14 @@ export async function createOrderBySalesRep(
 
   const { productId, title, variantSize, sku, unitPrice, quantity, notes } = validated.data;
 
+  const availability = await validateCartItemsAvailability([{ productId, title, variantSize }]);
+  if (!availability.valid) return { message: availability.message };
+
   const salesRepCommissionRate   = await getSalesRepCommission(session.userId);
   const lineTotal                = parseFloat((unitPrice * quantity).toFixed(2));
   const salesRepCommissionAmount = parseFloat(((lineTotal * salesRepCommissionRate) / 100).toFixed(2));
 
-  let orderNumber = generateOrderNumber();
-  while (await prisma.order.findUnique({ where: { orderNumber } })) {
-    orderNumber = generateOrderNumber();
-  }
+  const orderNumber = await generateOrderNumber();
 
   await prisma.$transaction([
     prisma.order.create({
@@ -123,14 +118,14 @@ export async function createOrderFromCart(
   }
   if (!items.length) return { message: "Your cart is empty." };
 
+  const availability = await validateCartItemsAvailability(items);
+  if (!availability.valid) return { message: availability.message };
+
   const salesRepCommissionRate   = await getSalesRepCommission(session.userId);
   const subtotal                 = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
   const salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
 
-  let orderNumber = generateOrderNumber();
-  while (await prisma.order.findUnique({ where: { orderNumber } })) {
-    orderNumber = generateOrderNumber();
-  }
+  const orderNumber = await generateOrderNumber();
 
   await prisma.$transaction([
     prisma.order.create({

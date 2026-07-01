@@ -6,7 +6,12 @@ import toast from "react-hot-toast";
 import { QuickOrderModal } from "@/components/sales/quick-order-modal";
 import { useCart } from "@/lib/cart/cart-context";
 
-type Variant = { size?: string; salePrice?: number; stock?: number; sku?: string; image?: string };
+type VariantStatus = "in_stock" | "out_of_stock" | "discontinued" | "inactive";
+type Variant = { size?: string; salePrice?: number; stock?: number; sku?: string; image?: string; status?: VariantStatus };
+
+function variantStatus(v: Variant): VariantStatus { return v.status ?? "in_stock"; }
+function isAvailable(v: Variant) { return variantStatus(v) === "in_stock"; }
+function isVisible(v: Variant)   { const s = variantStatus(v); return s !== "inactive"; }
 type RelatedProduct = {
   id: string; title: string; slug: string; image: string | null;
   salePrice: number; variants: unknown[];
@@ -27,8 +32,9 @@ type Props = {
 
 // ── Related product mini-card
 function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
-  const variants  = p.variants as Variant[];
-  const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 ? 0 : -1);
+  const allVariants = p.variants as Variant[];
+  const variants    = allVariants.filter(isVisible);
+  const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);
   const [qty,     setQty]     = useState(1);
   const [modal,   setModal]   = useState(false);
 
@@ -39,6 +45,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
 
   function handleBuy() {
     if (variants.length > 0 && selIdx < 0) { toast.error("Please select a size first."); return; }
+    if (sel && !isAvailable(sel)) { toast.error("This variant is not available for purchase."); return; }
     setModal(true);
   }
 
@@ -61,9 +68,15 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
             <select value={selIdx} onChange={(e) => setSelIdx(parseInt(e.target.value))}
               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-gray-900 transition-colors text-gray-700">
               <option value={-1}>— Size —</option>
-              {variants.map((v, i) => (
-                <option key={i} value={i}>{v.size}{v.salePrice !== undefined ? ` — $${v.salePrice.toFixed(2)}` : ""}</option>
-              ))}
+              {variants.map((v, i) => {
+                const available = isAvailable(v);
+                const suffix = !available ? ` (${variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued"})` : "";
+                return (
+                  <option key={i} value={i} disabled={!available}>
+                    {v.size}{v.salePrice !== undefined ? ` — $${v.salePrice.toFixed(2)}` : ""}{suffix}
+                  </option>
+                );
+              })}
             </select>
           ) : <div className="h-7" />}
         </div>
@@ -113,10 +126,11 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
 
 // ── Main product detail client component
 export function ProductDetailClient({ product, related, basePath = "/sales/shop" }: Props & { basePath?: string }) {
-  const variants = product.variants as Variant[];
+  const allVariants = product.variants as Variant[];
+  const variants    = allVariants.filter(isVisible);
 
   const [activeImage, setActiveImage]   = useState(product.image ?? "");
-  const [selectedIdx, setSelectedIdx]   = useState(() => variants.length === 1 ? 0 : -1);
+  const [selectedIdx, setSelectedIdx]   = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);
   const [qty,         setQty]           = useState(1);
   const [activeTab,   setActiveTab]     = useState<"info" | "reviews">("info");
   const [showModal,   setShowModal]     = useState(false);
@@ -132,6 +146,10 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
   function handleAddToCart() {
     if (variants.length > 0 && selectedIdx < 0) {
       toast.error("Please select a size first.");
+      return;
+    }
+    if (selectedVariant && !isAvailable(selectedVariant)) {
+      toast.error("This variant is not available for purchase.");
       return;
     }
     addItem({
@@ -227,16 +245,33 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
             <div className="mb-4">
               <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Size</p>
               <div className="flex flex-wrap gap-2 mb-2">
-                {variants.map((v, i) => (
-                  <button key={i} type="button" onClick={() => setSelectedIdx(i === selectedIdx ? -1 : i)}
-                    className={`px-4 py-1.5 rounded border text-sm font-medium transition-all ${
-                      i === selectedIdx
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
-                    }`}>
-                    {v.size}
-                  </button>
-                ))}
+                {variants.map((v, i) => {
+                  const available = isAvailable(v);
+                  const status    = variantStatus(v);
+                  const isSelected = i === selectedIdx;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      disabled={!available}
+                      onClick={() => available && setSelectedIdx(i === selectedIdx ? -1 : i)}
+                      className={`relative px-4 py-1.5 rounded border text-sm font-medium transition-all ${
+                        !available
+                          ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
+                          : isSelected
+                            ? "bg-gray-900 text-white border-gray-900"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
+                      }`}
+                    >
+                      {v.size}
+                      {!available && (
+                        <span className="block text-[9px] leading-tight mt-0.5 font-normal">
+                          {status === "out_of_stock" ? "Out of Stock" : "Discontinued"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
               {selectedIdx >= 0 && (
                 <button type="button" onClick={() => setSelectedIdx(-1)}

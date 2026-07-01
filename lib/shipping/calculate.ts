@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db/prisma";
+import { Country } from "country-state-city";
 import { ShippingMethod } from "@/generated/prisma/enums";
 
 export type ShippingOption = {
@@ -11,11 +12,15 @@ export type ShippingOption = {
   scope:  "state" | "country"; // for sorting priority
 };
 
-const METHOD_LABELS: Record<ShippingMethod, string> = {
-  FLAT:         "Flat Rate Shipping",
-  FREE:         "Free Shipping",
-  LOCAL_PICKUP: "Local Pickup",
-};
+function methodLabel(method: ShippingMethod, countryCode: string): string {
+  if (method === ShippingMethod.FLAT) {
+    const countryName = Country.getCountryByCode(countryCode)?.name ?? countryCode;
+    return `Shipping ${countryName} Flat Rate`;
+  }
+  if (method === ShippingMethod.FREE)         return "Free Shipping";
+  if (method === ShippingMethod.LOCAL_PICKUP) return "Local Pickup";
+  return method;
+}
 
 /**
  * Returns all active shipping options applicable to the given country + state.
@@ -45,10 +50,10 @@ export async function getShippingOptionsForCountry(
   for (const r of allRates) {
     if (r.states.length === 0) {
       // Country-wide rule
-      countryWide.push({ id: r.id, method: r.method, label: METHOD_LABELS[r.method], cost: r.cost, scope: "country" });
+      countryWide.push({ id: r.id, method: r.method, label: methodLabel(r.method, countryCode), cost: r.cost, scope: "country" });
     } else if (stateCode && r.states.includes(stateCode)) {
       // State-specific rule that matches the customer's state
-      stateSpecific.push({ id: r.id, method: r.method, label: METHOD_LABELS[r.method], cost: r.cost, scope: "state" });
+      stateSpecific.push({ id: r.id, method: r.method, label: methodLabel(r.method, countryCode), cost: r.cost, scope: "state" });
     }
   }
 

@@ -16,6 +16,7 @@ const SizeSchema = z.object({
   salePrice: z.number().min(0).optional(),
   stock:     z.number().int().min(0).optional(),
   weight:    z.number().min(0).optional(),
+  status:    z.enum(["in_stock", "out_of_stock", "discontinued", "inactive"]).default("in_stock"),
 });
 
 const ProductSchema = z.object({
@@ -56,6 +57,7 @@ function parseProductFormData(formData: FormData) {
   const sizeSalePrices = formData.getAll("sizeSalePrice[]").map(String);
   const sizeStocks     = formData.getAll("sizeStock[]").map(String);
   const sizeWeights    = formData.getAll("sizeWeight[]").map(String);
+  const sizeStatuses   = formData.getAll("sizeStatus[]").map(String);
 
   const toNum = (s: string) => { const n = Number(s.trim()); return isNaN(n) || s.trim() === "" ? undefined : n; };
 
@@ -69,6 +71,7 @@ function parseProductFormData(formData: FormData) {
       salePrice: toNum(sizeSalePrices[i] ?? ""),
       stock:     toNum(sizeStocks[i]    ?? ""),
       weight:    toNum(sizeWeights[i]   ?? ""),
+      status:    (sizeStatuses[i]?.trim() || "in_stock") as "in_stock" | "out_of_stock" | "discontinued" | "inactive",
     }))
     .filter((v) => v.size);
 

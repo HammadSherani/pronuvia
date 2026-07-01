@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
+import { generateOrderNumber } from "@/lib/orders/order-number";
+import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 
 type CartItem = {
   productId:   string;
@@ -21,13 +23,6 @@ export type WalletPayState = {
   orderNumber?: string;
   message?:    string;
 } | undefined;
-
-function generateOrderNumber(): string {
-  const d   = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${ymd}-${rnd}`;
-}
 
 export async function payWithWallet(
   _state: WalletPayState,
@@ -52,6 +47,9 @@ export async function payWithWallet(
   }
   if (!items.length) return { success: false, message: "Your cart is empty." };
 
+  const availability = await validateCartItemsAvailability(items);
+  if (!availability.valid) return { success: false, message: availability.message };
+
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
     select: { commission: true, walletBalance: true },
@@ -72,10 +70,7 @@ export async function payWithWallet(
   const txId             = `WALLET-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   const deliveryDate     = estimatedDeliveryDate(7);
 
-  let orderNumber = generateOrderNumber();
-  while (await prisma.order.findUnique({ where: { orderNumber } })) {
-    orderNumber = generateOrderNumber();
-  }
+  const orderNumber = await generateOrderNumber();
 
   const ops: Prisma.PrismaPromise<unknown>[] = [
     prisma.order.create({

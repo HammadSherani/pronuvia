@@ -341,6 +341,7 @@ export async function sendOrderEmail(
     select: {
       orderNumber: true, total: true, status: true, items: true,
       trackingNumber: true, shippingCarrier: true, estimatedDelivery: true,
+      customerEmail: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
     },
   });
@@ -391,9 +392,15 @@ export async function sendOrderEmail(
 
   const { subject, html } = templateFns[emailType](emailData);
 
+  // If a customer email was entered at checkout, use it as To and CC the doctor; otherwise fall back to the doctor's email
+  const toEmail = order.customerEmail ?? order.physician.email;
+  const ccEmail = order.customerEmail && order.customerEmail !== order.physician.email
+    ? order.physician.email
+    : undefined;
+
   try {
-    await sendMail({ to: order.physician.email, subject, html });
-    return { success: true, message: `"${label[emailType]}" email sent to ${order.physician.email}.` };
+    await sendMail({ to: toEmail, cc: ccEmail, subject, html });
+    return { success: true, message: `"${label[emailType]}" email sent to ${toEmail}.` };
   } catch (err) {
     console.error("[sendOrderEmail]", err);
     return { success: false, message: "Failed to send email. Check SMTP settings." };

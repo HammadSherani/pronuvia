@@ -1,5 +1,6 @@
 import { notFound }              from "next/navigation";
 import Link                       from "next/link";
+import { Country }                from "country-state-city";
 import { requireAdmin }           from "@/lib/auth/dal";
 import { getOrderById }           from "@/actions/admin/manage-orders";
 import { OrderStatus }            from "@/generated/prisma/enums";
@@ -15,6 +16,23 @@ import { OrderNotesPanel }        from "@/components/admin/order-notes-panel";
 type Props = { params: Promise<{ id: string }> };
 
 type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+
+function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
+  if (shippingRate <= 0) return "Free Shipping";
+  if (!shippingAddress) return "Shipping";
+  try {
+    const a: AddrObj = JSON.parse(shippingAddress);
+    if (a.country) {
+      const countryName = Country.getCountryByCode(a.country)?.name ?? a.country;
+      return `Shipping ${countryName} Flat Rate`;
+    }
+  } catch { /* fall through */ }
+  const lines = shippingAddress.split("\n").map(l => l.trim()).filter(Boolean);
+  const lastLine = lines[lines.length - 1];
+  if (lastLine) return `Shipping ${lastLine} Flat Rate`;
+  return "Shipping";
+}
+
 function fmtAddress(raw: string | null | undefined): string | null {
   if (!raw) return null;
   try {
@@ -376,20 +394,21 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           <span>−{fmtMoney(order.discountAmount ?? 0)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>Shipping</span>
-                        <span>
-                          {(() => {
-                            const stored  = order.shippingRate ?? 0;
-                            // If stored rate is 0 but total > subtotal - discount, recover the implied amount
-                            const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
-                            const display = stored > 0 ? stored : implied > 0 ? implied : 0;
-                            return display === 0
-                              ? <span className="text-[#3DBFA4] font-medium">Free</span>
-                              : fmtMoney(display);
-                          })()}
-                        </span>
-                      </div>
+                      {(() => {
+                        const stored  = order.shippingRate ?? 0;
+                        const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
+                        const display = stored > 0 ? stored : implied > 0 ? implied : 0;
+                        return (
+                          <div className="flex justify-between text-sm text-gray-500">
+                            <span>{getShippingLabel(order.shippingAddress, display)}</span>
+                            <span>
+                              {display === 0
+                                ? <span className="text-[#3DBFA4] font-medium">Free</span>
+                                : fmtMoney(display)}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       {isReturned && order.returnedTotal != null && (
                         <div className="flex justify-between text-sm text-orange-500 font-medium">
                           <span>Returned</span><span>−{fmtMoney(order.returnedTotal)}</span>

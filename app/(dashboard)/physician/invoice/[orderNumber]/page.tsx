@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Country } from "country-state-city";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PrintButton } from "@/components/sales/print-button";
@@ -21,6 +22,25 @@ function fmtMoney(n: number) {
 }
 
 type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+
+function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
+  if (shippingRate <= 0) return "Free Shipping";
+  if (!shippingAddress) return "Shipping";
+  // Try JSON format first
+  try {
+    const a: AddrObj = JSON.parse(shippingAddress);
+    if (a.country) {
+      const countryName = Country.getCountryByCode(a.country)?.name ?? a.country;
+      return `Shipping ${countryName} Flat Rate`;
+    }
+  } catch { /* fall through to plain text */ }
+  // Plain text: formatAddress() puts country name as the last line
+  const lines = shippingAddress.split("\n").map(l => l.trim()).filter(Boolean);
+  const lastLine = lines[lines.length - 1];
+  if (lastLine) return `Shipping ${lastLine} Flat Rate`;
+  return "Shipping";
+}
+
 function fmtAddress(raw: string | null | undefined): string {
   if (!raw) return "";
   try {
@@ -59,7 +79,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
       subtotal: true, total: true, shippingRate: true,
       couponCode: true, discountAmount: true,
       shippingCarrier: true, trackingNumber: true,
-      billingAddress: true, shippingAddress: true, estimatedDelivery: true,
+      billingAddress: true, shippingAddress: true,
       notes: true, items: true,
       physicianId: true,
       physician: {
@@ -103,7 +123,10 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </div>
               <div className="text-right">
                 <p className="text-xs text-white/60 uppercase tracking-wider">Invoice</p>
-                <p className="text-xl font-bold font-mono mt-0.5">{order.orderNumber}</p>
+                <div className="flex items-baseline gap-3 justify-end mt-1">
+                  <p className="text-sm text-white uppercase tracking-wider font-medium">Order Number</p>
+                  <p className="text-xl font-bold font-mono">#{order.orderNumber}</p>
+                </div>
                 <p className="text-xs text-white/70 mt-1">{fmtDate(order.createdAt)}</p>
               </div>
             </div>
@@ -128,18 +151,6 @@ export default async function PhysicianInvoicePage({ params }: Props) {
           {/* Body */}
           <div className="px-8 py-6 space-y-6">
 
-            {order.transactionId && (
-              <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</p>
-                  <p className="text-sm font-mono font-medium text-gray-800 mt-0.5 break-all">{order.transactionId}</p>
-                </div>
-                <svg className="w-5 h-5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-            )}
-
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
@@ -163,7 +174,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <InfoBox
                 label="Shipping / Tracking"
                 value={order.trackingNumber
@@ -173,15 +184,6 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" />
-                  </svg>
-                }
-              />
-              <InfoBox
-                label="Estimated Delivery"
-                value={fmtDate(order.estimatedDelivery)}
-                icon={
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 }
               />
@@ -230,19 +232,21 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                   <span>Subtotal</span>
                   <span>{fmtMoney(order.subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Shipping</span>
-                  <span>
-                    {(() => {
-                      const stored  = order.shippingRate ?? 0;
-                      const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
-                      const display = stored > 0 ? stored : implied > 0 ? implied : 0;
-                      return display === 0
-                        ? <span className="text-[#3DBFA4] font-medium">Free</span>
-                        : fmtMoney(display);
-                    })()}
-                  </span>
-                </div>
+                {(() => {
+                  const stored  = order.shippingRate ?? 0;
+                  const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
+                  const display = stored > 0 ? stored : implied > 0 ? implied : 0;
+                  return (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>{getShippingLabel(order.shippingAddress, display)}</span>
+                      <span>
+                        {display === 0
+                          ? <span className="text-[#3DBFA4] font-medium">Free</span>
+                          : fmtMoney(display)}
+                      </span>
+                    </div>
+                  );
+                })()}
                 {order.couponCode && (order.discountAmount ?? 0) > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span className="flex items-center gap-1.5">

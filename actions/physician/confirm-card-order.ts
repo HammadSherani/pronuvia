@@ -6,6 +6,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { stripe } from "@/lib/stripe/server";
 import { requirePhysician } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
+import { generateOrderNumber } from "@/lib/orders/order-number";
+import { sendMail } from "@/lib/email/mailer";
+import { orderConfirmationEmail } from "@/lib/email/templates";
+import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 
 type CartItem = {
   productId:   string;
@@ -25,6 +29,7 @@ export type ConfirmPhysicianCardOrderPayload = {
   notes:           string;
   shippingRate:    number;
   total:           number;
+  customerEmail:   string;
   couponId?:       string;
   couponCode?:     string;
   discountAmount?: number;
@@ -35,13 +40,6 @@ export type ConfirmPhysicianCardOrderResult = {
   orderNumber?: string;
   message?:     string;
 };
-
-function generateOrderNumber(): string {
-  const d   = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${ymd}-${rnd}`;
-}
 
 export async function confirmPhysicianCardOrder(
   payload: ConfirmPhysicianCardOrderPayload,
@@ -76,11 +74,14 @@ export async function confirmPhysicianCardOrder(
     return { success: false, message: "Invalid cart data." };
   }
 
+  const availability = await validateCartItemsAvailability(items);
+  if (!availability.valid) return { success: false, message: availability.message };
+
   const subtotal = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, uplineCommission: true, salesRepId: true },
+    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
   const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
@@ -93,10 +94,7 @@ export async function confirmPhysicianCardOrder(
     salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
   }
 
-  let orderNumber = generateOrderNumber();
-  while (await prisma.order.findUnique({ where: { orderNumber } })) {
-    orderNumber = generateOrderNumber();
-  }
+  const orderNumber = await generateOrderNumber();
 
   const ops: Prisma.PrismaPromise<unknown>[] = [
     prisma.order.create({
@@ -114,6 +112,7 @@ export async function confirmPhysicianCardOrder(
         physicianCommissionAmount,
         salesRepCommissionRate,
         salesRepCommissionAmount,
+        customerEmail:         payload.customerEmail   || undefined,
         billingAddress:        payload.billingAddress  || undefined,
         shippingAddress:       payload.shippingAddress || undefined,
         shippingRate:          payload.shippingRate,
@@ -142,6 +141,31 @@ export async function confirmPhysicianCardOrder(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(ops as any);
+
+  // Send order confirmation email: To = customer email, CC = physician's registered email
+  if (payload.customerEmail) {
+    try {
+      const { subject, html } = orderConfirmationEmail({
+        orderNumber,
+        firstName:  physician?.firstName ?? "Doctor",
+        total:      payload.total,
+        status:     "PAID",
+        items:      items.map((i) => ({
+          title:       i.title,
+          variantSize: i.variantSize,
+          quantity:    i.quantity,
+          unitPrice:   i.unitPrice,
+          lineTotal:   i.lineTotal,
+        })),
+      });
+      const cc = physician?.email && physician.email !== payload.customerEmail
+        ? physician.email
+        : undefined;
+      await sendMail({ to: payload.customerEmail, cc, subject, html });
+    } catch (err) {
+      console.error("[physician order] confirmation email failed:", err);
+    }
+  }
 
   revalidatePath("/physician/orders");
   return { success: true, orderNumber };

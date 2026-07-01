@@ -21,6 +21,7 @@ function createTransporter() {
 
 export async function sendMail(opts: {
   to:           string;
+  cc?:          string;
   subject:      string;
   html:         string;
   attachments?: { filename: string; path: string }[];
@@ -29,10 +30,11 @@ export async function sendMail(opts: {
   const info = await transporter.sendMail({
     from:        process.env.SMTP_FROM ?? process.env.SMTP_USER,
     to:          opts.to,
+    cc:          opts.cc,
     subject:     opts.subject,
     html:        opts.html,
     attachments: opts.attachments,
   });
-  console.log("[mailer] sent to", opts.to, "| subject:", opts.subject, "| msgId:", info.messageId);
+  console.log("[mailer] sent to", opts.to, opts.cc ? `| cc: ${opts.cc}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;
 }

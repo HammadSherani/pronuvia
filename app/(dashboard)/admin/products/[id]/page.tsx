@@ -6,6 +6,20 @@ import { getProductById } from "@/actions/admin/products";
 type SizeVariant = {
   size: string; sku?: string; gtin?: string; image?: string;
   costPrice?: number; salePrice?: number; stock?: number; weight?: number;
+  status?: string;
+};
+
+const VARIANT_STATUS_STYLES: Record<string, string> = {
+  in_stock:     "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  out_of_stock: "bg-amber-50  text-amber-700  border border-amber-200",
+  discontinued: "bg-red-50    text-red-700    border border-red-200",
+  inactive:     "bg-gray-100  text-gray-500   border border-gray-200",
+};
+const VARIANT_STATUS_LABELS: Record<string, string> = {
+  in_stock:     "In Stock",
+  out_of_stock: "Out of Stock",
+  discontinued: "Discontinued",
+  inactive:     "Inactive",
 };
 
 const STATUS_STYLES = {
@@ -146,6 +160,7 @@ export default async function ProductViewPage({ params }: Props) {
                 <tr className="bg-gray-50/60 border-b border-gray-100">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Image</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Size</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">GTIN</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cost</th>
@@ -170,6 +185,16 @@ export default async function ProductViewPage({ params }: Props) {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-800">{v.size}</td>
+                    <td className="px-4 py-3">
+                      {(() => {
+                        const s = v.status ?? "in_stock";
+                        return (
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${VARIANT_STATUS_STYLES[s] ?? VARIANT_STATUS_STYLES.inactive}`}>
+                            {VARIANT_STATUS_LABELS[s] ?? s}
+                          </span>
+                        );
+                      })()}
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">{v.sku || "—"}</td>
                     <td className="px-4 py-3 text-xs text-gray-500">{v.gtin || "—"}</td>
                     <td className="px-4 py-3 text-gray-600">{fmt(v.costPrice)}</td>

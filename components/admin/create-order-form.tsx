@@ -11,7 +11,15 @@ type Physician = {
   salesRep: { id: string; name: string; commission: number } | null;
 };
 
-type Variant = { size?: string; sku?: string; salePrice?: number | string; [k: string]: unknown };
+type Variant = { size?: string; sku?: string; salePrice?: number | string; status?: string; [k: string]: unknown };
+
+function variantStatusSuffix(v: Variant): string {
+  const s = v.status ?? "in_stock";
+  if (s === "out_of_stock") return " (Out of Stock)";
+  if (s === "discontinued") return " (Discontinued)";
+  if (s === "inactive")     return " (Inactive)";
+  return "";
+}
 
 type ProductOption = {
   id: string; title: string;
@@ -190,7 +198,9 @@ export function CreateOrderForm({ physicians, products }: Props) {
                           onChange={(e) => prod && selectVariant(idx, prod, e.target.value)}
                           className={base}>
                           {variants.map((v, vi) => (
-                            <option key={vi} value={v.size ?? ""}>{v.size ?? `Variant ${vi + 1}`}</option>
+                            <option key={vi} value={v.size ?? ""}>
+                              {(v.size ?? `Variant ${vi + 1}`) + variantStatusSuffix(v)}
+                            </option>
                           ))}
                         </select>
                       ) : (

@@ -5,21 +5,29 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useCart } from "@/lib/cart/cart-context";
 
-type Variant  = { size?: string; salePrice?: number; stock?: number; sku?: string };
+type VariantStatus = "in_stock" | "out_of_stock" | "discontinued" | "inactive";
+type Variant  = { size?: string; salePrice?: number; stock?: number; sku?: string; status?: VariantStatus };
+
+function variantStatus(v: Variant): VariantStatus { return v.status ?? "in_stock"; }
+function isAvailable(v: Variant) { return variantStatus(v) === "in_stock"; }
+function isVisible(v: Variant)   { return variantStatus(v) !== "inactive"; }
 type Product  = { id: string; title: string; slug: string; image: string | null; salePrice: number; variants: unknown[]; category: { id: string; name: string } | null; status: string };
 type Category = { id: string; name: string };
 
 function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
-  const variants = product.variants as Variant[];
+  const allVariants = product.variants as Variant[];
+  const variants    = allVariants.filter(isVisible);
   const { addItem, items } = useCart();
 
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const firstAvailableIdx = variants.findIndex(isAvailable);
+  const [selectedIdx, setSelectedIdx] = useState(firstAvailableIdx >= 0 ? firstAvailableIdx : 0);
   const [pulse,       setPulse]       = useState(false);
 
   const selected    = variants[selectedIdx] ?? variants[0] ?? null;
   const unitPrice   = selected?.salePrice ?? product.salePrice;
   const variantSize = selected?.size ?? "";
   const variantSku  = selected?.sku  ?? "";
+  const selectedAvailable = selected ? isAvailable(selected) : true;
 
   const inCart = items.some(
     (i) => i.productId === product.id && i.variantSize === variantSize
@@ -33,6 +41,10 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
     : `$${unitPrice.toFixed(2)}`;
 
   function handleAddToCart() {
+    if (!selectedAvailable) {
+      toast.error("This variant is out of stock.");
+      return;
+    }
     addItem({
       productId:    product.id,
       productTitle: product.title,
@@ -93,20 +105,27 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
         {/* Size chips — shown when product has multiple variants */}
         {variants.length > 1 && (
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {variants.map((v, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setSelectedIdx(idx)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
-                  selectedIdx === idx
-                    ? "bg-gray-900 text-white border-gray-900"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-[#3DBFA4]"
-                }`}
-              >
-                {v.size ?? `Option ${idx + 1}`}
-              </button>
-            ))}
+            {variants.map((v, idx) => {
+              const available = isAvailable(v);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  disabled={!available}
+                  onClick={() => available && setSelectedIdx(idx)}
+                  title={!available ? (variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued") : undefined}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
+                    !available
+                      ? "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed line-through"
+                      : selectedIdx === idx
+                        ? "bg-gray-900 text-white border-gray-900"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-[#3DBFA4]"
+                  }`}
+                >
+                  {v.size ?? `Option ${idx + 1}`}
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -119,16 +138,19 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
           <button
             type="button"
             onClick={handleAddToCart}
+            disabled={!selectedAvailable}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-              inCart || pulse
-                ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
+              !selectedAvailable
+                ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                : inCart || pulse
+                  ? "bg-gray-900 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
             }`}
           >
             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            {inCart ? "In Cart" : "Add to Cart"}
+            {!selectedAvailable ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
           </button>
         </div>
       </div>
