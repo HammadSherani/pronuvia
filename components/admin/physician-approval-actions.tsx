@@ -9,8 +9,10 @@ export function PhysicianApprovalActions({
   physicianId,
   physicianName,
 }: {
-  physicianId:   string;
-  physicianName: string;
+  physicianId:        string;
+  physicianName:      string;
+  existingCommission?: number;
+  salesRep?:          { firstName: string; lastName: string } | null;
 }) {
   const router                          = useRouter();
   const [isPending,   startTransition]  = useTransition();
