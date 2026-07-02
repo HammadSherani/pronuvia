@@ -181,7 +181,7 @@ export async function getSalesRepById(id: string) {
     where: { id },
     select: {
       id: true, name: true, firstName: true, lastName: true, email: true,
-      phone: true, commission: true, ordersCount: true,
+      phone: true, website: true, commission: true, ordersCount: true, walletBalance: true,
       billingAddress: true, shippingAddress: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true, swiftCode: true, routingNumber: true,
       createdAt: true, updatedAt: true,

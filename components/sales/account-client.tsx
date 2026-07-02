@@ -36,15 +36,14 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
   );
 }
 
-type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+type AddrObj = { line1?: string; line2?: string; city?: string; state?: string; zipCode?: string; country?: string };
 function parseAddress(raw: string | null | undefined): string {
   if (!raw) return "";
   try {
     const a: AddrObj = JSON.parse(raw);
     return [
-      [a.firstName, a.lastName].filter(Boolean).join(" "),
-      a.address1, a.address2,
-      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.line1, a.line2,
+      [a.city, a.state, a.zipCode].filter(Boolean).join(", "),
       a.country,
     ].filter(Boolean).join("\n");
   } catch { return raw; }

@@ -15,7 +15,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-type AddressObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; stateName?: string; zip?: string; country?: string };
+type AddressObj = { line1?: string; line2?: string; city?: string; state?: string; zipCode?: string; country?: string };
 
 function AddressDisplay({ label, raw }: { label: string; raw?: string | null }) {
   let addr: AddressObj | null = null;
@@ -32,12 +32,11 @@ function AddressDisplay({ label, raw }: { label: string; raw?: string | null }) 
         ) : (
           <span className="whitespace-pre-line">
             {[
-              [addr.firstName, addr.lastName].filter(Boolean).join(" "),
-              addr.address1,
-              addr.address2,
-              [addr.city, addr.state, addr.zip].filter(Boolean).join(", "),
+              addr.line1,
+              addr.line2,
+              [addr.city, addr.state, addr.zipCode].filter(Boolean).join(", "),
               addr.country,
-            ].filter(Boolean).join("\n")}
+            ].filter(Boolean).join("\n") || <span className="text-gray-300">—</span>}
           </span>
         )}
       </dd>
@@ -92,9 +91,12 @@ export default async function SalesRepViewPage({ params }: Props) {
           <h1 className="text-xl font-bold text-gray-900">{rep.name}</h1>
           <p className="text-sm text-gray-500">{rep.email}</p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
           <span className="inline-flex px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-sm font-medium">
             {rep.commission}% commission
+          </span>
+          <span className="inline-flex px-3 py-1 bg-teal-50 text-teal-700 border border-teal-200 rounded-full text-sm font-medium">
+            ${rep.walletBalance.toFixed(2)} wallet
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-sm font-medium">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -110,6 +112,9 @@ export default async function SalesRepViewPage({ params }: Props) {
         <InfoRow label="Last Name" value={rep.lastName} />
         <InfoRow label="Email" value={rep.email} />
         <InfoRow label="Phone" value={rep.phone} />
+        <InfoRow label="Website" value={rep.website} />
+        <InfoRow label="Commission" value={`${rep.commission}%`} />
+        <InfoRow label="Wallet Balance" value={`$${rep.walletBalance.toFixed(2)}`} />
         <InfoRow label="Total Orders" value={String(rep.ordersCount)} />
         <InfoRow label="Member Since" value={new Date(rep.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
       </Card>
@@ -125,7 +130,9 @@ export default async function SalesRepViewPage({ params }: Props) {
 
       <Card title="Payout / Bank Details">
         <InfoRow label="Bank Name" value={rep.bankName} />
+        <InfoRow label="SWIFT / IBAN" value={rep.swiftCode} />
         <InfoRow label="Account Name" value={rep.bankAccountName} />
+        <InfoRow label="Routing Number" value={rep.routingNumber} />
         <div className="col-span-2">
           <InfoRow label="Account Number" value={rep.bankAccountNumber} />
         </div>
