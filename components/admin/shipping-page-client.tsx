@@ -398,6 +398,9 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     } catch { /* ignore */ }
   }, []);
 
+  // Dimension unit
+  const [dimUnit, setDimUnit] = useState<"cm" | "in">("cm");
+
   // Weight
   const [weight,     setWeight]     = useState("1");
   const [weightUnit, setWeightUnit] = useState<WeightUnit>("lbs");
@@ -424,11 +427,15 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     if (wLbs <= 0) return null;
 
     if (pkgTab === "custom") {
+      const toIn = (v: string) => {
+        const n = parseFloat(v);
+        return isNaN(n) ? undefined : dimUnit === "cm" ? cmToIn(n) : n;
+      };
       return {
         weightLbs: wLbs,
-        lengthIn: lengthCm ? cmToIn(parseFloat(lengthCm)) : undefined,
-        widthIn:  widthCm  ? cmToIn(parseFloat(widthCm))  : undefined,
-        heightIn: heightCm ? cmToIn(parseFloat(heightCm)) : undefined,
+        lengthIn: lengthCm ? toIn(lengthCm) : undefined,
+        widthIn:  widthCm  ? toIn(widthCm)  : undefined,
+        heightIn: heightCm ? toIn(heightCm) : undefined,
       };
     }
     if (pkgTab === "carrier" && selectedCarrierPkg) {
@@ -690,16 +697,39 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">Dimensions (cm)</label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs text-gray-500">Dimensions</label>
+                      <div className="flex items-center rounded-md overflow-hidden border border-gray-200 text-xs font-semibold">
+                        {(["cm", "in"] as const).map(u => (
+                          <button
+                            key={u}
+                            type="button"
+                            onClick={() => setDimUnit(u)}
+                            className={`px-2.5 py-1 transition-colors ${
+                              dimUnit === u
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-400 hover:text-gray-600 bg-white"
+                            }`}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         { p: "Length", v: lengthCm, s: setLengthCm },
                         { p: "Width",  v: widthCm,  s: setWidthCm  },
                         { p: "Height", v: heightCm, s: setHeightCm },
                       ].map(({ p, v, s }) => (
-                        <input key={p} type="number" min="0" step="0.1" placeholder={p} value={v}
-                          onChange={e => s(e.target.value)}
-                          className="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 placeholder:text-gray-300 bg-white" />
+                        <div key={p} className="relative">
+                          <input type="number" min="0" step="0.1" placeholder={p} value={v}
+                            onChange={e => s(e.target.value)}
+                            className="w-full px-3 py-2.5 pr-8 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900/30 focus:border-gray-900 placeholder:text-gray-300 bg-white" />
+                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-300 font-medium pointer-events-none">
+                            {dimUnit}
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>

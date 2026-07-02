@@ -143,7 +143,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="Bank Name"       value={p.bankName} />
         <InfoRow label="Account Name"    value={p.bankAccountName} />
         <InfoRow label="Account Number"  value={p.bankAccountNumber} />
-        <InfoRow label="SWIFT / IBAN"    value={p.swiftCode} />
+        <InfoRow label="SWIFT CODE"    value={p.swiftCode} />
         <InfoRow label="Routing Number"  value={p.routingNumber} />
       </Section>
 

@@ -1,6 +1,7 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
 
-const BASE = "https://onlinetools.ups.com";
+// Use UPS_API_URL=https://wwwcie.ups.com for sandbox, or https://onlinetools.ups.com for production
+const BASE = process.env.UPS_API_URL ?? "https://wwwcie.ups.com";
 
 async function getToken(): Promise<string> {
   const creds = Buffer.from(

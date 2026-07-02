@@ -149,7 +149,7 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
         <InfoRow label="Bank Name"      value={r.bankName} />
         <InfoRow label="Account Name"   value={r.bankAccountName} />
         <InfoRow label="Account Number" value={r.bankAccountNumber} />
-        <InfoRow label="SWIFT / IBAN"   value={r.swiftCode} />
+        <InfoRow label="SWIFT CODE"   value={r.swiftCode} />
         <InfoRow label="Routing Number" value={r.routingNumber} />
       </Section>
     </div>
@@ -267,7 +267,7 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
           <Field label="Bank Name">
             <input name="bankName" defaultValue={r.bankName ?? ""} placeholder="e.g. Chase Bank" className={inp} />
           </Field>
-          <Field label="SWIFT / IBAN Code">
+          <Field label="SWIFT CODE">
             <input name="swiftCode" defaultValue={r.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
           </Field>
           <div className="col-span-2">
