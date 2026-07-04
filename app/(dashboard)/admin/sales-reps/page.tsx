@@ -79,6 +79,9 @@ export default async function SalesRepsPage({
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-4 justify-end">
+                        <Link href={`/admin/sales-reps/${r.id}/orders`} className="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors">
+                          Orders
+                        </Link>
                         <Link href={`/admin/sales-reps/${r.id}`} className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
                           View
                         </Link>

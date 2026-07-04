@@ -149,6 +149,30 @@ export async function updateSalesRepCommission(
   return { success: true, message: "Commission updated." };
 }
 
+export async function getSalesRepOrders(id: string, opts?: { skip?: number; take?: number }) {
+  await requireAdmin();
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where:   { salesRepId: id },
+      select: {
+        id: true, orderNumber: true, status: true,
+        total: true, subtotal: true, shippingRate: true,
+        paymentMethod: true, paymentStatus: true,
+        salesRepCommissionRate: true, salesRepCommissionAmount: true,
+        shippingCarrier: true, trackingNumber: true,
+        placedByAdmin: true,
+        physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
+    }),
+    prisma.order.count({ where: { salesRepId: id } }),
+  ]);
+  return { orders, total };
+}
+
 export async function deleteSalesRep(id: string): Promise<SalesRepActionState> {
   await requireAdmin();
   const existing = await prisma.salesRepresentative.findUnique({ where: { id } });
