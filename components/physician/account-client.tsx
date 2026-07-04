@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
 import { AddressFields, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
 import { State, Country } from "country-state-city";
@@ -189,6 +190,18 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
       countryName: country?.name ?? "United States",
     };
   });
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.success) {
+      toast.success(state.message ?? "Profile updated successfully.");
+    } else if (state.errors) {
+      const firstError = Object.values(state.errors).flat()[0];
+      if (firstError) toast.error(firstError);
+    } else if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   const e = state?.errors ?? {};
 

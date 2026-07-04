@@ -74,6 +74,15 @@ export async function updatePhysicianProfile(
     return { errors: { fieldsOfSpeciality: ["Please select at least one specialty"] } };
   }
 
+  if (validated.data.license) {
+    const licenseExists = await prisma.partneringPhysician.findFirst({
+      where: { license: validated.data.license, NOT: { id: session.userId } },
+    });
+    if (licenseExists) {
+      return { errors: { license: ["This license number is already registered with another physician."] } };
+    }
+  }
+
   await prisma.partneringPhysician.update({
     where: { id: session.userId },
     data: { ...validated.data, fieldsOfSpeciality },

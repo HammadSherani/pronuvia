@@ -99,6 +99,9 @@ export function PhysicianForm({
       if (successRedirect) router.push(successRedirect);
     } else if (state.message && !state.errors) {
       toast.error(state.message);
+    } else if (state.errors) {
+      const firstError = Object.values(state.errors).flat()[0];
+      if (firstError) toast.error(firstError);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);

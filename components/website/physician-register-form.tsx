@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { Country, State } from "country-state-city";
+import toast from "react-hot-toast";
 import { registerPhysician, type RegisterPhysicianState } from "@/actions/website/register-physician";
 
 const ALL_COUNTRIES = Country.getAllCountries();
@@ -56,7 +57,13 @@ export function PhysicianRegisterForm() {
   }
 
   useEffect(() => {
-    if (state?.success) window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!state) return;
+    if (state.success) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (state.errors) {
+      const firstError = Object.values(state.errors).flat()[0];
+      if (firstError) toast.error(firstError);
+    }
     if (state?.values?.country) {
       const match = ALL_COUNTRIES.find((c) => c.name === state.values!.country);
       if (match) setCountryIso(match.isoCode);

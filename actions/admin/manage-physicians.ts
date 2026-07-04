@@ -74,6 +74,15 @@ export async function adminCreatePhysician(
     return { errors: { email: ["A physician with this email already exists."] } };
   }
 
+  if (validated.data.license) {
+    const licenseExists = await prisma.partneringPhysician.findFirst({
+      where: { license: validated.data.license },
+    });
+    if (licenseExists) {
+      return { errors: { license: ["This license number is already registered with another physician."] }, values: strValues };
+    }
+  }
+
   const { salesRepId, ...rest } = validated.data;
 
   // Determine approval status from which submit button was clicked
@@ -207,6 +216,15 @@ export async function updatePhysician(
   const physician = await prisma.partneringPhysician.findUnique({ where: { id } });
   if (!physician) {
     return { message: "Physician not found." };
+  }
+
+  if (validated.data.license) {
+    const licenseExists = await prisma.partneringPhysician.findFirst({
+      where: { license: validated.data.license, NOT: { id } },
+    });
+    if (licenseExists) {
+      return { errors: { license: ["This license number is already registered with another physician."] } };
+    }
   }
 
   const salesRepIdToSet = (formData.get("salesRepId") as string)?.trim() || null;

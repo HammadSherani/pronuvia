@@ -79,6 +79,15 @@ export async function salesRepAddPhysician(
     return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
   }
 
+  if (validated.data.license) {
+    const licenseExists = await prisma.partneringPhysician.findFirst({
+      where: { license: validated.data.license },
+    });
+    if (licenseExists) {
+      return { errors: { license: ["This license number is already registered with another physician."] }, values: strValues };
+    }
+  }
+
   const salesRepNote = (formData.get("salesRepNote") as string)?.trim() || null;
 
   const placeholder = randomPlaceholderPassword();

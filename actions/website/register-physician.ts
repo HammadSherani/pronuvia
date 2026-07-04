@@ -82,6 +82,13 @@ export async function registerPhysician(
     return { errors: { email: ["An account with this email already exists."] }, values: strValues };
   }
 
+  const licenseExists = await prisma.partneringPhysician.findFirst({
+    where: { license: validated.data.license },
+  });
+  if (licenseExists) {
+    return { errors: { license: ["This license number is already registered with another physician."] }, values: strValues };
+  }
+
   const placeholder = randomPlaceholderPassword();
   const hashed      = await hashPassword(placeholder);
 
