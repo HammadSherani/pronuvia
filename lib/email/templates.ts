@@ -569,7 +569,7 @@ export function orderCompletedEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Total paid: $${d.total.toFixed(2)}</p>
       </div>
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order History</a>
+        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order</a>
       </div>`),
   };
 }

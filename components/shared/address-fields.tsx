@@ -6,6 +6,7 @@ import { Country, State } from "country-state-city";
 export type AddressData = {
   firstName: string;
   lastName:  string;
+  phone:     string;
   address1:  string;
   address2:  string;
   city:      string;
@@ -17,7 +18,7 @@ export type AddressData = {
 };
 
 export const EMPTY_ADDRESS: AddressData = {
-  firstName: "", lastName:  "", address1: "", address2: "",
+  firstName: "", lastName: "", phone: "", address1: "", address2: "",
   city: "", state: "", stateName: "", zip: "",
   country: "US", countryName: "United States",
 };
@@ -28,12 +29,13 @@ const inp =
   "w-full px-3 py-2.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white placeholder:text-gray-400";
 
 interface Props {
-  value:    AddressData;
-  onChange: (v: AddressData) => void;
-  showName?: boolean;
+  value:      AddressData;
+  onChange:   (v: AddressData) => void;
+  showName?:  boolean;
+  showPhone?: boolean;
 }
 
-export function AddressFields({ value, onChange, showName = true }: Props) {
+export function AddressFields({ value, onChange, showName = true, showPhone = true }: Props) {
   const [states, setStates] = useState<{ isoCode: string; name: string }[]>([]);
 
   // Load states when country changes
@@ -70,6 +72,9 @@ export function AddressFields({ value, onChange, showName = true }: Props) {
           <input className={inp} placeholder="First name" value={value.firstName} onChange={set("firstName")} />
           <input className={inp} placeholder="Last name"  value={value.lastName}  onChange={set("lastName")} />
         </div>
+      )}
+      {showPhone && (
+        <input className={inp} placeholder="Phone number" type="tel" value={value.phone} onChange={set("phone")} />
       )}
       <input className={inp} placeholder="Address" value={value.address1} onChange={set("address1")} />
       <input className={inp} placeholder="Apartment, suite, etc. (optional)" value={value.address2} onChange={set("address2")} />
@@ -111,7 +116,7 @@ export function AddressFields({ value, onChange, showName = true }: Props) {
 
 /** Convert old string-based AddressData to new code-based format */
 export function migrateAddressData(old: {
-  firstName?: string; lastName?: string; address1?: string; address2?: string;
+  firstName?: string; lastName?: string; phone?: string; address1?: string; address2?: string;
   city?: string; state?: string; zip?: string; country?: string;
 }): AddressData {
   const countryInput = old.country ?? "";
@@ -138,6 +143,7 @@ export function migrateAddressData(old: {
   return {
     firstName:   old.firstName   ?? "",
     lastName:    old.lastName    ?? "",
+    phone:       old.phone       ?? "",
     address1:    old.address1    ?? "",
     address2:    old.address2    ?? "",
     city:        old.city        ?? "",
@@ -154,7 +160,12 @@ export function formatAddress(a: AddressData): string {
   const name   = `${a.firstName} ${a.lastName}`.trim();
   const street = [a.address1, a.address2].filter(Boolean).join(", ");
   const city   = [a.city, a.state, a.zip].filter(Boolean).join(", ");
-  return [name, street, city, a.countryName].filter(Boolean).join("\n");
+  return [name, a.phone, street, city, a.countryName].filter(Boolean).join("\n");
+}
+
+/** Serialize address as JSON for storage (preserves all fields including phone) */
+export function serializeAddress(a: AddressData): string {
+  return JSON.stringify(a);
 }
 
 /** Format for FedEx (uses codes) */

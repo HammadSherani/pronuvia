@@ -15,7 +15,15 @@ import { OrderNotesPanel }        from "@/components/admin/order-notes-panel";
 
 type Props = { params: Promise<{ id: string }> };
 
-type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+type AddrObj = { firstName?: string; lastName?: string; phone?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+
+function parseAddrPhone(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const a: AddrObj = JSON.parse(raw);
+    return a.phone || null;
+  } catch { return null; }
+}
 
 function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
   if (shippingRate <= 0) return "Free Shipping";
@@ -121,7 +129,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Order History
+            Order
           </Link>
           <div className="flex items-center gap-2">
             {/* <PrintButton /> */}
@@ -281,9 +289,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>
                       )}
                       <p className="text-[#3DBFA4] text-xs mt-1">{order.physician.email}</p>
-                      {order.physician.phone && (
-                        <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
-                          {order.physician.phone}
+                      {(parseAddrPhone(order.billingAddress) ?? order.physician.phone) && (
+                        <a href={`tel:${parseAddrPhone(order.billingAddress) ?? order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                          {parseAddrPhone(order.billingAddress) ?? order.physician.phone}
                         </a>
                       )}
                     </div>
@@ -303,9 +311,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         </p>
                       )}
                       <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
-                      {order.physician?.phone && (
-                        <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
-                          {order.physician.phone}
+                      {(parseAddrPhone(order.shippingAddress) ?? order.physician?.phone) && (
+                        <a href={`tel:${parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                          {parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}
                         </a>
                       )}
                     </div>

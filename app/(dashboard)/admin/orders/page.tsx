@@ -5,7 +5,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Order History – Pronuvia Admin" };
+export const metadata = { title: "Order – Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -50,7 +50,7 @@ export default async function OrdersPage({
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Order History</h1>
+          <h1 className="text-xl font-bold text-gray-800">Order</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Track orders, update statuses, and manage commission clawbacks
           </p>

@@ -360,7 +360,7 @@ export async function getDoctorCommissionReport(f: ReportFilters): Promise<Docto
 }
 
 // ─────────────────────────────────────────────
-// 7. Customer Order History
+// 7. Customer Order
 // ─────────────────────────────────────────────
 export type CustomerHistoryRow = {
   id: string; orderNumber: string; date: string;

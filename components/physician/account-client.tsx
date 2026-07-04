@@ -349,7 +349,7 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
         {(e.addressOne ?? e.city ?? e.state ?? e.zipCode) && (
           <p className="text-xs text-red-500">{e.addressOne?.[0] ?? e.city?.[0] ?? e.state?.[0] ?? e.zipCode?.[0]}</p>
         )}
-        <AddressFields value={addrData} onChange={setAddrData} showName={false} />
+        <AddressFields value={addrData} onChange={setAddrData} showName={false} showPhone={false} />
       </div>
 
       {/* ── Bank Details ── */}

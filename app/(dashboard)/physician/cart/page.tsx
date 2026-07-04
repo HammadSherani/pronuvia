@@ -14,7 +14,7 @@ export default function PhysicianCartPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
         </div>
-        <h1 className="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-2">Cart is empty</h1>
         <p className="text-sm text-gray-500 mb-6">Add products from the shop to get started.</p>
         <Link href="/physician/shop"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors">
@@ -31,7 +31,7 @@ export default function PhysicianCartPage() {
     <div className="">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Your Cart</h1>
+          <h1 className="text-xl font-bold text-gray-800">Cart</h1>
           <p className="text-sm text-gray-500 mt-0.5">{items.length} item{items.length !== 1 ? "s" : ""}</p>
         </div>
         <Link href="/physician/shop"

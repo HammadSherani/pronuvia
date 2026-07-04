@@ -21,7 +21,7 @@ function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-type AddrObj = { firstName?: string; lastName?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
+type AddrObj = { firstName?: string; lastName?: string; phone?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
 
 function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
   if (shippingRate <= 0) return "Free Shipping";
@@ -47,6 +47,7 @@ function fmtAddress(raw: string | null | undefined): string {
     const a: AddrObj = JSON.parse(raw);
     return [
       [a.firstName, a.lastName].filter(Boolean).join(" "),
+      a.phone,
       a.address1, a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
@@ -106,7 +107,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Order History
+            Order
           </Link>
           <PrintButton />
         </div>

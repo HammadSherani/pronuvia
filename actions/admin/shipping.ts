@@ -53,6 +53,20 @@ function toCountryCode(s: string): string {
 }
 
 function parseAddressString(raw: string): { street: string; city: string; state: string; zip: string; country: string } | null {
+  // Try JSON format first (new format from serializeAddress)
+  try {
+    const j = JSON.parse(raw);
+    if (j && j.address1 && j.city && j.zip) {
+      return {
+        street:  [j.address1, j.address2].filter(Boolean).join(", "),
+        city:    j.city,
+        state:   toStateCode(j.state ?? ""),
+        zip:     j.zip,
+        country: j.country ? toCountryCode(j.country) : "US",
+      };
+    }
+  } catch { /* fall through to plain-text parsing */ }
+
   const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
 
   // ── City + State + ZIP via regex (most reliable, works even with duplicate data) ──

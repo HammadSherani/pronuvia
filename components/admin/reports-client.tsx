@@ -28,7 +28,7 @@ const TABS = [
   { id: "salesrep-commission", label: "Sales Rep Commission" },
   { id: "overall-commission",  label: "Overall Commission" },
   { id: "doctor-commission",   label: "Doctor Commission" },
-  { id: "customer-history",    label: "Customer Order History" },
+  { id: "customer-history",    label: "Customer Order" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];

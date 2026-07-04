@@ -45,7 +45,7 @@ export async function payWithWallet(
   } catch {
     return { success: false, message: "Invalid cart data." };
   }
-  if (!items.length) return { success: false, message: "Your cart is empty." };
+  if (!items.length) return { success: false, message: "Cart is empty." };
 
   const availability = await validateCartItemsAvailability(items);
   if (!availability.valid) return { success: false, message: availability.message };

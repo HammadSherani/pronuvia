@@ -94,7 +94,7 @@ function buildNav(role: Role): NavItem[] {
 
   // PHYSICIAN
   return [
-    // { label: "Order History", href: "/physician/orders" },
+    // { label: "Order", href: "/physician/orders" },
     // { label: "Downloads", href: "/physician/downloads" },
     { label: "Contact Us", href: "/contact" },
     {

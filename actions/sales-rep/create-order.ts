@@ -116,7 +116,7 @@ export async function createOrderFromCart(
   } catch {
     return { message: "Invalid cart data." };
   }
-  if (!items.length) return { message: "Your cart is empty." };
+  if (!items.length) return { message: "Cart is empty." };
 
   const availability = await validateCartItemsAvailability(items);
   if (!availability.valid) return { message: availability.message };

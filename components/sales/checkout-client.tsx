@@ -25,7 +25,7 @@ import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
 import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
 import { validateCoupon }      from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
-import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
+import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 
 type ShippingOption = { id: string; method: string; label: string; cost: number };
@@ -54,7 +54,7 @@ function displayAddr(a: AddressData) {
 }
 
 function addrToString(a: AddressData): string {
-  return formatAddress(a);
+  return serializeAddress(a);
 }
 
 // ── Stripe inner form (must live inside <Elements>) ─────────────────────────
@@ -350,7 +350,7 @@ export function CheckoutClient({
     return (
       <div className="max-w-lg mx-auto text-center py-24">
         <p className="text-lg font-semibold text-gray-700 mb-2">Nothing to checkout</p>
-        <p className="text-sm text-gray-400 mb-6">Add products to your cart first.</p>
+        <p className="text-sm text-gray-400 mb-6">Add products to cart first.</p>
         <Link href="/sales/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors">
           Go to Shop
         </Link>

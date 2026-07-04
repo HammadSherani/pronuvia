@@ -13,7 +13,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { confirmBehalfCardOrder } from "@/actions/admin/order-behalf";
 import { validateCoupon } from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
-import { AddressFields, EMPTY_ADDRESS, migrateAddressData, formatAddress } from "@/components/shared/address-fields";
+import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 
 type ShippingOption = { id: string; method: string; label: string; cost: number };
@@ -190,8 +190,8 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   })));
 
   const effectiveBilling = sameAsBilling ? shipping : billing;
-  const shipStr = formatAddress(shipping);
-  const billStr = formatAddress(effectiveBilling);
+  const shipStr = serializeAddress(shipping);
+  const billStr = serializeAddress(effectiveBilling);
   const shipDsp = displayAddr(shipping);
   const billDsp = displayAddr(effectiveBilling);
 
