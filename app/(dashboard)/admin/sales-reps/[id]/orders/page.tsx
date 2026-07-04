@@ -5,7 +5,6 @@ import { getSalesRepById, getSalesRepOrders } from "@/actions/admin/manage-sales
 import { Pagination }            from "@/components/shared/pagination";
 import { parsePagination }       from "@/lib/pagination";
 import { Suspense }              from "react";
-import { OrderStatus, PaymentStatus } from "@/generated/prisma/enums";
 
 export const metadata = { title: "Sales Rep Orders – Pronuvia Admin" };
 
