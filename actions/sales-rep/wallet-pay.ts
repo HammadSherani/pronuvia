@@ -32,6 +32,7 @@ export async function payWithWallet(
 
   const itemsRaw        = (formData.get("items")           as string) || "[]";
   const shippingAddress = (formData.get("shippingAddress") as string) || undefined;
+  const billingAddress  = (formData.get("billingAddress")  as string) || undefined;
   const shippingRate    = parseFloat((formData.get("shippingRate")    as string) || "0");
   const total           = parseFloat((formData.get("total")           as string) || "0");
   const notes           = (formData.get("notes")           as string) || undefined;
@@ -88,6 +89,7 @@ export async function payWithWallet(
         physicianCommissionRate:   0,
         physicianCommissionAmount: 0,
         shippingAddress,
+        billingAddress,
         shippingRate,
         estimatedDelivery: deliveryDate,
         paymentMethod:  "WALLET",

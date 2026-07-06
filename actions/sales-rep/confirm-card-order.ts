@@ -20,15 +20,16 @@ type CartItem = {
 };
 
 export type ConfirmCardOrderPayload = {
-  paymentIntentId: string;
-  itemsJson:       string;
-  shippingAddress: string;
-  notes:           string;
-  shippingRate:    number;
-  total:           number;
-  couponId?:       string;
-  couponCode?:     string;
-  discountAmount?: number;
+  paymentIntentId:  string;
+  itemsJson:        string;
+  shippingAddress:  string;
+  billingAddress?:  string;
+  notes:            string;
+  shippingRate:     number;
+  total:            number;
+  couponId?:        string;
+  couponCode?:      string;
+  discountAmount?:  number;
 };
 
 export type ConfirmCardOrderResult = {
@@ -106,6 +107,7 @@ export async function confirmCardOrder(
         physicianCommissionRate:   0,
         physicianCommissionAmount: 0,
         shippingAddress:  payload.shippingAddress || undefined,
+        billingAddress:   payload.billingAddress  || undefined,
         shippingRate:     payload.shippingRate,
         estimatedDelivery: deliveryDate,
         paymentMethod:    "CARD",

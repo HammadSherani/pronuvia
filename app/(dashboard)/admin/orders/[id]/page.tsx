@@ -55,6 +55,20 @@ function fmtAddress(raw: string | null | undefined): string | null {
   } catch { return raw; }
 }
 
+// Address body without the name line (used when name is shown separately)
+function fmtAddressBody(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const a: AddrObj = JSON.parse(raw);
+    return [
+      a.address1,
+      a.address2,
+      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.country,
+    ].filter(Boolean).join(", ");
+  } catch { return raw; }
+}
+
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
@@ -277,10 +291,25 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 {/* Billing */}
                 <div className="px-6 py-5">
                   <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Billing</h4>
-                  {order.physician ? (
+                  {order.billingAddress ? (
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
-                         {order.physician.firstName} {order.physician.lastName}
+                        {fmtAddress(order.billingAddress)?.split("\n")[0]}
+                      </p>
+                      <p className="text-gray-500 text-xs leading-relaxed">
+                        {fmtAddressBody(order.billingAddress)}
+                      </p>
+                      {parseAddrPhone(order.billingAddress) && (
+                        <a href={`tel:${parseAddrPhone(order.billingAddress)}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                          {parseAddrPhone(order.billingAddress)}
+                        </a>
+                      )}
+                    </div>
+                  ) : order.physician ? (
+                    // Fallback for old orders that didn't store billing address JSON
+                    <div className="text-sm space-y-1">
+                      <p className="font-semibold text-gray-800">
+                        {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {order.physician.nameOfPractice && (
                         <p className="text-gray-600">{order.physician.nameOfPractice}</p>
@@ -288,10 +317,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       {physAddr && (
                         <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>
                       )}
-                      <p className="text-[#3DBFA4] text-xs mt-1">{order.physician.email}</p>
-                      {(parseAddrPhone(order.billingAddress) ?? order.physician.phone) && (
-                        <a href={`tel:${parseAddrPhone(order.billingAddress) ?? order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
-                          {parseAddrPhone(order.billingAddress) ?? order.physician.phone}
+                      <p className="text-[#3DBFA4] text-xs">{order.physician.email}</p>
+                      {order.physician.phone && (
+                        <a href={`tel:${order.physician.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                          {order.physician.phone}
                         </a>
                       )}
                     </div>
@@ -305,12 +334,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Shipping</h4>
                   {order.shippingAddress ? (
                     <div className="text-sm space-y-1">
-                      {order.physician && (
-                        <p className="font-semibold text-gray-800">
-                           {order.physician.firstName} {order.physician.lastName}
-                        </p>
-                      )}
-                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-wrap">{fmtAddress(order.shippingAddress)}</p>
+                      <p className="font-semibold text-gray-800">
+                        {fmtAddress(order.shippingAddress)?.split("\n")[0]}
+                      </p>
+                      <p className="text-gray-500 text-xs leading-relaxed">
+                        {fmtAddressBody(order.shippingAddress)}
+                      </p>
                       {(parseAddrPhone(order.shippingAddress) ?? order.physician?.phone) && (
                         <a href={`tel:${parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
                           {parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}
@@ -318,9 +347,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       )}
                     </div>
                   ) : order.physician ? (
+                    // Fallback for old orders
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
-                         {order.physician.firstName} {order.physician.lastName}
+                        {order.physician.firstName} {order.physician.lastName}
                       </p>
                       {physAddr && (
                         <p className="text-gray-500 text-xs leading-relaxed">{physAddr}</p>

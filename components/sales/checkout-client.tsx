@@ -63,22 +63,23 @@ type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
 
 type StripeHandle = { submit: () => void };
 type StripeFormProps = {
-  itemsJson:       string;
-  shippingAddress: string;
-  notes:           string;
-  shippingRate:    number;
-  total:           number;
-  couponId?:       string;
-  couponCode?:     string;
-  discountAmount?: number;
-  onSuccess:       (orderNumber: string) => void;
-  onProcessing:    (v: boolean) => void;
-  onError:         (msg: string) => void;
+  itemsJson:        string;
+  shippingAddress:  string;
+  billingAddress?:  string;
+  notes:            string;
+  shippingRate:     number;
+  total:            number;
+  couponId?:        string;
+  couponCode?:      string;
+  discountAmount?:  number;
+  onSuccess:        (orderNumber: string) => void;
+  onProcessing:     (v: boolean) => void;
+  onError:          (msg: string) => void;
 };
 
 const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
   function StripeInnerForm(
-    { itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError },
+    { itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError },
     ref
   ) {
     const stripe   = useStripe();
@@ -90,7 +91,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
       onError("");
 
       sessionStorage.setItem("sr_order", JSON.stringify({
-        itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+        itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
       }));
 
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
@@ -110,7 +111,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
         sessionStorage.removeItem("sr_order");
         const result = await confirmCardOrder({
           paymentIntentId: paymentIntent.id,
-          itemsJson, shippingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+          itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
         });
         if (result.success && result.orderNumber) {
           onSuccess(result.orderNumber);
@@ -230,6 +231,7 @@ export function CheckoutClient({
     lineTotal:   parseFloat((i.unitPrice * i.quantity).toFixed(2)),
   })));
   const shipStr = addrToString(shipping);
+  const billStr = addrToString(sameAsBilling ? shipping : billing);
 
   const handleUseAddress = () => {
     setEditShip(false);
@@ -582,6 +584,7 @@ export function CheckoutClient({
                           ref={stripeRef}
                           itemsJson={itemsJson}
                           shippingAddress={shipStr}
+                          billingAddress={billStr}
                           notes={notes}
                           shippingRate={shippingCost}
                           total={total}
@@ -664,6 +667,7 @@ export function CheckoutClient({
           <form action={walletAction} className="hidden">
             <input type="hidden" name="items"           value={itemsJson} />
             <input type="hidden" name="shippingAddress" value={shipStr} />
+            <input type="hidden" name="billingAddress"  value={billStr} />
             <input type="hidden" name="shippingRate"    value={shippingCost} />
             <input type="hidden" name="total"           value={total} />
             <input type="hidden" name="notes"           value={notes} />

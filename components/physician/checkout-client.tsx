@@ -277,7 +277,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   };
 
   const handlePlaceOrder = () => {
-    if (!email.trim()) { toast.error("Please enter the customer's email address."); return; }
+    if (!email.trim()) { toast.error("Please enter the patient's email address."); return; }
     if (!hasAddr(shipping)) { toast.error("Please enter a shipping address."); return; }
     if (shippingOptions.length > 0 && !selectedShipping) {
       toast.error("Please select a shipping method.");
