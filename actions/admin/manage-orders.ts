@@ -311,12 +311,14 @@ export async function getOrderById(id: string) {
           id: true, firstName: true, lastName: true, email: true,
           nameOfPractice: true, commission: true,
           phone: true, addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
+          walletBalance: true,
         },
       },
       salesRep: {
         select: {
           id: true, name: true, firstName: true, lastName: true, email: true,
           phone: true, commission: true, billingAddress: true,
+          walletBalance: true,
         },
       },
     },
@@ -430,82 +432,204 @@ export type ReturnActionState = {
   message?: string;
 } | undefined;
 
+export type RefundLineItem   = { index: number; returnedQty: number };
+export type StoredRefundItem = { index: number; returnedQty: number; lineTotal: number };
+export type CustomerRefundPayload = {
+  method: "manual" | "stripe";
+  amount: number;
+};
+
 export async function processReturn(
-  orderId:             string,
-  returnedItemIndexes: number[] | null,   // null = full return
-  reason:              string,
+  orderId:        string,
+  returnedLines:  RefundLineItem[] | null,  // null = full refund of all remaining
+  reason:         string,
+  customerRefund?: CustomerRefundPayload,
 ): Promise<ReturnActionState> {
   await requireAdmin();
 
   const order = await prisma.order.findUnique({
     where:  { id: orderId },
     select: {
-      id: true, orderNumber: true, status: true, total: true, items: true,
+      id: true, orderNumber: true, status: true, total: true, subtotal: true, items: true,
       salesRepId: true, physicianId: true,
       salesRepCommissionAmount: true, physicianCommissionAmount: true,
       commissionPaid: true,
-      returnedAt: true,
+      returnedAt: true, returnedTotal: true, returnReason: true,
+      salesRepClawback: true, physicianClawback: true,
+      stripePaymentIntentId: true,
       salesRep:  { select: { walletBalance: true } },
       physician: { select: { walletBalance: true } },
     },
   });
 
-  if (!order)           return { message: "Order not found." };
-  if (order.returnedAt) return { message: "This order has already been returned." };
+  if (!order) return { message: "Order not found." };
 
-  const items        = order.items as unknown as OrderItem[];
-  const isFullReturn = returnedItemIndexes === null;
+  const items = order.items as unknown as OrderItem[];
 
-  const returnedTotal = isFullReturn
-    ? order.total
-    : (returnedItemIndexes ?? []).reduce((sum, idx) => {
-        const item = items[idx];
-        return sum + (item?.lineTotal ?? 0);
-      }, 0);
+  // ── Load existing refunds to compute already-refunded quantities ─────────
+  const existingRefunds = await prisma.orderRefund.findMany({
+    where:   { orderId },
+    orderBy: { processedAt: "asc" },
+  });
 
-  if (returnedTotal <= 0) return { message: "No items selected for return." };
+  const refundedQtyByIdx = new Map<number, number>();
+  for (const r of existingRefunds) {
+    if (!r.items) {
+      items.forEach((item, idx) => refundedQtyByIdx.set(idx, item.quantity));
+    } else {
+      for (const ri of r.items as StoredRefundItem[]) {
+        refundedQtyByIdx.set(ri.index, (refundedQtyByIdx.get(ri.index) ?? 0) + ri.returnedQty);
+      }
+    }
+  }
 
-  const ratio             = order.total > 0 ? returnedTotal / order.total : 0;
-  const salesRepClawback  = parseFloat((order.salesRepCommissionAmount  * ratio).toFixed(2));
-  const physicianClawback = parseFloat((order.physicianCommissionAmount * ratio).toFixed(2));
+  const remainingByIdx = new Map<number, number>();
+  for (let i = 0; i < items.length; i++) {
+    remainingByIdx.set(i, Math.max(0, items[i].quantity - (refundedQtyByIdx.get(i) ?? 0)));
+  }
 
+  const totalRemaining = Array.from(remainingByIdx.values()).reduce((s, v) => s + v, 0);
+  if (totalRemaining === 0) return { message: "All items on this order have already been refunded." };
+
+  // ── Determine lines to process ───────────────────────────────────────────
+  let linesToProcess: { index: number; returnedQty: number }[];
+  let isFullThisRefund: boolean;
+
+  if (returnedLines === null) {
+    linesToProcess = items
+      .map((_, idx) => ({ index: idx, returnedQty: remainingByIdx.get(idx) ?? 0 }))
+      .filter(l => l.returnedQty > 0);
+    isFullThisRefund = true;
+  } else {
+    const activeLines = returnedLines.filter(rl => rl.returnedQty > 0);
+    if (activeLines.length === 0) return { message: "No items selected for refund." };
+
+    for (const line of activeLines) {
+      const remaining = remainingByIdx.get(line.index) ?? 0;
+      if (line.returnedQty > remaining) {
+        return { message: `Item #${line.index + 1} exceeds remaining refundable quantity (${remaining}).` };
+      }
+    }
+
+    linesToProcess = activeLines;
+    isFullThisRefund = items.every((_, idx) => {
+      const remaining = remainingByIdx.get(idx) ?? 0;
+      if (remaining === 0) return true;
+      const line = linesToProcess.find(l => l.index === idx);
+      return !!line && line.returnedQty >= remaining;
+    });
+  }
+
+  // ── Build stored items and compute event total ───────────────────────────
+  const storedRefundItems: StoredRefundItem[] = linesToProcess.map(rl => {
+    const item  = items[rl.index];
+    const r     = item ? rl.returnedQty / item.quantity : 0;
+    return {
+      index:       rl.index,
+      returnedQty: rl.returnedQty,
+      lineTotal:   parseFloat(((item?.lineTotal ?? 0) * r).toFixed(2)),
+    };
+  });
+
+  const eventTotal = parseFloat(
+    storedRefundItems.reduce((s, ri) => s + ri.lineTotal, 0).toFixed(2)
+  );
+  if (eventTotal <= 0) return { message: "Refund amount is zero." };
+
+  // ── Commission clawback for this event ───────────────────────────────────
+  const existingSalesRepClawback  = order.salesRepClawback  ?? 0;
+  const existingPhysicianClawback = order.physicianClawback ?? 0;
+  const remainingSalesRepCommission  = Math.max(0, order.salesRepCommissionAmount  - existingSalesRepClawback);
+  const remainingPhysicianCommission = Math.max(0, order.physicianCommissionAmount - existingPhysicianClawback);
+
+  const denominator = order.subtotal > 0 ? order.subtotal : order.total;
+  const salesRepClawback  = isFullThisRefund
+    ? remainingSalesRepCommission
+    : parseFloat(Math.min(remainingSalesRepCommission, order.salesRepCommissionAmount * Math.min(1.0, eventTotal / denominator)).toFixed(2));
+  const physicianClawback = isFullThisRefund
+    ? remainingPhysicianCommission
+    : parseFloat(Math.min(remainingPhysicianCommission, order.physicianCommissionAmount * Math.min(1.0, eventTotal / denominator)).toFixed(2));
+
+  const refundNumber = existingRefunds.length + 1;
+
+  // ── Customer payment refund (Stripe or manual) ──────────────────────────
+  let stripeRefundId: string | null = null;
+
+  if (customerRefund && customerRefund.amount > 0) {
+    if (customerRefund.method === "stripe") {
+      if (!order.stripePaymentIntentId) {
+        return { message: "No Stripe payment on this order — cannot process Stripe refund." };
+      }
+      const { stripe } = await import("@/lib/stripe/server");
+      if (!stripe) {
+        return { message: "Stripe is not configured on this server." };
+      }
+      try {
+        const stripeRefund = await stripe.refunds.create({
+          payment_intent: order.stripePaymentIntentId,
+          amount:         Math.round(customerRefund.amount * 100),
+        });
+        stripeRefundId = stripeRefund.id;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Stripe refund failed.";
+        return { message: `Stripe error: ${msg}` };
+      }
+    }
+    // "manual" — no external call, just record it below
+  }
+
+  // ── Create OrderRefund record ────────────────────────────────────────────
+  await prisma.orderRefund.create({
+    data: {
+      orderId,
+      refundNumber,
+      items:                storedRefundItems as object[],
+      total:                eventTotal,
+      salesRepClawback,
+      physicianClawback,
+      reason:               reason.trim() || null,
+      customerRefundMethod: customerRefund?.amount && customerRefund.amount > 0 ? customerRefund.method : null,
+      customerRefundAmount: customerRefund?.amount && customerRefund.amount > 0 ? customerRefund.amount : null,
+      stripeRefundId:       stripeRefundId || null,
+    },
+  });
+
+  // ── Commission clawback (negative balance allowed) ───────────────────────
   if (order.commissionPaid) {
-    // Clawback sales rep
     if (order.salesRepId && salesRepClawback > 0) {
       const currentBalance = order.salesRep?.walletBalance ?? 0;
-      const newBalance     = Math.max(0, currentBalance - salesRepClawback);
+      const newBalance     = parseFloat((currentBalance - salesRepClawback).toFixed(2));
       await prisma.salesRepresentative.update({
         where: { id: order.salesRepId },
         data:  { walletBalance: newBalance },
       });
       await prisma.walletTransaction.create({
         data: {
-          userId:   order.salesRepId,
-          userRole: "SALES_REP",
-          amount:   salesRepClawback,
-          type:     "DEBIT",
-          description: `Commission clawback — return on order #${order.orderNumber}`,
+          userId:      order.salesRepId,
+          userRole:    "SALES_REP",
+          amount:      salesRepClawback,
+          type:        "DEBIT",
+          description: `Commission clawback — refund #${refundNumber} on order #${order.orderNumber}`,
           orderId,
           balance:     newBalance,
         },
       });
     }
 
-    // Clawback physician
     if (order.physicianId && physicianClawback > 0) {
       const currentBalance = order.physician?.walletBalance ?? 0;
-      const newBalance     = Math.max(0, currentBalance - physicianClawback);
+      const newBalance     = parseFloat((currentBalance - physicianClawback).toFixed(2));
       await prisma.partneringPhysician.update({
         where: { id: order.physicianId },
         data:  { walletBalance: newBalance },
       });
       await prisma.walletTransaction.create({
         data: {
-          userId:   order.physicianId,
-          userRole: "PHYSICIAN",
-          amount:   physicianClawback,
-          type:     "DEBIT",
-          description: `Commission clawback — return on order #${order.orderNumber}`,
+          userId:      order.physicianId,
+          userRole:    "PHYSICIAN",
+          amount:      physicianClawback,
+          type:        "DEBIT",
+          description: `Commission clawback — refund #${refundNumber} on order #${order.orderNumber}`,
           orderId,
           balance:     newBalance,
         },
@@ -513,20 +637,49 @@ export async function processReturn(
     }
   }
 
-  const newStatus = isFullReturn ? "REFUNDED" : order.status;
+  // ── Inventory restore ────────────────────────────────────────────────────
+  await Promise.all(linesToProcess.map(async rl => {
+    const item = items[rl.index];
+    if (!item?.productId || !rl.returnedQty) return;
+    try {
+      const product = await prisma.product.findUnique({ where: { id: item.productId } });
+      if (!product) return;
+      type Variant = { sku?: string; stock?: number; [key: string]: unknown };
+      const variants = (product.variants ?? []) as Variant[];
+      const vIdx     = variants.findIndex(v => v.sku && item.sku && v.sku === item.sku);
+      if (vIdx !== -1) {
+        variants[vIdx] = { ...variants[vIdx], stock: (variants[vIdx].stock ?? 0) + rl.returnedQty };
+        const newTotal = variants.reduce((s, v) => s + (v.stock ?? 0), 0);
+        await prisma.product.update({
+          where: { id: item.productId },
+          data:  { variants: variants as object[], quantity: newTotal },
+        });
+      } else {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data:  { quantity: { increment: rl.returnedQty } },
+        });
+      }
+    } catch (e) {
+      console.error(`[Inventory Restore] product ${item.productId}:`, e);
+    }
+  }));
+
+  // ── Update order aggregate fields ────────────────────────────────────────
+  const newReturnedTotal     = parseFloat(((order.returnedTotal ?? 0) + eventTotal).toFixed(2));
+  const newSalesRepClawback  = parseFloat((existingSalesRepClawback + salesRepClawback).toFixed(2));
+  const newPhysicianClawback = parseFloat((existingPhysicianClawback + physicianClawback).toFixed(2));
 
   await prisma.order.update({
     where: { id: orderId },
     data:  {
-      status:           newStatus as OrderStatus,
-      returnedAt:       new Date(),
-      returnReason:     reason.trim() || null,
-      returnedItems:    isFullReturn ? null : returnedItemIndexes,
-      returnedTotal,
-      salesRepClawback,
-      physicianClawback,
-      // Reverse commissionPaid flag on full return so it won't re-credit
-      ...(isFullReturn && { commissionPaid: false }),
+      status:            (isFullThisRefund ? "REFUNDED" : order.status) as OrderStatus,
+      returnedAt:        order.returnedAt ?? new Date(),
+      returnReason:      reason.trim() || order.returnReason || null,
+      returnedTotal:     newReturnedTotal,
+      salesRepClawback:  newSalesRepClawback,
+      physicianClawback: newPhysicianClawback,
+      ...(isFullThisRefund && { commissionPaid: false }),
     },
   });
 
@@ -534,12 +687,27 @@ export async function processReturn(
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/sales/wallet");
   revalidatePath("/physician/wallet");
+
+  const customerNote = stripeRefundId
+    ? ` Stripe refund $${customerRefund!.amount.toFixed(2)} sent.`
+    : customerRefund?.method === "manual" && (customerRefund.amount ?? 0) > 0
+    ? ` Manual refund $${customerRefund.amount.toFixed(2)} recorded.`
+    : "";
+
   return {
     success: true,
     message: order.commissionPaid
-      ? `Return processed. Rep: $${salesRepClawback.toFixed(2)}, Dr: $${physicianClawback.toFixed(2)} clawed back.`
-      : "Return processed. No commission was paid — no clawback needed.",
+      ? `Refund #${refundNumber} processed.${customerNote} Rep clawback: $${salesRepClawback.toFixed(2)}, Doctor clawback: $${physicianClawback.toFixed(2)}.`
+      : `Refund #${refundNumber} processed.${customerNote} Commission not yet paid — no clawback applied.`,
   };
+}
+
+export async function getOrderRefunds(orderId: string) {
+  await requireAdmin();
+  return prisma.orderRefund.findMany({
+    where:   { orderId },
+    orderBy: { processedAt: "asc" },
+  });
 }
 
 export async function getCommissionSummary(opts?: { salesRepId?: string; physicianId?: string }) {

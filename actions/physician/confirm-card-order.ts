@@ -30,6 +30,7 @@ export type ConfirmPhysicianCardOrderPayload = {
   shippingRate:    number;
   total:           number;
   customerEmail:   string;
+  customerPhone?:  string;
   couponId?:       string;
   couponCode?:     string;
   discountAmount?: number;
@@ -113,6 +114,7 @@ export async function confirmPhysicianCardOrder(
         salesRepCommissionRate,
         salesRepCommissionAmount,
         customerEmail:         payload.customerEmail   || undefined,
+        customerPhone:         payload.customerPhone   || undefined,
         billingAddress:        payload.billingAddress  || undefined,
         shippingAddress:       payload.shippingAddress || undefined,
         shippingRate:          payload.shippingRate,

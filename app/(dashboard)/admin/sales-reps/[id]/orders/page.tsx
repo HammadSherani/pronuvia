@@ -112,7 +112,7 @@ export default async function SalesRepOrdersPage({ params, searchParams }: Props
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
-                  {["Order #", "Date", "Doctor", "Payment", "Status", "Total", "Commission", ""].map(h => (
+                  {["Order #", "Date", "Doctor", "Payment", "Status", "Total", "Commission"].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       {h}
                     </th>
@@ -124,8 +124,13 @@ export default async function SalesRepOrdersPage({ params, searchParams }: Props
                   const status  = o.status  as string;
                   const payment = o.paymentStatus as string;
                   return (
-                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={o.id} className="relative hover:bg-gray-50/80 transition-colors cursor-pointer">
                       <td className="px-4 py-3">
+                        <Link
+                          href={`/admin/orders/${o.id}`}
+                          className="absolute inset-0"
+                          aria-label={`View order #${o.orderNumber}`}
+                        />
                         <span className="font-mono text-xs font-semibold text-gray-700">
                           #{o.orderNumber}
                         </span>
@@ -172,14 +177,6 @@ export default async function SalesRepOrdersPage({ params, searchParams }: Props
                         <span className="text-gray-400 font-normal ml-1">
                           ({o.salesRepCommissionRate ?? 0}%)
                         </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/admin/orders/${o.id}`}
-                          className="text-xs font-medium text-[#5BB8D4] hover:text-[#3a9db8] transition-colors"
-                        >
-                          View
-                        </Link>
                       </td>
                     </tr>
                   );

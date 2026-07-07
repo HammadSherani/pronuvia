@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
-import { getOrderByNumber, processReturn } from "@/actions/admin/manage-orders";
+import { getOrderByNumber, processReturn, type RefundLineItem } from "@/actions/admin/manage-orders";
 
 type OrderData = NonNullable<Awaited<ReturnType<typeof getOrderByNumber>>>;
 type OrderItem = { title: string; variantSize: string; sku: string; quantity: number; unitPrice: number; lineTotal: number };
@@ -69,8 +69,8 @@ function LookupStep({ onFound, initialOrderNumber }: { onFound: (o: OrderData) =
 
   return (
     <div className="p-6 shrink-0">
-      <h3 className="text-base font-bold text-gray-800 mb-1">Process Return</h3>
-      <p className="text-sm text-gray-500 mb-5">Enter the order number to begin a return.</p>
+      <h3 className="text-base font-bold text-gray-800 mb-1">Process Refund</h3>
+      <p className="text-sm text-gray-500 mb-5">Enter the order number to begin a refund.</p>
       <label className="block text-xs font-semibold text-gray-600 mb-1.5">Order Number</label>
       <div className="flex gap-2">
         <input
@@ -135,10 +135,15 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
   const confirm = () => {
     if (!canConfirm) return;
     start(async () => {
-      const indexes = fullReturn ? null : [...selected].sort((a, b) => a - b);
-      const res     = await processReturn(order.id, indexes, reason);
-      if (res?.success) { toast.success(res.message ?? "Return processed"); onDone(); }
-      else              { toast.error(res?.message ?? "Failed to process return"); }
+      const lines: RefundLineItem[] | null = fullReturn
+        ? null
+        : [...selected].sort((a, b) => a - b).map(idx => ({
+            index: idx,
+            returnedQty: items[idx]?.quantity ?? 1,
+          }));
+      const res = await processReturn(order.id, lines, reason);
+      if (res?.success) { toast.success(res.message ?? "Refund processed"); onDone(); }
+      else              { toast.error(res?.message ?? "Failed to process refund"); }
     });
   };
 
@@ -156,7 +161,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
           </button>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-gray-800 truncate">
-              Return — <span className="font-mono">{order.orderNumber}</span>
+              Refund — <span className="font-mono">{order.orderNumber}</span>
             </h3>
             <div className="flex flex-wrap gap-x-3 text-xs text-gray-400 mt-0.5">
               {order.salesRep && (
@@ -183,15 +188,15 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
             className="w-4 h-4 accent-orange-500 rounded shrink-0"
           />
           <div>
-            <p className="text-sm font-bold text-orange-700">Full Invoice Return</p>
-            <p className="text-xs text-orange-500">Returns all items — order marked as Refunded</p>
+            <p className="text-sm font-bold text-orange-700">Full Invoice Refund</p>
+            <p className="text-xs text-orange-500">Refunds all items — order marked as Refunded</p>
           </div>
         </label>
 
         {/* Items */}
         <div>
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-            {fullReturn ? "Items (all selected)" : "Select items to return"}
+            {fullReturn ? "Items (all selected)" : "Select items to refund"}
           </p>
           <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-50">
             {items.map((item, idx) => {
@@ -312,7 +317,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
               </svg>
           }
-          Confirm Return
+          Confirm Refund
         </button>
       </div>
     </div>
@@ -336,7 +341,7 @@ export function ReturnOrderModal({ initialOrderNumber }: { initialOrderNumber?: 
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
         </svg>
-        Return Order
+        Refund Order
       </button>
 
       {open && (

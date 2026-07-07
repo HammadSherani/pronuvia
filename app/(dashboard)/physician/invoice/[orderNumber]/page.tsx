@@ -82,6 +82,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
       shippingCarrier: true, trackingNumber: true,
       billingAddress: true, shippingAddress: true,
       notes: true, items: true,
+      customerEmail: true, customerPhone: true,
       physicianId: true,
       physician: {
         select: { firstName: true, lastName: true, email: true, phone: true },
@@ -174,6 +175,26 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                 )}
               </div>
             </div>
+
+            {(order.customerEmail || order.customerPhone) && (
+              <div className="bg-gray-50 rounded-xl px-4 py-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Patient Contact</p>
+                <div className="space-y-0.5">
+                  {order.customerEmail && (
+                    <p className="text-sm text-gray-700">
+                      <span className="text-gray-400 mr-1.5">Email:</span>
+                      {order.customerEmail}
+                    </p>
+                  )}
+                  {order.customerPhone && (
+                    <p className="text-sm text-gray-700">
+                      <span className="text-gray-400 mr-1.5">Phone:</span>
+                      {order.customerPhone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <InfoBox

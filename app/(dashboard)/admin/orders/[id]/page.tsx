@@ -2,16 +2,17 @@ import { notFound }              from "next/navigation";
 import Link                       from "next/link";
 import { Country }                from "country-state-city";
 import { requireAdmin }           from "@/lib/auth/dal";
-import { getOrderById }           from "@/actions/admin/manage-orders";
+import { getOrderById, getOrderRefunds } from "@/actions/admin/manage-orders";
 import { OrderStatus }            from "@/generated/prisma/enums";
-import { ReturnOrderModal }       from "@/components/admin/return-order-modal";
+import { RefundOrderModal }       from "@/components/admin/refund-order-modal";
 import { PrintButton }            from "@/components/sales/print-button";
 import { SendOrderEmailPanel }    from "@/components/admin/send-order-email-panel";
 import { OrderActionsPanel }      from "@/components/admin/order-actions-panel";
 import { getOrderShipments }      from "@/actions/admin/shipping";
-import type { OrderItem }         from "@/actions/admin/manage-orders";
+import type { OrderItem, StoredRefundItem } from "@/actions/admin/manage-orders";
 import { getOrderNotes }          from "@/actions/admin/order-notes";
 import { OrderNotesPanel }        from "@/components/admin/order-notes-panel";
+import { EditOrderAddress, EditOrderEmail, EditOrderPhone } from "@/components/admin/edit-order-address";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -69,6 +70,7 @@ function fmtAddressBody(raw: string | null | undefined): string | null {
   } catch { return raw; }
 }
 
+
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
@@ -109,15 +111,61 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   await requireAdmin();
   const { id } = await params;
 
-  const [order, shipments, notes] = await Promise.all([
+  const [order, shipments, notes, refunds] = await Promise.all([
     getOrderById(id),
     getOrderShipments(id),
     getOrderNotes(id),
+    getOrderRefunds(id),
   ]);
   if (!order) notFound();
 
-  const items      = order.items as unknown as OrderItem[];
+  const items = order.items as unknown as OrderItem[];
+
+  // Build per-item refunded qty from OrderRefund records (multi-refund system)
+  const refundQtyByIdx         = new Map<number, number>();
+  const refundLineTotalByIdx   = new Map<number, number>();
+
+  if (refunds.length > 0) {
+    for (const r of refunds) {
+      const rItems = r.items as StoredRefundItem[] | null;
+      if (!rItems) {
+        items.forEach((item, idx) => {
+          refundQtyByIdx.set(idx, item.quantity);
+          refundLineTotalByIdx.set(idx, item.lineTotal);
+        });
+      } else {
+        for (const ri of rItems) {
+          refundQtyByIdx.set(ri.index, (refundQtyByIdx.get(ri.index) ?? 0) + ri.returnedQty);
+          refundLineTotalByIdx.set(ri.index, (refundLineTotalByIdx.get(ri.index) ?? 0) + ri.lineTotal);
+        }
+      }
+    }
+  } else if (order.returnedAt) {
+    // Legacy single-refund: read from order.returnedItems
+    const legacyItems = order.returnedItems;
+    if (!legacyItems) {
+      items.forEach((item, idx) => {
+        refundQtyByIdx.set(idx, item.quantity);
+        refundLineTotalByIdx.set(idx, item.lineTotal);
+      });
+    } else if (Array.isArray(legacyItems)) {
+      for (const ri of legacyItems) {
+        if (typeof ri === "number") {
+          refundQtyByIdx.set(ri, items[ri]?.quantity ?? 0);
+          refundLineTotalByIdx.set(ri, items[ri]?.lineTotal ?? 0);
+        } else if (typeof ri === "object" && ri !== null) {
+          const r = ri as { index: number; returnedQty: number; lineTotal: number };
+          refundQtyByIdx.set(r.index, (refundQtyByIdx.get(r.index) ?? 0) + r.returnedQty);
+          refundLineTotalByIdx.set(r.index, (refundLineTotalByIdx.get(r.index) ?? 0) + r.lineTotal);
+        }
+      }
+    }
+  }
+
+  const alreadyRefunded = items.map((_, idx) => refundQtyByIdx.get(idx) ?? 0);
+  const allItemsFullyRefunded = items.length > 0 && items.every((item, idx) => (refundQtyByIdx.get(idx) ?? 0) >= item.quantity);
   const isReturned = !!order.returnedAt;
+  const customerPhone: string | null = order.customerPhone ?? null;
   const payStatus  = order.paymentStatus ?? "PENDING";
 
   const physAddr = [
@@ -150,7 +198,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ── Return banner ─────────────────────────────────────────────── */}
+        {/* ── Refund banner ─────────────────────────────────────────────── */}
         {isReturned && (
           <div className="no-print mb-5 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
             <svg className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -158,14 +206,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             </svg>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-orange-700">
-                Return processed — {fmtDate(order.returnedAt)}
+                Refund processed — {fmtDate(order.returnedAt)}
               </p>
               <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-xs text-orange-600">
                 {order.returnedTotal != null && (
-                  <span>Returned: <strong>{fmtMoney(order.returnedTotal)}</strong></span>
+                  <span>Refunded: <strong>{fmtMoney(order.returnedTotal)}</strong></span>
                 )}
                 {(order.salesRepClawback ?? 0) > 0 && (
                   <span>Rep clawback: <strong>−{fmtMoney(order.salesRepClawback!)}</strong></span>
+                )}
+                {(order.physicianClawback ?? 0) > 0 && (
+                  <span>Doctor clawback: <strong>−{fmtMoney(order.physicianClawback!)}</strong></span>
                 )}
               </div>
               {order.returnReason && (
@@ -285,6 +336,30 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         <p className="text-sm text-gray-700"> (Direct)</p>
                       </div>
                     )}
+                    {order.customerEmail && (
+                      <div>
+                        <p className="text-[11px] text-gray-400 mb-0.5">
+                          Patient Email:
+                          <EditOrderEmail orderId={order.id} current={order.customerEmail} />
+                        </p>
+                        <a href={`mailto:${order.customerEmail}`} className="text-xs text-[#3DBFA4] hover:underline break-all">
+                          {order.customerEmail}
+                        </a>
+                      </div>
+                    )}
+                    {(customerPhone || order.customerEmail) && (
+                      <div>
+                        <p className="text-[11px] text-gray-400 mb-0.5">
+                          Patient Phone:
+                          <EditOrderPhone orderId={order.id} current={customerPhone} />
+                        </p>
+                        {customerPhone && (
+                          <a href={`tel:${customerPhone}`} className="text-xs text-[#3DBFA4] hover:underline">
+                            {customerPhone}
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -304,9 +379,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           {parseAddrPhone(order.billingAddress)}
                         </a>
                       )}
+                      <EditOrderAddress orderId={order.id} type="billing" raw={order.billingAddress} />
                     </div>
                   ) : order.physician ? (
-                    // Fallback for old orders that didn't store billing address JSON
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
                         {order.physician.firstName} {order.physician.lastName}
@@ -323,9 +398,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           {order.physician.phone}
                         </a>
                       )}
+                      <EditOrderAddress orderId={order.id} type="billing" raw={null} />
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400">No billing info</p>
+                    <div>
+                      <p className="text-sm text-gray-400">No billing info</p>
+                      <EditOrderAddress orderId={order.id} type="billing" raw={null} />
+                    </div>
                   )}
                 </div>
 
@@ -345,9 +424,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           {parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}
                         </a>
                       )}
+                      <EditOrderAddress orderId={order.id} type="shipping" raw={order.shippingAddress} />
                     </div>
                   ) : order.physician ? (
-                    // Fallback for old orders
                     <div className="text-sm space-y-1">
                       <p className="font-semibold text-gray-800">
                         {order.physician.firstName} {order.physician.lastName}
@@ -360,9 +439,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           {order.physician.phone}
                         </a>
                       )}
+                      <EditOrderAddress orderId={order.id} type="shipping" raw={null} />
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400">No shipping info</p>
+                    <div>
+                      <p className="text-sm text-gray-400">No shipping info</p>
+                      <EditOrderAddress orderId={order.id} type="shipping" raw={null} />
+                    </div>
                   )}
                 </div>
               </div>
@@ -381,17 +464,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {items.map((item, idx) => {
-                      const returnedIdxs = isReturned && Array.isArray(order.returnedItems)
-                        ? (order.returnedItems as number[])
-                        : null;
-                      const isItemReturned = returnedIdxs ? returnedIdxs.includes(idx) : isReturned;
+                      const refQty            = refundQtyByIdx.get(idx) ?? 0;
+                      const refLineTotal      = refundLineTotalByIdx.get(idx) ?? 0;
+                      const isFullyRefunded   = refQty >= item.quantity;
+                      const isPartialRefunded = refQty > 0 && refQty < item.quantity;
                       return (
-                        <tr key={idx} className={isItemReturned ? "opacity-50" : ""}>
+                        <tr key={idx} className={isFullyRefunded ? "opacity-50" : ""}>
                           <td className="py-3.5 font-medium text-gray-800">
                             {item.title}
-                            {isItemReturned && (
+                            {isFullyRefunded && (
                               <span className="ml-2 text-[10px] font-semibold text-orange-500 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">
-                                Returned
+                                Refunded
+                              </span>
+                            )}
+                            {isPartialRefunded && (
+                              <span className="ml-2 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+                                Partial Refund ({refQty}/{item.quantity})
                               </span>
                             )}
                           </td>
@@ -399,11 +487,23 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                             {item.variantSize || "—"}
                             {item.sku && <p className="text-xs text-gray-400">SKU: {item.sku}</p>}
                           </td>
-                          <td className="py-3.5 text-center text-gray-700">{item.quantity}</td>
+                          <td className="py-3.5 text-center text-gray-700">
+                            {item.quantity}
+                            {isPartialRefunded && (
+                              <p className="text-[10px] text-orange-500">−{refQty} refunded</p>
+                            )}
+                          </td>
                           <td className="py-3.5 text-right text-gray-700">{fmtMoney(item.unitPrice)}</td>
                           <td className="py-3.5 text-right font-semibold text-gray-900">
-                            {isItemReturned
+                            {isFullyRefunded
                               ? <span className="line-through text-gray-300">{fmtMoney(item.lineTotal)}</span>
+                              : isPartialRefunded
+                              ? (
+                                <span>
+                                  {fmtMoney(item.lineTotal - refLineTotal)}
+                                  <span className="block text-[10px] text-orange-400 line-through">{fmtMoney(item.lineTotal)}</span>
+                                </span>
+                              )
                               : fmtMoney(item.lineTotal)}
                           </td>
                         </tr>
@@ -492,8 +592,103 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 <p className="text-xs text-gray-400 font-medium mb-1"> Commission</p>
                 <p className="text-xl font-bold text-[#8b5cf6]">{fmtMoney(order.physicianCommissionAmount)}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{order.physicianCommissionRate}%</p>
+                {(order.physicianClawback ?? 0) > 0 && (
+                  <p className="text-xs text-orange-500 font-medium mt-0.5">−{fmtMoney(order.physicianClawback!)} clawed back</p>
+                )}
               </div>
             </div>
+
+            {/* ── Refund Activity Log ──────────────────────────────────── */}
+            {refunds.length > 0 && (
+              <div className="no-print bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                  </svg>
+                  <h3 className="text-sm font-semibold text-gray-700">Refund History</h3>
+                  <span className="ml-auto text-[11px] text-gray-400 font-medium">
+                    {refunds.length} event{refunds.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {refunds.map((refund) => {
+                    const rItems = refund.items as StoredRefundItem[] | null;
+                    return (
+                      <div key={refund.id} className="px-5 py-4">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div>
+                            <p className="text-xs font-bold text-gray-700">
+                              Refund #{refund.refundNumber}
+                              <span className="ml-2 text-[11px] font-normal text-gray-400">
+                                {fmtDateTime(refund.processedAt as Date)}
+                              </span>
+                            </p>
+                            {refund.reason && (
+                              <p className="text-[11px] text-gray-400 italic mt-0.5">"{refund.reason as string}"</p>
+                            )}
+                          </div>
+                          <span className="text-sm font-bold text-orange-600 shrink-0">
+                            −{fmtMoney(refund.total as number)}
+                          </span>
+                        </div>
+
+                        <div className="space-y-0.5 mb-2">
+                          {!rItems ? (
+                            <p className="text-xs text-gray-500">All items — full refund</p>
+                          ) : (
+                            rItems.map((ri) => {
+                              const item = items[ri.index];
+                              return item ? (
+                                <p key={ri.index} className="text-xs text-gray-500">
+                                  {item.title}
+                                  {item.variantSize && <span className="text-gray-400"> · {item.variantSize}</span>}
+                                  <span className="text-gray-700 font-medium"> × {ri.returnedQty}</span>
+                                  <span className="text-gray-400 ml-1">({fmtMoney(ri.lineTotal)})</span>
+                                </p>
+                              ) : null;
+                            })
+                          )}
+                        </div>
+
+                        {((refund.salesRepClawback as number) > 0 || (refund.physicianClawback as number) > 0) && (
+                          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-orange-500 font-medium">
+                            {(refund.salesRepClawback as number) > 0 && (
+                              <span>Rep clawback: −{fmtMoney(refund.salesRepClawback as number)}</span>
+                            )}
+                            {(refund.physicianClawback as number) > 0 && (
+                              <span>Dr clawback: −{fmtMoney(refund.physicianClawback as number)}</span>
+                            )}
+                          </div>
+                        )}
+
+                        {refund.customerRefundMethod && (refund.customerRefundAmount as number) > 0 && (
+                          <div className={`mt-2 flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg w-fit ${
+                            refund.customerRefundMethod === "stripe"
+                              ? "bg-indigo-50 text-indigo-700"
+                              : "bg-emerald-50 text-emerald-700"
+                          }`}>
+                            {refund.customerRefundMethod === "stripe" ? (
+                              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            Customer refund {fmtMoney(refund.customerRefundAmount as number)} via{" "}
+                            {refund.customerRefundMethod === "stripe" ? "Stripe (original card)" : "manual"}
+                            {refund.stripeRefundId && (
+                              <span className="font-mono text-[10px] opacity-60 ml-1">· {refund.stripeRefundId as string}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ════════ RIGHT SIDEBAR ════════ */}
@@ -556,10 +751,28 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               isReturned={isReturned}
             />
 
-            {/* Return action */}
-            {!isReturned && (
+            {/* Refund action — hidden only when all items are fully refunded */}
+            {!allItemsFullyRefunded && (
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <ReturnOrderModal />
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Refund Order</p>
+                <RefundOrderModal
+                  orderId={order.id}
+                  orderNumber={order.orderNumber}
+                  total={order.total}
+                  items={items}
+                  alreadyRefunded={alreadyRefunded}
+                  existingSalesRepClawback={order.salesRepClawback ?? 0}
+                  existingPhysicianClawback={order.physicianClawback ?? 0}
+                  salesRepName={order.salesRep?.name ?? null}
+                  physicianName={order.physician ? `${order.physician.firstName} ${order.physician.lastName}` : null}
+                  salesRepCommissionAmount={order.salesRepCommissionAmount}
+                  physicianCommissionAmount={order.physicianCommissionAmount}
+                  commissionPaid={order.commissionPaid}
+                  salesRepWalletBalance={order.salesRep?.walletBalance ?? null}
+                  physicianWalletBalance={order.physician?.walletBalance ?? null}
+                  stripePaymentIntentId={order.stripePaymentIntentId ?? null}
+                  paymentMethod={order.paymentMethod ?? null}
+                />
               </div>
             )}
 

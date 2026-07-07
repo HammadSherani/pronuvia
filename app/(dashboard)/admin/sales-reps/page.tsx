@@ -78,8 +78,14 @@ export default async function SalesRepsPage({
                       {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-4 justify-end">
-                        <Link href={`/admin/sales-reps/${r.id}/orders`} className="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors">
+                      <div className="flex items-center gap-3 justify-end">
+                        <Link
+                          href={`/admin/sales-reps/${r.id}/orders`}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-[#3DBFA4] hover:bg-[#35a993] px-2.5 py-1.5 rounded-lg transition-colors text-nowrap"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
                           Orders
                         </Link>
                         <Link href={`/admin/sales-reps/${r.id}`} className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">

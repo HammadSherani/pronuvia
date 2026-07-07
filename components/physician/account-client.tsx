@@ -150,7 +150,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
 
       <Section title="Commission">
         <InfoRow label="Commission Rate"        value={`${p.commission}%`} />
-        <InfoRow label="Upline Commission Rate" value={`${p.uplineCommission}%`} />
+        {/* <InfoRow label="Upline Commission Rate" value={`${p.uplineCommission}%`} /> */}
       </Section>
 
       {p.salesRep && (
