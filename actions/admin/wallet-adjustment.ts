@@ -23,13 +23,13 @@ export async function adjustWallet(data: {
   if (userRole === "SALES_REP") {
     const rep = await prisma.salesRepresentative.findUnique({ where: { id: userId }, select: { walletBalance: true } });
     if (!rep) return { success: false, message: "Sales rep not found." };
-    newBalance = type === "CREDIT" ? (rep.walletBalance ?? 0) + amount : Math.max(0, (rep.walletBalance ?? 0) - amount);
+    newBalance = type === "CREDIT" ? (rep.walletBalance ?? 0) + amount : (rep.walletBalance ?? 0) - amount;
     await prisma.salesRepresentative.update({ where: { id: userId }, data: { walletBalance: newBalance } });
     revalidatePath("/sales/wallet");
   } else {
     const physician = await prisma.partneringPhysician.findUnique({ where: { id: userId }, select: { walletBalance: true } });
     if (!physician) return { success: false, message: "Physician not found." };
-    newBalance = type === "CREDIT" ? (physician.walletBalance ?? 0) + amount : Math.max(0, (physician.walletBalance ?? 0) - amount);
+    newBalance = type === "CREDIT" ? (physician.walletBalance ?? 0) + amount : (physician.walletBalance ?? 0) - amount;
     await prisma.partneringPhysician.update({ where: { id: userId }, data: { walletBalance: newBalance } });
     revalidatePath("/physician/wallet");
   }

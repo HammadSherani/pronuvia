@@ -118,7 +118,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
 
                   {/* Balance */}
                   <td className="px-5 py-4">
-                    <span className={`text-sm font-bold ${rep.walletBalance > 0 ? "text-emerald-600" : "text-gray-400"}`}>
+                    <span className={`text-sm font-bold ${rep.walletBalance > 0 ? "text-emerald-600" : rep.walletBalance < 0 ? "text-red-500" : "text-gray-400"}`}>
                       {fmt(rep.walletBalance)}
                     </span>
                   </td>
@@ -224,13 +224,16 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
               {amount && parseFloat(amount) > 0 && (
                 <p className="text-xs text-gray-400 mt-1.5">
                   New balance:{" "}
-                  <span className="font-semibold text-gray-700">
-                    {fmt(
-                      type === "CREDIT"
-                        ? selected.walletBalance + parseFloat(amount)
-                        : Math.max(0, selected.walletBalance - parseFloat(amount))
-                    )}
-                  </span>
+                  {(() => {
+                    const nb = type === "CREDIT"
+                      ? selected.walletBalance + parseFloat(amount)
+                      : selected.walletBalance - parseFloat(amount);
+                    return (
+                      <span className={`font-semibold ${nb < 0 ? "text-red-600" : "text-gray-700"}`}>
+                        {fmt(nb)}
+                      </span>
+                    );
+                  })()}
                 </p>
               )}
             </div>

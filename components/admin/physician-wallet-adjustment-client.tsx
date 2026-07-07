@@ -99,7 +99,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-500">{p.email}</td>
                   <td className="px-5 py-4">
-                    <span className={`text-sm font-bold ${p.walletBalance > 0 ? "text-emerald-600" : "text-gray-400"}`}>
+                    <span className={`text-sm font-bold ${p.walletBalance > 0 ? "text-emerald-600" : p.walletBalance < 0 ? "text-red-500" : "text-gray-400"}`}>
                       {fmt(p.walletBalance)}
                     </span>
                   </td>
@@ -179,9 +179,16 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
               {amount && parseFloat(amount) > 0 && (
                 <p className="text-xs text-gray-400 mt-1.5">
                   New balance:{" "}
-                  <span className="font-semibold text-gray-700">
-                    {fmt(type === "CREDIT" ? selected.walletBalance + parseFloat(amount) : Math.max(0, selected.walletBalance - parseFloat(amount)))}
-                  </span>
+                  {(() => {
+                    const nb = type === "CREDIT"
+                      ? selected.walletBalance + parseFloat(amount)
+                      : selected.walletBalance - parseFloat(amount);
+                    return (
+                      <span className={`font-semibold ${nb < 0 ? "text-red-600" : "text-gray-700"}`}>
+                        {fmt(nb)}
+                      </span>
+                    );
+                  })()}
                 </p>
               )}
             </div>
