@@ -518,22 +518,24 @@ export type OrderEmailData = {
   trackingNumber?:   string | null;
   shippingCarrier?:  string | null;
   estimatedDelivery?: Date | null;
+  isPatientEmail?:   boolean;
 };
 
 export function orderConfirmationEmail(d: OrderEmailData) {
+  const greeting = d.isPatientEmail ? "Hello" : `Hi ${d.firstName}`;
   return {
     subject: `Order Confirmed: ${d.orderNumber}`,
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Confirmed!</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${d.firstName}, thank you for your order. We've received it and will start processing shortly.
+        ${greeting}, thank you for your order. We've received it and will start processing shortly.
       </p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
         <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Order #${d.orderNumber} · Total: $${d.total.toFixed(2)}</p>
       </div>
       ${orderItemsTable(d.items)}
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+       
       </div>`),
   };
 }
@@ -551,7 +553,7 @@ export function orderProcessingEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#1d4ed8;font-weight:600;">We'll notify you once your order ships.</p>
       </div>
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
+        // <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
       </div>`),
   };
 }
@@ -569,7 +571,7 @@ export function orderCompletedEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Total paid: $${d.total.toFixed(2)}</p>
       </div>
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order</a>
+        // <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order</a>
       </div>`),
   };
 }
@@ -588,7 +590,7 @@ export function orderCancelledEmail(d: OrderEmailData) {
         <p style="margin:0;font-size:13px;color:#dc2626;font-weight:600;">For questions, please contact support.</p>
       </div>
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+       
       </div>`),
   };
 }
@@ -629,7 +631,7 @@ export function orderDetailsEmail(d: OrderEmailData) {
       </div>
       ${orderItemsTable(d.items)}
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      
       </div>`),
   };
 }
@@ -841,7 +843,7 @@ export function orderNoteEmail(opts: { firstName: string; orderNumber: string; n
         <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
       </div>
       <div style="text-align:center;">
-        <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View My Orders</a>
+      
       </div>
       <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
         If you have questions, please contact your administrator.

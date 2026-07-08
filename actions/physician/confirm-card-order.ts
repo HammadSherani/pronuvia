@@ -149,10 +149,11 @@ export async function confirmPhysicianCardOrder(
     try {
       const { subject, html } = orderConfirmationEmail({
         orderNumber,
-        firstName:  physician?.firstName ?? "Doctor",
-        total:      payload.total,
-        status:     "PAID",
-        items:      items.map((i) => ({
+        firstName:       physician?.firstName ?? "Doctor",
+        total:           payload.total,
+        status:          "PAID",
+        isPatientEmail:  true,
+        items:           items.map((i) => ({
           title:       i.title,
           variantSize: i.variantSize,
           quantity:    i.quantity,
@@ -163,10 +164,14 @@ export async function confirmPhysicianCardOrder(
       const cc = physician?.email && physician.email !== payload.customerEmail
         ? physician.email
         : undefined;
+      console.log("[physician order] sending confirmation email to:", payload.customerEmail, cc ? `| cc: ${cc}` : "");
       await sendMail({ to: payload.customerEmail, cc, subject, html });
+      console.log("[physician order] confirmation email sent successfully");
     } catch (err) {
-      console.error("[physician order] confirmation email failed:", err);
+      console.error("[physician order] confirmation email FAILED:", err);
     }
+  } else {
+    console.log("[physician order] no customerEmail provided — skipping confirmation email");
   }
 
   revalidatePath("/physician/orders");

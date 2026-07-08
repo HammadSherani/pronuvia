@@ -93,6 +93,33 @@ const CARRIER_PACKAGES: { group: string; carrier: CarrierCode; packages: Carrier
 
 function fmt(n: number) { return n.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
 
+function parseAddressLines(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const obj = JSON.parse(raw);
+    const lines: string[] = [];
+    if (obj.address1) lines.push(obj.address1);
+    if (obj.address2) lines.push(obj.address2);
+    const city = [obj.city, obj.state && obj.zip ? `${obj.state} ${obj.zip}` : (obj.state || obj.zip)].filter(Boolean).join(", ");
+    if (city) lines.push(city);
+    if (obj.country) lines.push(obj.country);
+    return lines;
+  } catch {
+    return raw.split("\n").map(l => l.trim()).filter(Boolean);
+  }
+}
+
+function parseAddressName(raw: string | null, fallback: string | null): string | null {
+  if (!raw) return fallback;
+  try {
+    const obj = JSON.parse(raw);
+    const name = [obj.firstName, obj.lastName].filter(Boolean).join(" ");
+    return name || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function generatePackingSlip(params: {
   orderNumber:    string;
   trackingNumber: string;
@@ -109,10 +136,8 @@ function generatePackingSlip(params: {
   const total = subtotal + shippingCost;
   const fmt = (n: number) => `$${n.toFixed(2)}`;
 
-  // Parse shipTo address lines (skip name line)
-  const addrLines = (shipTo.address ?? "").split("\n").map(l => l.trim()).filter(Boolean);
-  const firstIsName = shipTo.name && addrLines[0]?.toLowerCase() === shipTo.name?.toLowerCase();
-  const displayAddr = firstIsName ? addrLines.slice(1) : addrLines;
+  const displayAddr = parseAddressLines(shipTo.address ?? null);
+  const resolvedName = parseAddressName(shipTo.address ?? null, shipTo.name ?? null);
 
   const itemRows = items.map(it => `
     <tr>
@@ -176,7 +201,7 @@ function generatePackingSlip(params: {
     </div>
     <div class="box">
       <h3>Ship To</h3>
-      ${shipTo.name ? `<p><strong>${shipTo.name}</strong></p>` : ""}
+      ${resolvedName ? `<p><strong>${resolvedName}</strong></p>` : ""}
       ${displayAddr.map(l => `<p>${l}</p>`).join("")}
     </div>
   </div>
@@ -963,16 +988,12 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Details</p>
           <div className="space-y-2.5">
             <Row label="Ship from" value={`${shipFrom.name}, ${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}`} />
-            <Row label="Ship to"   value={
-              (() => {
-                if (!shipTo.address) return "No address on file";
-                // Strip first line if it matches the name (name embedded at checkout)
-                const lines = shipTo.address.split("\n").map(l => l.trim()).filter(Boolean);
-                const firstIsName = shipTo.name && lines[0]?.toLowerCase() === shipTo.name.toLowerCase();
-                const addrLines = firstIsName ? lines.slice(1) : lines;
-                return addrLines.join(", ") || shipTo.address;
-              })()
-            } />
+            <Row label="Ship to" value={(() => {
+              const name = parseAddressName(shipTo.address ?? null, shipTo.name ?? null);
+              const lines = parseAddressLines(shipTo.address ?? null);
+              if (!lines.length && !name) return "No address on file";
+              return [name, ...lines].filter(Boolean).join(", ");
+            })()} />
             <div className="border-t border-gray-200 pt-2.5 space-y-2">
               <Row label="Number of items" value={String(items.length)} />
               <Row label="Order value"     value={fmt(orderValue)} bold />

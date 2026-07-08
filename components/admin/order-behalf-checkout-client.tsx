@@ -39,13 +39,15 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   notes:           string;
   total:           number;
   shippingRate:    number;
+  customerEmail?:  string;
+  customerPhone?:  string;
   couponId?:       string;
   couponCode?:     string;
   discountAmount?: number;
   onSuccess:       (orderNumber: string) => void;
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
-}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
+}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
 
@@ -55,7 +57,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
     onError("");
     sessionStorage.setItem("ab_order", JSON.stringify({
       physicianId, itemsJson, billingAddress, shippingAddress,
-      notes, shippingRate, total, couponId, couponCode, discountAmount,
+      notes, shippingRate, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
     }));
 
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
@@ -75,7 +77,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
       const result = await confirmBehalfCardOrder({
         physicianId, paymentIntentId: paymentIntent.id,
         itemsJson, billingAddress, shippingAddress, notes,
-        shippingRate, total, couponId, couponCode, discountAmount,
+        shippingRate, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
       });
       if (result.success && result.orderNumber) {
         onSuccess(result.orderNumber);
@@ -113,7 +115,8 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const router = useRouter();
 
   const migrated = migrateAddressData({ ...EMPTY_ADDRESS, ...initialAddress });
-  const [email,         setEmail]         = useState(physicianEmail);
+  const [email,         setEmail]         = useState("");
+  const [phone,         setPhone]         = useState("");
   const [shipping,      setShipping]      = useState<AddressData>(migrated);
   const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
@@ -212,6 +215,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
     const data = JSON.parse(saved) as {
       physicianId: string; itemsJson: string; billingAddress: string;
       shippingAddress: string; notes: string; shippingRate: number; total: number;
+      customerEmail?: string; customerPhone?: string;
       couponId?: string; couponCode?: string; discountAmount?: number;
     };
     sessionStorage.removeItem("ab_order");
@@ -286,15 +290,28 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
           {/* Contact */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
-            <div className="border border-gray-300 rounded px-4 py-3">
-              <label className="text-xs text-gray-400 mb-0.5 block">Email address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="text-sm text-gray-800 w-full outline-none bg-transparent"
-              />
+            <h2 className="text-base font-semibold text-gray-800 mb-3">Patient contact information</h2>
+            <div className="border border-gray-300 rounded px-4 py-3 space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-0.5 block">Patient&apos;s Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter patient's email (for order confirmation)"
+                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
+                />
+              </div>
+              <div className="border-t border-gray-100 pt-3">
+                <label className="text-xs text-gray-400 mb-0.5 block">Patient&apos;s Phone Number <span className="text-gray-300">(optional)</span></label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter patient's phone"
+                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
+                />
+              </div>
             </div>
           </section>
 
@@ -425,6 +442,8 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                     notes={notes}
                     total={total}
                     shippingRate={shippingCost}
+                    customerEmail={email || undefined}
+                    customerPhone={phone || undefined}
                     couponId={appliedCoupon?.couponId}
                     couponCode={appliedCoupon?.code}
                     discountAmount={discountAmount}

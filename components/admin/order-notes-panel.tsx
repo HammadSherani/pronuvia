@@ -82,7 +82,7 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   )}
-                  {note.type === "private" ? "Private" : "Customer"}
+                  {note.type === "private" ? "Private" : "Patient"}
                 </span>
                 <div className="flex items-center gap-2 ml-auto">
                   <span className="text-[10px] text-gray-400">{formatDate(note.createdAt)}</span>

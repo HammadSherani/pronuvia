@@ -8,6 +8,8 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
+import { sendMail } from "@/lib/email/mailer";
+import { orderConfirmationEmail } from "@/lib/email/templates";
 
 type CartItem = {
   productId:   string;
@@ -28,6 +30,8 @@ export type ConfirmBehalfOrderPayload = {
   notes:           string;
   shippingRate:    number;
   total:           number;
+  customerEmail?:  string;
+  customerPhone?:  string;
   couponId?:       string;
   couponCode?:     string;
   discountAmount?: number;
@@ -79,7 +83,7 @@ export async function confirmBehalfCardOrder(
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: payload.physicianId },
-    select: { commission: true, uplineCommission: true, salesRepId: true },
+    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
   const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
@@ -110,6 +114,8 @@ export async function confirmBehalfCardOrder(
         physicianCommissionAmount,
         salesRepCommissionRate,
         salesRepCommissionAmount,
+        customerEmail:         payload.customerEmail   || undefined,
+        customerPhone:         payload.customerPhone   || undefined,
         billingAddress:        payload.billingAddress  || undefined,
         shippingAddress:       payload.shippingAddress || undefined,
         shippingRate:          payload.shippingRate,
@@ -138,6 +144,32 @@ export async function confirmBehalfCardOrder(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(ops as any);
+
+  // Send confirmation email to patient; CC physician
+  if (payload.customerEmail) {
+    try {
+      const { subject, html } = orderConfirmationEmail({
+        orderNumber,
+        firstName:      physician?.firstName ?? "Doctor",
+        total:          payload.total,
+        status:         "PAID",
+        isPatientEmail: true,
+        items:          items.map((i) => ({
+          title:       i.title,
+          variantSize: i.variantSize,
+          quantity:    i.quantity,
+          unitPrice:   i.unitPrice,
+          lineTotal:   i.lineTotal,
+        })),
+      });
+      const cc = physician?.email && physician.email !== payload.customerEmail
+        ? physician.email
+        : undefined;
+      await sendMail({ to: payload.customerEmail, cc, subject, html });
+    } catch (err) {
+      console.error("[behalf order] confirmation email failed:", err);
+    }
+  }
 
   revalidatePath("/admin/orders");
   revalidatePath(`/physician/orders`);

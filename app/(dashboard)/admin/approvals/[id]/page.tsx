@@ -127,7 +127,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
           <InfoRow label="First Name"   value={p.firstName} />
           <InfoRow label="Last Name"    value={p.lastName} />
           <InfoRow label="Email"        value={p.email} />
-          <InfoRow label="Mobile Phone" value={p.phone} />
+          <InfoRow label="Phone" value={p.phone} />
           <InfoRow label="Office Phone" value={p.officeContactNumber} />
           <InfoRow label="Fax"          value={p.fax} />
         </div>

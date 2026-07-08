@@ -87,6 +87,15 @@ function DoctorTableRow({ p }: { p: Physician }) {
               Order
             </Link>
           )}
+          <Link
+            href={`/admin/physicians/${p.id}/orders`}
+            className="inline-flex items-center gap-1 text-xs font-medium text-[#5BB8D4] hover:text-[#3a9db8] bg-[#5BB8D4]/10 hover:bg-[#5BB8D4]/20 px-2 py-1 rounded-lg transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Summary
+          </Link>
           <Link href={`/admin/physicians/${p.id}`} className="text-xs font-medium text-gray-500 hover:text-gray-700">View</Link>
           <Link href={`/admin/physicians/${p.id}/edit`} className="text-xs font-medium text-[#5BB8D4] hover:text-[#3a9db8]">Edit</Link>
           <DeleteButton
