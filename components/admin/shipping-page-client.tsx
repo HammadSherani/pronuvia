@@ -537,8 +537,6 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     });
   }
 
-  const shippingTotal = (selectedRate?.totalCost ?? shippingRate) + subtotal;
-
   function printLabel(base64: string, format: string) {
     const win = window.open("", "_blank", "width=600,height=800");
     if (!win) return;
@@ -981,7 +979,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
       </div>
 
       {/* ── RIGHT SIDEBAR ── */}
-      <div className="space-y-4 sticky top-6">
+      <div className="space-y-4 sticky top-32">
 
         {/* Order details */}
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
@@ -1009,13 +1007,20 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
           <div className="space-y-2.5">
             <div className="flex justify-between items-center gap-2">
               <span className="text-gray-500 shrink-0">Ship date</span>
-              <input type="date" value={shipDate} onChange={e => setShipDate(e.target.value)}
-                className="text-xs text-gray-800 font-medium border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white" />
+              <div className="relative">
+                <input type="date" value={shipDate} onChange={e => setShipDate(e.target.value)}
+                  className="text-xs text-gray-800 font-medium border border-gray-200 rounded-lg pl-2 pr-7 py-1 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white" />
+                <svg className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
             </div>
-            <div className="border-t border-gray-200 pt-2.5 space-y-2">
-              <Row label="Subtotal" value={fmt(subtotal)} />
-              <Row label="Total"    value={fmt(shippingTotal)} bold />
-            </div>
+            {selectedRate && (
+              <div className="border-t border-gray-200 pt-2.5 space-y-2">
+                <Row label={`${selectedRate.carrierLabel} - ${selectedRate.service}`} value={fmt(selectedRate.totalCost)} />
+                <Row label="Total" value={fmt(selectedRate.totalCost)} bold />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1065,7 +1070,7 @@ export function ShippingPageClient(props: Props) {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
         {/* Tabs */}
         <div className="border-b border-gray-100 px-6">
           <div className="flex items-center overflow-x-auto">
