@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { createWithdrawRequest } from "@/actions/sales-rep/withdraw-request";
 
 function fmt(n: number) {
@@ -74,15 +75,14 @@ export function WithdrawModal({
           </div>
 
           {/* Bank destination */}
-          {hasBankDetails && (
+          {hasBankDetails ? (
             <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-gray-900/15 flex items-center justify-center shrink-0 mt-0.5">
                 <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
                 </svg>
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-700">Sending to</p>
                 {bankAccountName && <p className="text-xs text-gray-600 mt-0.5">{bankAccountName}</p>}
                 {bankName        && <p className="text-xs text-gray-400">{bankName}</p>}
@@ -92,18 +92,34 @@ export function WithdrawModal({
                   </p>
                 )}
               </div>
+              <Link
+                href="/sales/account"
+                onClick={onClose}
+                className="shrink-0 text-[11px] font-semibold text-[#3DBFA4] hover:text-[#35a993] flex items-center gap-1 mt-0.5 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </Link>
             </div>
-          )}
-
-          {!hasBankDetails && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2">
-              <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round"
-                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              <p className="text-xs text-amber-700">
-                No bank account linked. Add your bank details in Account Settings before requesting a withdrawal.
-              </p>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <p className="text-xs text-amber-700">
+                  No bank account linked. Please add your bank details before requesting a withdrawal.
+                </p>
+              </div>
+              <Link
+                href="/sales/account"
+                onClick={onClose}
+                className="shrink-0 text-[11px] font-semibold text-amber-700 underline hover:text-amber-900 transition-colors whitespace-nowrap"
+              >
+                Add now
+              </Link>
             </div>
           )}
 

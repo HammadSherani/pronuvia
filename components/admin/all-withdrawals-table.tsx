@@ -46,7 +46,7 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-function RowActions({ requestId }: { requestId: string }) {
+function RowActions({ requestId, canApprove }: { requestId: string; canApprove: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [open,      setOpen]         = useState(false);
   const [adminNote, setAdminNote]    = useState("");
@@ -65,12 +65,14 @@ function RowActions({ requestId }: { requestId: string }) {
   return (
     <>
       <div className="flex items-center justify-end gap-1.5">
-        <button type="button" onClick={() => confirm("APPROVED")} disabled={isPending} title="Approve"
-          className="w-7 h-7 inline-flex items-center justify-center bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </button>
+        {canApprove && (
+          <button type="button" onClick={() => confirm("APPROVED")} disabled={isPending} title="Approve"
+            className="w-7 h-7 inline-flex items-center justify-center bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        )}
         <button type="button" onClick={() => confirm("REJECTED")} disabled={isPending} title="Reject"
           className="w-7 h-7 inline-flex items-center justify-center bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -81,7 +83,7 @@ function RowActions({ requestId }: { requestId: string }) {
 
       {open && action && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-left">
             <h3 className="text-base font-bold text-gray-800 mb-1">
               {action === "APPROVED" ? "Approve" : "Reject"} Withdrawal
             </h3>
@@ -117,21 +119,27 @@ function RowActions({ requestId }: { requestId: string }) {
 }
 
 export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
+  const [activeTab,     setActiveTab]     = useState<"pending" | "approved">("pending");
   const [selected,      setSelected]      = useState<Set<string>>(new Set());
   const [confirmAction, setConfirmAction] = useState<"APPROVED" | "REJECTED" | null>(null);
   const [isPending,     startTransition]  = useTransition();
   const [page,          setPage]          = useState(1);
   const [pageSize,      setPageSize]      = useState(10);
 
-  const pendingIds  = requests.filter((r) => r.status === "PENDING").map((r) => r.id);
+  const tabRequests = useMemo(
+    () => requests.filter((r) => activeTab === "pending" ? r.status === "PENDING" : r.status !== "PENDING"),
+    [requests, activeTab]
+  );
+
+  const pendingIds  = tabRequests.filter((r) => r.status === "PENDING").map((r) => r.id);
   const allSelected = pendingIds.length > 0 && pendingIds.every((id) => selected.has(id));
   const toggle    = (id: string) => setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => setSelected(allSelected ? new Set() : new Set(pendingIds));
 
   const pagedRequests = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return requests.slice(start, start + pageSize);
-  }, [requests, page, pageSize]);
+    return tabRequests.slice(start, start + pageSize);
+  }, [tabRequests, page, pageSize]);
 
   const handleBulk = (action: "APPROVED" | "REJECTED") => {
     startTransition(async () => {
@@ -143,21 +151,52 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
     });
   };
 
-  if (requests.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
-        </div>
-        <p className="text-sm font-medium text-gray-500">No withdrawal requests yet</p>
-      </div>
-    );
-  }
+  const pendingCount  = requests.filter((r) => r.status === "PENDING").length;
+  const approvedCount = requests.filter((r) => r.status !== "PENDING").length;
 
   return (
     <>
+      {/* Tabs */}
+      <div className="flex items-center gap-1 mb-4 bg-gray-100 rounded-xl p-1 w-fit">
+        {([
+          { key: "pending",  label: "Pending",  count: pendingCount },
+          { key: "approved", label: "Approved", count: approvedCount },
+        ] as const).map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => { setActiveTab(tab.key); setPage(1); setSelected(new Set()); }}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === tab.key
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.label}
+            <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
+              activeTab === tab.key
+                ? tab.key === "pending" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+                : "bg-gray-200 text-gray-500"
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {tabRequests.length === 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-gray-500">
+            No {activeTab === "pending" ? "pending" : "approved"} withdrawal requests
+          </p>
+        </div>
+      )}
+
       {selected.size > 0 && (
         <div className="flex items-center justify-between gap-4 mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
           <span className="text-sm font-semibold text-blue-800">
@@ -185,39 +224,46 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
         </div>
       )}
 
+      {tabRequests.length > 0 && (
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-sm table-fixed">
           <colgroup>
-            <col className="w-8" />
+            {activeTab === "pending" && <col className="w-8" />}
             <col className="w-[8%]" />
             <col className="w-[16%]" />
             <col className="w-[15%]" />
-            <col className="w-[8%]" />
             <col className="w-[9%]" />
-            <col className="w-[12%]" />
-            <col className="w-[8%]" />
-            <col className="w-[8%]" />
-            <col className="w-[7%]" />
+            {activeTab === "pending" && <col className="w-[9%]" />}
+            <col className="w-[14%]" />
             <col className="w-[9%]" />
+            <col className="w-[8%]" />
+            <col className="w-[8%]" />
+            {activeTab === "pending" && <col className="w-[10%]" />}
           </colgroup>
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="px-3 py-3">
-                {pendingIds.length > 0 && (
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll} title="Select all pending"
-                    className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
-                )}
-              </th>
+              {activeTab === "pending" && (
+                <th className="px-3 py-3">
+                  {pendingIds.length > 0 && (
+                    <input type="checkbox" checked={allSelected} onChange={toggleAll} title="Select all pending"
+                      className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
+                  )}
+                </th>
+              )}
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
+              {activeTab === "pending" && (
+                <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
+              )}
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Wallet</th>
-              <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              {activeTab === "pending" && (
+                <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -229,12 +275,14 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
 
               return (
                 <tr key={r.id} className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
-                  <td className="px-3 py-3">
-                    {isPendingRow
-                      ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
-                          className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
-                      : <span className="block w-4 h-4" />}
-                  </td>
+                  {activeTab === "pending" && (
+                    <td className="px-3 py-3">
+                      {isPendingRow
+                        ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
+                            className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
+                        : <span className="block w-4 h-4" />}
+                    </td>
+                  )}
 
                   <td className="px-3 py-3">
                     {isRep ? (
@@ -271,14 +319,16 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                     <span className="text-sm font-bold text-gray-800">{fmt(r.amount)}</span>
                   </td>
 
-                  <td className="px-3 py-3">
-                    <span className={`text-xs font-semibold ${(user?.walletBalance ?? 0) >= r.amount ? "text-emerald-600" : "text-red-500"}`}>
-                      {fmt(user?.walletBalance ?? 0)}
-                    </span>
-                    {(user?.walletBalance ?? 0) < r.amount && isPendingRow && (
-                      <p className="text-[10px] text-red-400">Low</p>
-                    )}
-                  </td>
+                  {activeTab === "pending" && (
+                    <td className="px-3 py-3">
+                      <span className={`text-xs font-semibold ${(user?.walletBalance ?? 0) >= r.amount ? "text-emerald-600" : "text-red-500"}`}>
+                        {fmt(user?.walletBalance ?? 0)}
+                      </span>
+                      {(user?.walletBalance ?? 0) < r.amount && (
+                        <p className="text-[10px] text-red-400">Low</p>
+                      )}
+                    </td>
+                  )}
 
                   <td className="px-3 py-3 space-y-1">
                     {r.note
@@ -312,28 +362,29 @@ export function AllWithdrawalsTable({ requests, repMap, drMap }: Props) {
                       : <PhysicianWalletModal physicianId={r.userId} physicianName={user ? `${user.firstName} ${user.lastName}` : r.userId} />}
                   </td>
 
-                  <td className="px-3 py-3 text-right">
-                    {isPendingRow
-                      ? <RowActions requestId={r.id} />
-                      : <span className="text-xs text-gray-300">—</span>}
-                  </td>
+                  {activeTab === "pending" && (
+                    <td className="px-3 py-3 text-right">
+                      <RowActions requestId={r.id} canApprove={(user?.walletBalance ?? 0) >= r.amount} />
+                    </td>
+                  )}
                 </tr>
               );
             })}
           </tbody>
         </table>
         <ClientPagination
-          total={requests.length}
+          total={tabRequests.length}
           page={page}
           pageSize={pageSize}
           onPage={setPage}
           onPageSize={setPageSize}
         />
       </div>
+      )}
 
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-left">
             <h3 className="text-base font-bold text-gray-800 mb-1">
               {confirmAction === "APPROVED" ? "Bulk Approve" : "Bulk Reject"} {selected.size} Request{selected.size !== 1 ? "s" : ""}
             </h3>
