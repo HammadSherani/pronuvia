@@ -8,6 +8,8 @@ import { requireSalesRep } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
+import { sendMail } from "@/lib/email/mailer";
+import { orderConfirmationEmail } from "@/lib/email/templates";
 
 type CartItem = {
   productId:   string;
@@ -30,6 +32,8 @@ export type ConfirmCardOrderPayload = {
   couponId?:        string;
   couponCode?:      string;
   discountAmount?:  number;
+  customerEmail?:   string;
+  customerPhone?:   string;
 };
 
 export type ConfirmCardOrderResult = {
@@ -82,7 +86,7 @@ export async function confirmCardOrder(
 
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
-    select: { commission: true },
+    select: { commission: true, email: true, firstName: true },
   });
   const commissionRate   = rep?.commission ?? 0;
   const commissionAmount = parseFloat(((subtotal * commissionRate) / 100).toFixed(2));
@@ -106,6 +110,8 @@ export async function confirmCardOrder(
         salesRepCommissionAmount:  commissionAmount,
         physicianCommissionRate:   0,
         physicianCommissionAmount: 0,
+        customerEmail:    payload.customerEmail   || undefined,
+        customerPhone:    payload.customerPhone   || undefined,
         shippingAddress:  payload.shippingAddress || undefined,
         billingAddress:   payload.billingAddress  || undefined,
         shippingRate:     payload.shippingRate,
@@ -134,6 +140,29 @@ export async function confirmCardOrder(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(ops as any);
+
+  if (payload.customerEmail) {
+    try {
+      const { subject, html } = orderConfirmationEmail({
+        orderNumber,
+        firstName:      rep?.firstName ?? "Sales Rep",
+        total:          payload.total,
+        status:         "PAID",
+        isPatientEmail: true,
+        items:          items.map((i) => ({
+          title:       i.title,
+          variantSize: i.variantSize,
+          quantity:    i.quantity,
+          unitPrice:   i.unitPrice,
+          lineTotal:   i.lineTotal,
+        })),
+      });
+      const cc = rep?.email && rep.email !== payload.customerEmail ? rep.email : undefined;
+      await sendMail({ to: payload.customerEmail, cc, subject, html });
+    } catch (err) {
+      console.error("[sales-rep order] confirmation email failed:", err);
+    }
+  }
 
   revalidatePath("/sales/orders");
   return { success: true, orderNumber };

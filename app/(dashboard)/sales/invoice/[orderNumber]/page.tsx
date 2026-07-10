@@ -81,6 +81,7 @@ export default async function InvoicePage({ params }: Props) {
       couponCode: true, discountAmount: true,
       shippingCarrier: true, trackingNumber: true,
       shippingAddress: true,
+      customerEmail: true, customerPhone: true,
       notes: true, items: true,
       salesRepId: true,
       salesRep: {
@@ -168,6 +169,15 @@ export default async function InvoicePage({ params }: Props) {
                     {order.salesRep.phone && <p className="text-gray-500">{order.salesRep.phone}</p>}
                   </div>
                 ) : <p className="text-sm text-gray-400">—</p>}
+                {(order.customerEmail || order.customerPhone) && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Patient Contact</p>
+                    <div className="text-sm text-gray-600 space-y-0.5">
+                      {order.customerEmail && <p>{order.customerEmail}</p>}
+                      {order.customerPhone && <p>{order.customerPhone}</p>}
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ship To</p>

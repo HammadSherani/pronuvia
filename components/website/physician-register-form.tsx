@@ -127,6 +127,17 @@ export function PhysicianRegisterForm() {
       </div>
 
       {/* Country — hidden real name field + visible iso select */}
+      
+
+      {/* Address */}
+      <Field label="Address Line 1" error={e.addressOne?.[0]}>
+        <input required name="addressOne" placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne} className={e.addressOne ? inpErr : inp} />
+      </Field>
+      <Field label="Address Line 2" req={false}>
+        <input name="addressTwo" placeholder="Suite 400 (optional)" defaultValue={state?.values?.addressTwo} className={inp} />
+      </Field>
+
+
       <Field label="Country" error={e.country?.[0]}>
         <input type="hidden" name="country" value={countryName} />
         <select
@@ -140,20 +151,9 @@ export function PhysicianRegisterForm() {
         </select>
       </Field>
 
-      {/* Address */}
-      <Field label="Address Line 1" error={e.addressOne?.[0]}>
-        <input required name="addressOne" placeholder="123 Medical Drive" defaultValue={state?.values?.addressOne} className={e.addressOne ? inpErr : inp} />
-      </Field>
-      <Field label="Address Line 2" req={false}>
-        <input name="addressTwo" placeholder="Suite 400 (optional)" defaultValue={state?.values?.addressTwo} className={inp} />
-      </Field>
-
       {/* City + State */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="City" error={e.city?.[0]}>
-          <input required name="city" placeholder="e.g. Los Angeles" defaultValue={state?.values?.city} className={e.city ? inpErr : inp} />
-        </Field>
-        <Field label="State / Province" error={e.state?.[0]}>
+         <Field label="State / Province" error={e.state?.[0]}>
           {states.length > 0 ? (
             <select name="state" defaultValue={state?.values?.state ?? ""} className={e.state ? inpErr : inp}>
               <option value="" disabled>Select state…</option>
@@ -165,6 +165,10 @@ export function PhysicianRegisterForm() {
             <input name="state" placeholder="State / Province / Region" defaultValue={state?.values?.state} className={e.state ? inpErr : inp} />
           )}
         </Field>
+        <Field label="City" error={e.city?.[0]}>
+          <input required name="city" placeholder="e.g. Los Angeles" defaultValue={state?.values?.city} className={e.city ? inpErr : inp} />
+        </Field>
+       
       </div>
 
       {/* Zip + Phone */}

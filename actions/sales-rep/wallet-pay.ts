@@ -7,6 +7,8 @@ import { requireSalesRep } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
+import { sendMail } from "@/lib/email/mailer";
+import { orderConfirmationEmail } from "@/lib/email/templates";
 
 type CartItem = {
   productId:   string;
@@ -39,6 +41,8 @@ export async function payWithWallet(
   const couponCode      = (formData.get("couponCode")      as string) || undefined;
   const couponId        = (formData.get("couponId")        as string) || undefined;
   const discountAmount  = parseFloat((formData.get("discountAmount")  as string) || "0");
+  const customerEmail   = (formData.get("customerEmail")   as string) || undefined;
+  const customerPhone   = (formData.get("customerPhone")   as string) || undefined;
 
   let items: CartItem[];
   try {
@@ -53,7 +57,7 @@ export async function payWithWallet(
 
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, walletBalance: true },
+    select: { commission: true, walletBalance: true, email: true, firstName: true },
   });
   if (!rep) return { success: false, message: "Account not found." };
 
@@ -88,6 +92,8 @@ export async function payWithWallet(
         salesRepCommissionAmount:  commissionAmount,
         physicianCommissionRate:   0,
         physicianCommissionAmount: 0,
+        customerEmail,
+        customerPhone,
         shippingAddress,
         billingAddress,
         shippingRate,
@@ -128,6 +134,29 @@ export async function payWithWallet(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(ops as any);
+
+  if (customerEmail) {
+    try {
+      const { subject, html } = orderConfirmationEmail({
+        orderNumber,
+        firstName:      rep?.firstName ?? "Sales Rep",
+        total,
+        status:         "PAID",
+        isPatientEmail: true,
+        items:          items.map((i) => ({
+          title:       i.title,
+          variantSize: i.variantSize,
+          quantity:    i.quantity,
+          unitPrice:   i.unitPrice,
+          lineTotal:   i.lineTotal,
+        })),
+      });
+      const cc = rep?.email && rep.email !== customerEmail ? rep.email : undefined;
+      await sendMail({ to: customerEmail, cc, subject, html });
+    } catch (err) {
+      console.error("[sales-rep wallet] confirmation email failed:", err);
+    }
+  }
 
   revalidatePath("/sales/orders");
   return { success: true, orderNumber };

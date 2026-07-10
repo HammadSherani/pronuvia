@@ -72,6 +72,8 @@ type StripeFormProps = {
   couponId?:        string;
   couponCode?:      string;
   discountAmount?:  number;
+  customerEmail?:   string;
+  customerPhone?:   string;
   onSuccess:        (orderNumber: string) => void;
   onProcessing:     (v: boolean) => void;
   onError:          (msg: string) => void;
@@ -79,7 +81,7 @@ type StripeFormProps = {
 
 const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
   function StripeInnerForm(
-    { itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError },
+    { itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, customerEmail, customerPhone, onSuccess, onProcessing, onError },
     ref
   ) {
     const stripe   = useStripe();
@@ -91,7 +93,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
       onError("");
 
       sessionStorage.setItem("sr_order", JSON.stringify({
-        itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+        itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, customerEmail, customerPhone,
       }));
 
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
@@ -112,6 +114,8 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
         const result = await confirmCardOrder({
           paymentIntentId: paymentIntent.id,
           itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+          customerEmail: customerEmail || undefined,
+          customerPhone: customerPhone || undefined,
         });
         if (result.success && result.orderNumber) {
           onSuccess(result.orderNumber);
@@ -142,7 +146,6 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
 // ── Main component ──────────────────────────────────────────────────────────
 
 type Props = {
-  repEmail:             string;
   savedShippingAddress: string;
   savedBillingAddress:  string;
   walletBalance:        number;
@@ -150,7 +153,6 @@ type Props = {
 };
 
 export function CheckoutClient({
-  repEmail,
   savedShippingAddress,
   savedBillingAddress,
   walletBalance,
@@ -159,7 +161,8 @@ export function CheckoutClient({
   const { items, clearCart } = useCart();
   const router = useRouter();
 
-  const [email,         setEmail]         = useState(repEmail);
+  const [patientEmail,  setPatientEmail]  = useState("");
+  const [patientPhone,  setPatientPhone]  = useState("");
 
   // address
   const [shipping,      setShipping]      = useState<AddressData>(() => parseAddr(savedShippingAddress));
@@ -298,6 +301,7 @@ export function CheckoutClient({
       itemsJson: string; shippingAddress: string; notes: string;
       shippingRate: number; total: number;
       couponId?: string; couponCode?: string; discountAmount?: number;
+      customerEmail?: string; customerPhone?: string;
     };
     sessionStorage.removeItem("sr_order");
     window.history.replaceState({}, "", window.location.pathname);
@@ -388,17 +392,28 @@ export function CheckoutClient({
         {/* ── LEFT COLUMN ───────────────────────────────────────── */}
         <div className="lg:col-span-3 space-y-8">
 
-          {/* 1. Contact information */}
+          {/* 1. Patient contact information */}
           <section>
-            <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
-            <div className="border border-gray-300 rounded">
+            <h2 className="text-base font-semibold text-gray-800 mb-3">Patient contact information</h2>
+            <div className="border border-gray-300 rounded divide-y divide-gray-200">
               <div className="px-4 py-3">
-                <label className="text-xs text-gray-400 mb-0.5 block">Email address</label>
+                <label className="text-xs text-gray-400 mb-0.5 block">Patient email address</label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="text-sm text-gray-800 w-full outline-none bg-transparent"
+                  value={patientEmail}
+                  onChange={(e) => setPatientEmail(e.target.value)}
+                  placeholder="patient@example.com"
+                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
+                />
+              </div>
+              <div className="px-4 py-3">
+                <label className="text-xs text-gray-400 mb-0.5 block">Patient phone number</label>
+                <input
+                  type="tel"
+                  value={patientPhone}
+                  onChange={(e) => setPatientPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
                 />
               </div>
             </div>
@@ -591,6 +606,8 @@ export function CheckoutClient({
                           couponId={appliedCoupon?.couponId}
                           couponCode={appliedCoupon?.code}
                           discountAmount={discountAmount}
+                          customerEmail={patientEmail || undefined}
+                          customerPhone={patientPhone || undefined}
                           onSuccess={handleCardSuccess}
                           onProcessing={setCardProcessing}
                           onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
@@ -674,6 +691,8 @@ export function CheckoutClient({
             <input type="hidden" name="couponCode"      value={appliedCoupon?.code      ?? ""} />
             <input type="hidden" name="couponId"        value={appliedCoupon?.couponId  ?? ""} />
             <input type="hidden" name="discountAmount"  value={discountAmount} />
+            <input type="hidden" name="customerEmail"   value={patientEmail} />
+            <input type="hidden" name="customerPhone"   value={patientPhone} />
             <button ref={walletSubmit} type="submit" aria-hidden="true" />
           </form>
 
