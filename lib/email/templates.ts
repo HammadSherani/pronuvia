@@ -650,6 +650,114 @@ export function orderConfirmationEmail(d: OrderEmailData) {
   };
 }
 
+// ─────────────────────────────────────────────
+// New-order notification (internal — sent to info@pronuvia.com)
+// ─────────────────────────────────────────────
+export function newOrderNotificationEmail(opts: {
+  orderNumber:     string;
+  orderedBy:       string;
+  orderDate:       Date;
+  items:           OrderItem[];
+  subtotal:        number;
+  shippingCost:    number;
+  paymentMethod:   string | null;
+  total:           number;
+  billingAddress?: string | null;
+  shippingAddress?: string | null;
+}) {
+  const dateStr = opts.orderDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  const payLabel = (() => {
+    const pm = opts.paymentMethod;
+    if (!pm) return "—";
+    if (pm === "CARD")   return "Credit / Debit Card";
+    if (pm === "WALLET") return "Wallet";
+    return pm;
+  })();
+
+  const itemRows = opts.items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` (${i.variantSize})` : ""}
+      </td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
+  return {
+    subject: `New Order: #${opts.orderNumber}`,
+    html: base(`
+      <div style="background:#7c3aed;margin:-40px -40px 24px;padding:24px 40px;border-radius:16px 16px 0 0;">
+        <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">New Order: #${opts.orderNumber}</h1>
+      </div>
+
+      <p style="margin:0 0 4px;font-size:13px;color:#6b7280;">
+        You've received the following order from <strong style="color:#374151;">${opts.orderedBy}</strong>:
+      </p>
+      <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#7c3aed;">[Order #${opts.orderNumber}] (${dateStr})</p>
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f9fafb;">
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Quantity</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemRows}
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #e5e7eb;">Subtotal:</td>
+            <td style="border-top:1px solid #e5e7eb;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${opts.subtotal.toFixed(2)}</td>
+          </tr>
+          ${opts.shippingCost > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">$${opts.shippingCost.toFixed(2)}</td>
+          </tr>` : ""}
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Payment method:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
+          </tr>
+          <tr style="background:#f9fafb;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;border-top:1px solid #e5e7eb;">Total:</td>
+            <td style="border-top:1px solid #e5e7eb;"></td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;text-align:right;border-top:1px solid #e5e7eb;">$${opts.total.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${(opts.billingAddress || opts.shippingAddress) ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          ${opts.billingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-right:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(opts.billingAddress)}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+          ${opts.shippingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-left:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+        </tr>
+      </table>` : ""}
+
+      <p style="margin:0;font-size:13px;color:#6b7280;">
+        Process your orders on the go.
+      </p>
+    `),
+  };
+}
+
 export function orderProcessingEmail(d: OrderEmailData) {
   return {
     subject: `Your order ${d.orderNumber} is being processed`,

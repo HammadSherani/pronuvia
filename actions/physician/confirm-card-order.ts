@@ -8,7 +8,7 @@ import { requirePhysician } from "@/lib/auth/dal";
 import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { sendMail } from "@/lib/email/mailer";
-import { orderConfirmationEmail } from "@/lib/email/templates";
+import { orderConfirmationEmail, newOrderNotificationEmail } from "@/lib/email/templates";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 
 type CartItem = {
@@ -82,7 +82,7 @@ export async function confirmPhysicianCardOrder(
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true },
+    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true, lastName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
   const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
@@ -178,6 +178,27 @@ export async function confirmPhysicianCardOrder(
     }
   } else {
     console.log("[physician order] no customerEmail provided — skipping confirmation email");
+  }
+
+  // Internal notification to Pronuvia
+  try {
+    const orderedBy = [physician?.firstName, physician?.lastName].filter(Boolean).join(" ") || "Physician";
+    const subtotal  = items.reduce((s, i) => s + i.lineTotal, 0);
+    const { subject, html } = newOrderNotificationEmail({
+      orderNumber,
+      orderedBy,
+      orderDate:       new Date(),
+      items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
+      subtotal,
+      shippingCost:    payload.shippingRate,
+      paymentMethod:   "CARD",
+      total:           payload.total,
+      billingAddress:  payload.billingAddress  || null,
+      shippingAddress: payload.shippingAddress || null,
+    });
+    await sendMail({ to: "info@pronuvia.com", subject, html });
+  } catch (err) {
+    console.error("[physician order] internal notification email failed:", err);
   }
 
   revalidatePath("/physician/orders");

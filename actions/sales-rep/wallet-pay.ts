@@ -8,7 +8,7 @@ import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 import { sendMail } from "@/lib/email/mailer";
-import { orderConfirmationEmail } from "@/lib/email/templates";
+import { orderConfirmationEmail, newOrderNotificationEmail } from "@/lib/email/templates";
 
 type CartItem = {
   productId:   string;
@@ -57,7 +57,7 @@ export async function payWithWallet(
 
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, walletBalance: true, email: true, firstName: true },
+    select: { commission: true, walletBalance: true, email: true, firstName: true, lastName: true },
   });
   if (!rep) return { success: false, message: "Account not found." };
 
@@ -162,6 +162,27 @@ export async function payWithWallet(
     } catch (err) {
       console.error("[sales-rep wallet] confirmation email failed:", err);
     }
+  }
+
+  // Internal notification to Pronuvia
+  try {
+    const orderedBy = [rep?.firstName, rep?.lastName].filter(Boolean).join(" ") || "Sales Rep";
+    const subtotal  = items.reduce((s, i) => s + i.lineTotal, 0);
+    const { subject, html } = newOrderNotificationEmail({
+      orderNumber,
+      orderedBy,
+      orderDate:       new Date(),
+      items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
+      subtotal,
+      shippingCost:    shippingRate,
+      paymentMethod:   "WALLET",
+      total,
+      billingAddress:  billingAddress  || null,
+      shippingAddress: shippingAddress || null,
+    });
+    await sendMail({ to: "info@pronuvia.com", subject, html });
+  } catch (err) {
+    console.error("[sales-rep wallet] internal notification email failed:", err);
   }
 
   revalidatePath("/sales/orders");

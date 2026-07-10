@@ -9,7 +9,7 @@ import { estimatedDeliveryDate } from "@/lib/utils/shipping";
 import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 import { sendMail } from "@/lib/email/mailer";
-import { orderConfirmationEmail } from "@/lib/email/templates";
+import { orderConfirmationEmail, newOrderNotificationEmail } from "@/lib/email/templates";
 
 type CartItem = {
   productId:   string;
@@ -86,7 +86,7 @@ export async function confirmCardOrder(
 
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
-    select: { commission: true, email: true, firstName: true },
+    select: { commission: true, email: true, firstName: true, lastName: true },
   });
   const commissionRate   = rep?.commission ?? 0;
   const commissionAmount = parseFloat(((subtotal * commissionRate) / 100).toFixed(2));
@@ -168,6 +168,27 @@ export async function confirmCardOrder(
     } catch (err) {
       console.error("[sales-rep order] confirmation email failed:", err);
     }
+  }
+
+  // Internal notification to Pronuvia
+  try {
+    const orderedBy = [rep?.firstName, rep?.lastName].filter(Boolean).join(" ") || "Sales Rep";
+    const subtotal  = items.reduce((s, i) => s + i.lineTotal, 0);
+    const { subject, html } = newOrderNotificationEmail({
+      orderNumber,
+      orderedBy,
+      orderDate:       new Date(),
+      items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
+      subtotal,
+      shippingCost:    payload.shippingRate,
+      paymentMethod:   "CARD",
+      total:           payload.total,
+      billingAddress:  payload.billingAddress  || null,
+      shippingAddress: payload.shippingAddress || null,
+    });
+    await sendMail({ to: "info@pronuvia.com", subject, html });
+  } catch (err) {
+    console.error("[sales-rep order] internal notification email failed:", err);
   }
 
   revalidatePath("/sales/orders");
