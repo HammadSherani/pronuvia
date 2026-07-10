@@ -171,12 +171,13 @@ export function RefundOrderModal({
       {open && (
         <div
           ref={overlayRef}
-          className="fixed inset-0 p-20 !z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/40 backdrop-blur-sm"
           onClick={(e) => { if (e.target === overlayRef.current) setOpen(false); }}
         >
+          <div className="flex min-h-full items-center justify-center p-4 pt-[130px] pb-8">
           <div
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden"
-            style={{ maxHeight: "min(94vh, 820px)" }}
+            style={{ maxHeight: "calc(100vh - 150px)" }}
           >
             {/* Close */}
             <button
@@ -442,6 +443,7 @@ export function RefundOrderModal({
                 {isPending ? "Processing…" : "Confirm Refund"}
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}

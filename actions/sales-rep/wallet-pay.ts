@@ -139,17 +139,23 @@ export async function payWithWallet(
     try {
       const { subject, html } = orderConfirmationEmail({
         orderNumber,
-        firstName:      rep?.firstName ?? "Sales Rep",
+        firstName:       rep?.firstName ?? "Sales Rep",
         total,
-        status:         "PAID",
-        isPatientEmail: true,
-        items:          items.map((i) => ({
+        status:          "PAID",
+        isPatientEmail:  true,
+        items:           items.map((i) => ({
           title:       i.title,
           variantSize: i.variantSize,
           quantity:    i.quantity,
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
+        shippingCost:    shippingRate,
+        paymentMethod:   "WALLET",
+        billingAddress:  billingAddress  || null,
+        shippingAddress: shippingAddress || null,
+        notes:           notes           || null,
+        orderDate:       new Date(),
       });
       const cc = rep?.email && rep.email !== customerEmail ? rep.email : undefined;
       await sendMail({ to: customerEmail, cc, subject, html });

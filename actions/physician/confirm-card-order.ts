@@ -160,6 +160,12 @@ export async function confirmPhysicianCardOrder(
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
+        shippingCost:    payload.shippingRate,
+        paymentMethod:   "CARD",
+        billingAddress:  payload.billingAddress  || null,
+        shippingAddress: payload.shippingAddress || null,
+        notes:           payload.notes           || null,
+        orderDate:       new Date(),
       });
       const cc = physician?.email && physician.email !== payload.customerEmail
         ? physician.email

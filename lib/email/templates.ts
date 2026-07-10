@@ -510,33 +510,143 @@ function orderItemsTable(items: OrderItem[]) {
 }
 
 export type OrderEmailData = {
-  orderNumber:       string;
-  firstName:         string;
-  total:             number;
-  status:            string;
-  items:             OrderItem[];
-  trackingNumber?:   string | null;
-  shippingCarrier?:  string | null;
+  orderNumber:        string;
+  firstName:          string;
+  total:              number;
+  status:             string;
+  items:              OrderItem[];
+  trackingNumber?:    string | null;
+  shippingCarrier?:   string | null;
   estimatedDelivery?: Date | null;
-  isPatientEmail?:   boolean;
+  isPatientEmail?:    boolean;
+  shippingCost?:      number;
+  paymentMethod?:     string | null;
+  billingAddress?:    string | null;
+  shippingAddress?:   string | null;
+  notes?:             string | null;
+  orderDate?:         Date;
 };
 
+function renderAddr(raw: string | null | undefined): string {
+  if (!raw) return "";
+  try {
+    const a = JSON.parse(raw);
+    return [
+      [a.firstName, a.lastName].filter(Boolean).join(" "),
+      a.address1, a.address2,
+      [a.city, a.state, a.zip].filter(Boolean).join(", "),
+      a.country, a.phone,
+    ].filter(Boolean).join("<br/>");
+  } catch {
+    return raw.replace(/\n/g, "<br/>");
+  }
+}
+
 export function orderConfirmationEmail(d: OrderEmailData) {
-  const greeting = d.isPatientEmail ? "Hello" : `Hi ${d.firstName}`;
+  const patientName = (() => {
+    if (!d.isPatientEmail || !d.billingAddress) return null;
+    try {
+      const a = JSON.parse(d.billingAddress);
+      return [a.firstName, a.lastName].filter(Boolean).join(" ") || null;
+    } catch { return null; }
+  })();
+
+  const greeting  = d.isPatientEmail ? `Dear ${patientName ?? "Customer"},` : `Hi ${d.firstName},`;
+  const dateStr   = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
+  const shipping  = d.shippingCost ?? 0;
+
+  const payLabel = (() => {
+    const pm = d.paymentMethod;
+    if (!pm) return "—";
+    if (pm === "CARD")   return "Credit card / debit card";
+    if (pm === "WALLET") return "Wallet";
+    return pm;
+  })();
+
+  const itemRows = d.items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:#6b7280;">Volume: ${i.variantSize}</span>` : ""}
+      </td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
   return {
-    subject: `Order Confirmed: ${d.orderNumber}`,
+    subject: `Thank you for your order #${d.orderNumber}`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Confirmed!</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        ${greeting}, thank you for your order. We've received it and will start processing shortly.
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">Thank you for your order</h1>
+      <p style="margin:0 0 4px;font-size:14px;color:#374151;font-weight:500;">${greeting}</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#6b7280;line-height:1.6;">
+        We've received your order <strong>#${d.orderNumber}</strong>, and it is now being processed.
       </p>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-        <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Order #${d.orderNumber} · Total: $${d.total.toFixed(2)}</p>
-      </div>
-      ${orderItemsTable(d.items)}
-      <div style="text-align:center;">
-       
-      </div>`),
+
+      <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#7c3aed;">[Order #${d.orderNumber}] (${dateStr})</p>
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f9fafb;">
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Quantity</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemRows}
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #e5e7eb;">Subtotal:</td>
+            <td style="border-top:1px solid #e5e7eb;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${subtotal.toFixed(2)}</td>
+          </tr>
+          ${shipping > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">$${shipping.toFixed(2)}</td>
+          </tr>` : ""}
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Payment method:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
+          </tr>
+          <tr style="background:#f9fafb;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;border-top:1px solid #e5e7eb;">Total:</td>
+            <td style="border-top:1px solid #e5e7eb;"></td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;text-align:right;border-top:1px solid #e5e7eb;">$${d.total.toFixed(2)}</td>
+          </tr>
+          ${d.notes ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Note:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${d.notes}</td>
+          </tr>` : ""}
+        </tbody>
+      </table>
+
+      ${(d.billingAddress || d.shippingAddress) ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          ${d.billingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-right:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(d.billingAddress)}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+          ${d.shippingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-left:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(d.shippingAddress)}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+        </tr>
+      </table>` : ""}
+
+      <p style="margin:0;font-size:14px;color:#374151;">Thanks!</p>
+    `),
   };
 }
 
@@ -828,6 +938,156 @@ export function welcomeAboardEmail(opts: {
       </p>
     </div>
   `);
+  return { subject, html };
+}
+
+// ─────────────────────────────────────────────
+// Order refund email — sent to patient when admin processes a refund
+// ─────────────────────────────────────────────
+export function orderRefundEmail(opts: {
+  orderNumber:     string;
+  orderDate:       Date;
+  refundAmount:    number;
+  reason?:         string | null;
+  note?:           string | null;
+  items:           { title: string; variantSize?: string; quantity: number; unitPrice: number; lineTotal: number }[];
+  subtotal:        number;
+  shippingCost:    number;
+  paymentMethod:   string | null;
+  billingAddress?: string | null;
+  shippingAddress?: string | null;
+}) {
+  const subject = `Order Refunded: ${opts.orderNumber}`;
+
+  const rows = opts.items.map((i) => `
+    <tr>
+      <td style="padding:10px 0;font-size:13px;color:#111827;border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` <span style="color:#6b7280;">(${i.variantSize})</span>` : ""}
+      </td>
+      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 0;font-size:13px;font-weight:600;color:#111827;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
+  const payLabel = opts.paymentMethod === "CARD"
+    ? "Credit card / debit card"
+    : opts.paymentMethod === "WALLET"
+    ? "Wallet balance"
+    : (opts.paymentMethod ?? "—");
+
+  const html = base(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#7c3aed;">Order Refunded: ${opts.orderNumber}</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+      Hello, your order on Pronuvia has been refunded. Here are the details for your reference:
+    </p>
+
+    <!-- Order label -->
+    <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#7c3aed;">
+      [Order #${opts.orderNumber}] (${new Date(opts.orderDate).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})})
+    </p>
+
+    <!-- Items table -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px;">
+      <thead>
+        <tr style="background:#f9fafb;">
+          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:left;letter-spacing:.05em;">Product</th>
+          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:center;letter-spacing:.05em;">Quantity</th>
+          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:right;letter-spacing:.05em;">Price</th>
+        </tr>
+      </thead>
+      <tbody style="padding:0 12px;">${rows.replace(/<td/g, '<td style="padding:10px 12px;" ').replace(/<\/td>/g, '</td>')}</tbody>
+      <tbody>
+        <tr><td colspan="3" style="border-top:1px solid #e5e7eb;padding:10px 12px;font-size:13px;color:#6b7280;">Subtotal</td></tr>
+        <tr style="border-top:0;">
+          <td colspan="2" style="padding:0 12px 10px;font-size:13px;color:#6b7280;"></td>
+          <td style="padding:0 12px 10px;font-size:13px;font-weight:600;color:#111827;text-align:right;">$${opts.subtotal.toFixed(2)}</td>
+        </tr>
+
+        <tr style="border-top:1px solid #e5e7eb;">
+          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">Shipping</td>
+          <td></td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#111827;text-align:right;">
+            ${opts.shippingCost > 0 ? `$${opts.shippingCost.toFixed(2)}` : '<span style="color:#059669;">Free</span>'}
+          </td>
+        </tr>
+
+        <tr style="border-top:1px solid #e5e7eb;">
+          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">Payment method</td>
+          <td></td>
+          <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;">${payLabel}</td>
+        </tr>
+
+        ${opts.refundAmount > 0 ? `
+        <tr style="border-top:1px solid #e5e7eb;">
+          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">${opts.reason ? opts.reason : "Refund"}</td>
+          <td></td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#dc2626;text-align:right;">−$${opts.refundAmount.toFixed(2)}</td>
+        </tr>` : ""}
+
+        <tr style="border-top:2px solid #e5e7eb;background:#f9fafb;">
+          <td style="padding:12px;font-size:13px;font-weight:700;color:#111827;">Total</td>
+          <td></td>
+          <td style="padding:12px;font-size:13px;font-weight:700;color:#111827;text-align:right;">
+            <span style="text-decoration:line-through;color:#9ca3af;margin-right:8px;">$${(opts.subtotal + opts.shippingCost).toFixed(2)}</span>
+            $${Math.max(0, opts.subtotal + opts.shippingCost - opts.refundAmount).toFixed(2)}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    ${(opts.billingAddress || opts.shippingAddress) ? `
+    <!-- Addresses -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        ${opts.billingAddress ? `
+        <td width="50%" style="vertical-align:top;padding-right:12px;">
+          <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
+          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px;">
+            <p style="margin:0;font-size:13px;color:#374151;white-space:pre-line;line-height:1.7;">${(() => {
+              try {
+                const a = JSON.parse(opts.billingAddress!);
+                return [
+                  [a.firstName, a.lastName].filter(Boolean).join(" "),
+                  a.address1, a.address2,
+                  [a.city, a.state, a.zip].filter(Boolean).join(", "),
+                  a.country,
+                  a.phone,
+                ].filter(Boolean).join("\n");
+              } catch { return opts.billingAddress!; }
+            })()}</p>
+          </div>
+        </td>` : "<td width='50%'></td>"}
+        ${opts.shippingAddress ? `
+        <td width="50%" style="vertical-align:top;padding-left:12px;">
+          <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
+          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px;">
+            <p style="margin:0;font-size:13px;color:#374151;white-space:pre-line;line-height:1.7;">${(() => {
+              try {
+                const a = JSON.parse(opts.shippingAddress!);
+                return [
+                  [a.firstName, a.lastName].filter(Boolean).join(" "),
+                  a.address1, a.address2,
+                  [a.city, a.state, a.zip].filter(Boolean).join(", "),
+                  a.country,
+                  a.phone,
+                ].filter(Boolean).join("\n");
+              } catch { return opts.shippingAddress!; }
+            })()}</p>
+          </div>
+        </td>` : "<td width='50%'></td>"}
+      </tr>
+    </table>` : ""}
+
+    ${opts.note ? `
+    <div style="background:#f9fafb;border-left:4px solid #7c3aed;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.05em;">Note</p>
+      <p style="margin:0;font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap;">${opts.note}</p>
+    </div>` : ""}
+
+    <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+      We hope to see you again soon.
+    </p>
+  `);
+
   return { subject, html };
 }
 

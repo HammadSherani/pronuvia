@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { z } from "zod";
 import { OrderStatus } from "@/generated/prisma/enums";
+import { sendMail } from "@/lib/email/mailer";
+import { orderRefundEmail } from "@/lib/email/templates";
 
 export type OrderActionState = {
   errors?: Record<string, string[]>;
@@ -457,6 +459,8 @@ export async function processReturn(
       returnedAt: true, returnedTotal: true, returnReason: true,
       salesRepClawback: true, physicianClawback: true,
       stripePaymentIntentId: true,
+      customerEmail: true, shippingRate: true, paymentMethod: true, createdAt: true,
+      billingAddress: true, shippingAddress: true, notes: true,
       salesRep:  { select: { walletBalance: true } },
       physician: { select: { walletBalance: true } },
     },
@@ -693,6 +697,38 @@ export async function processReturn(
     : customerRefund?.method === "manual" && (customerRefund.amount ?? 0) > 0
     ? ` Manual refund $${customerRefund.amount.toFixed(2)} recorded.`
     : "";
+
+  // Send refund confirmation email to patient
+  if (order.customerEmail) {
+    try {
+      const refundedItems = linesToProcess.map((l) => {
+        const item = items[l.index];
+        return {
+          title:       item.title,
+          variantSize: item.variantSize,
+          quantity:    l.returnedQty,
+          unitPrice:   item.unitPrice,
+          lineTotal:   parseFloat((item.unitPrice * l.returnedQty).toFixed(2)),
+        };
+      });
+      const { subject, html } = orderRefundEmail({
+        orderNumber:     order.orderNumber,
+        orderDate:       order.createdAt,
+        refundAmount:    customerRefund?.amount ?? eventTotal,
+        reason:          reason.trim() || null,
+        note:            reason.trim() || null,
+        items:           refundedItems,
+        subtotal:        order.subtotal,
+        shippingCost:    order.shippingRate ?? 0,
+        paymentMethod:   order.paymentMethod ?? null,
+        billingAddress:  order.billingAddress ?? null,
+        shippingAddress: order.shippingAddress ?? null,
+      });
+      await sendMail({ to: order.customerEmail, subject, html });
+    } catch (err) {
+      console.error("[processReturn] refund email failed:", err);
+    }
+  }
 
   return {
     success: true,

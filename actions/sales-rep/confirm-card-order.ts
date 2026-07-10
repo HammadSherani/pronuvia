@@ -145,17 +145,23 @@ export async function confirmCardOrder(
     try {
       const { subject, html } = orderConfirmationEmail({
         orderNumber,
-        firstName:      rep?.firstName ?? "Sales Rep",
-        total:          payload.total,
-        status:         "PAID",
-        isPatientEmail: true,
-        items:          items.map((i) => ({
+        firstName:       rep?.firstName ?? "Sales Rep",
+        total:           payload.total,
+        status:          "PAID",
+        isPatientEmail:  true,
+        items:           items.map((i) => ({
           title:       i.title,
           variantSize: i.variantSize,
           quantity:    i.quantity,
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
+        shippingCost:    payload.shippingRate,
+        paymentMethod:   "CARD",
+        billingAddress:  payload.billingAddress  || null,
+        shippingAddress: payload.shippingAddress || null,
+        notes:           payload.notes           || null,
+        orderDate:       new Date(),
       });
       const cc = rep?.email && rep.email !== payload.customerEmail ? rep.email : undefined;
       await sendMail({ to: payload.customerEmail, cc, subject, html });
