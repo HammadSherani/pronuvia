@@ -11,7 +11,7 @@ export function BodyResponseSection() {
         </svg>
       ),
       title: "Cell signaling",
-      body: "Ionic calcium is a primary messenger inside the cell. Sustained, balanced levels help support normal calcium-driven cell signaling.",
+      body: "Ionic calcium is a primary messenger inside cells. Sustained, balanced levels help support normal calcium-driven cell signaling.",
     },
     {
       icon: (
@@ -29,7 +29,7 @@ export function BodyResponseSection() {
         </svg>
       ),
       title: "Calcium homeostasis",
-      body: "By supplying calcium in its active form, AIC supports the body's effort to maintain healthy calcium homeostasis.",
+      body: "By supplying calcium in its active form, AIC supports the body’s effort to maintain healthy calcium homeostasis.",
     },
   ];
 
@@ -60,8 +60,7 @@ export function BodyResponseSection() {
             Your body responds.
           </h2>
           <p className="text-[14px] text-[#1B2D4F]/60 leading-relaxed">
-            Pronuvia does not force an outcome. By restoring sustained ionic calcium, AIC supports
-            the conditions the body needs — and its own natural responses follow.
+           Pronuvia doesn’t force an outcome. By restoring sustained ionic calcium, AIC supports the conditions your body needs — and the body’s own natural responses follow.
           </p>
         </div>
 

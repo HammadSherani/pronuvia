@@ -29,6 +29,11 @@ export function SiteHeader({ dashboardHref }: { variant?: "overlay" | "solid"; d
         <nav className="hidden lg:flex items-center justify-center gap-7 ml-12 flex-1">
           {NAV.map(({ label, href }) => (
             <a key={href} href={href}
+              onClick={e => {
+                e.preventDefault();
+                const id = href.replace("#", "");
+                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="text-sm font-medium text-[#112c5faa] hover:text-[#1B2D4Faa] transition-colors whitespace-nowrap">
               {label}
             </a>
@@ -64,7 +69,13 @@ export function SiteHeader({ dashboardHref }: { variant?: "overlay" | "solid"; d
       {open && (
         <div className="lg:hidden px-6 pb-5 space-y-1 bg-[#EEF2F7] border-b border-[#d5dde9]">
           {NAV.map(({ label, href }) => (
-            <a key={href} href={href} onClick={() => setOpen(false)}
+            <a key={href} href={href}
+              onClick={e => {
+                e.preventDefault();
+                setOpen(false);
+                const id = href.replace("#", "");
+                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="block py-2.5 text-sm font-medium text-[#1B2D4F] border-b border-[#d5dde9]">
               {label}
             </a>

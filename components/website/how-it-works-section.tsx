@@ -3,22 +3,22 @@ export function HowItWorksSection() {
     {
       num: "01",
       title: "Delivers ionic calcium",
-      body: "Antiorbital bonding releases calcium in its active Ca²⁺ form the moment it is absorbed. No conversion required, and no dependence on stomach acid.",
+      body: "Antiorbital bonding releases calcium in its active Ca²⁺ form the moment it’s absorbed — no conversion required.",
     },
     {
       num: "02",
       title: "Sustains elevated levels",
-      body: "Rather than a brief spike that fades, AIC is designed to keep serum ionic calcium elevated across many hours — maintaining the signal, not just creating it.",
+      body: "Rather than a brief spike, AIC is designed to keep serum ionic calcium elevated over many hours.",
     },
     {
       num: "03",
       title: "Restores homeostasis",
-      body: "Sustained ionic calcium supports the body's own effort to maintain healthy calcium homeostasis — the balance on which so much of cellular life depends.",
+      body: "Sustained ionic calcium supports the body’s effort to maintain healthy calcium homeostasis — its natural balance.",
     },
     {
       num: "04",
       title: "The cells respond",
-      body: "Balanced ionic calcium supports normal cell signaling and mitochondrial function. From there, the body's own natural responses do the work.",
+      body: "Balanced ionic calcium supports normal cell signaling and mitochondrial function — the body’s own responses do the rest.",
     },
   ];
 
@@ -56,8 +56,7 @@ export function HowItWorksSection() {
               Not another calcium.
             </h2>
             <p className="text-[14px] text-white/50 leading-relaxed">
-              Our approach rests on a single idea: give the body sustained access to ionic calcium,
-              then let the body do what it naturally does with it.
+              Pronuvia’s approach is built around one idea: give the body sustained access to ionic calcium, then let the body do what it naturally does with it.
             </p>
           </div>
         </div>

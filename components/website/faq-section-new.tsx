@@ -5,23 +5,23 @@ import { useState } from "react";
 const FAQS = [
   {
     q: `What is "ionic" calcium, and why does it matter?`,
-    a: `Calcium is only physiologically active in its free ionic state (Ca²⁺). Most dietary and supplemental calcium arrives protein-bound and must be slowly converted. AIC delivers calcium already in the ionic form, so it is ready for the body to use.`,
+    a: `Calcium is only physiologically active in its free ionic state (Ca²⁺). Most dietary and supplemental calcium arrives protein-bound and must be slowly converted. AIC delivers calcium already in the ionic form, so it’s ready for the body to use.`,
   },
   {
     q: "Does more calcium mean more benefit?",
-    a: "Not necessarily. What matters is the form, and how long ionic calcium stays available. AIC is designed for sustained ionic calcium rather than a large dose delivered in a slow-release form.",
+    a: "Not necessarily. What matters is the form and how long ionic calcium stays available. AIC is designed for sustained ionic calcium rather than a large dose in a slow-release form.",
   },
   {
     q: "How is AIC taken?",
-    a: "AIC is a liquid, simply mixed into water and consumed. It is designed to be a convenient, non-invasive part of a daily routine, used under the guidance of your practitioner.",
+    a: "AIC is a liquid that is simply mixed into water and consumed. It’s designed to be a convenient, non-invasive part of a daily routine, used under the guidance of your practitioner.",
   },
   {
     q: "Where does the benefit come from?",
-    a: "Pronuvia's role is to deliver and sustain ionic calcium. The responses that follow come from your body's own natural processes, as it works to maintain healthy calcium homeostasis.",
+    a: "Pronuvia’s role is to deliver and sustain ionic calcium. The responses that follow come from your body’s own natural processes as it works to maintain healthy calcium homeostasis.",
   },
   {
     q: "How do I get AIC?",
-    a: `AIC is offered through partnering physicians and health practitioners. Ask your practitioner, or use "Find a practitioner" to connect with a provider in our network.`,
+    a: `AIC is offered through partnering physicians and health practitioners. Ask your practitioner, or use “Find a practitioner” to connect with a provider in our network.`,
   },
 ];
 

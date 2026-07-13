@@ -8,7 +8,7 @@ export function PractitionersSection() {
           {/* ── Left: Content ── */}
           <div>
             <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-white/35 mb-6">
-              For Practitioners
+              Available through your practitioner
             </p>
 
             <h2
@@ -29,9 +29,7 @@ export function PractitionersSection() {
             </h2>
 
             <p className="text-[14px] text-white/55 leading-relaxed mb-8">
-              Pronuvia AIC reaches patients through partnering physicians and health practitioners.
-              Join the partner network to order for your practice, manage patients, and access
-              clinical materials.
+             Pronuvia AIC is provided to patients through partnering physicians and health practitioners. Are you a practitioner? Join our partner network to offer ionic calcium therapy in your practice.
             </p>
 
             <div className="flex flex-wrap gap-3">

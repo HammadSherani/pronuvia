@@ -65,6 +65,11 @@ export function SiteFooter() {
                 <li key={href}>
                   <a
                     href={href}
+                    onClick={e => {
+                      e.preventDefault();
+                      const id = href.replace("#", "");
+                      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+                    }}
                     style={{
                       fontSize: "15px",
                       color: "rgba(148,163,184,0.7)",
