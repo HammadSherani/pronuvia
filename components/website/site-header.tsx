@@ -2,93 +2,57 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
-import logo from "@/public/assets/logo.png"
-import whiteLogo from "@/public/assets/logo-white.png"
+import logo from "@/public/assets/logo.png";
 
 const NAV = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  // { label: "Account",              href: "/account" },
-  // { label: "Sign Up", href: "/account" },
+  { label: "The Problem",       href: "#the-problem" },
+  { label: "How It Works",      href: "#how-it-works" },
+  { label: "The Science",       href: "#the-science" },
+  { label: "Research",          href: "#research" },
+  { label: "For Practitioners", href: "#for-practitioners" },
 ];
 
-export function SiteHeader({ variant = "overlay", dashboardHref }: { variant?: "overlay" | "solid"; dashboardHref?: string }) {
-  const pathname = usePathname();
+export function SiteHeader({ dashboardHref }: { variant?: "overlay" | "solid"; dashboardHref?: string }) {
   const [open, setOpen] = useState(false);
 
-  const isSolid = variant === "solid";
-  const isHome = pathname === "/";
-
   return (
-    <header className={isSolid
-      ? "sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm"
-      : "absolute top-0 inset-x-0 z-50"
-    }>
-      <div className="max-w-7xl mx-auto px-6 flex items-center h-16">
+    <header className="sticky top-0 z-50 bg-[#EEF2F7] border-b border-[#d5dde9]">
+      <div className="max-w-7xl mx-auto px-8 flex items-center h-[72px]">
 
-        {/* ── Logo (left) ── */}
-        {/* <Link href="/" className="flex items-center gap-2 shrink-0 select-none w-1/3">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 2C8 2 3 7 3 13c0 4 2.5 7.5 6 9.5V24a1 1 0 001 1h8a1 1 0 001-1v-1.5c3.5-2 6-5.5 6-9.5 0-6-5-11-11-11z"
-              fill="#3DBFA4" opacity="0.9"/>
-            <path d="M10 13c1-3 4-5 7-4" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <span
-            className={`font-semibold text-xl tracking-wide ${isSolid ? "text-gray-900" : "text-white"}`}
-            style={{ fontFamily: "Georgia, serif" }}
-          >
-            Pronuvia
-          </span>
-        </Link> */}
-        <div className="flex items-center gap-2 shrink-0 select-none w-1/3">
-          <Link href="/">
-            <Image
-              src={isHome ? whiteLogo : logo}
-              alt="Pronuvia Logo"
-              width={150}
-              height={50}
-              className="w-auto h-10"
-            />
-          </Link>
-        </div>
+        {/* Logo */}
+        <Link href="/" className="shrink-0">
+          <Image src={logo} alt="Pronuvia" width={160} height={50} className="w-auto h-9" />
+        </Link>
 
-
-        {/* ── Desktop nav (center) ── */}
-        <nav className="hidden md:flex items-center justify-center gap-8 w-1/3">
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex items-center justify-center gap-7 ml-12 flex-1">
           {NAV.map(({ label, href }) => (
-            <Link key={href} href={href}
-              className={`text-sm font-medium transition-colors ${pathname === href
-                  ? "text-[#3DBFA4]"
-                  : isSolid
-                    ? "text-gray-600 hover:text-[#3DBFA4]"
-                    : "text-white/90 hover:text-[#3DBFA4]"
-                }`}>
+            <a key={href} href={href}
+              className="text-sm font-medium text-[#112c5faa] hover:text-[#1B2D4Faa] transition-colors whitespace-nowrap">
               {label}
-            </Link>
+            </a>
           ))}
         </nav>
 
-        {/* ── Login / Dashboard (right) ── */}
-        <div className="hidden md:flex justify-end w-1/3">
+        {/* Partner Login / Dashboard */}
+        <div className="hidden lg:flex items-center ml-auto pl-6">
           {dashboardHref ? (
             <Link href={dashboardHref}
-              className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
+              className="px-6 py-2.5 bg-[#1B2D4F] hover:bg-[#0f1e36] text-white text-xs rounded-sm font-bold tracking-[0.12em] uppercase transition-colors">
               Dashboard
             </Link>
           ) : (
             <Link href="/login"
-              className="inline-flex items-center px-5 py-2 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-lg transition-colors shadow">
-              Login / Sign Up
+              className="px-6 py-2.5 bg-[#1B2D4F] hover:bg-[#0f1e36] text-white text-xs rounded-sm font-bold tracking-[0.12em] uppercase transition-colors">
+              Partner Login
             </Link>
           )}
         </div>
 
-        {/* ── Mobile hamburger ── */}
+        {/* Mobile hamburger */}
         <button type="button" onClick={() => setOpen(!open)}
-          className={`md:hidden ml-auto w-9 h-9 flex items-center justify-center ${isSolid ? "text-gray-700" : "text-white"}`}>
+          className="lg:hidden ml-auto w-9 h-9 flex items-center justify-center text-[#1B2D4F]">
           {open
             ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -96,25 +60,24 @@ export function SiteHeader({ variant = "overlay", dashboardHref }: { variant?: "
         </button>
       </div>
 
-      {/* ── Mobile menu ── */}
+      {/* Mobile menu */}
       {open && (
-        <div className={`md:hidden px-6 pb-5 space-y-1 ${isSolid ? "bg-white border-b border-gray-100" : "bg-black/80 backdrop-blur-md"}`}>
+        <div className="lg:hidden px-6 pb-5 space-y-1 bg-[#EEF2F7] border-b border-[#d5dde9]">
           {NAV.map(({ label, href }) => (
-            <Link key={href} href={href} onClick={() => setOpen(false)}
-              className={`block py-2.5 text-sm font-medium border-b ${isSolid ? "border-gray-100" : "border-white/10"
-                } ${pathname === href ? "text-[#3DBFA4]" : isSolid ? "text-gray-600" : "text-white/90"}`}>
+            <a key={href} href={href} onClick={() => setOpen(false)}
+              className="block py-2.5 text-sm font-medium text-[#1B2D4F] border-b border-[#d5dde9]">
               {label}
-            </Link>
+            </a>
           ))}
           {dashboardHref ? (
             <Link href={dashboardHref} onClick={() => setOpen(false)}
-              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg">
+              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#1B2D4F] text-white text-xs font-bold tracking-[0.12em] uppercase">
               Dashboard
             </Link>
           ) : (
             <Link href="/login" onClick={() => setOpen(false)}
-              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#3DBFA4] text-white text-sm font-semibold rounded-lg">
-              Login
+              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#1B2D4F] text-white text-xs font-bold tracking-[0.12em] uppercase">
+              Partner Login
             </Link>
           )}
         </div>

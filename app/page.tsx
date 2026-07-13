@@ -1,8 +1,15 @@
 import { prisma }        from "@/lib/db/prisma";
 import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
-import { HeroCarousel }  from "@/components/website/hero-carousel";
+import { HeroSection }   from "@/components/website/hero-section";
 import { MarqueeStrip }  from "@/components/website/marquee-strip";
-import { AboutSection }        from "@/components/website/about-section";
+import { ProblemSection }      from "@/components/website/problem-section";
+import { HowItWorksSection }   from "@/components/website/how-it-works-section";
+import { TheScienceSection }   from "@/components/website/science-section-new";
+import { BodyResponseSection } from "@/components/website/body-response-section";
+import { ResearchSection }       from "@/components/website/research-section";
+import { PractitionersSection }  from "@/components/website/practitioners-section";
+import { FaqSectionNew }         from "@/components/website/faq-section-new";
+import { AboutSection }          from "@/components/website/about-section";
 import { TestimonialsSection } from "@/components/website/testimonials-section";
 import { ReviewsSection }      from "@/components/website/reviews-section";
 import { ScienceSection }      from "@/components/website/science-section";
@@ -16,12 +23,8 @@ import { FaqSection }          from "@/components/website/faq-section";
 import { SiteFooter }         from "@/components/website/site-footer";
 
 export default async function HomePage() {
-  const [banners, blogPosts] = await Promise.all([
-    prisma.websiteBanner.findMany({
-      where:   { isPublished: true },
-      orderBy: { sortOrder: "asc" },
-      select:  { id: true, imageUrl: true },
-    }),
+  const [, blogPosts] = await Promise.all([
+    Promise.resolve([]),
     prisma.blog.findMany({
       where:   { isPublished: true },
       orderBy: { publishedAt: "desc" },
@@ -33,22 +36,27 @@ export default async function HomePage() {
   return (
     <>
     <main>
-      <div className="relative">
-        <SiteHeader />
-        <HeroCarousel banners={banners} />
-      </div>
+      <SiteHeader />
+      <HeroSection />
       <MarqueeStrip />
-      <AboutSection />
-      <TestimonialsSection />
-      <ScienceSection />
-      <BlogSection posts={blogPosts} />
-      <SocialSection />
-      <WhyChooseSection />
-      <PartnersSection />
-      <InsiderSection />
-      <ReviewsSection />
-      <FeaturedImageSection />
-      <FaqSection />
+      <ProblemSection />
+      <HowItWorksSection />
+      <TheScienceSection />
+      <BodyResponseSection />
+      <ResearchSection />
+      <PractitionersSection />
+      <FaqSectionNew />
+      {/* <AboutSection /> */}
+      {/* <TestimonialsSection /> */}
+      {/* <ScienceSection /> */}
+      {/* <BlogSection posts={blogPosts} /> */}
+      {/* <SocialSection /> */}
+      {/* <WhyChooseSection /> */}
+      {/* <PartnersSection /> */}
+      {/* <InsiderSection /> */}
+      {/* <ReviewsSection /> */}
+      {/* <FeaturedImageSection /> */}
+      {/* <FaqSection /> */}
     </main>
     <SiteFooter />
     </>
