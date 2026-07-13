@@ -25,9 +25,20 @@ const Schema = z.object({
   officeContactNumber: z.string().min(1, "Office contact person is required"),
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().min(1, "Name of practice is required"),
-  yearsInPractice:     z.string({ required_error: "Years in practice is required" })
+  yearsInPractice:     z.string()
     .min(1, "Years in practice is required")
-    .pipe(z.coerce.number({ invalid_type_error: "Must be a valid number" }).int().min(0, "Must be 0 or more")),
+    .transform((val, ctx) => {
+      const n = Number(val);
+      if (isNaN(n) || !Number.isInteger(n)) {
+        ctx.addIssue({ code: "custom", message: "Must be a valid number" });
+        return z.NEVER;
+      }
+      if (n < 0) {
+        ctx.addIssue({ code: "custom", message: "Must be 0 or more" });
+        return z.NEVER;
+      }
+      return n;
+    }),
 });
 
 export type RegisterPhysicianState = {
