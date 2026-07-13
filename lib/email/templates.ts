@@ -482,6 +482,20 @@ export function salesRepPhysicianAssignedEmail(opts: {
 // ─────────────────────────────────────────────
 // Order email templates (admin → physician)
 // ─────────────────────────────────────────────
+
+// Extracts the recipient's first name from the shipping address JSON, then
+// billing address JSON, then falls back to null.
+function recipientFirstName(d: { shippingAddress?: string | null; billingAddress?: string | null }): string | null {
+  for (const raw of [d.shippingAddress, d.billingAddress]) {
+    if (!raw) continue;
+    try {
+      const a = JSON.parse(raw);
+      const name = [a.firstName, a.lastName].filter(Boolean).join(" ");
+      if (name) return name;
+    } catch { /* ignore */ }
+  }
+  return null;
+}
 type OrderItem = {
   title: string; variantSize?: string;
   quantity: number; unitPrice: number; lineTotal: number;
@@ -525,6 +539,8 @@ export type OrderEmailData = {
   shippingAddress?:   string | null;
   notes?:             string | null;
   orderDate?:         Date;
+  email?:             string | null;
+  customerPhone?:     string | null;
 };
 
 function renderAddr(raw: string | null | undefined): string {
@@ -543,15 +559,10 @@ function renderAddr(raw: string | null | undefined): string {
 }
 
 export function orderConfirmationEmail(d: OrderEmailData) {
-  const patientName = (() => {
-    if (!d.isPatientEmail || !d.billingAddress) return null;
-    try {
-      const a = JSON.parse(d.billingAddress);
-      return [a.firstName, a.lastName].filter(Boolean).join(" ") || null;
-    } catch { return null; }
-  })();
-
-  const greeting  = d.isPatientEmail ? `Dear ${patientName ?? "Customer"},` : `Hi ${d.firstName},`;
+  const name = d.isPatientEmail ? recipientFirstName(d) : null;
+  const greeting = d.isPatientEmail
+    ? (name ? `Hello ${name},` : "Hello,")
+    : `Hi ${d.firstName},`;
   const dateStr   = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
   const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping  = d.shippingCost ?? 0;
@@ -770,27 +781,90 @@ export function orderProcessingEmail(d: OrderEmailData) {
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
         <p style="margin:0;font-size:13px;color:#1d4ed8;font-weight:600;">We'll notify you once your order ships.</p>
       </div>
-      <div style="text-align:center;">
-        // <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">Track My Order</a>
-      </div>`),
+      `),
   };
 }
 
 export function orderCompletedEmail(d: OrderEmailData) {
+  const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
+  const shipping  = d.shippingCost ?? 0;
+  const recipient = recipientFirstName(d);
+  const greeting  = recipient ? `Hello ${recipient},` : "Hello,";
+
+  const itemRows = d.items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:#6b7280;">Volume: ${i.variantSize}</span>` : ""}
+      </td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
+  const shippingAddrHtml = renderAddr(d.shippingAddress);
+  const billingAddrHtml  = renderAddr(d.billingAddress);
+
   return {
     subject: `Order ${d.orderNumber} Completed — Thank You!`,
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Completed!</h1>
+      <p style="margin:0 0 4px;font-size:14px;color:#374151;font-weight:500;">${greeting}</p>
       <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
+        Your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
       </p>
-      ${orderItemsTable(d.items)}
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-        <p style="margin:0;font-size:13px;color:#15803d;font-weight:600;">Total paid: $${d.total.toFixed(2)}</p>
-      </div>
-      <div style="text-align:center;">
-        // <a href="${getAppUrl()}/physician/orders" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">View Order</a>
-      </div>`),
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f9fafb;">
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Qty</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemRows}
+          <tr>
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#6b7280;border-top:1px solid #e5e7eb;">Subtotal</td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${subtotal.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#6b7280;border-top:1px solid #f3f4f6;">Shipping</td>
+            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${shipping > 0 ? `$${shipping.toFixed(2)}` : "Free"}</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:700;color:#15803d;border-top:1px solid #bbf7d0;">Total paid</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#15803d;text-align:right;border-top:1px solid #bbf7d0;">$${d.total.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${(shippingAddrHtml || billingAddrHtml) ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          ${shippingAddrHtml ? `
+          <td width="50%" style="vertical-align:top;padding-right:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151;">Shipping address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${shippingAddrHtml}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+          ${billingAddrHtml ? `
+          <td width="50%" style="vertical-align:top;padding-left:10px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151;">Billing address</p>
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${billingAddrHtml}</p>
+            </div>
+          </td>` : "<td width='50%'></td>"}
+        </tr>
+      </table>` : ""}
+
+      ${(d.email || d.customerPhone) ? `
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Contact</p>
+        ${d.email ? `<p style="margin:0 0 4px;font-size:13px;color:#374151;"><span style="color:#6b7280;">Email:&nbsp;</span>${d.email}</p>` : ""}
+        ${d.customerPhone ? `<p style="margin:0;font-size:13px;color:#374151;"><span style="color:#6b7280;">Phone:&nbsp;</span>${d.customerPhone}</p>` : ""}
+      </div>` : ""}
+    `),
   };
 }
 

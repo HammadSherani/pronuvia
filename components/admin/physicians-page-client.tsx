@@ -84,7 +84,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              Order
+              Place Order
             </Link>
           )}
           <Link
@@ -149,7 +149,7 @@ export function PhysiciansPageClient({
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Physicians &amp; Sales Reps</h1>
+          <h1 className="text-xl font-bold text-gray-800">Partnering Physicians</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Manage doctors, downline structure, and commission rates ({total} total)
           </p>

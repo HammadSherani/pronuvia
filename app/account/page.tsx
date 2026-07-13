@@ -156,14 +156,14 @@ export default async function AccountPage() {
       <main className="bg-gray-50 py-14 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold tracking-[0.3em] text-[#3DBFA4] uppercase mb-3">
+            {/* <p className="text-xs font-semibold tracking-[0.3em] text-[#3DBFA4] uppercase mb-3">
               Physician Program
-            </p>
+            </p> */}
             <h1
               className="text-4xl lg:text-5xl font-normal text-gray-900 mb-4"
               style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
             >
-              Join Our Partnering Physician Program
+              Partner Program Application
             </h1>
             <p className="text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
               Complete the form below to apply. Our team will review your application

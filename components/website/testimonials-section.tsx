@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import imgOne from "@/public/assets/t-one.jpg";
 import imgTwo from "@/public/assets/t-two.jpg";
 import imgThree from "@/public/assets/t-three.jpg";
@@ -124,7 +124,7 @@ export function TestimonialsSection() {
             type="button"
             onClick={prev}
             disabled={current === 0}
-            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#3DBFA4] hover:text-[#3DBFA4] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#1b3b6f] hover:text-[#1b3b6f] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -138,7 +138,7 @@ export function TestimonialsSection() {
                 type="button"
                 onClick={() => setCurrent(i)}
                 className={`rounded-full transition-all duration-300 ${
-                  i === current ? "w-6 h-2.5 bg-[#3DBFA4]" : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
+                  i === current ? "w-6 h-2.5 bg-[#1b3b6f]" : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
                 }`}
               />
             ))}
@@ -148,7 +148,7 @@ export function TestimonialsSection() {
             type="button"
             onClick={next}
             disabled={current === maxIndex}
-            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#3DBFA4] hover:text-[#3DBFA4] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#1b3b6f] hover:text-[#1b3b6f] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image, { StaticImageData } from "next/image";
@@ -101,7 +101,7 @@ export function AboutScrollStory() {
               ref={(el) => { blockRefs.current[i] = el; }}
               className="min-h-screen flex flex-col justify-center px-14 py-20 border-b border-gray-100 last:border-0"
             >
-              <p className="text-xs font-semibold tracking-[0.3em] text-[#3DBFA4] uppercase mb-4">
+              <p className="text-xs font-semibold tracking-[0.3em] text-[#1b3b6f] uppercase mb-4">
                 {s.label}
               </p>
               <h2
@@ -120,7 +120,7 @@ export function AboutScrollStory() {
                   <div
                     key={j}
                     className={`h-0.5 rounded-full transition-all duration-500 ${
-                      j === i ? "w-10 bg-[#3DBFA4]" : "w-4 bg-gray-300"
+                      j === i ? "w-10 bg-[#1b3b6f]" : "w-4 bg-gray-300"
                     }`}
                   />
                 ))}
@@ -146,7 +146,7 @@ export function AboutScrollStory() {
             />
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 px-7 py-12">
-              <p className="text-xs font-semibold tracking-[0.3em] text-[#3DBFA4] uppercase mb-3">
+              <p className="text-xs font-semibold tracking-[0.3em] text-[#1b3b6f] uppercase mb-3">
                 {s.label}
               </p>
               <h2

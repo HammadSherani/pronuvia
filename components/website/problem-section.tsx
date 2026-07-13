@@ -1,72 +1,87 @@
 export function ProblemSection() {
   return (
-    <section id="the-problem" className="bg-[#EEF2F7] py-16">
-      <div className="max-w-7xl mx-auto px-8">
+    <section id="the-problem" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
 
-        {/* ── Top: label + heading ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-10 mb-12">
+      {/* Header */}
+      <div className="max-w-3xl">
+        <p className="eyebrow">The calcium problem</p>
+        <h2
+          className="mt-4 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink"
+          style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.02em" }}
+        >
+          Not all calcium
+          <br />
+          <em className="font-normal italic text-ion" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
+            works the same way.
+          </em>
+        </h2>
+        <p className="mt-5 text-[17px] leading-relaxed text-foreground/70">
+          Calcium is only active in its free ionic state (Ca²⁺). Yet nearly all dietary and
+          supplemental calcium ends up protein-bound — a slow-release "standby" form the body
+          converts only gradually.
+        </p>
+      </div>
 
-          {/* Label */}
-          <div className="pt-2">
-            <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#1B2D4F]/45">
-              The Calcium Problem
-            </p>
+      {/* Cards */}
+      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
+
+        {/* Card 1 — Conventional */}
+        <article className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 lg:p-10">
+          <div className="flex items-center justify-between">
+            <span className="eyebrow">Conventional calcium</span>
+            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+              Locked in standby
+            </span>
           </div>
-
-          {/* Heading + body */}
-          <div className="max-w-2xl">
-            <h2
-              className="text-[2.2rem] lg:text-[2.6rem] leading-[1.1] text-[#1B2D4F] mb-5"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
-            >
-              Not all calcium<br />
-              works the <em style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>same way.</em>
-            </h2>
-            <p className="text-[14px] text-[#1B2D4F]/60 leading-relaxed">
-             Calcium is only active in its free ionic state (Ca²⁺). Yet nearly all dietary and supplemental calcium ends up protein-bound — a slow-release “standby” form the body converts only gradually.
-
-            </p>
+          <h3
+            className="mt-8 text-3xl leading-tight text-ink"
+            style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 }}
+          >
+            Slow to arrive.<br />Slow to convert.
+          </h3>
+          <p className="mt-4 text-[15px] leading-relaxed text-foreground/65">
+            Tablets and food-based calcium arrive protein-bound. Only a small fraction is
+            absorbed, and the body must slowly convert it — a process that depends on
+            stomach acid, Vitamin D, and healthy digestion that many people lack.
+          </p>
+          {/* Bar chart visual */}
+          <div className="mt-8 flex items-end gap-1.5">
+            {[3, 5, 4, 6, 4, 7, 5, 6, 4, 5].map((h, i) => (
+              <span key={i} className="w-3 rounded-t bg-muted-foreground/25"
+                style={{ height: `${h * 7}px` }} />
+            ))}
           </div>
-        </div>
+          <p className="mt-2 text-xs text-muted-foreground">Rises slowly · Fades quickly</p>
+        </article>
 
-        {/* ── Bottom: comparison cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 border border-[#c8d4e3]">
-
-          {/* Card 1 — Conventional Calcium */}
-          <div className="p-8 border-b md:border-b-0 md:border-r border-[#c8d4e3] bg-white">
-            <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#1B2D4F]/40 mb-4">
-              Conventional Calcium
-            </p>
-            <h3
-              className="text-[1.4rem] text-[#1B2D4F] mb-4"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
-            >
-              Locked in standby.
-            </h3>
-            <p className="text-[13px] text-[#1B2D4F]/55 leading-relaxed">
-             Tablets and food-based calcium arrive protein-bound. Only a small fraction is absorbed, and the body must slowly convert it — a process that depends on stomach acid, Vitamin D, and healthy digestion that many people lack.
-
-            </p>
+        {/* Card 2 — AIC */}
+        <article className="relative overflow-hidden rounded-3xl border border-ion/20 bg-gradient-to-br from-ion/5 via-card to-card p-8 lg:p-10">
+          <div className="flex items-center justify-between">
+            <span className="eyebrow" style={{ color: "var(--color-ion)" }}>Pronuvia AIC</span>
+            <span className="rounded-full bg-ion/15 px-3 py-1 text-xs font-medium text-ion">
+              Ready to act
+            </span>
           </div>
-
-          {/* Card 2 — Pronuvia AIC */}
-          <div className="p-8 bg-white">
-            <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#1B2D4F]/40 mb-4">
-              Pronuvia AIC
-            </p>
-            <h3
-              className="text-[1.4rem] text-[#1B2D4F] mb-4"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
-            >
-              Ready to act.
-            </h3>
-            <p className="text-[13px] text-[#1B2D4F]/55 leading-relaxed">
-             Antiorbital Ionic Calcium is delivered already in the ionic Ca²⁺ form and stays elevated for hours — so the calcium signal your cells rely on is present and sustained, not fleeting.
-
-            </p>
+          <h3
+            className="mt-8 text-3xl leading-tight text-ink"
+            style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 }}
+          >
+            Active on arrival.<br />Sustained for hours.
+          </h3>
+          <p className="mt-4 text-[15px] leading-relaxed text-foreground/65">
+            Antiorbital Ionic Calcium is delivered already in the ionic Ca²⁺ form and stays
+            elevated for hours — so the calcium signal your cells rely on is present and
+            sustained, not fleeting.
+          </p>
+          {/* Bar chart visual */}
+          <div className="mt-8 flex items-end gap-1.5">
+            {[4, 8, 10, 11, 11, 10, 11, 10, 11, 10].map((h, i) => (
+              <span key={i} className="w-3 rounded-t bg-ion"
+                style={{ height: `${h * 7}px`, opacity: 0.3 + i * 0.07 }} />
+            ))}
           </div>
-
-        </div>
+          <p className="mt-2 text-xs text-ion/70">Rises quickly · Stays elevated</p>
+        </article>
 
       </div>
     </section>

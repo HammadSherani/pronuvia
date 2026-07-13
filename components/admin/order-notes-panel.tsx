@@ -35,7 +35,7 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
       setContent("");
       const res = await addOrderNote(orderId, type, trimmed);
       if (!res.success) toast.error(res.message ?? "Failed to add note.");
-      else if (type === "customer") toast.success("Note added & email sent to customer.");
+      else if (type === "customer") toast.success("Note added & email sent to patient.");
       else toast.success("Private note added.");
     });
   };
@@ -135,21 +135,21 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            Customer
+            Patient
           </button>
         </div>
 
         <p className="text-[10px] text-gray-400 mb-2">
           {type === "private"
-            ? "Only visible to admin — not sent to customer."
-            : "Will be emailed to the customer immediately."}
+            ? "Only visible to admin — not sent to patient."
+            : "Will be emailed to the patient immediately."}
         </p>
 
         <textarea
           rows={3}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={type === "private" ? "Add a private note…" : "Write a message to the customer…"}
+          placeholder={type === "private" ? "Add a private note…" : "Write a message to the patient…"}
           className="w-full px-3 py-2.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 resize-none text-gray-700 placeholder:text-gray-300"
           onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleAdd(); }}
         />
@@ -161,7 +161,7 @@ export function OrderNotesPanel({ orderId, initialNotes }: { orderId: string; in
             type === "private" ? "bg-gray-700 hover:bg-gray-800" : "bg-gray-900 hover:bg-gray-700"
           }`}
         >
-          {type === "private" ? "Add Private Note" : "Send to Customer"}
+          {type === "private" ? "Add Private Note" : "Send to Patient"}
         </button>
       </div>
     </div>

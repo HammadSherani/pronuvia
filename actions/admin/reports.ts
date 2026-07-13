@@ -56,7 +56,7 @@ function parseAddr(raw: string | null) {
 // ─────────────────────────────────────────────
 export async function getReportFilterOptions() {
   await requireAdmin();
-  const [doctors, salesReps] = await Promise.all([
+  const [doctors, salesReps, products] = await Promise.all([
     prisma.partneringPhysician.findMany({
       select: { id: true, firstName: true, lastName: true },
       orderBy: { lastName: "asc" },
@@ -65,10 +65,16 @@ export async function getReportFilterOptions() {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    prisma.product.findMany({
+      where:   { status: "ACTIVE" },
+      select:  { id: true, title: true },
+      orderBy: { title: "asc" },
+    }),
   ]);
   return {
     doctors:   doctors.map(d => ({ id: d.id, name: ` ${d.firstName} ${d.lastName}` })),
     salesReps: salesReps.map(r => ({ id: r.id, name: r.name })),
+    products:  products.map(p => ({ id: p.id, name: p.title })),
   };
 }
 

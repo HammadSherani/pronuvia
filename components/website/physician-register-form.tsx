@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { Country, State } from "country-state-city";
@@ -15,7 +15,7 @@ const SPECIALTIES = [
 ];
 
 
-const inp    = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition bg-white";
+const inp    = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition bg-white";
 const inpErr = "w-full border border-red-400 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition bg-white";
 const lbl    = "block text-xs font-semibold text-gray-600 mb-1.5";
 
@@ -37,6 +37,7 @@ export function PhysicianRegisterForm() {
   const [customSpecialty, setCustomSpecialty] = useState("");
   const [terms, setTerms] = useState(false);
   const [countryIso, setCountryIso] = useState("US");
+  const [selectedState, setSelectedState] = useState<string>("");
 
   const states = useMemo(() => State.getStatesOfCountry(countryIso), [countryIso]);
   const countryName = useMemo(
@@ -68,13 +69,16 @@ export function PhysicianRegisterForm() {
       const match = ALL_COUNTRIES.find((c) => c.name === state.values!.country);
       if (match) setCountryIso(match.isoCode);
     }
+    if (state?.values?.state !== undefined) {
+      setSelectedState(state.values.state);
+    }
   }, [state]);
 
   if (state?.success) {
     return (
       <div className="py-16 text-center">
-        <div className="w-20 h-20 rounded-full bg-[#3DBFA4]/10 flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="w-20 h-20 rounded-full bg-[#1b3b6f]/10 flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10 text-[#1b3b6f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
           </svg>
         </div>
@@ -102,7 +106,7 @@ export function PhysicianRegisterForm() {
           <input required name="email" type="email" placeholder="doctor@clinic.com" defaultValue={state?.values?.email} className={e.email ? inpErr : inp} />
         </Field>
         <Field label="First Name" error={e.firstName?.[0]}>
-          <input required name="firstName" placeholder=" Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
+          <input required name="firstName" placeholder="Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
         </Field>
       </div>
 
@@ -155,7 +159,12 @@ export function PhysicianRegisterForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
          <Field label="State / Province" error={e.state?.[0]}>
           {states.length > 0 ? (
-            <select name="state" defaultValue={state?.values?.state ?? ""} className={e.state ? inpErr : inp}>
+            <select
+              name="state"
+              value={selectedState}
+              onChange={(ev) => setSelectedState(ev.target.value)}
+              className={e.state ? inpErr : inp}
+            >
               <option value="" disabled>Select state…</option>
               {states.map((s) => (
                 <option key={s.isoCode} value={s.name}>{s.name}</option>
@@ -209,8 +218,8 @@ export function PhysicianRegisterForm() {
             <button key={s} type="button" onClick={() => toggleSpecialty(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 specialties.includes(s)
-                  ? "bg-[#3DBFA4] text-white border-[#3DBFA4]"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-[#3DBFA4]"
+                  ? "bg-[#1b3b6f] text-white border-[#1b3b6f]"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-[#1b3b6f]"
               }`}>
               {s}
             </button>
@@ -241,7 +250,7 @@ export function PhysicianRegisterForm() {
         {specialties.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {specialties.map((s) => (
-              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#3DBFA4]/10 text-[#3DBFA4] text-xs rounded-full font-medium">
+              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1b3b6f]/10 text-[#1b3b6f] text-xs rounded-full font-medium">
                 {s}
                 <button type="button" onClick={() => toggleSpecialty(s)} className="hover:text-red-500 transition-colors">×</button>
               </span>
@@ -253,15 +262,15 @@ export function PhysicianRegisterForm() {
       {/* Terms */}
       <label className="flex items-start gap-3 cursor-pointer">
         <input type="checkbox" checked={terms} onChange={(ev) => setTerms(ev.target.checked)}
-          className="mt-0.5 w-4 h-4 accent-[#3DBFA4] cursor-pointer" />
+          className="mt-0.5 w-4 h-4 accent-[#1b3b6f] cursor-pointer" />
         <span className="text-sm text-gray-600">
           I agree to the{" "}
-          <a href="/terms" target="_blank" className="text-[#3DBFA4] hover:underline">Terms and Conditions</a>
+          <a href="/terms" target="_blank" className="text-[#1b3b6f] hover:underline">Terms and Conditions</a>
         </span>
       </label>
 
       <button type="submit" disabled={pending || !terms}
-        className="w-full py-3 bg-[#3DBFA4] hover:bg-[#35a993] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+        className="w-full py-3 bg-[#1b3b6f] hover:bg-[#162f5c] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
         {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
         {pending ? "Submitting…" : "Submit Registration"}
       </button>

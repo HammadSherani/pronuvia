@@ -224,6 +224,7 @@ model Order {
   customerPhone             String?
 
   placedByAdmin             Boolean              @default(false)
+  placedBySalesRep          Boolean              @default(false)
 
   // Return / clawback fields
   returnedAt                DateTime?

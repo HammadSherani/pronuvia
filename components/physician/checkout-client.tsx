@@ -7,6 +7,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useRef,
+  useActionState,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,8 +20,9 @@ import {
 } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
-import { confirmPhysicianCardOrder } from "@/actions/physician/confirm-card-order";
-import { savePhysicianAddress }      from "@/actions/physician/save-address";
+import { confirmPhysicianCardOrder }  from "@/actions/physician/confirm-card-order";
+import { payWithPhysicianWallet }     from "@/actions/physician/wallet-pay";
+import { savePhysicianAddress }       from "@/actions/physician/save-address";
 import { validateCoupon }            from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
@@ -124,9 +126,10 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 type Props = {
   physicianEmail:  string;
   initialAddress:  Partial<AddressData> & { country?: string; state?: string };
+  walletBalance:   number;
 };
 
-export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Props) {
+export function PhysicianCheckoutClient({ physicianEmail, initialAddress, walletBalance }: Props) {
   const { items, clearCart } = useCart();
   const router = useRouter();
 
@@ -188,6 +191,8 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const [showNotes,      setShowNotes]      = useState(false);
   const [clientSecret,   setClientSecret]   = useState("");
   const [fetchingIntent, setFetchingIntent] = useState(false);
+  const [intentError,    setIntentError]    = useState(false);
+  const [retryCount,     setRetryCount]     = useState(0);
   const [stripeError,    setStripeError]    = useState("");
   const [cardProcessing, setCardProcessing] = useState(false);
 
@@ -196,28 +201,44 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   const [couponError,   setCouponError]   = useState("");
   const [couponPending, startCoupon]      = useTransition();
 
-  const stripeRef = useRef<StripeHandle>(null);
+  const stripeRef    = useRef<StripeHandle>(null);
+  const walletFormRef = useRef<HTMLFormElement>(null);
+  const [payMethod,    setPayMethod]    = useState<"CARD" | "WALLET">("CARD");
+  const [walletState, walletFormAction, walletPending] = useActionState(payWithPhysicianWallet, undefined);
 
   const subtotal       = parseFloat(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0).toFixed(2));
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
   const shippingCost   = selectedShipping?.cost ?? 0;
   const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
+  const canWallet      = walletBalance > 0 && walletBalance >= total && total > 0;
 
   useEffect(() => {
-    if (!items.length || total <= 0) return;
+    if (payMethod !== "CARD" || !items.length || total <= 0) return;
+    let active = true;
+    const controller = new AbortController();
     setClientSecret("");
+    setIntentError(false);
     setFetchingIntent(true);
     fetch("/api/checkout/physician-payment-intent", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ amountInCents: Math.round(total * 100) }),
+      signal:  controller.signal,
     })
       .then((r) => r.json())
-      .then(({ clientSecret: cs }) => setClientSecret(cs ?? ""))
-      .catch(() => toast.error("Could not initialize card payment."))
-      .finally(() => setFetchingIntent(false));
+      .then(({ clientSecret: cs }) => {
+        if (!active) return;
+        if (cs) setClientSecret(cs);
+        else setIntentError(true);
+      })
+      .catch((err) => {
+        if (!active || err.name === "AbortError") return;
+        setIntentError(true);
+      })
+      .finally(() => { if (active) setFetchingIntent(false); });
+    return () => { active = false; controller.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [total]);
+  }, [payMethod, total, retryCount]);
 
   const itemsJson = JSON.stringify(items.map((i) => ({
     productId:   i.productId,
@@ -264,6 +285,18 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!walletState) return;
+    if (walletState.success && walletState.orderNumber) {
+      toast.success("Order placed successfully!");
+      clearCart();
+      router.push(`/physician/invoice/${walletState.orderNumber}`);
+    } else if (!walletState.success && walletState.message) {
+      toast.error(walletState.message);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletState]);
+
   const handleApplyCoupon = () => {
     setCouponError("");
     startCoupon(async () => {
@@ -285,7 +318,11 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
       toast.error("Please select a shipping method.");
       return;
     }
-    stripeRef.current?.submit();
+    if (payMethod === "WALLET") {
+      walletFormRef.current?.requestSubmit();
+    } else {
+      stripeRef.current?.submit();
+    }
   };
 
   if (items.length === 0) {
@@ -355,7 +392,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
                   </button>
                   <button type="button" onClick={handleSaveForLater} disabled={savingAddr}
                     className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700">
-                    {savingAddr ? "Saving…" : "Save for later"}
+                    {savingAddr ? "Saving…" : "Save address only"}
                   </button>
                   {hasAddr(shipping) && (
                     <button type="button" onClick={() => setEditShip(false)}
@@ -455,57 +492,140 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
           {/* 4. Payment */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Payment</h2>
-            <div className="border border-gray-300 rounded p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
-                <div className="ml-auto flex items-center gap-1">
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
-                </div>
-              </div>
-              {!stripeReady ? (
-                <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
-                  Stripe is not configured.
-                </div>
-              ) : fetchingIntent ? (
-                <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
-                  <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
-                  Initializing secure payment…
-                </div>
-              ) : clientSecret ? (
-                <Elements
-                  stripe={stripePromise}
-                  options={{
-                    clientSecret,
-                    appearance: { theme: "stripe", variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" } },
-                  }}
-                >
-                  <StripeInnerForm
-                    ref={stripeRef}
-                    itemsJson={itemsJson}
-                    billingAddress={billStr}
-                    shippingAddress={shipStr}
-                    notes={notes}
-                    total={total}
-                    shippingRate={shippingCost}
-                    customerEmail={email}
-                    customerPhone={phone || undefined}
-                    couponId={appliedCoupon?.couponId}
-                    couponCode={appliedCoupon?.code}
-                    discountAmount={discountAmount}
-                    onSuccess={handleCardSuccess}
-                    onProcessing={setCardProcessing}
-                    onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+
+            {/* Payment method selector — only shown when wallet can cover the order */}
+            {canWallet && (
+              <div className="border border-gray-300 rounded divide-y divide-gray-100 mb-4">
+                <label className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payMethod"
+                    checked={payMethod === "CARD"}
+                    onChange={() => setPayMethod("CARD")}
+                    className="accent-gray-900"
                   />
-                </Elements>
-              ) : (
-                <p className="text-sm text-red-500 py-6 text-center">Could not initialize payment. Please refresh.</p>
-              )}
-              {stripeError && (
-                <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">{stripeError}</p>
-              )}
-            </div>
+                  <span className="flex-1 text-sm font-medium text-gray-800">Credit / Debit Card</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payMethod"
+                    checked={payMethod === "WALLET"}
+                    onChange={() => setPayMethod("WALLET")}
+                    className="accent-gray-900"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">Wallet Credit</p>
+                    <p className="text-xs text-gray-500">Balance: ${walletBalance.toFixed(2)}</p>
+                  </div>
+                </label>
+              </div>
+            )}
+
+            {/* Card payment panel */}
+            {payMethod === "CARD" && (
+              <div className="border border-gray-300 rounded p-4">
+                {!canWallet && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
+                    <div className="ml-auto flex items-center gap-1">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
+                    </div>
+                  </div>
+                )}
+                {!stripeReady ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
+                    Stripe is not configured.
+                  </div>
+                ) : fetchingIntent ? (
+                  <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
+                    <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                    Initializing secure payment…
+                  </div>
+                ) : clientSecret ? (
+                  <Elements
+                    stripe={stripePromise}
+                    options={{
+                      clientSecret,
+                      appearance: { theme: "stripe", variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" } },
+                    }}
+                  >
+                    <StripeInnerForm
+                      ref={stripeRef}
+                      itemsJson={itemsJson}
+                      billingAddress={billStr}
+                      shippingAddress={shipStr}
+                      notes={notes}
+                      total={total}
+                      shippingRate={shippingCost}
+                      customerEmail={email}
+                      customerPhone={phone || undefined}
+                      couponId={appliedCoupon?.couponId}
+                      couponCode={appliedCoupon?.code}
+                      discountAmount={discountAmount}
+                      onSuccess={handleCardSuccess}
+                      onProcessing={setCardProcessing}
+                      onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+                    />
+                  </Elements>
+                ) : intentError ? (
+                  <div className="py-6 flex flex-col items-center gap-3 text-center">
+                    <p className="text-sm text-red-500">Could not initialize payment.</p>
+                    <button
+                      type="button"
+                      onClick={() => setRetryCount((c) => c + 1)}
+                      className="text-xs font-semibold px-4 py-2 bg-gray-900 text-white hover:bg-gray-700 rounded transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : null}
+                {stripeError && (
+                  <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">{stripeError}</p>
+                )}
+              </div>
+            )}
+
+            {/* Wallet payment panel */}
+            {payMethod === "WALLET" && (
+              <div className="border border-gray-300 rounded p-4 space-y-3">
+                <p className="text-sm text-gray-700">
+                  Your wallet balance of{" "}
+                  <span className="font-semibold">${walletBalance.toFixed(2)}</span>{" "}
+                  will be used to pay the order total of{" "}
+                  <span className="font-semibold">${total.toFixed(2)}</span>.
+                </p>
+                {walletState && !walletState.success && walletState.message && (
+                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
+                    {walletState.message}
+                  </p>
+                )}
+                <form ref={walletFormRef} action={walletFormAction} className="hidden">
+                  <input type="hidden" name="items"           value={itemsJson} />
+                  <input type="hidden" name="shippingAddress" value={shipStr} />
+                  <input type="hidden" name="billingAddress"  value={billStr} />
+                  <input type="hidden" name="shippingRate"    value={String(shippingCost)} />
+                  <input type="hidden" name="total"           value={String(total)} />
+                  <input type="hidden" name="customerEmail"   value={email} />
+                  {phone && <input type="hidden" name="customerPhone" value={phone} />}
+                  {notes && <input type="hidden" name="notes" value={notes} />}
+                  {appliedCoupon && (
+                    <>
+                      <input type="hidden" name="couponCode"     value={appliedCoupon.code} />
+                      <input type="hidden" name="couponId"       value={appliedCoupon.couponId} />
+                      <input type="hidden" name="discountAmount" value={String(appliedCoupon.discountAmount)} />
+                    </>
+                  )}
+                </form>
+              </div>
+            )}
           </section>
 
           {/* 5. Notes */}
@@ -528,9 +648,9 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress }: Prop
           </p>
 
           <button type="button" onClick={handlePlaceOrder}
-            disabled={cardProcessing || !hasAddr(shipping)}
+            disabled={cardProcessing || walletPending || !hasAddr(shipping)}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded transition-colors">
-            {cardProcessing ? (
+            {(cardProcessing || walletPending) ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Placing order…

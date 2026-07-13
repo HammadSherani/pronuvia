@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { FAQS } from "@/constants/faqs";
@@ -30,7 +30,7 @@ export function FaqSection() {
                   <button
                     type="button"
                     onClick={() => toggle(faq.id)}
-                    className="w-full flex items-center justify-between gap-3 bg-[#3DBFA4] hover:bg-[#2eac92] text-white text-sm font-semibold text-left px-5 py-4 transition-colors duration-200"
+                    className="w-full flex items-center justify-between gap-3 bg-[#1b3b6f] hover:bg-[#142d54] text-white text-sm font-semibold text-left px-5 py-4 transition-colors duration-200"
                   >
                     <span className="leading-snug">{faq.question}</span>
                     <svg

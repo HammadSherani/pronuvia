@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 
@@ -53,7 +53,7 @@ export function HeroCarousel({ banners }: Props) {
           {banners.map((_, i) => (
             <button key={i} type="button" onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`}
               className={`rounded-full transition-all duration-300 ${
-                i === current ? "w-7 h-2.5 bg-[#3DBFA4]" : "w-2.5 h-2.5 bg-white/50 hover:bg-white/80"
+                i === current ? "w-7 h-2.5 bg-[#1b3b6f]" : "w-2.5 h-2.5 bg-white/50 hover:bg-white/80"
               }`}
             />
           ))}

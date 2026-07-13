@@ -18,6 +18,7 @@ type FilterOption = { id: string; name: string };
 interface Props {
   doctors:   FilterOption[];
   salesReps: FilterOption[];
+  products:  FilterOption[];
 }
 
 // ── Tabs ──────────────────────────────────────────────────────
@@ -37,7 +38,7 @@ const ORDER_STATUSES = ["PENDING","PROCESSING","SHIPPED","DELIVERED","COMPLETED"
 const PAGE_SIZE = 50;
 
 // ── Helpers ───────────────────────────────────────────────────
-function usd(n: number) { return `$${n.toFixed(2)}`; }
+function usd(n: number) { return n.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
 function pct(n: number) { return `${n.toFixed(2)}%`; }
 
 function StatusBadge({ status }: { status: string }) {
@@ -301,7 +302,7 @@ function SummaryCards({ tab, data }: { tab: TabId; data: Record<string, unknown>
 }
 
 // ── Main component ────────────────────────────────────────────
-export function ReportsClient({ doctors, salesReps }: Props) {
+export function ReportsClient({ doctors, salesReps, products }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("overall-sales");
   const [filters,   setFilters]   = useState<ReportFilters>({});
   const [search,    setSearch]    = useState("");
@@ -437,8 +438,11 @@ export function ReportsClient({ doctors, salesReps }: Props) {
           {tf.product && (
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Product</label>
-              <input className={inp} placeholder="Search product…" value={filters.product ?? ""}
-                onChange={e => setFilters(f => ({ ...f, product: e.target.value || undefined }))} />
+              <select className={sel} value={filters.product ?? ""}
+                onChange={e => setFilters(f => ({ ...f, product: e.target.value || undefined }))}>
+                <option value="">All Products</option>
+                {products.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+              </select>
             </div>
           )}
         </div>

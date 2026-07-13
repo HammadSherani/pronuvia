@@ -1,106 +1,62 @@
 export function HowItWorksSection() {
-  const STEPS = [
-    {
-      num: "01",
-      title: "Delivers ionic calcium",
-      body: "Antiorbital bonding releases calcium in its active Ca²⁺ form the moment it’s absorbed — no conversion required.",
-    },
-    {
-      num: "02",
-      title: "Sustains elevated levels",
-      body: "Rather than a brief spike, AIC is designed to keep serum ionic calcium elevated over many hours.",
-    },
-    {
-      num: "03",
-      title: "Restores homeostasis",
-      body: "Sustained ionic calcium supports the body’s effort to maintain healthy calcium homeostasis — its natural balance.",
-    },
-    {
-      num: "04",
-      title: "The cells respond",
-      body: "Balanced ionic calcium supports normal cell signaling and mitochondrial function — the body’s own responses do the rest.",
-    },
+  const steps = [
+    { n: "01", t: "Delivers ionic calcium",   d: "Antiorbital bonding releases calcium in its active Ca²⁺ form the moment it's absorbed — no conversion required." },
+    { n: "02", t: "Sustains elevated levels", d: "Rather than a brief spike, AIC is designed to keep serum ionic calcium elevated over many hours." },
+    { n: "03", t: "Restores homeostasis",     d: "Sustained ionic calcium supports the body's effort to maintain healthy calcium homeostasis — its natural balance." },
+    { n: "04", t: "Cells respond",            d: "Balanced ionic calcium supports normal cell signaling and mitochondrial function — the body's own responses do the rest." },
   ];
 
   return (
-    <section id="how-it-works" className="bg-[#0B1628] py-16">
-      <div className="max-w-7xl mx-auto px-8">
+    <section id="how-it-works" className="border-y border-border bg-cream">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
 
-        {/* ── Top: label + heading ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-10 mb-12">
-
-          {/* Label */}
-          <div className="pt-2">
-            <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-white/35">
-              How AIC Works
-            </p>
-          </div>
-
-          {/* Heading + body */}
-          <div className="max-w-xl">
-            <h2
-              className="text-[2.2rem] lg:text-[2.6rem] leading-[1.1] text-white mb-2"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
-            >
-              A delivery system.
-            </h2>
-            <h2
-              className="text-[2.2rem] lg:text-[2.6rem] leading-[1.1] mb-6"
-              style={{
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                fontWeight: 400,
-                fontStyle: "italic",
-                color: "#3DBFA4",
-              }}
-            >
-              Not another calcium.
-            </h2>
-            <p className="text-[14px] text-white/50 leading-relaxed">
-              Pronuvia’s approach is built around one idea: give the body sustained access to ionic calcium, then let the body do what it naturally does with it.
-            </p>
-          </div>
+        {/* Header */}
+        <div className="max-w-3xl">
+          <p className="eyebrow">How AIC works</p>
+          <h2
+            className="mt-4 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink"
+            style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.02em" }}
+          >
+            A delivery system,
+            <br />
+            <em className="font-normal italic text-ion" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
+              not just another calcium.
+            </em>
+          </h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-foreground/70">
+            Pronuvia's approach is built around one idea: give the body sustained access to
+            ionic calcium, then let the body do what it naturally does with it.
+          </p>
         </div>
 
-        {/* ── Steps ── */}
-        <div className="border-t border-white/10">
-          {STEPS.map(({ num, title, body }) => (
-            <div
-              key={num}
-              className="grid grid-cols-[48px_1fr_1fr] gap-6 items-start py-7 border-b border-white/10"
-            >
-              {/* Number */}
-              <span
-                className="text-[1.3rem] text-white/20 mt-0.5 select-none"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-              >
-                {num}
-              </span>
-
-              {/* Title */}
+        {/* Steps grid */}
+        <ol className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
+          {steps.map(s => (
+            <li key={s.n} className="flex flex-col bg-white p-8 lg:p-9">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-ion">Step {s.n}</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
               <h3
-                className="text-[1rem] text-white leading-snug"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
+                className="mt-7 text-[1.35rem] leading-snug text-ink"
+                style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 }}
               >
-                {title}
+                {s.t}
               </h3>
-
-              {/* Body */}
-              <p className="text-[13px] text-[#8BB8D8] leading-relaxed">
-                {body}
-              </p>
-            </div>
+              <p className="mt-3 text-sm leading-relaxed text-foreground/65">{s.d}</p>
+            </li>
           ))}
-        </div>
+        </ol>
 
-        {/* ── Quote ── */}
-        <div className="mt-12 pl-5 border-l-2 border-[#3DBFA4]/50 max-w-2xl">
+        {/* Quote */}
+        <div className="mt-12 pl-5 border-l-2 border-ion/40 max-w-2xl">
           <p
-            className="text-[0.95rem] text-white/80 leading-relaxed mb-2"
-            style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" }}
+            className="text-[1rem] text-ink/75 leading-relaxed italic"
+            style={{ fontFamily: "var(--font-display), Georgia, serif" }}
           >
             "We do not push the body toward an outcome. We restore a signal it already knows how to read."
           </p>
-          <p className="text-[10px] tracking-[0.15em] uppercase text-white/30">
+          <p className="mt-2 font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
             The Pronuvia approach
           </p>
         </div>

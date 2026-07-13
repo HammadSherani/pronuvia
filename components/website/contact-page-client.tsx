@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -79,7 +79,7 @@ function FaqAccordion({ items }: { items: typeof FAQS }) {
           <button
             type="button"
             onClick={() => setOpenId((p) => (p === faq.id ? null : faq.id))}
-            className="w-full flex items-center justify-between gap-3 bg-[#3DBFA4] hover:bg-[#2eac92] text-white text-sm font-semibold text-left px-5 py-4 transition-colors"
+            className="w-full flex items-center justify-between gap-3 bg-[#1b3b6f] hover:bg-[#142d54] text-white text-sm font-semibold text-left px-5 py-4 transition-colors"
           >
             <span className="leading-snug">{faq.q}</span>
             <svg className={`w-5 h-5 shrink-0 transition-transform duration-300 ${openId === faq.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -106,7 +106,7 @@ function TopicAccordion({ items }: { items: { q: string; a: string }[] }) {
           <button
             type="button"
             onClick={() => setOpenIdx((p) => (p === i ? null : i))}
-            className="w-full flex items-center justify-between gap-3 py-4 text-left text-sm font-medium text-gray-800 hover:text-[#3DBFA4] transition-colors"
+            className="w-full flex items-center justify-between gap-3 py-4 text-left text-sm font-medium text-gray-800 hover:text-[#1b3b6f] transition-colors"
           >
             <span>{item.q}</span>
             <svg className={`w-4 h-4 shrink-0 text-gray-400 transition-transform duration-300 ${openIdx === i ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -166,7 +166,7 @@ export function ContactPageClient() {
       </section>
 
       {/* ── 2. FAQ Section ── */}
-      <section className="bg-[#3DBFA4]/15 py-16 px-6">
+      <section className="bg-[#1b3b6f]/15 py-16 px-6">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 items-start">
           {/* Left heading */}
           <div className="lg:w-64 shrink-0">
@@ -204,7 +204,7 @@ export function ContactPageClient() {
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-3 text-xs font-semibold tracking-wide whitespace-nowrap transition-colors border-b-2 -mb-px ${
                     activeTab === tab
-                      ? "border-[#3DBFA4] text-[#3DBFA4]"
+                      ? "border-[#1b3b6f] text-[#1b3b6f]"
                       : "border-transparent text-gray-500 hover:text-gray-800"
                   }`}
                 >
@@ -233,8 +233,8 @@ export function ContactPageClient() {
           <p className="text-sm text-gray-500 mb-10">Contact Us</p>
 
           {sent ? (
-            <div className="bg-[#3DBFA4]/10 border border-[#3DBFA4]/30 rounded-2xl p-10 text-center">
-              <svg className="w-12 h-12 text-[#3DBFA4] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="bg-[#1b3b6f]/10 border border-[#1b3b6f]/30 rounded-2xl p-10 text-center">
+              <svg className="w-12 h-12 text-[#1b3b6f] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
               </svg>
               <p className="text-lg font-medium text-gray-800">Message Sent!</p>
@@ -250,7 +250,7 @@ export function ContactPageClient() {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition"
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition"
                   />
                 </div>
                 <div>
@@ -260,7 +260,7 @@ export function ContactPageClient() {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition"
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition"
                   />
                 </div>
               </div>
@@ -273,7 +273,7 @@ export function ContactPageClient() {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition"
+                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition"
                 />
               </div>
 
@@ -284,7 +284,7 @@ export function ContactPageClient() {
                   placeholder="Company / Organization (optional)"
                   value={formData.business}
                   onChange={(e) => setFormData({ ...formData, business: e.target.value })}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition"
+                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition"
                 />
               </div>
 
@@ -294,7 +294,7 @@ export function ContactPageClient() {
                   <select
                     value={formData.ageRange}
                     onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition bg-white"
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition bg-white"
                   >
                     <option value="">Select</option>
                     <option>Under 18</option>
@@ -311,7 +311,7 @@ export function ContactPageClient() {
                   <select
                     value={formData.personalGoal}
                     onChange={(e) => setFormData({ ...formData, personalGoal: e.target.value })}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition bg-white"
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition bg-white"
                   >
                     <option value="">Select</option>
                     <option>Bone Health</option>
@@ -328,7 +328,7 @@ export function ContactPageClient() {
                   <select
                     value={formData.medicalConditions}
                     onChange={(e) => setFormData({ ...formData, medicalConditions: e.target.value })}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition bg-white"
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-700 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition bg-white"
                   >
                     <option value="">Select</option>
                     <option>Osteoporosis</option>
@@ -349,13 +349,13 @@ export function ContactPageClient() {
                   placeholder="Describe your question in detail..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#3DBFA4] focus:ring-1 focus:ring-[#3DBFA4]/30 transition resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full h-12 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+                className="w-full h-12 bg-[#1b3b6f] hover:bg-[#162f5c] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
               >
                 Send Message
               </button>

@@ -11,7 +11,7 @@ section[id] {
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --pronuvia-teal: #3dbfa4;
+  --pronuvia-teal: #1b3b6f;
   --pronuvia-blue: #5bb8d4;
 }
 
@@ -20,7 +20,38 @@ section[id] {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+
+  /* Website design tokens */
+  --color-cream: #F5F3EE;
+  --color-ink: #0B1220;
+  --color-ion: #1b3b6f;
+  --color-card: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
 }
+
+/* ── Website utility classes ── */
+.eyebrow {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+@keyframes ion-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.55; }
+  50%       { transform: scale(1.15); opacity: 1;    }
+}
+@keyframes ion-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-ion-pulse { animation: ion-pulse 3.6s ease-in-out infinite; }
+.animate-ion-orbit { animation: ion-orbit 22s linear infinite; }
 
 body {
   background: var(--background);

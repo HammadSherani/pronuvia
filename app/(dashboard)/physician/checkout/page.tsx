@@ -10,14 +10,15 @@ export default async function PhysicianCheckoutPage() {
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
     select: {
-      email:      true,
-      firstName:  true,
-      lastName:   true,
-      addressOne: true,
-      addressTwo: true,
-      city:       true,
-      state:      true,
-      zipCode:    true,
+      email:         true,
+      firstName:     true,
+      lastName:      true,
+      addressOne:    true,
+      addressTwo:    true,
+      city:          true,
+      state:         true,
+      zipCode:       true,
+      walletBalance: true,
     },
   });
 
@@ -36,6 +37,7 @@ export default async function PhysicianCheckoutPage() {
     <PhysicianCheckoutClient
       physicianEmail={physician?.email ?? session.email ?? ""}
       initialAddress={initialAddress}
+      walletBalance={physician?.walletBalance ?? 0}
     />
   );
 }

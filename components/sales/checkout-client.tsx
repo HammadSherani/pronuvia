@@ -211,6 +211,8 @@ export function CheckoutClient({
   const [showNotes,      setShowNotes]      = useState(false);
   const [clientSecret,   setClientSecret]   = useState("");
   const [fetchingIntent, setFetchingIntent] = useState(false);
+  const [intentError,    setIntentError]    = useState(false);
+  const [retryCount,     setRetryCount]     = useState(0);
   const [stripeError,    setStripeError]    = useState("");
   const [cardProcessing, setCardProcessing] = useState(false);
 
@@ -222,7 +224,13 @@ export function CheckoutClient({
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
   const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
   const cashback       = commission > 0 ? parseFloat((subtotal * commission / 100).toFixed(2)) : 0;
-  const canWallet      = walletBalance >= total;
+  const canWallet      = walletBalance > 0 && walletBalance >= total && total > 0;
+
+  // If the total changes (coupon, shipping) and wallet can no longer cover it, fall back to card
+  useEffect(() => {
+    if (!canWallet && payMethod === "WALLET") setPayMethod("CARD");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canWallet]);
 
   const itemsJson = JSON.stringify(items.map((i) => ({
     productId:   i.productId,
@@ -253,22 +261,34 @@ export function CheckoutClient({
     }
   };
 
-  // fetch stripe payment intent
+  // fetch stripe payment intent — AbortController prevents stale responses from overwriting a newer secret
   useEffect(() => {
     if (payMethod !== "CARD" || !items.length || total <= 0) return;
+    let active = true;
+    const controller = new AbortController();
     setClientSecret("");
+    setIntentError(false);
     setFetchingIntent(true);
     fetch("/api/checkout/create-payment-intent", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ amountInCents: Math.round(total * 100) }),
+      signal:  controller.signal,
     })
       .then((r) => r.json())
-      .then(({ clientSecret: cs }) => setClientSecret(cs ?? ""))
-      .catch(() => toast.error("Could not initialize card payment."))
-      .finally(() => setFetchingIntent(false));
+      .then(({ clientSecret: cs }) => {
+        if (!active) return;
+        if (cs) setClientSecret(cs);
+        else setIntentError(true);
+      })
+      .catch((err) => {
+        if (!active || err.name === "AbortError") return;
+        setIntentError(true);
+      })
+      .finally(() => { if (active) setFetchingIntent(false); });
+    return () => { active = false; controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payMethod, total]);
+  }, [payMethod, total, retryCount]);
 
   // wallet action
   const [walletState, walletAction, walletPending] = useActionState(payWithWallet, undefined);
@@ -381,9 +401,9 @@ export function CheckoutClient({
             <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
           </svg>
-          Upon placing this order a cashback of{" "}
+          A cashback of{" "}
           <strong className="text-gray-900">${cashback.toFixed(2)}</strong>{" "}
-          will be credited to your wallet.
+          will be credited to your wallet after your order is completed.
         </div>
       )}
 
@@ -438,7 +458,7 @@ export function CheckoutClient({
                     disabled={savingAddr}
                     className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700"
                   >
-                    {savingAddr ? "Saving…" : "Save for later"}
+                    {savingAddr ? "Saving…" : "Save address only"}
                   </button>
                   {hasAddr(shipping) && (
                     <button
@@ -613,11 +633,18 @@ export function CheckoutClient({
                           onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
                         />
                       </Elements>
-                    ) : (
-                      <p className="text-sm text-red-500 py-6 text-center">
-                        Could not initialize payment. Please refresh the page.
-                      </p>
-                    )}
+                    ) : intentError ? (
+                      <div className="py-6 flex flex-col items-center gap-3 text-center">
+                        <p className="text-sm text-red-500">Could not initialize payment.</p>
+                        <button
+                          type="button"
+                          onClick={() => setRetryCount((c) => c + 1)}
+                          className="text-xs font-semibold px-4 py-2 bg-gray-900 text-white hover:bg-gray-700 rounded transition-colors"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    ) : null}
                     {stripeError && (
                       <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
                         {stripeError}
@@ -627,28 +654,24 @@ export function CheckoutClient({
                 )}
               </div>
 
-              {/* Wallet */}
-              <div>
-                <label className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payMethod"
-                    checked={payMethod === "WALLET"}
-                    onChange={() => setPayMethod("WALLET")}
-                    className="accent-gray-900"
-                  />
-                  <span className="text-sm text-gray-800 font-medium">Wallet Balance</span>
-                  <span className={`ml-auto text-xs font-semibold ${canWallet ? "text-[#3DBFA4]" : "text-red-500"}`}>
-                    ${walletBalance.toFixed(2)} available
-                  </span>
-                </label>
-                {payMethod === "WALLET" && !canWallet && (
-                  <p className="px-4 pb-3 text-xs text-red-600 bg-red-50 mx-4 mb-3 rounded p-2">
-                    Insufficient balance. You need <strong>${total.toFixed(2)}</strong> but have <strong>${walletBalance.toFixed(2)}</strong>.
-                    Please use card payment or top up your wallet.
-                  </p>
-                )}
-              </div>
+              {/* Wallet — only shown when balance covers the order total */}
+              {canWallet && (
+                <div>
+                  <label className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payMethod"
+                      checked={payMethod === "WALLET"}
+                      onChange={() => setPayMethod("WALLET")}
+                      className="accent-gray-900"
+                    />
+                    <span className="text-sm text-gray-800 font-medium">Wallet Balance</span>
+                    <span className="ml-auto text-xs font-semibold text-[#3DBFA4]">
+                      ${walletBalance.toFixed(2)} available
+                    </span>
+                  </label>
+                </div>
+              )}
             </div>
           </section>
 

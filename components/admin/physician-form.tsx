@@ -284,7 +284,7 @@ export function PhysicianForm({
                   <label className={lbl}>
                     Sales Rep&apos;s Upline Commission %
                     <span className="ml-1.5 text-xs font-normal text-gray-400">
-                      earned by {selectedRep?.name ?? "this rep"} on this doctor&apos;s orders
+                      {`earned by ${selectedRep?.name ?? "this rep"} on this doctor's orders`}
                     </span>
                   </label>
                   <div className="relative">
@@ -314,8 +314,9 @@ export function PhysicianForm({
             <FE msg={e.nameOfPractice?.[0]} />
           </div>
           <div>
-            <label className={lbl}>Years in Practice</label>
-            <input name="yearsInPractice" type="number" min="0" className={icls()} placeholder="10" defaultValue={state?.values?.yearsInPractice ?? defaults?.yearsInPractice} />
+            <label className={lbl}>Years in Practice <span className="text-red-500">*</span></label>
+            <input name="yearsInPractice" type="number" min="0" required className={icls(e.yearsInPractice?.[0])} placeholder="10" defaultValue={state?.values?.yearsInPractice ?? defaults?.yearsInPractice} />
+            <FE msg={e.yearsInPractice?.[0]} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">

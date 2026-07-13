@@ -1,4 +1,4 @@
-import insiderImage from "@/public/assets/inside-image.jpg";
+﻿import insiderImage from "@/public/assets/inside-image.jpg";
 import Image from "next/image";
 
 
@@ -31,7 +31,7 @@ export function InsiderSection() {
           </h2>
           <a
             href="/login"
-            className="inline-flex items-center px-7 py-2.5 bg-[#3DBFA4] hover:bg-[#35a993] text-white text-sm font-semibold rounded-full transition-colors shadow-sm"
+            className="inline-flex items-center px-7 py-2.5 bg-[#1b3b6f] hover:bg-[#162f5c] text-white text-sm font-semibold rounded-full transition-colors shadow-sm"
           >
             Join Now
           </a>

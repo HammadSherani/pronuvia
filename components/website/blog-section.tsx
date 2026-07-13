@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 type BlogPost = {
   id:       string;
@@ -66,7 +66,7 @@ export function BlogSection({ posts }: Props) {
                     {post.excerpt}
                   </p>
                 )}
-                <span className="text-xs font-semibold text-[#3DBFA4] group-hover:underline">
+                <span className="text-xs font-semibold text-[#1b3b6f] group-hover:underline">
                   Read more →
                 </span>
               </div>

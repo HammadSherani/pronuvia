@@ -18,6 +18,7 @@ interface Props {
   orderId:                   string;
   orderNumber:               string;
   total:                     number;
+  shippingRate:              number;
   items:                     OrderItem[];
   alreadyRefunded:           number[];
   existingSalesRepClawback:  number;
@@ -43,7 +44,7 @@ function fmtBalance(n: number) {
 }
 
 export function RefundOrderModal({
-  orderId, orderNumber, total, items,
+  orderId, orderNumber, total, shippingRate, items,
   alreadyRefunded, existingSalesRepClawback, existingPhysicianClawback,
   salesRepName, physicianName,
   salesRepCommissionAmount, physicianCommissionAmount,
@@ -52,15 +53,16 @@ export function RefundOrderModal({
   stripePaymentIntentId, paymentMethod,
 }: Props) {
   const router  = useRouter();
-  const [open,        setOpen]    = useState(false);
-  const [quantities,  setQtys]    = useState<number[]>(() =>
+  const [open,            setOpen]          = useState(false);
+  const [quantities,      setQtys]          = useState<number[]>(() =>
     items.map((item, idx) => Math.max(0, item.quantity - (alreadyRefunded[idx] ?? 0)))
   );
-  const [reason,      setReason]  = useState("");
-  const [custMethod,  setCustMethod] = useState<"manual" | "stripe">("manual");
-  const [custAmount,  setCustAmount] = useState<string>("");
-  const [isPending,   start]      = useTransition();
-  const overlayRef                = useRef<HTMLDivElement>(null);
+  const [reason,          setReason]        = useState("");
+  const [custMethod,      setCustMethod]    = useState<"manual" | "stripe">("manual");
+  const [custAmount,      setCustAmount]    = useState<string>("");
+  const [includeShipping, setIncludeShipping] = useState(false);
+  const [isPending,       start]            = useTransition();
+  const overlayRef                          = useRef<HTMLDivElement>(null);
 
   const canStripe = !!(stripePaymentIntentId && paymentMethod === "CARD");
 
@@ -72,6 +74,7 @@ export function RefundOrderModal({
       setQtys(items.map((item, idx) => Math.max(0, item.quantity - (alreadyRefunded[idx] ?? 0))));
       setCustMethod("manual");
       setCustAmount("");
+      setIncludeShipping(false);
     }
   }, [open, items, alreadyRefunded]);
 
@@ -111,11 +114,12 @@ export function RefundOrderModal({
 
   const hasSelection = quantities.some(q => q > 0);
 
-  // Auto-fill customer refund amount when event total changes
+  // Auto-fill customer refund amount when event total or shipping checkbox changes
   useEffect(() => {
-    setCustAmount(returnedTotal.toFixed(2));
+    const base = returnedTotal + (includeShipping ? (shippingRate ?? 0) : 0);
+    setCustAmount(base.toFixed(2));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [returnedTotal]);
+  }, [returnedTotal, includeShipping]);
 
   function setAllFull()  { setQtys(items.map((_, idx) => maxByIdx[idx])); }
   function setAllZero()  { setQtys(items.map(() => 0)); }
@@ -370,6 +374,20 @@ export function RefundOrderModal({
                         );
                       })}
                     </div>
+                    {/* Shipping checkbox */}
+                    {shippingRate > 0 && (
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={includeShipping}
+                          onChange={(e) => setIncludeShipping(e.target.checked)}
+                          className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500"
+                        />
+                        <span className="text-xs text-gray-600">
+                          Include shipping fee <span className="font-semibold text-gray-800">({fmt(shippingRate)})</span>
+                        </span>
+                      </label>
+                    )}
                     {/* Amount */}
                     <div className="flex items-center gap-2">
                       <label className="text-xs text-gray-500 shrink-0 w-14">Amount</label>

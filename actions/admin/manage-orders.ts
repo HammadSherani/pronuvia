@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/auth/dal";
 import { z } from "zod";
 import { OrderStatus } from "@/generated/prisma/enums";
@@ -283,7 +284,7 @@ export async function listOrders(opts?: { skip?: number; take?: number }) {
     prisma.order.findMany({
       select: {
         id: true, orderNumber: true, status: true, total: true,
-        subtotal: true, placedByAdmin: true,
+        subtotal: true, placedByAdmin: true, commissionPaid: true,
         salesRepCommissionRate: true, salesRepCommissionAmount: true,
         physicianCommissionRate: true, physicianCommissionAmount: true,
         paymentMethod: true, paymentStatus: true, transactionId: true,
@@ -301,6 +302,110 @@ export async function listOrders(opts?: { skip?: number; take?: number }) {
     prisma.order.count(),
   ]);
   return { orders, total };
+}
+
+export async function bulkCompleteOrders(orderIds: string[]): Promise<OrderActionState> {
+  await requireAdmin();
+  if (!orderIds.length) return { message: "No orders selected." };
+
+  const orders = await prisma.order.findMany({
+    where: {
+      id:             { in: orderIds },
+      commissionPaid: false,
+      status:         { notIn: [OrderStatus.COMPLETED, OrderStatus.REFUNDED, OrderStatus.CANCELLED] },
+    },
+    select: {
+      id: true, orderNumber: true,
+      salesRepId:               true, salesRepCommissionAmount:  true,
+      physicianId:              true, physicianCommissionAmount: true,
+    },
+  });
+
+  if (!orders.length) {
+    return { success: true, message: "No eligible orders to complete (already completed, refunded, or cancelled)." };
+  }
+
+  // Aggregate total credit per user so we can compute running balances
+  const repCreditMap = new Map<string, number>();
+  const drCreditMap  = new Map<string, number>();
+  for (const o of orders) {
+    if (o.salesRepId  && o.salesRepCommissionAmount  > 0)
+      repCreditMap.set(o.salesRepId,  (repCreditMap.get(o.salesRepId)  ?? 0) + o.salesRepCommissionAmount);
+    if (o.physicianId && o.physicianCommissionAmount > 0)
+      drCreditMap.set(o.physicianId, (drCreditMap.get(o.physicianId) ?? 0) + o.physicianCommissionAmount);
+  }
+
+  const [reps, physicians] = await Promise.all([
+    repCreditMap.size > 0
+      ? prisma.salesRepresentative.findMany({ where: { id: { in: [...repCreditMap.keys()] } }, select: { id: true, walletBalance: true } })
+      : [],
+    drCreditMap.size > 0
+      ? prisma.partneringPhysician.findMany({ where: { id: { in: [...drCreditMap.keys()] } }, select: { id: true, walletBalance: true } })
+      : [],
+  ]);
+
+  const repBalances = new Map(reps.map((r) => [r.id, r.walletBalance]));
+  const drBalances  = new Map(physicians.map((p) => [p.id, p.walletBalance]));
+
+  const ops: Prisma.PrismaPromise<unknown>[] = [];
+
+  // Update all eligible orders
+  for (const o of orders) {
+    ops.push(prisma.order.update({ where: { id: o.id }, data: { status: OrderStatus.COMPLETED, commissionPaid: true } }));
+  }
+
+  // Credit sales reps — running balance per order so the ledger is accurate
+  for (const [repId, totalCredit] of repCreditMap) {
+    const startBalance = repBalances.get(repId) ?? 0;
+    const newBalance   = parseFloat((startBalance + totalCredit).toFixed(2));
+    ops.push(prisma.salesRepresentative.update({ where: { id: repId }, data: { walletBalance: newBalance } }));
+
+    let running = startBalance;
+    for (const o of orders.filter((o) => o.salesRepId === repId && o.salesRepCommissionAmount > 0)) {
+      running = parseFloat((running + o.salesRepCommissionAmount).toFixed(2));
+      ops.push(prisma.walletTransaction.create({
+        data: {
+          userId: repId, userRole: "SALES_REP",
+          amount: o.salesRepCommissionAmount, type: "CREDIT",
+          description: `Commission for order #${o.orderNumber}`,
+          orderId: o.id, balance: running,
+        },
+      }));
+    }
+  }
+
+  // Credit physicians — same pattern
+  for (const [drId, totalCredit] of drCreditMap) {
+    const startBalance = drBalances.get(drId) ?? 0;
+    const newBalance   = parseFloat((startBalance + totalCredit).toFixed(2));
+    ops.push(prisma.partneringPhysician.update({ where: { id: drId }, data: { walletBalance: newBalance } }));
+
+    let running = startBalance;
+    for (const o of orders.filter((o) => o.physicianId === drId && o.physicianCommissionAmount > 0)) {
+      running = parseFloat((running + o.physicianCommissionAmount).toFixed(2));
+      ops.push(prisma.walletTransaction.create({
+        data: {
+          userId: drId, userRole: "PHYSICIAN",
+          amount: o.physicianCommissionAmount, type: "CREDIT",
+          description: `Commission for order #${o.orderNumber}`,
+          orderId: o.id, balance: running,
+        },
+      }));
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await prisma.$transaction(ops as any);
+
+  revalidatePath("/admin/orders");
+  revalidatePath("/sales/wallet");
+  revalidatePath("/physician/wallet");
+
+  const skipped = orderIds.length - orders.length;
+  return {
+    success: true,
+    message: `${orders.length} order${orders.length !== 1 ? "s" : ""} marked as Completed and commissions released.${skipped > 0 ? ` ${skipped} skipped (already completed/refunded/cancelled).` : ""}`,
+  };
 }
 
 export async function getOrderById(id: string) {
@@ -345,7 +450,8 @@ export async function sendOrderEmail(
     select: {
       orderNumber: true, total: true, status: true, items: true,
       trackingNumber: true, shippingCarrier: true, estimatedDelivery: true,
-      customerEmail: true,
+      shippingRate: true, shippingAddress: true, billingAddress: true,
+      paymentMethod: true, customerEmail: true, customerPhone: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
     },
   });
@@ -378,6 +484,12 @@ export async function sendOrderEmail(
     trackingNumber:    order.trackingNumber,
     shippingCarrier:   order.shippingCarrier,
     estimatedDelivery: order.estimatedDelivery,
+    shippingCost:      order.shippingRate ?? 0,
+    shippingAddress:   order.shippingAddress,
+    billingAddress:    order.billingAddress,
+    paymentMethod:     order.paymentMethod,
+    email:             order.customerEmail ?? order.physician.email,
+    customerPhone:     order.customerPhone,
   };
 
   const {
@@ -402,9 +514,28 @@ export async function sendOrderEmail(
     ? order.physician.email
     : undefined;
 
+  // Map email type → order status (only for status-bearing emails)
+  const statusMap: Partial<Record<OrderEmailType, string>> = {
+    processing_order: "PROCESSING",
+    completed_order:  "COMPLETED",
+    cancelled_order:  "CANCELLED",
+  };
+
   try {
     await sendMail({ to: toEmail, cc: ccEmail, subject, html });
-    return { success: true, message: `"${label[emailType]}" email sent to ${toEmail}.` };
+
+    const newStatus = statusMap[emailType];
+    if (newStatus) {
+      await prisma.order.update({
+        where: { id: orderId },
+        data:  { status: newStatus as never },
+      });
+      revalidatePath(`/admin/orders/${orderId}`);
+      revalidatePath("/admin/orders");
+    }
+
+    const statusNote = newStatus ? ` Order status updated to ${newStatus.charAt(0) + newStatus.slice(1).toLowerCase()}.` : "";
+    return { success: true, message: `"${label[emailType]}" email sent to ${toEmail}.${statusNote}` };
   } catch (err) {
     console.error("[sendOrderEmail]", err);
     return { success: false, message: "Failed to send email. Check SMTP settings." };

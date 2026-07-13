@@ -60,11 +60,13 @@ export default async function PhysicianWalletPage() {
     }),
   ]);
 
-  const balance      = physician?.walletBalance ?? 0;
-  const hasPending   = withdrawRequests.some((r) => r.status === "PENDING");
+  const balance    = physician?.walletBalance ?? 0;
+  const hasPending = withdrawRequests.some((r) => r.status === "PENDING");
 
-  const paidOrders    = earningOrders.filter((o) => o.commissionPaid);
-  const pendingOrders = earningOrders.filter((o) => !o.commissionPaid);
+  const CLOSED = new Set(["REFUNDED", "CANCELLED"]);
+  const paidOrders     = earningOrders.filter((o) =>  o.commissionPaid);
+  const reversedOrders = earningOrders.filter((o) => !o.commissionPaid && CLOSED.has(o.status));
+  const pendingOrders  = earningOrders.filter((o) => !o.commissionPaid && !CLOSED.has(o.status));
 
   type EarningEntry =
     | { kind: "order"; data: (typeof earningOrders)[number] }
@@ -75,8 +77,9 @@ export default async function PhysicianWalletPage() {
     ...adminTxns.map((t)     => ({ kind: "txn"   as const, data: t })),
   ].sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
 
-  const totalPaid      = paidOrders.reduce((s, o) => s + (o.physicianCommissionAmount ?? 0), 0);
-  const totalPending   = pendingOrders.reduce((s, o) => s + (o.physicianCommissionAmount ?? 0), 0);
+  const totalPaid      = paidOrders.reduce((s, o)     => s + (o.physicianCommissionAmount ?? 0), 0);
+  const totalPending   = pendingOrders.reduce((s, o)  => s + (o.physicianCommissionAmount ?? 0), 0);
+  const totalReversed  = reversedOrders.reduce((s, o) => s + (o.physicianCommissionAmount ?? 0), 0);
   const totalWithdrawn = withdrawRequests
     .filter((r) => r.status === "APPROVED")
     .reduce((s, r) => s + r.amount, 0);
@@ -159,7 +162,11 @@ export default async function PhysicianWalletPage() {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <span className={`text-sm font-bold ${o.commissionPaid ? "text-emerald-600" : "text-gray-400"}`}>
+                          <span className={`text-sm font-bold ${
+                            o.commissionPaid
+                              ? "text-emerald-600"
+                              : CLOSED.has(o.status) ? "text-red-400 line-through" : "text-gray-400"
+                          }`}>
                             {fmt(o.physicianCommissionAmount ?? 0)}
                           </span>
                         </td>
@@ -170,6 +177,13 @@ export default async function PhysicianWalletPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
                               Paid to Wallet
+                            </span>
+                          ) : CLOSED.has(o.status) ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-full text-xs font-medium">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                              </svg>
+                              Reversed
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-medium">
@@ -229,9 +243,14 @@ export default async function PhysicianWalletPage() {
                     <span className="text-sm font-black text-emerald-600">{fmt(totalPaid)}</span>
                   </td>
                   <td className="px-5 py-3.5 text-center">
-                    {totalPending > 0 && (
-                      <span className="text-xs text-amber-600 font-medium">{fmt(totalPending)} pending</span>
-                    )}
+                    <div className="flex flex-col items-center gap-0.5">
+                      {totalPending > 0 && (
+                        <span className="text-xs text-amber-600 font-medium">{fmt(totalPending)} pending</span>
+                      )}
+                      {totalReversed > 0 && (
+                        <span className="text-xs text-red-500 font-medium">{fmt(totalReversed)} reversed</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               </tfoot>

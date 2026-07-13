@@ -17,7 +17,7 @@ export const CreatePhysicianSchema = z.object({
   officeContactNumber: z.string().optional(),
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().optional(),
-  yearsInPractice:     z.number().int().min(0).optional(),
+  yearsInPractice:     z.number({ required_error: "Years in practice is required" }).int().min(0, "Must be 0 or more"),
   fieldsOfSpeciality:  z.array(z.string()).optional().default([]),
   commission:          z.number().min(0).max(100).optional().default(0),
   uplineCommission:    z.number().min(0).max(100).optional().default(0),

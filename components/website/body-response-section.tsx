@@ -1,102 +1,84 @@
 export function BodyResponseSection() {
-  const CARDS = [
+  const pillars = [
     {
       icon: (
-        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="3" fill="#1B2D4F" opacity="0.4"/>
-          <circle cx="14" cy="6"  r="1.5" fill="#1B2D4F" opacity="0.25"/>
-          <circle cx="14" cy="22" r="1.5" fill="#1B2D4F" opacity="0.25"/>
-          <circle cx="6"  cy="14" r="1.5" fill="#1B2D4F" opacity="0.25"/>
-          <circle cx="22" cy="14" r="1.5" fill="#1B2D4F" opacity="0.25"/>
+        <svg viewBox="0 0 40 40" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <circle cx="20" cy="20" r="4" fill="currentColor" />
+          <circle cx="20" cy="20" r="10" />
+          <circle cx="20" cy="20" r="17" opacity="0.45" />
         </svg>
       ),
-      title: "Cell signaling",
-      body: "Ionic calcium is a primary messenger inside cells. Sustained, balanced levels help support normal calcium-driven cell signaling.",
+      t: "Cell signaling",
+      d: "Ionic calcium is a primary messenger inside cells. Sustained, balanced levels help support normal calcium-driven cell signaling.*",
     },
     {
       icon: (
-        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-          <path d="M16 4L10 15h6l-4 9 10-13h-6L16 4z" stroke="#1B2D4F" strokeWidth="1.5" strokeLinejoin="round" fill="none" opacity="0.5"/>
+        <svg viewBox="0 0 40 40" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <ellipse cx="20" cy="20" rx="14" ry="7" />
+          <path d="M8 20c3-4 6-4 8 0s5 4 8 0 5-4 8 0" />
         </svg>
       ),
-      title: "Mitochondrial function",
-      body: "Healthy calcium balance supports normal mitochondrial function — part of how cells maintain their everyday energy and resilience.",
+      t: "Mitochondrial function",
+      d: "Healthy calcium balance supports normal mitochondrial function — part of how cells maintain their everyday energy and resilience.*",
     },
     {
       icon: (
-        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-          <path d="M3 14 Q7 7 11 14 Q15 21 19 14 Q23 7 25 14" stroke="#1B2D4F" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+        <svg viewBox="0 0 40 40" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <path d="M6 30h28M20 8v20M12 22l8-8 8 8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
-      title: "Calcium homeostasis",
-      body: "By supplying calcium in its active form, AIC supports the body’s effort to maintain healthy calcium homeostasis.",
+      t: "Calcium homeostasis",
+      d: "By supplying calcium in its active form, AIC supports the body's effort to maintain healthy calcium homeostasis.*",
     },
   ];
 
   return (
-    <section className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-8">
+    <section className="relative overflow-hidden border-t border-border bg-white">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-[-10%] top-1/2 h-[480px] w-[480px] -translate-y-1/2 rounded-full bg-ion/8 blur-3xl" />
+      </div>
 
-        {/* ── Top: label + heading ── */}
-        <div className="mb-10 max-w-xl">
-          <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#1B2D4F]/45 mb-5">
-            The Body Does the Work
-          </p>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+        <div className="max-w-3xl">
+          <p className="eyebrow">The body does the work</p>
           <h2
-            className="text-[2.2rem] lg:text-[2.6rem] leading-[1.1] text-[#1B2D4F] mb-1"
-            style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
+            className="mt-4 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink"
+            style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.02em" }}
           >
-            We deliver the signal.
+            We deliver the signal.{" "}
+            <em className="font-normal italic text-ion" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
+              Your body responds.
+            </em>
           </h2>
-          <h2
-            className="text-[2.2rem] lg:text-[2.6rem] leading-[1.1] mb-5"
-            style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              fontWeight: 400,
-              fontStyle: "italic",
-              color: "#1B2D4F",
-            }}
-          >
-            Your body responds.
-          </h2>
-          <p className="text-[14px] text-[#1B2D4F]/60 leading-relaxed">
-           Pronuvia doesn’t force an outcome. By restoring sustained ionic calcium, AIC supports the conditions your body needs — and the body’s own natural responses follow.
+          <p className="mt-5 text-[17px] leading-relaxed text-foreground/70">
+            Pronuvia doesn&apos;t force an outcome. By restoring sustained ionic calcium, AIC
+            supports the conditions your body needs — and the body&apos;s own natural responses follow.
           </p>
         </div>
 
-        {/* ── Three cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border border-[#c8d4e3]">
-          {CARDS.map(({ icon, title, body }, i) => (
-            <div
-              key={i}
-              className={`p-8 ${i < 2 ? "border-b md:border-b-0 md:border-r border-[#c8d4e3]" : ""} bg-white`}
-            >
-              {/* Icon */}
-              <div className="mb-5">{icon}</div>
-
-              {/* Title */}
+        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {pillars.map((p, i) => (
+            <div key={p.t}
+              className="group relative rounded-3xl border border-border bg-card p-8 transition-colors hover:border-ion/40">
+              <div className="flex items-center justify-between">
+                <span className="text-ion">{p.icon}</span>
+                <span className="font-mono text-xs text-muted-foreground">0{i + 1}</span>
+              </div>
               <h3
-                className="text-[1rem] text-[#1B2D4F] mb-3"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}
+                className="mt-7 text-[1.3rem] text-ink"
+                style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 }}
               >
-                {title}
+                {p.t}
               </h3>
-
-              {/* Body */}
-              <p className="text-[13px] text-[#1B2D4F]/55 leading-relaxed">
-                {body}
-                <span className="text-[#1B2D4F]/30">*</span>
-              </p>
+              <p className="mt-3 text-sm leading-relaxed text-foreground/65">{p.d}</p>
             </div>
           ))}
         </div>
 
-        {/* ── FDA disclaimer ── */}
-        <p className="mt-6 text-[11px] text-[#1B2D4F]/35 leading-relaxed">
+        <p className="mt-6 text-xs text-muted-foreground">
           * These statements have not been evaluated by the Food and Drug Administration.
           This product is not intended to diagnose, treat, cure, or prevent any disease.
         </p>
-
       </div>
     </section>
   );

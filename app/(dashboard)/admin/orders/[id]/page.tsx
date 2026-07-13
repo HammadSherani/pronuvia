@@ -759,6 +759,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   orderId={order.id}
                   orderNumber={order.orderNumber}
                   total={order.total}
+                  shippingRate={order.shippingRate ?? 0}
                   items={items}
                   alreadyRefunded={alreadyRefunded}
                   existingSalesRepClawback={order.salesRepClawback ?? 0}

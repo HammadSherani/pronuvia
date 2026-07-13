@@ -1,96 +1,90 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import Image from "next/image";
 import logo from "@/public/assets/logo.png";
+import { useState } from "react";
 
 const NAV = [
-  { label: "The Problem",       href: "#the-problem" },
   { label: "How It Works",      href: "#how-it-works" },
   { label: "The Science",       href: "#the-science" },
   { label: "Research",          href: "#research" },
   { label: "For Practitioners", href: "#for-practitioners" },
 ];
 
-export function SiteHeader({ dashboardHref }: { variant?: "overlay" | "solid"; dashboardHref?: string }) {
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
+
+
+export function SiteHeader({ dashboardHref }: { variant?: string; dashboardHref?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#EEF2F7] border-b border-[#d5dde9]">
-      <div className="max-w-7xl mx-auto px-8 flex items-center h-[72px]">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
 
         {/* Logo */}
-        <Link href="/" className="shrink-0">
+        <Link href="/" className="flex items-center">
           <Image src={logo} alt="Pronuvia" width={160} height={50} className="w-auto h-9" />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center justify-center gap-7 ml-12 flex-1">
-          {NAV.map(({ label, href }) => (
-            <a key={href} href={href}
-              onClick={e => {
-                e.preventDefault();
-                const id = href.replace("#", "");
-                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="text-sm font-medium text-[#112c5faa] hover:text-[#1B2D4Faa] transition-colors whitespace-nowrap">
-              {label}
+        <nav className="hidden items-center gap-8 md:flex">
+          {NAV.map(n => (
+            <a key={n.label} href={n.href}
+              onClick={e => { e.preventDefault(); scrollTo(n.href.replace("#", "")); }}
+              className="text-sm text-foreground/70 transition-colors hover:text-ink">
+              {n.label}
             </a>
           ))}
         </nav>
 
-        {/* Partner Login / Dashboard */}
-        <div className="hidden lg:flex items-center ml-auto pl-6">
+        {/* CTA */}
+        <div className="flex items-center gap-3">
           {dashboardHref ? (
             <Link href={dashboardHref}
-              className="px-6 py-2.5 bg-[#1B2D4F] hover:bg-[#0f1e36] text-white text-xs rounded-sm font-bold tracking-[0.12em] uppercase transition-colors">
+              className="hidden md:inline-flex items-center rounded-full bg-ink px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-ink/80">
               Dashboard
             </Link>
           ) : (
             <Link href="/login"
-              className="px-6 py-2.5 bg-[#1B2D4F] hover:bg-[#0f1e36] text-white text-xs rounded-sm font-bold tracking-[0.12em] uppercase transition-colors">
-              Partner Login
+              className="hidden md:inline-flex items-center rounded-full border border-ink/15 px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-white">
+               Login
             </Link>
           )}
-        </div>
 
-        {/* Mobile hamburger */}
-        <button type="button" onClick={() => setOpen(!open)}
-          className="lg:hidden ml-auto w-9 h-9 flex items-center justify-center text-[#1B2D4F]">
-          {open
-            ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-          }
-        </button>
+          {/* Mobile hamburger */}
+          <button type="button" onClick={() => setOpen(v => !v)}
+            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-ink">
+            <span className={`block h-px w-4 bg-current transition-all ${open ? "rotate-45 translate-y-px shadow-none" : "shadow-[0_-4px_0_currentColor,0_4px_0_currentColor]"}`} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
       {open && (
-        <div className="lg:hidden px-6 pb-5 space-y-1 bg-[#EEF2F7] border-b border-[#d5dde9]">
-          {NAV.map(({ label, href }) => (
-            <a key={href} href={href}
-              onClick={e => {
-                e.preventDefault();
-                setOpen(false);
-                const id = href.replace("#", "");
-                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="block py-2.5 text-sm font-medium text-[#1B2D4F] border-b border-[#d5dde9]">
-              {label}
-            </a>
-          ))}
-          {dashboardHref ? (
-            <Link href={dashboardHref} onClick={() => setOpen(false)}
-              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#1B2D4F] text-white text-xs font-bold tracking-[0.12em] uppercase">
-              Dashboard
-            </Link>
-          ) : (
-            <Link href="/login" onClick={() => setOpen(false)}
-              className="mt-3 w-full flex items-center justify-center py-2.5 bg-[#1B2D4F] text-white text-xs font-bold tracking-[0.12em] uppercase">
-              Partner Login
-            </Link>
-          )}
+        <div className="md:hidden border-t border-border bg-white px-6 py-5">
+          <div className="flex flex-col gap-4">
+            {NAV.map(n => (
+              <a key={n.label} href={n.href}
+                onClick={e => { e.preventDefault(); setOpen(false); scrollTo(n.href.replace("#", "")); }}
+                className="text-base text-foreground/80 hover:text-ink">
+                {n.label}
+              </a>
+            ))}
+            {dashboardHref ? (
+              <Link href={dashboardHref} onClick={() => setOpen(false)}
+                className="mt-2 w-fit inline-flex items-center rounded-full bg-ink px-5 py-2 text-sm font-medium text-white">
+                Dashboard
+              </Link>
+            ) : (
+              <Link href="/login" onClick={() => setOpen(false)}
+                className="mt-2 w-fit inline-flex items-center rounded-full bg-ink px-5 py-2 text-sm font-medium text-white">
+                 Login
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </header>

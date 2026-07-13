@@ -1,48 +1,32 @@
 export function MarqueeStrip() {
-  const PARTNERS = [
-    "Calcium & Bone Health Institute",
-    "University Research Partners",
-    "Presented at AACR 2025",
-    "Collaborative Clinical Studies",
+  const items = [
+    { k: "01", h: "Ionic",           p: "Delivered in the active Ca²⁺ form — the only physiologically active form of calcium." },
+    { k: "02", h: "Hours",           p: "Sustained elevation of ionic calcium — designed to maintain the signal, not spike and fade." },
+    { k: "03", h: "No stomach acid", p: "Absorption that bypasses digestion — no dependence on Vitamin D or peptides." },
   ];
 
   return (
-    <div className="bg-[#EEF2F7] border-t border-b border-[#d5dde9] py-10">
-      <div className="max-w-7xl mx-auto px-8">
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 items-start">
-
-          {/* Left: Headline + body */}
-          <div>
-            <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#1B2D4F]/45 mb-3">
-              Developed &amp; Studied in Collaboration
-            </p>
-            <p className="text-[14px] text-[#1B2D4F]/60 leading-relaxed">
-              Antiorbital Ionic Calcium was developed through collaborative research and continues
-              to be studied with universities, research institutes, and clinicians. Our marketing
-              is grounded in that science — not in promises.
-            </p>
-          </div>
-
-          {/* Right: Partner chips */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:justify-end lg:pt-7">
-            {PARTNERS.map((name, i) => (
-              <span
-                key={i}
-                className="text-[13px] text-[#1B2D4F]/50 select-none"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" }}
-              >
-                {name}
-                {i < PARTNERS.length - 1 && (
-                  <span className="ml-6 text-[#1B2D4F]/25 not-italic">·</span>
-                )}
-              </span>
-            ))}
-          </div>
-
-        </div>
-
+    <section className="relative bg-ink text-white">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/3 h-64 w-64 rounded-full bg-ion/20 blur-3xl" />
       </div>
-    </div>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
+        {items.map(it => (
+          <div key={it.k} className="bg-ink px-8 py-14 lg:px-12 lg:py-16">
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-xs text-ion">{it.k}</span>
+              <span className="h-px flex-1 bg-white/15" />
+            </div>
+            <h3
+              className="mt-6 text-4xl lg:text-5xl text-white tracking-tight"
+              style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 }}
+            >
+              {it.h}
+            </h3>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/65">{it.p}</p>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

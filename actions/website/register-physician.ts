@@ -25,7 +25,9 @@ const Schema = z.object({
   officeContactNumber: z.string().min(1, "Office contact person is required"),
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().min(1, "Name of practice is required"),
-  yearsInPractice:     z.coerce.number().min(0, "Must be 0 or more"),
+  yearsInPractice:     z.string({ required_error: "Years in practice is required" })
+    .min(1, "Years in practice is required")
+    .pipe(z.coerce.number({ invalid_type_error: "Must be a valid number" }).int().min(0, "Must be 0 or more")),
 });
 
 export type RegisterPhysicianState = {
@@ -50,13 +52,13 @@ export async function registerPhysician(
     addressOne:          (formData.get("addressOne") as string)?.trim(),
     addressTwo:          (formData.get("addressTwo") as string) || undefined,
     city:                (formData.get("city") as string)?.trim(),
-    state:               (formData.get("state") as string)?.trim(),
+    state:               (formData.get("state") as string)?.trim() ?? "",
     zipCode:             (formData.get("zipCode") as string)?.trim(),
     phone:               (formData.get("phone") as string)?.trim(),
     officeContactNumber: (formData.get("officeContactNumber") as string)?.trim(),
     fax:                 (formData.get("fax") as string)?.trim(),
     nameOfPractice:      (formData.get("nameOfPractice") as string)?.trim(),
-    yearsInPractice:     formData.get("yearsInPractice") || undefined,
+    yearsInPractice:     (formData.get("yearsInPractice") as string) ?? "",
   };
 
   const strValues: Record<string, string> = Object.fromEntries(
