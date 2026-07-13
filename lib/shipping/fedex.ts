@@ -40,10 +40,11 @@ export async function getFedExRates(
   const body = {
     accountNumber: { value: process.env.FEDEX_ACCOUNT_NUMBER ?? "" },
     requestedShipment: {
-      shipper:   { address: toFedExAddress(from) },
-      recipient: { address: toFedExAddress(to) },
-      pickupType: "DROPOFF_AT_FEDEX_LOCATION",
-      rateRequestType: ["LIST"],
+      shipper:         { address: toFedExAddress(from) },
+      recipient:       { address: toFedExAddress(to) },
+      pickupType:      "DROPOFF_AT_FEDEX_LOCATION",
+      packagingType:   "YOUR_PACKAGING",
+      rateRequestType: ["ACCOUNT", "LIST"],
       requestedPackageLineItems: [{
         weight:     { units: "LB", value: pkg.weightLbs },
         dimensions: pkg.lengthIn ? {
@@ -72,8 +73,10 @@ export async function getFedExRates(
   const data = await res.json();
   console.log("[FedEx] Rates response:", JSON.stringify(data, null, 2));
 
-  if (!res.ok) {
-    throw new Error(`FedEx rates error: ${JSON.stringify(data)}`);
+  if (!res.ok || (data?.errors?.length ?? 0) > 0) {
+    const errs = (data?.errors ?? []) as { message?: string; code?: string }[];
+    const msg  = errs.map((e) => e.message ?? e.code).filter(Boolean).join("; ");
+    throw new Error(msg || `FedEx rates failed (HTTP ${res.status})`);
   }
 
   const rateDetails = data?.output?.rateReplyDetails ?? [];
