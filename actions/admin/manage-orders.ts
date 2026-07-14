@@ -278,10 +278,15 @@ export async function deleteOrder(id: string): Promise<OrderActionState> {
   return { success: true, message: "Order deleted." };
 }
 
-export async function listOrders(opts?: { skip?: number; take?: number }) {
+export async function listOrders(opts?: { skip?: number; take?: number; status?: string; q?: string }) {
   await requireAdmin();
+  const where: Record<string, unknown> = {};
+  if (opts?.status) where.status = opts.status as OrderStatus;
+  if (opts?.q)      where.orderNumber = { contains: opts.q, mode: "insensitive" };
+  const whereArg = Object.keys(where).length ? where : undefined;
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
+      where: whereArg,
       select: {
         id: true, orderNumber: true, status: true, total: true,
         subtotal: true, placedByAdmin: true, commissionPaid: true,
@@ -299,7 +304,7 @@ export async function listOrders(opts?: { skip?: number; take?: number }) {
       skip: opts?.skip,
       take: opts?.take,
     }),
-    prisma.order.count(),
+    prisma.order.count({ where: whereArg }),
   ]);
   return { orders, total };
 }

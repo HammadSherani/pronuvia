@@ -1,9 +1,11 @@
-﻿import { listOrders }        from "@/actions/admin/manage-orders";
-import { ReturnOrderModal }  from "@/components/admin/return-order-modal";
-import { OrdersTableClient } from "@/components/admin/orders-table-client";
-import { Pagination } from "@/components/shared/pagination";
-import { parsePagination } from "@/lib/pagination";
-import { Suspense } from "react";
+import { listOrders }           from "@/actions/admin/manage-orders";
+import { ReturnOrderModal }     from "@/components/admin/return-order-modal";
+import { OrdersTableClient }   from "@/components/admin/orders-table-client";
+import { OrderStatusFilter }   from "@/components/admin/order-status-filter";
+import { OrderSearchInput }    from "@/components/admin/order-search-input";
+import { Pagination }          from "@/components/shared/pagination";
+import { parsePagination }     from "@/lib/pagination";
+import { Suspense }            from "react";
 
 export const metadata = { title: "Order – Pronuvia Admin" };
 
@@ -29,12 +31,20 @@ export default async function OrdersPage({
 }) {
   const sp = await searchParams;
   const { page, pageSize, skip, take } = parsePagination(sp);
+  const status = typeof sp.status === "string" && sp.status ? sp.status : undefined;
+  const q      = typeof sp.q      === "string" && sp.q      ? sp.q      : undefined;
 
-  // Paginated page + full totals in parallel
+  // Paginated (filtered) + full unfiltered totals in parallel
   const [{ orders, total }, { orders: allOrders }] = await Promise.all([
-    listOrders({ skip, take }),
+    listOrders({ skip, take, status, q }),
     listOrders({}),
   ]);
+
+  // Per-status counts for filter tab badges
+  const statusCounts = allOrders.reduce<Record<string, number>>((acc, o) => {
+    acc[o.status] = (acc[o.status] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const totalRevenue   = allOrders.reduce((s, o) => s + o.total,                    0);
   const totalRepComm   = allOrders.reduce((s, o) => s + o.salesRepCommissionAmount,  0);
@@ -63,7 +73,7 @@ export default async function OrdersPage({
         <SummaryCard
           label="Total Revenue"
           value={fmt(totalRevenue)}
-          sub={`${total} orders total`}
+          sub={`${allOrders.length} orders total`}
           color="#3DBFA4"
         />
         <SummaryCard
@@ -73,7 +83,7 @@ export default async function OrdersPage({
           color="#5BB8D4"
         />
         <SummaryCard
-          label=" Commissions Earned"
+          label="Commissions Earned"
           value={fmt(totalDrComm)}
           sub={`${pendingCount} pending`}
           color="#8b5cf6"
@@ -88,12 +98,17 @@ export default async function OrdersPage({
 
       {/* ── Orders table ───────────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+
+        {/* Table header + search + status dropdown */}
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-sm font-semibold text-gray-700">
             All Orders
             <span className="ml-2 text-xs font-normal text-gray-400">({total})</span>
           </h2>
-          <p className="text-xs text-gray-400">Click any row to view order details</p>
+          <div className="flex items-center gap-2">
+            <OrderSearchInput current={q} status={status} />
+            <OrderStatusFilter current={status} counts={statusCounts} />
+          </div>
         </div>
 
         <OrdersTableClient orders={orders} />

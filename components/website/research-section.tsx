@@ -29,7 +29,7 @@ export function ResearchSection() {
               continues to be studied with universities, research institutes, and clinicians.
               Our marketing is grounded in that science — not in promises.
             </p>
-            <a href="#"
+            <a href="/research"
               className="mt-8 inline-flex items-center gap-2 rounded-full border border-ink/20 px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-ink/5">
               Read the Research
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">

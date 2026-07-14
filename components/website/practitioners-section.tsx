@@ -13,7 +13,10 @@ export function PractitionersSection() {
 
           {/* Left */}
           <div className="lg:col-span-8">
-            <p className="eyebrow" style={{ color: "var(--color-ion)" }}>
+            <p className="eyebrow text-white" 
+            
+            // style={{ color: "var(--color-ion)" }}
+            >
               For patients &amp; practitioners
             </p>
             <h2
@@ -72,7 +75,7 @@ export function PractitionersSection() {
           ))}
         </div>
         <p
-          className="relative mt-4 text-sm italic text-ion"
+          className="relative mt-4 text-sm italic "
           style={{ fontFamily: "var(--font-display), Georgia, serif" }}
         >
           Mixed into water. Taken daily.

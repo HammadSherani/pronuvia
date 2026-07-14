@@ -59,13 +59,13 @@ export function TheScienceSection() {
             {/* AIC */}
             <div className="rounded-3xl border border-ink bg-ink p-7 text-white">
               <div className="flex items-center justify-between border-b border-white/15 pb-4">
-                <span className="eyebrow" style={{ color: "var(--color-ion)" }}>Pronuvia AIC</span>
-                <span className="h-2 w-2 rounded-full bg-ion animate-ion-pulse" />
+                <span className="eyebrow" style={{ color: "#93C5FD" }}>Pronuvia AIC</span>
+                <span className="h-2 w-2 rounded-full bg-blue-300 animate-ion-pulse" />
               </div>
               <ul className="mt-5 space-y-4">
                 {pros.map(x => (
                   <li key={x} className="flex gap-3 text-sm text-white/80">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ion" />
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-300" />
                     <span>{x}</span>
                   </li>
                 ))}

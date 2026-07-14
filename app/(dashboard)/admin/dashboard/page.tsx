@@ -1,6 +1,7 @@
 ﻿import { requireAdmin } from "@/lib/auth/dal";
 import { getDashboardStats } from "@/actions/admin/dashboard";
 import { DashboardChartsPanel } from "@/components/admin/dashboard-charts";
+import { DashboardDateFilter } from "@/components/admin/dashboard-date-filter";
 import Link from "next/link";
 
 export const metadata = { title: "Admin Dashboard – Pronuvia" };
@@ -28,10 +29,18 @@ const APPROVAL_STYLE: Record<string, { bg: string; color: string; label: string 
   REJECTED: { bg: "#fef2f2", color: "#dc2626", label: "Rejected" },
 };
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp   = await searchParams;
+  const from = typeof sp.from === "string" && sp.from ? new Date(sp.from) : undefined;
+  const to   = typeof sp.to   === "string" && sp.to   ? new Date(sp.to)   : undefined;
+
   const [, stats] = await Promise.all([
     requireAdmin(),
-    getDashboardStats(),
+    getDashboardStats({ from, to }),
   ]);
 
   const { kpis, latestOrders, latestPhysicians } = stats;
@@ -104,9 +113,8 @@ export default async function AdminDashboardPage() {
     },
   ];
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
+  const fromStr = typeof sp.from === "string" ? sp.from : undefined;
+  const toStr   = typeof sp.to   === "string" ? sp.to   : undefined;
 
   return (
     <div className="space-y-6">
@@ -122,12 +130,7 @@ export default async function AdminDashboardPage() {
               <h1 className="text-xl font-bold text-gray-900">Good Morning, Admin!</h1>
               <p className="text-sm text-gray-400 mt-0.5">Stay informed with live updates on your store&apos;s activity.</p>
             </div>
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm shrink-0">
-              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="text-xs font-medium text-gray-600">{today}</span>
-            </div>
+            <DashboardDateFilter from={fromStr} to={toStr} />
           </div>
 
           {/* KPI cards */}

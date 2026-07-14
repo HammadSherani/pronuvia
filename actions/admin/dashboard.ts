@@ -28,9 +28,20 @@ function buildBuckets(period: "daily" | "weekly" | "monthly", count: number) {
   });
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(opts?: { from?: Date; to?: Date }) {
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+  // When a date range is selected, use it; otherwise fall back to 12-month window for charts
+  const rangeFrom = opts?.from;
+  const rangeTo   = opts?.to
+    ? new Date(opts.to.getFullYear(), opts.to.getMonth(), opts.to.getDate() + 1) // inclusive end
+    : undefined;
+
+  const chartFrom  = rangeFrom ?? twelveMonthsAgo;
+  const orderWhere = rangeFrom || rangeTo
+    ? { createdAt: { gte: rangeFrom, ...(rangeTo ? { lt: rangeTo } : {}) } }
+    : undefined;
 
   const [
     salesRepsCount,
@@ -44,9 +55,9 @@ export async function getDashboardStats() {
     prisma.salesRepresentative.count(),
     prisma.partneringPhysician.count({ where: { isApproved: "APPROVED" } }),
     prisma.withdrawRequest.count({ where: { status: "PENDING" } }),
-    prisma.order.aggregate({ _sum: { total: true }, _count: true }),
+    prisma.order.aggregate({ where: orderWhere, _sum: { total: true }, _count: true }),
     prisma.order.findMany({
-      where: { createdAt: { gte: twelveMonthsAgo } },
+      where: { createdAt: { gte: chartFrom, ...(rangeTo ? { lt: rangeTo } : {}) } },
       select: {
         total: true,
         status: true,
@@ -58,6 +69,7 @@ export async function getDashboardStats() {
     }),
     prisma.order.findMany({
       take: 6,
+      where: orderWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

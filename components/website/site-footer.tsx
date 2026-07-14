@@ -78,7 +78,7 @@ export function SiteFooter() {
 
         {/* FDA disclaimer */}
         <div className="mt-14 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-xs leading-relaxed text-white/50">
-          <p className="font-mono uppercase tracking-widest text-ion mb-3 text-[0.65rem]">* Disclaimer</p>
+          <p className="font-mono uppercase tracking-widest text-white mb-3 text-[0.65rem]">* Disclaimer</p>
           <p>
             These statements have not been evaluated by the Food and Drug Administration.
             This product is not intended to diagnose, treat, cure, or prevent any disease.

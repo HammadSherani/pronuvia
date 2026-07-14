@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <div className="w-full  rounded-xl overflow-hidden  flex min-h-screen">
       {/* ── Left panel — branded (no external image needed) ── */}
-      <div className="relative hidden md:flex md:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#3DBFA4] to-[#2a8f7a] text-white">
+      <div className="relative hidden md:flex md:w-1/2 flex-col items-center justify-center bg-ink text-white">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/2" />
@@ -63,7 +63,7 @@ export default function LoginPage() {
         </Link>
         <Link
           href="/"
-          className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#3DBFA4] transition-colors"
+          className="mt-4 inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:border-gray-400 hover:text-gray-800 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
