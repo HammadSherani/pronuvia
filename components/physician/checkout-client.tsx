@@ -365,16 +365,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                   className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
                 />
               </div>
-              <div className="border-t border-gray-100 pt-3">
-                <label className="text-xs text-gray-400 mb-0.5 block">Patient’s Phone Number</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter patient’s phone (optional)"
-                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
-                />
-              </div>
             </div>
           </section>
 

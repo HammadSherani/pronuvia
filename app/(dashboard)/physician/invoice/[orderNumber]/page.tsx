@@ -50,6 +50,7 @@ function fmtAddress(raw: string | null | undefined): string {
       a.address1, a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
+      a.phone,
     ].filter(Boolean).join("\n");
   } catch { return raw; }
 }

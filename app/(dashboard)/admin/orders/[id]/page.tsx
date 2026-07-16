@@ -415,12 +415,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-line">
                         {fmtAddressBody(order.shippingAddress)}
                       </p>
-                      {(order.customerEmail || order.customerPhone) && (
+                      {/* {(order.customerEmail || order.customerPhone) && (
                         <div className="pt-1 border-t border-gray-100 space-y-0.5">
                           {order.customerEmail && <p className="text-xs text-gray-500">{order.customerEmail}</p>}
                           {order.customerPhone && <p className="text-xs text-gray-500">{order.customerPhone}</p>}
                         </div>
-                      )}
+                      )} */}
                       <EditOrderAddress orderId={order.id} type="shipping" raw={order.shippingAddress} />
                     </div>
                   ) : order.physician ? (
