@@ -50,6 +50,7 @@ function fmtAddress(raw: string | null | undefined): string {
       a.address1, a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
+      a.phone,
     ].filter(Boolean).join("\n");
   } catch { return raw; }
 }
@@ -79,7 +80,7 @@ export default async function InvoicePage({ params }: Props) {
       subtotal: true, total: true, shippingRate: true,
       couponCode: true, discountAmount: true,
       shippingCarrier: true, trackingNumber: true,
-      shippingAddress: true,
+      shippingAddress: true, billingAddress: true,
       customerEmail: true, customerPhone: true,
       notes: true, items: true,
       salesRepId: true,
@@ -161,12 +162,10 @@ export default async function InvoicePage({ params }: Props) {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
-                {order.salesRep ? (
-                  <div className="text-sm text-gray-700 space-y-0.5">
-                    <p className="font-semibold">{order.salesRep.firstName} {order.salesRep.lastName}</p>
-                    <p className="text-gray-500">{order.salesRep.email}</p>
-                    {order.salesRep.phone && <p className="text-gray-500">{order.salesRep.phone}</p>}
-                  </div>
+                {(order.billingAddress || order.shippingAddress) ? (
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                    {fmtAddress(order.billingAddress ?? order.shippingAddress)}
+                  </p>
                 ) : <p className="text-sm text-gray-400">—</p>}
               </div>
               <div>

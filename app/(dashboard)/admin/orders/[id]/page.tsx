@@ -66,6 +66,7 @@ function fmtAddressBody(raw: string | null | undefined): string | null {
       a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
+      a.phone,
     ].filter(Boolean).join("\n");
   } catch { return raw; }
 }
@@ -347,7 +348,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         </a>
                       </div>
                     )}
-                    {(customerPhone || order.customerEmail) && (
+                    {/* {(customerPhone || order.customerEmail) && (
                       <div>
                         <p className="text-[11px] text-gray-400 mb-0.5">
                           Patient Phone:
@@ -359,7 +360,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           </a>
                         )}
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
 

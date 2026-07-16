@@ -426,16 +426,6 @@ export function CheckoutClient({
                   className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
                 />
               </div>
-              <div className="px-4 py-3">
-                <label className="text-xs text-gray-400 mb-0.5 block">Patient phone number</label>
-                <input
-                  type="tel"
-                  value={patientPhone}
-                  onChange={(e) => setPatientPhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
-                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
-                />
-              </div>
             </div>
           </section>
 
