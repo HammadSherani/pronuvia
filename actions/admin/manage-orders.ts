@@ -459,10 +459,19 @@ export async function sendOrderEmail(
       shippingRate: true, shippingAddress: true, billingAddress: true,
       paymentMethod: true, customerEmail: true, customerPhone: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
+      salesRep:  { select: { email: true, firstName: true, lastName: true } },
     },
   });
-  if (!order)               return { success: false, message: "Order not found." };
-  if (!order.physician)     return { success: false, message: "No physician linked to this order." };
+  if (!order) return { success: false, message: "Order not found." };
+
+  // Derive recipient name: physician → patient from shipping address → sales rep
+  let recipientFirstName = order.physician?.firstName ?? "Customer";
+  if (!order.physician && order.shippingAddress) {
+    try {
+      const addr = JSON.parse(order.shippingAddress) as { firstName?: string };
+      if (addr.firstName) recipientFirstName = addr.firstName;
+    } catch { /* use default */ }
+  }
 
   const label: Record<OrderEmailType, string> = {
     new_order:        "New Order",
@@ -481,9 +490,13 @@ export async function sendOrderEmail(
     lineTotal:   i.lineTotal   ?? 0,
   }));
 
+  // Primary recipient: customerEmail (patient) → physician email → sales rep email
+  const primaryEmail = order.customerEmail ?? order.physician?.email ?? order.salesRep?.email ?? "";
+  if (!primaryEmail) return { success: false, message: "No recipient email found for this order." };
+
   const emailData = {
     orderNumber:       order.orderNumber,
-    firstName:         order.physician.firstName,
+    firstName:         recipientFirstName,
     total:             order.total,
     status:            order.status,
     items,
@@ -494,7 +507,7 @@ export async function sendOrderEmail(
     shippingAddress:   order.shippingAddress,
     billingAddress:    order.billingAddress,
     paymentMethod:     order.paymentMethod,
-    email:             order.customerEmail ?? order.physician.email,
+    email:             primaryEmail,
     customerPhone:     order.customerPhone,
   };
 
@@ -514,11 +527,10 @@ export async function sendOrderEmail(
 
   const { subject, html } = templateFns[emailType](emailData);
 
-  // If a customer email was entered at checkout, use it as To and CC the doctor; otherwise fall back to the doctor's email
-  const toEmail = order.customerEmail ?? order.physician.email;
-  const ccEmail = order.customerEmail && order.customerEmail !== order.physician.email
-    ? order.physician.email
-    : undefined;
+  const toEmail = primaryEmail;
+  // CC: if patient email is the To, CC the physician or sales rep
+  const ccCandidate = order.physician?.email ?? order.salesRep?.email;
+  const ccEmail = ccCandidate && ccCandidate !== toEmail ? ccCandidate : undefined;
 
   // Map email type → order status (only for status-bearing emails)
   const statusMap: Partial<Record<OrderEmailType, string>> = {
