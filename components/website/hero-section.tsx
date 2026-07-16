@@ -53,11 +53,11 @@ export function HeroSection() {
                   <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </a>
-              <a href="#for-practitioners"
+              {/* <a href="#for-practitioners"
                 onClick={e => { e.preventDefault(); scrollTo("for-practitioners"); }}
                 className="inline-flex items-center rounded-full border border-ink/15 px-6 py-3.5 text-sm font-medium text-ink transition-colors hover:bg-ink/5">
                 Find a practitioner
-              </a>
+              </a> */}
             </div>
 
             <p className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">

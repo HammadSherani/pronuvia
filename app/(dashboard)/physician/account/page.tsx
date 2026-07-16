@@ -18,7 +18,6 @@ export default async function PhysicianAccountPage() {
       bankName: true, bankAccountName: true, bankAccountNumber: true, swiftCode: true, routingNumber: true,
       commission: true, uplineCommission: true,
       isApproved: true, createdAt: true,
-      salesRep: { select: { firstName: true, lastName: true, email: true, phone: true } },
     },
   });
 

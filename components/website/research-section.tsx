@@ -2,8 +2,8 @@ export function ResearchSection() {
   const chips = [
     "Calcium & Bone Health Institute",
     "University Research Partners",
-    "Presented at AACR 2025",
-    "Collaborative Clinical Studies",
+    // "Presented at AACR 2025",
+    // "Collaborative Clinical Studies",
   ];
 
   return (
@@ -29,13 +29,13 @@ export function ResearchSection() {
               continues to be studied with universities, research institutes, and clinicians.
               Our marketing is grounded in that science — not in promises.
             </p>
-            <a href="/research"
+            {/* <a href="/research"
               className="mt-8 inline-flex items-center gap-2 rounded-full border border-ink/20 px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-ink/5">
               Read the Research
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </a> */}
           </div>
 
           {/* Right: chips */}

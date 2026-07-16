@@ -47,7 +47,6 @@ function fmtAddress(raw: string | null | undefined): string {
     const a: AddrObj = JSON.parse(raw);
     return [
       [a.firstName, a.lastName].filter(Boolean).join(" "),
-      a.phone,
       a.address1, a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
@@ -121,7 +120,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-2xl font-black tracking-tight">PRONUVIA</p>
-                <p className="text-sm text-white/70 mt-0.5">Health & Wellness Products</p>
+                {/* <p className="text-sm text-white/70 mt-0.5">Health & Wellness Products</p> */}
               </div>
               <div className="text-right">
                 <p className="text-xs text-white/60 uppercase tracking-wider">Invoice</p>
@@ -173,28 +172,14 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                 ) : (
                   <p className="text-sm text-gray-400">No shipping address provided.</p>
                 )}
+                {(order.customerEmail || order.customerPhone) && (
+                  <div className="mt-2 pt-2 border-t border-gray-100 space-y-0.5">
+                    {order.customerEmail && <p className="text-xs text-gray-500">{order.customerEmail}</p>}
+                    {order.customerPhone && <p className="text-xs text-gray-500">{order.customerPhone}</p>}
+                  </div>
+                )}
               </div>
             </div>
-
-            {(order.customerEmail || order.customerPhone) && (
-              <div className="bg-gray-50 rounded-xl px-4 py-3">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Patient Contact</p>
-                <div className="space-y-0.5">
-                  {order.customerEmail && (
-                    <p className="text-sm text-gray-700">
-                      <span className="text-gray-400 mr-1.5">Email:</span>
-                      {order.customerEmail}
-                    </p>
-                  )}
-                  {order.customerPhone && (
-                    <p className="text-sm text-gray-700">
-                      <span className="text-gray-400 mr-1.5">Phone:</span>
-                      {order.customerPhone}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
 
             <div className="grid grid-cols-2 gap-4">
               <InfoBox

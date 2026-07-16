@@ -56,5 +56,6 @@ export async function createPhysicianWithdrawRequest(
   });
 
   revalidatePath("/physician/wallet");
+  revalidatePath("/physician/withdrawals");
   return { success: true, message: `Withdrawal request of $${amount.toFixed(2)} submitted successfully.` };
 }

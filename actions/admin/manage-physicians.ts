@@ -35,16 +35,14 @@ export async function adminCreatePhysician(
     addressOne: (formData.get("addressOne") as string) || undefined,
     addressTwo: (formData.get("addressTwo") as string) || undefined,
     city: (formData.get("city") as string) || undefined,
-    state: (formData.get("state") as string) || undefined,
+    state: (formData.get("state") as string) ?? "",
     zipCode: (formData.get("zipCode") as string) || undefined,
-    country: (formData.get("country") as string) || undefined,
+    country: (formData.get("country") as string) ?? "",
     phone: (formData.get("phone") as string) || undefined,
     officeContactNumber: (formData.get("officeContactNumber") as string) || undefined,
     fax: (formData.get("fax") as string) || undefined,
     nameOfPractice: (formData.get("nameOfPractice") as string) || undefined,
-    yearsInPractice: formData.get("yearsInPractice")
-      ? Number(formData.get("yearsInPractice"))
-      : undefined,
+    yearsInPractice: (formData.get("yearsInPractice") as string) ?? "",
     fieldsOfSpeciality: formData.get("fieldsOfSpeciality")
       ? JSON.parse(formData.get("fieldsOfSpeciality") as string)
       : [],
@@ -71,7 +69,7 @@ export async function adminCreatePhysician(
     where: { email: validated.data.email },
   });
   if (exists) {
-    return { errors: { email: ["A physician with this email already exists."] } };
+    return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
   }
 
   if (validated.data.license) {

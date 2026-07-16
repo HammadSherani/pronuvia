@@ -43,21 +43,48 @@ export async function addOrderNote(
     const order = await prisma.order.findUnique({
       where:  { id: orderId },
       select: {
-        orderNumber: true, total: true, status: true,
+        orderNumber:     true,
+        customerEmail:   true,
+        shippingAddress: true,
         physician: { select: { email: true, firstName: true } },
       },
     });
 
-    if (order?.physician?.email) {
+    if (order) {
       const { sendMail }       = await import("@/lib/email/mailer");
       const { orderNoteEmail } = await import("@/lib/email/templates");
-      const { subject, html }  = orderNoteEmail({
-        firstName:   order.physician.firstName,
-        orderNumber: order.orderNumber,
-        note:        trimmed,
-      });
+
+      const sends: Promise<unknown>[] = [];
+
+      // Email to doctor
+      if (order.physician?.email) {
+        const { subject, html } = orderNoteEmail({
+          firstName:   order.physician.firstName,
+          orderNumber: order.orderNumber,
+          note:        trimmed,
+        });
+        sends.push(sendMail({ to: order.physician.email, subject, html }));
+      }
+
+      // Email to patient
+      if (order.customerEmail) {
+        let patientFirstName = "Patient";
+        if (order.shippingAddress) {
+          try {
+            const addr = JSON.parse(order.shippingAddress) as { firstName?: string };
+            if (addr?.firstName) patientFirstName = addr.firstName;
+          } catch {}
+        }
+        const { subject, html } = orderNoteEmail({
+          firstName:   patientFirstName,
+          orderNumber: order.orderNumber,
+          note:        trimmed,
+        });
+        sends.push(sendMail({ to: order.customerEmail, subject, html }));
+      }
+
       try {
-        await sendMail({ to: order.physician.email, subject, html });
+        await Promise.all(sends);
       } catch (err) {
         console.error("[addOrderNote] email failed:", err);
       }

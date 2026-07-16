@@ -91,6 +91,14 @@ body {
 /* Hide scrollbar for social strip */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 
+/* Hide Stripe Link floating badge */
+iframe[name*="privateStripeController"],
+iframe[name*="stripe-pay-with-link"],
+iframe[name*="stripeLink"],
+iframe[title="Stripe Link"],
+[data-js-forms-banner],
+body > div[style*="position: fixed"][style*="bottom"][style*="right"] { display: none !important; }
+
 /* Remove default input autofill background */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

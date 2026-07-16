@@ -363,7 +363,7 @@ export function PhysicianForm({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={lbl}>Country{requirePracticeFields && <Req />}</label>
+            <label className={lbl}>Country<Req /></label>
             <select
               name="country"
               value={selectedCountry}
@@ -380,7 +380,7 @@ export function PhysicianForm({
             <FE msg={e.country?.[0]} />
           </div>
           <div>
-            <label className={lbl}>State / Province{requirePracticeFields && <Req />}</label>
+            <label className={lbl}>State / Province<Req /></label>
             {statesForCountry.length > 0 ? (
               <select
                 name="state"

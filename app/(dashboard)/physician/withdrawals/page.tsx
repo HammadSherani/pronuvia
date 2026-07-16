@@ -1,4 +1,4 @@
-﻿import { requireSalesRep } from "@/lib/auth/dal";
+import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { Role } from "@/generated/prisma/enums";
 import Link from "next/link";
@@ -18,19 +18,19 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-export default async function SalesWithdrawalsPage({
+export default async function PhysicianWithdrawalsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await requireSalesRep();
+  const session = await requirePhysician();
   const sp = await searchParams;
   const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const where = { userId: session.userId, userRole: Role.SALES_REP };
+  const where = { userId: session.userId, userRole: Role.PHYSICIAN };
 
-  const [rep, [requests, total]] = await Promise.all([
-    prisma.salesRepresentative.findUnique({
+  const [physician, [requests, total]] = await Promise.all([
+    prisma.partneringPhysician.findUnique({
       where:  { id: session.userId },
       select: { walletBalance: true, bankName: true },
     }),
@@ -40,7 +40,7 @@ export default async function SalesWithdrawalsPage({
     ]),
   ]);
 
-  const balance    = rep?.walletBalance ?? 0;
+  const balance    = physician?.walletBalance ?? 0;
   const hasPending = requests.some((r) => r.status === "PENDING");
   const totalPaid  = await prisma.withdrawRequest.aggregate({
     where: { ...where, status: "APPROVED" },
@@ -56,7 +56,7 @@ export default async function SalesWithdrawalsPage({
         </div>
         {!hasPending && (
           <Link
-            href="/sales/withdrawals/new"
+            href="/physician/withdrawals/new"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -70,9 +70,9 @@ export default async function SalesWithdrawalsPage({
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Wallet Balance",  value: fmt(balance),        color: "#3DBFA4" },
-          { label: "Total Withdrawn", value: fmt(totalPaid),      color: "#5BB8D4" },
-          { label: "Total Requests",  value: String(total),       color: "#8b5cf6" },
+          { label: "Wallet Balance",  value: fmt(balance),   color: "#3DBFA4" },
+          { label: "Total Withdrawn", value: fmt(totalPaid), color: "#5BB8D4" },
+          { label: "Total Requests",  value: String(total),  color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
@@ -82,7 +82,7 @@ export default async function SalesWithdrawalsPage({
         ))}
       </div>
 
-      {!rep?.bankName && (
+      {!physician?.bankName && (
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
           <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.834-2.194-.834-2.964 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -91,7 +91,7 @@ export default async function SalesWithdrawalsPage({
             <p className="text-sm font-semibold text-amber-800">Bank details not set</p>
             <p className="text-xs text-amber-600 mt-0.5">
               Add your bank details in{" "}
-              <Link href="/sales/account" className="underline font-medium">Account Settings</Link>
+              <Link href="/physician/account" className="underline font-medium">Account Settings</Link>
               {" "}before requesting a withdrawal.
             </p>
           </div>
@@ -118,8 +118,8 @@ export default async function SalesWithdrawalsPage({
             </div>
             <p className="text-sm font-medium text-gray-500">No withdrawal requests yet</p>
             <p className="text-xs text-gray-400 mt-1">Your requests will appear here once submitted.</p>
-            {rep?.bankName && (
-              <Link href="/sales/withdrawals/new" className="mt-4 text-sm text-[#3DBFA4] hover:underline font-medium">
+            {physician?.bankName && (
+              <Link href="/physician/withdrawals/new" className="mt-4 text-sm text-[#3DBFA4] hover:underline font-medium">
                 Submit your first request →
               </Link>
             )}

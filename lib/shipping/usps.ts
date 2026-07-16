@@ -1,8 +1,8 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
 
-const BASE = "https://api.usps.com";
+const BASE = process.env.USPS_BASE_URL ?? "https://api.usps.com";
 
-async function getToken(scope: string): Promise<string> {
+async function getToken(): Promise<string> {
   const res = await fetch(`${BASE}/oauth2/v3/token`, {
     method:  "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -10,11 +10,13 @@ async function getToken(scope: string): Promise<string> {
       grant_type:    "client_credentials",
       client_id:     process.env.USPS_CLIENT_ID     ?? "",
       client_secret: process.env.USPS_CLIENT_SECRET ?? "",
-      scope,
     }),
     cache: "no-store",
   });
-  if (!res.ok) throw new Error(`USPS auth failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`USPS auth failed ${res.status}: ${body}`);
+  }
   const data = await res.json();
   return data.access_token as string;
 }
@@ -22,17 +24,18 @@ async function getToken(scope: string): Promise<string> {
 const MAIL_CLASSES = [
   { code: "PRIORITY_MAIL",         label: "USPS Priority Mail" },
   { code: "PRIORITY_MAIL_EXPRESS", label: "USPS Priority Mail Express" },
-  { code: "GROUND_ADVANTAGE",      label: "USPS Ground Advantage" },
-  { code: "PARCEL_SELECT",         label: "USPS Parcel Select" },
+  { code: "USPS_GROUND_ADVANTAGE", label: "USPS Ground Advantage" },
+  { code: "USPS_RETAIL_GROUND",    label: "USPS Retail Ground" },
 ];
+
+type UspsRateOption = { totalBasePrice: number; rates: { productName?: string; description?: string }[] };
 
 export async function getUSPSRates(
   from: ShipAddress,
   to:   ShipAddress,
   pkg:  PackageInfo
 ): Promise<RateResult[]> {
-  const token = await getToken("prices.read");
-
+  const token    = await getToken();
   const weightOz = Math.round(pkg.weightLbs * 16 * 10) / 10;
 
   const requests = MAIL_CLASSES.map(async ({ code, label }): Promise<RateResult | null> => {
@@ -44,12 +47,12 @@ export async function getUSPSRates(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          originZIPCode:      from.zip,
-          destinationZIPCode: to.zip,
-          weight:             weightOz,
-          length:             pkg.lengthIn  ?? 6,
-          width:              pkg.widthIn   ?? 4,
-          height:             pkg.heightIn  ?? 2,
+          originZIPCode:      from.zip.slice(0, 5),
+          destinationZIPCode: to.zip.slice(0, 5),
+          weight:             Math.ceil(weightOz),
+          length:             Math.ceil(pkg.lengthIn  ?? 6),
+          width:              Math.ceil(pkg.widthIn   ?? 4),
+          height:             Math.ceil(pkg.heightIn  ?? 2),
           mailClass:          code,
           processingCategory: "MACHINABLE",
           destinationEntryFacilityType: "NONE",
@@ -59,18 +62,32 @@ export async function getUSPSRates(
         }),
         cache: "no-store",
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        const err = await res.text();
+        console.error(`USPS rate [${code}] failed ${res.status}:`, err);
+        return null;
+      }
       const data = await res.json();
-      const total = data?.totalBasePrice ?? data?.price ?? 0;
+
+      // USPS returns rateOptions[] — pick the cheapest
+      const options: UspsRateOption[] = data?.rateOptions ?? [];
+      if (!options.length) return null;
+      const best = options.reduce((a, b) => a.totalBasePrice <= b.totalBasePrice ? a : b);
+      const total = best.totalBasePrice;
+      if (!total) return null;
+
+      const productName = best.rates?.[0]?.productName ?? best.rates?.[0]?.description ?? label;
+
       return {
         carrier:      "usps",
         carrierLabel: "USPS",
-        service:      label,
+        service:      productName,
         serviceCode:  code,
         totalCost:    parseFloat(String(total)),
         currency:     "USD",
       } satisfies RateResult;
-    } catch {
+    } catch (e) {
+      console.error(`USPS rate [${code}] exception:`, e);
       return null;
     }
   });
@@ -86,7 +103,7 @@ export async function purchaseUSPSLabel(
   serviceCode: string,
   service:     string
 ): Promise<LabelResult> {
-  const token = await getToken("labels");
+  const token = await getToken();
 
   const weightOz = Math.round(pkg.weightLbs * 16 * 10) / 10;
 

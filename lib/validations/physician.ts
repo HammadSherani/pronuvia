@@ -10,14 +10,27 @@ export const CreatePhysicianSchema = z.object({
   addressOne:          z.string().optional(),
   addressTwo:          z.string().optional(),
   city:                z.string().optional(),
-  state:               z.string().optional(),
+  state:               z.string().min(1, "State / Province is required"),
   zipCode:             z.string().optional(),
-  country:             z.string().optional(),
+  country:             z.string().min(1, "Country is required"),
   phone:               z.string().optional(),
   officeContactNumber: z.string().optional(),
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().optional(),
-  yearsInPractice:     z.number().int().min(0, "Must be 0 or more"),
+  yearsInPractice:     z.string()
+    .min(1, "Years in practice is required")
+    .transform((val, ctx) => {
+      const n = Number(val);
+      if (isNaN(n) || !Number.isInteger(n)) {
+        ctx.addIssue({ code: "custom", message: "Must be a valid whole number" });
+        return z.NEVER;
+      }
+      if (n < 0) {
+        ctx.addIssue({ code: "custom", message: "Must be 0 or more" });
+        return z.NEVER;
+      }
+      return n;
+    }),
   fieldsOfSpeciality:  z.array(z.string()).optional().default([]),
   commission:          z.number().min(0).max(100).optional().default(0),
   uplineCommission:    z.number().min(0).max(100).optional().default(0),

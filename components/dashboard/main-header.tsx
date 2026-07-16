@@ -77,14 +77,15 @@ function buildNav(role: Role): NavItem[] {
 
       // { label: "Terms and Conditions", href: "/Terms" },
       { label: "Contact Us", href: "/contact" },
-      { label: "Terms and conditions", href: "/terms" },
+      // { label: "Terms and conditions", href: "/terms" },
       {
         label: "My Account",
         children: [
           { label: "Account Details", href: "/sales/account" },
-          { label: "Orders", href: "/sales/orders" },
+          // { label: "Orders", href: "/sales/orders" },
           // { label: "Terms and conditions", href: "/terms" },
-          { label: "Wallet", href: "/sales/wallet" },
+          // { label: "Wallet", href: "/sales/wallet" },
+          { label: "Terms and conditions", href: "/terms" },
           { label: "Downloads", href: "/sales/downloads" },
           { label: "Logout", action: async () => { await logout(); } },
         ],
@@ -102,7 +103,7 @@ function buildNav(role: Role): NavItem[] {
       children: [
         { label: "Account Details", href: "/physician/account" },
         { label: "Downloads", href: "/physician/downloads" },
-        { label: "Account", href: "/physician/account" },
+        { label: "Terms and conditions", href: "/terms" },
          { label: "Logout", action: async () => { await logout(); } },
       ],
     },

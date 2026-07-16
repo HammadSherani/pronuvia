@@ -13,11 +13,22 @@ type Order = {
   total:          number;
   createdAt:      Date;
   returnedAt:     Date | null;
-  placedByAdmin:  boolean | null;
-  commissionPaid: boolean;
+  placedByAdmin:    boolean | null;
+  placedBySalesRep: boolean;
+  commissionPaid:   boolean;
+  shippingAddress:  string | null;
   physician:      { firstName: string; lastName: string } | null;
   salesRep:       { name: string } | null;
 };
+
+function patientName(shippingAddress: string | null): string | null {
+  if (!shippingAddress) return null;
+  try {
+    const a = JSON.parse(shippingAddress) as { firstName?: string; lastName?: string };
+    const name = [a.firstName, a.lastName].filter(Boolean).join(" ");
+    return name || null;
+  } catch { return null; }
+}
 
 const statusBadge: Record<OrderStatus, string> = {
   PENDING:    "bg-amber-50   text-amber-700   border-amber-200",
@@ -195,8 +206,8 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                           <span className="text-gray-400 font-normal text-xs">ORDER#</span> {o.orderNumber}
                           {o.physician ? (
                             <span className="font-normal text-gray-500"> · {o.physician.firstName} {o.physician.lastName}</span>
-                          ) : o.salesRep ? (
-                            <span className="font-normal text-gray-500"> · {o.salesRep.name}</span>
+                          ) : (patientName(o.shippingAddress) ?? o.salesRep?.name) ? (
+                            <span className="font-normal text-gray-500"> · {patientName(o.shippingAddress) ?? o.salesRep?.name}</span>
                           ) : null}
                         </p>
                         {isReturned && (
@@ -237,10 +248,15 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                         Admin
                       </span>
-                    ) : o.physician && o.salesRep ? (
+                    ) : o.placedBySalesRep && o.physician ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-gray-900" />
-                        Sales Rep (for doctor)
+                        Sales Rep (for Doctor)
+                      </span>
+                    ) : o.placedBySalesRep ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-600 border border-violet-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                        Sales Rep (Self)
                       </span>
                     ) : o.physician ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">
@@ -250,7 +266,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-600 border border-violet-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                        Sales Rep (self)
+                        Sales Rep (Self)
                       </span>
                     )}
                   </td>

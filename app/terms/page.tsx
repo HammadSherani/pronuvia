@@ -19,8 +19,7 @@ export default function TermsPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Terms and Conditions for Physician Registration
-        </h1>
+          Terms and Conditions         </h1>
         <p className="text-xs text-gray-400 mb-10">Last updated: 2026</p>
 
         <div className="text-sm text-gray-700 leading-relaxed space-y-4 mb-10">

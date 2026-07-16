@@ -176,7 +176,7 @@ export async function getShippingRates(
   }
   if (carriers.includes("usps") && process.env.USPS_CLIENT_ID) {
     tasks.push(getUSPSRates(from, to, pkg).catch((e: Error) => {
-      console.error("USPS rates error:", e.message); return [];
+      console.error("USPS rates error:", e.message, e.stack); return [];
     }));
   }
 

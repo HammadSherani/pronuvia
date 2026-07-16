@@ -108,7 +108,7 @@ export default async function SalesDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
+      <div className="grid grid-cols-1  gap-6 items-start">
 
         {/* ── LEFT: main content ── */}
         <div className="space-y-6 min-w-0">
@@ -244,63 +244,7 @@ export default async function SalesDashboardPage() {
           </div>
         </div>
 
-        {/* ── RIGHT: sidebar ── */}
-        <div className="space-y-5">
-
-          {/* Quick actions */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <Link
-                href="/sales/physicians"
-                className="flex items-center gap-3 px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Physician
-              </Link>
-              {[
-                { label: "Browse Shop",       href: "/sales/shop",        icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" },
-                { label: "My Wallet",         href: "/sales/wallet",      icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" },
-                { label: "My Orders",         href: "/sales/orders",      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
-                { label: "Account Settings",  href: "/sales/account",     icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
-                >
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
-                  </svg>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats summary */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-4">Account Summary</h3>
-            <div className="space-y-3">
-              {[
-                { label: "Commission Rate",  value: `${rep?.commission ?? 0}%`,        color: "#5BB8D4" },
-                { label: "Total Orders",     value: (rep?.ordersCount ?? 0).toString(), color: "#8b5cf6" },
-                { label: "Wallet Balance",   value: fmtMoney(rep?.walletBalance ?? 0), color: "#3DBFA4" },
-                { label: "Total Physicians", value: totalPhysicians.toString(),         color: "#f59e0b" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
-                    <span className="text-xs text-gray-500">{item.label}</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-800">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

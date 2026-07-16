@@ -17,11 +17,12 @@ type Category = { id: string; name: string };
 function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
   const allVariants = product.variants as Variant[];
   const variants    = allVariants.filter(isVisible);
-  const { addItem, items } = useCart();
+  const { addItem, items, updateQty, removeItem } = useCart();
 
   const firstAvailableIdx = variants.findIndex(isAvailable);
   const [selectedIdx, setSelectedIdx] = useState(firstAvailableIdx >= 0 ? firstAvailableIdx : 0);
   const [pulse,       setPulse]       = useState(false);
+  const [qty,         setQty]         = useState(1);
 
   const selected    = variants[selectedIdx] ?? variants[0] ?? null;
   const unitPrice   = selected?.salePrice ?? product.salePrice;
@@ -29,9 +30,10 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   const variantSku  = selected?.sku  ?? "";
   const selectedAvailable = selected ? isAvailable(selected) : true;
 
-  const inCart = items.some(
+  const cartItem = items.find(
     (i) => i.productId === product.id && i.variantSize === variantSize
   );
+  const inCart = !!cartItem;
 
   const prices     = variants.length > 0 ? variants.map((v) => v.salePrice ?? product.salePrice) : [product.salePrice];
   const minPrice   = Math.min(...prices);
@@ -53,11 +55,19 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
       variantSize,
       variantSku,
       unitPrice,
-      quantity: 1,
+      quantity: qty,
     });
+    setQty(1);
     setPulse(true);
     toast.success("Added to cart!");
     setTimeout(() => setPulse(false), 2000);
+  }
+
+  function stepInCart(delta: number) {
+    if (!cartItem) return;
+    const next = cartItem.quantity + delta;
+    if (next <= 0) removeItem(cartItem.cartId);
+    else updateQty(cartItem.cartId, next);
   }
 
   return (
@@ -112,7 +122,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
                   key={idx}
                   type="button"
                   disabled={!available}
-                  onClick={() => available && setSelectedIdx(idx)}
+                  onClick={() => { if (available) { setSelectedIdx(idx); setQty(1); } }}
                   title={!available ? (variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued") : undefined}
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
                     !available
@@ -129,29 +139,50 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
           </div>
         )}
 
-        {/* Price + Add to Cart */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+        {/* Price + Qty + Cart */}
+        <div className="mt-auto pt-2 border-t border-gray-50 space-y-2">
           <p className="text-sm font-bold text-gray-800">
             {variants.length > 1 ? `$${unitPrice.toFixed(2)}` : priceLabel}
           </p>
+          <div className="flex items-center gap-2">
+            {/* Quantity stepper */}
+            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shrink-0">
+              <button
+                type="button"
+                disabled={!selectedAvailable}
+                onClick={() => inCart ? stepInCart(-1) : setQty((q) => Math.max(1, q - 1))}
+                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm font-bold transition-colors disabled:opacity-30"
+              >−</button>
+              <span className="px-1.5 text-xs font-semibold text-gray-800 min-w-[22px] text-center">
+                {inCart ? (cartItem?.quantity ?? 1) : qty}
+              </span>
+              <button
+                type="button"
+                disabled={!selectedAvailable}
+                onClick={() => inCart ? stepInCart(1) : setQty((q) => q + 1)}
+                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm font-bold transition-colors disabled:opacity-30"
+              >+</button>
+            </div>
 
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={!selectedAvailable}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-              !selectedAvailable
-                ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                : inCart || pulse
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
-            }`}
-          >
-            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            {!selectedAvailable ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
-          </button>
+            {/* Add to Cart / In Cart */}
+            <button
+              type="button"
+              onClick={!inCart ? handleAddToCart : undefined}
+              disabled={!selectedAvailable}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                !selectedAvailable
+                  ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                  : inCart || pulse
+                    ? "bg-gray-900 text-white cursor-default"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
+              }`}
+            >
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              {!selectedAvailable ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

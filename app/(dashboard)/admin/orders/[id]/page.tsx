@@ -66,7 +66,7 @@ function fmtAddressBody(raw: string | null | undefined): string | null {
       a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
-    ].filter(Boolean).join(", ");
+    ].filter(Boolean).join("\n");
   } catch { return raw; }
 }
 
@@ -371,14 +371,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="font-semibold text-gray-800">
                         {fmtAddress(order.billingAddress)?.split("\n")[0]}
                       </p>
-                      <p className="text-gray-500 text-xs leading-relaxed">
+                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-line">
                         {fmtAddressBody(order.billingAddress)}
                       </p>
-                      {parseAddrPhone(order.billingAddress) && (
-                        <a href={`tel:${parseAddrPhone(order.billingAddress)}`} className="block text-xs text-[#3DBFA4] hover:underline">
-                          {parseAddrPhone(order.billingAddress)}
-                        </a>
-                      )}
                       <EditOrderAddress orderId={order.id} type="billing" raw={order.billingAddress} />
                     </div>
                   ) : order.physician ? (
@@ -416,13 +411,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="font-semibold text-gray-800">
                         {fmtAddress(order.shippingAddress)?.split("\n")[0]}
                       </p>
-                      <p className="text-gray-500 text-xs leading-relaxed">
+                      <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-line">
                         {fmtAddressBody(order.shippingAddress)}
                       </p>
-                      {(parseAddrPhone(order.shippingAddress) ?? order.physician?.phone) && (
-                        <a href={`tel:${parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}`} className="block text-xs text-[#3DBFA4] hover:underline">
-                          {parseAddrPhone(order.shippingAddress) ?? order.physician?.phone}
-                        </a>
+                      {(order.customerEmail || order.customerPhone) && (
+                        <div className="pt-1 border-t border-gray-100 space-y-0.5">
+                          {order.customerEmail && <p className="text-xs text-gray-500">{order.customerEmail}</p>}
+                          {order.customerPhone && <p className="text-xs text-gray-500">{order.customerPhone}</p>}
+                        </div>
                       )}
                       <EditOrderAddress orderId={order.id} type="shipping" raw={order.shippingAddress} />
                     </div>
@@ -582,6 +578,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </div>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 border-l-2 border-l-[#5BB8D4]">
                 <p className="text-xs text-gray-400 font-medium mb-1">Rep Commission</p>
+                {order.salesRep && (
+                  <p className="text-xs font-semibold text-gray-600 mb-1">{order.salesRep.name}</p>
+                )}
                 <p className="text-xl font-bold text-[#5BB8D4]">{fmtMoney(order.salesRepCommissionAmount)}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{order.salesRepCommissionRate}%</p>
                 {(order.salesRepClawback ?? 0) > 0 && (
@@ -589,7 +588,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 )}
               </div>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 border-l-2 border-l-[#8b5cf6]">
-                <p className="text-xs text-gray-400 font-medium mb-1"> Commission</p>
+                <p className="text-xs text-gray-400 font-medium mb-1">Doctor Commission</p>
+                {order.physician && (
+                  <p className="text-xs font-semibold text-gray-600 mb-1">Dr. {order.physician.firstName} {order.physician.lastName}</p>
+                )}
                 <p className="text-xl font-bold text-[#8b5cf6]">{fmtMoney(order.physicianCommissionAmount)}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{order.physicianCommissionRate}%</p>
                 {(order.physicianClawback ?? 0) > 0 && (

@@ -289,13 +289,14 @@ export async function listOrders(opts?: { skip?: number; take?: number; status?:
       where: whereArg,
       select: {
         id: true, orderNumber: true, status: true, total: true,
-        subtotal: true, placedByAdmin: true, commissionPaid: true,
+        subtotal: true, placedByAdmin: true, placedBySalesRep: true, commissionPaid: true,
         salesRepCommissionRate: true, salesRepCommissionAmount: true,
         physicianCommissionRate: true, physicianCommissionAmount: true,
         paymentMethod: true, paymentStatus: true, transactionId: true,
         shippingCarrier: true, trackingNumber: true, shippingRate: true, estimatedDelivery: true,
         returnedAt: true, returnedTotal: true,
         salesRepClawback: true, physicianClawback: true,
+        shippingAddress: true,
         physician: { select: { firstName: true, lastName: true, nameOfPractice: true } },
         salesRep:  { select: { name: true } },
         createdAt: true,
@@ -598,7 +599,7 @@ export async function processReturn(
       customerEmail: true, shippingRate: true, paymentMethod: true, createdAt: true,
       billingAddress: true, shippingAddress: true, notes: true,
       salesRep:  { select: { walletBalance: true } },
-      physician: { select: { walletBalance: true } },
+      physician: { select: { walletBalance: true, email: true, firstName: true } },
     },
   });
 
@@ -834,8 +835,8 @@ export async function processReturn(
     ? ` Manual refund $${customerRefund.amount.toFixed(2)} recorded.`
     : "";
 
-  // Send refund confirmation email to patient
-  if (order.customerEmail) {
+  // Send refund confirmation email to patient and doctor
+  if (order.customerEmail || order.physician?.email) {
     try {
       const refundedItems = linesToProcess.map((l) => {
         const item = items[l.index];
@@ -860,7 +861,15 @@ export async function processReturn(
         billingAddress:  order.billingAddress ?? null,
         shippingAddress: order.shippingAddress ?? null,
       });
-      await sendMail({ to: order.customerEmail, subject, html });
+
+      const sends: Promise<unknown>[] = [];
+      if (order.customerEmail) {
+        sends.push(sendMail({ to: order.customerEmail, subject, html }));
+      }
+      if (order.physician?.email) {
+        sends.push(sendMail({ to: order.physician.email, subject, html }));
+      }
+      await Promise.all(sends);
     } catch (err) {
       console.error("[processReturn] refund email failed:", err);
     }

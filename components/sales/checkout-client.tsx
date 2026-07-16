@@ -395,7 +395,7 @@ export function CheckoutClient({
       <div className="h-0.5 bg-blue-500 mb-6" />
 
       {/* Cashback banner */}
-      {cashback > 0 && (
+      {/* {cashback > 0 && (
         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded mb-6 text-sm text-gray-700">
           <svg className="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
@@ -405,7 +405,7 @@ export function CheckoutClient({
           <strong className="text-gray-900">${cashback.toFixed(2)}</strong>{" "}
           will be credited to your wallet after your order is completed.
         </div>
-      )}
+      )} */}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
@@ -775,9 +775,9 @@ export function CheckoutClient({
                     {item.variantSize && (
                       <p className="text-xs text-gray-400">Size: {item.variantSize}</p>
                     )}
-                    <p className="text-[11px] text-orange-600 mt-1 leading-snug">
+                    {/* <p className="text-[11px] text-orange-600 mt-1 leading-snug">
                       This product is distributed only through participating medical practitioners and not to patients directly.
-                    </p>
+                    </p> */}
                   </div>
                   <p className="text-sm font-semibold text-gray-800 shrink-0">
                     ${(item.unitPrice * item.quantity).toFixed(2)}

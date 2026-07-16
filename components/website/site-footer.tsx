@@ -64,7 +64,7 @@ export function SiteFooter() {
           <div className="lg:col-span-3">
             <p className="text-white/40 uppercase tracking-widest text-[11px] font-medium">Practitioners</p>
             <div className="mt-4 flex flex-col gap-3">
-              <Link href="/partnering-physician"
+              <Link href="/account"
                 className="w-fit inline-flex items-center rounded-full border border-white/20 px-5 py-2.5 text-sm text-white hover:bg-white/10 transition-colors">
                 Sign up
               </Link>

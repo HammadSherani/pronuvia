@@ -236,9 +236,9 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           </p>
 
           {/* Notice */}
-          <p className="text-sm text-[#3DBFA4] italic mb-5 leading-relaxed">
+          {/* <p className="text-sm text-[#3DBFA4] italic mb-5 leading-relaxed">
             This product is distributed only through participating medical practitioners and not to patients directly.
-          </p>
+          </p> */}
 
           {/* Size selector */}
           {variants.length > 0 && (

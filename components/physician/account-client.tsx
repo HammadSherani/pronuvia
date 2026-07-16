@@ -26,7 +26,6 @@ type Physician = {
   commission: number; uplineCommission: number;
   isApproved: "APPROVED" | "PENDING" | "REJECTED";
   createdAt: Date;
-  salesRep: { firstName: string; lastName: string; email: string; phone: string | null } | null;
 };
 
 const inp    = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/30 transition bg-white disabled:bg-gray-50 disabled:text-gray-400";
@@ -153,13 +152,6 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         {/* <InfoRow label="Upline Commission Rate" value={`${p.uplineCommission}%`} /> */}
       </Section>
 
-      {p.salesRep && (
-        <Section title="Upline Sales Representative">
-          <InfoRow label="Name"  value={`${p.salesRep.firstName} ${p.salesRep.lastName}`} />
-          <InfoRow label="Email" value={p.salesRep.email} />
-          <InfoRow label="Phone" value={p.salesRep.phone} />
-        </Section>
-      )}
     </div>
   );
 }

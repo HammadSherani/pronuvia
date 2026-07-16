@@ -25,7 +25,7 @@ export default async function PhysicianDashboardPage() {
   const [physician, orderAggregate, recentOrders, pendingWithdrawals] = await Promise.all([
     prisma.partneringPhysician.findUnique({
       where: { id: session.userId },
-      select: { firstName: true, lastName: true, walletBalance: true, salesRep: { select: { firstName: true, lastName: true } } },
+      select: { firstName: true, lastName: true, walletBalance: true },
     }),
     prisma.order.aggregate({
       where: { physicianId: session.userId },
@@ -46,8 +46,6 @@ export default async function PhysicianDashboardPage() {
   const totalOrders      = orderAggregate._count;
   const totalCommission  = orderAggregate._sum.physicianCommissionAmount ?? 0;
   const walletBalance    = physician?.walletBalance ?? 0;
-  const repName          = physician?.salesRep ? `${physician.salesRep.firstName} ${physician.salesRep.lastName}` : null;
-
   const kpiCards = [
     {
       label: "My Orders",
@@ -109,7 +107,7 @@ export default async function PhysicianDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
+      <div className="grid grid-cols-1  gap-6 items-start">
 
         {/* ── LEFT: main content ── */}
         <div className="space-y-6 min-w-0">
@@ -120,12 +118,12 @@ export default async function PhysicianDashboardPage() {
               <h1 className="text-xl font-bold text-gray-900">
                 Welcome back, {physician?.firstName ?? session.email}!
               </h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              {/* <p className="text-sm text-gray-400 mt-0.5">
                 Here&apos;s your account overview.
                 {repName && (
                   <span className="text-gray-400"> Managed by <span className="font-medium text-gray-600">{repName}</span>.</span>
                 )}
-              </p>
+              </p> */}
             </div>
             <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm shrink-0">
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -226,78 +224,7 @@ export default async function PhysicianDashboardPage() {
         </div>
 
         {/* ── RIGHT: sidebar ── */}
-        <div className="space-y-5">
-
-          {/* Quick actions */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <Link
-                href="/physician/shop"
-                className="flex items-center gap-3 px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                Browse Shop
-              </Link>
-              {[
-                { label: "My Orders",  href: "/physician/orders",  icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
-                { label: "My Wallet", href: "/physician/wallet",  icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" },
-                { label: "My Account", href: "/physician/account", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
-                >
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
-                  </svg>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats summary */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-gray-800 mb-4">Account Summary</h3>
-            <div className="space-y-3">
-              {[
-                { label: "Total Orders",        value: totalOrders.toString(),      color: "#3DBFA4" },
-                { label: "Commission Earned",   value: fmtMoney(totalCommission),  color: "#5BB8D4" },
-                { label: "Wallet Balance",      value: fmtMoney(walletBalance),    color: "#10b981" },
-                { label: "Pending Withdrawals", value: pendingWithdrawals.toString(), color: pendingWithdrawals > 0 ? "#d97706" : "#6b7280" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
-                    <span className="text-xs text-gray-500">{item.label}</span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-800">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {repName && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-bold text-gray-800 mb-2">Your Sales Rep</h3>
-              <div className="flex items-center gap-3 mt-3">
-                <div className="w-10 h-10 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">{repName}</p>
-                  <p className="text-xs text-gray-400">Sales Representative</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        
       </div>
     </div>
   );

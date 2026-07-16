@@ -46,6 +46,8 @@ export default async function SalesOrdersPage({
     status: true,
     paymentMethod: true, paymentStatus: true,
     transactionId: true,
+    physicianId: true,
+    physician: { select: { firstName: true, lastName: true } },
   };
 
   const [orders, total] = await Promise.all([
@@ -127,13 +129,14 @@ export default async function SalesOrdersPage({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
+                  <th className="text-left px-5 text-nowrap py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Origin</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-5 py-3.5" />
                 </tr>
@@ -193,6 +196,15 @@ export default async function SalesOrdersPage({
                         <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${stsCls}`}>
                           {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                         </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {o.physicianId ? (
+                          <span className="text-xs text-indigo-600 font-medium">
+                            {o.physician?.firstName} {o.physician?.lastName}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-500 font-medium">Myself</span>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
                         {new Date(o.createdAt).toLocaleDateString("en-US", {

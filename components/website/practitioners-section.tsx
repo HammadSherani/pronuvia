@@ -17,7 +17,7 @@ export function PractitionersSection() {
             
             // style={{ color: "var(--color-ion)" }}
             >
-              For patients &amp; practitioners
+              For patients &amp; practitioners — Offer AIC in your practice.
             </p>
             <h2
               className="mt-5 text-[clamp(2rem,4.5vw,3.6rem)] leading-[1.02] text-white"
@@ -30,25 +30,23 @@ export function PractitionersSection() {
               </em>
             </h2>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
-              Pronuvia AIC is provided to patients through partnering physicians and health
-              practitioners. Are you a practitioner? Join our partner network to offer
-              ionic calcium therapy in your practice.
+             Pronuvia AIC reaches patients only through partnering practitioners. Join the network to order for your practice.
             </p>
           </div>
 
           {/* Right: buttons */}
           <div className="lg:col-span-4 flex flex-wrap gap-3 lg:justify-end">
-            <a href="/partnering-physician"
+            <a href="/account"
               className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5">
               Become a partner
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <a href="/login"
+            {/* <a href="/login"
               className="inline-flex items-center rounded-full border border-white/30 px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/10">
               Partner login
-            </a>
+            </a> */}
           </div>
 
         </div>

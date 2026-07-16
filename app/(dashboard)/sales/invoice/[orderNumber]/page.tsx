@@ -47,7 +47,6 @@ function fmtAddress(raw: string | null | undefined): string {
     const a: AddrObj = JSON.parse(raw);
     return [
       [a.firstName, a.lastName].filter(Boolean).join(" "),
-      a.phone,
       a.address1, a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
@@ -125,7 +124,7 @@ export default async function InvoicePage({ params }: Props) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-2xl font-black tracking-tight">PRONUVIA</p>
-                <p className="text-sm text-white/70 mt-0.5">Health & Wellness Products</p>
+                {/* <p className="text-sm text-white/70 mt-0.5">Health & Wellness Products</p> */}
               </div>
               <div className="text-right">
                 <p className="text-xs text-white/60 uppercase tracking-wider">Invoice</p>
@@ -169,15 +168,6 @@ export default async function InvoicePage({ params }: Props) {
                     {order.salesRep.phone && <p className="text-gray-500">{order.salesRep.phone}</p>}
                   </div>
                 ) : <p className="text-sm text-gray-400">—</p>}
-                {(order.customerEmail || order.customerPhone) && (
-                  <div className="mt-3 pt-3 border-t border-gray-100">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Patient Contact</p>
-                    <div className="text-sm text-gray-600 space-y-0.5">
-                      {order.customerEmail && <p>{order.customerEmail}</p>}
-                      {order.customerPhone && <p>{order.customerPhone}</p>}
-                    </div>
-                  </div>
-                )}
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ship To</p>
@@ -187,6 +177,12 @@ export default async function InvoicePage({ params }: Props) {
                   </p>
                 ) : (
                   <p className="text-sm text-gray-400">No shipping address provided.</p>
+                )}
+                {(order.customerEmail || order.customerPhone) && (
+                  <div className="mt-2 pt-2 border-t border-gray-100 space-y-0.5">
+                    {order.customerEmail && <p className="text-xs text-gray-500">{order.customerEmail}</p>}
+                    {order.customerPhone && <p className="text-xs text-gray-500">{order.customerPhone}</p>}
+                  </div>
                 )}
               </div>
             </div>

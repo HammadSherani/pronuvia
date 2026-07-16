@@ -5,7 +5,7 @@ export const metadata = { title: "Unauthorized – Pronuvia" };
 export default function UnauthorizedPage() {
   return (
     <div className="min-h-screen bg-[#9ca3a0] flex items-center justify-center p-4">
-      <div className="bg-[#f7f8f9] border-2 border-[#5BB8D4] rounded-xl shadow-2xl p-12 flex flex-col items-center max-w-md w-full text-center">
+      <div className="bg-[#f7f8f9] border-2 border-ink/60 rounded-xl shadow-2xl p-12 flex flex-col items-center max-w-md w-full text-center">
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-6">
           <svg
             className="w-8 h-8 text-red-500"
@@ -29,7 +29,7 @@ export default function UnauthorizedPage() {
         </p>
         <Link
           href="/login"
-          className="bg-[#3DBFA4] hover:bg-[#35ab93] text-white font-semibold px-8 py-3 rounded-md text-sm transition-colors"
+          className="bg-ink hover:bg-ink/90 text-white font-semibold px-8 py-3 rounded-md text-sm transition-colors"
         >
           Back to Login
         </Link>

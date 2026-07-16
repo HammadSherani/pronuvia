@@ -8,7 +8,7 @@ import { useState } from "react";
 const NAV = [
   { label: "How It Works",      href: "#how-it-works" },
   { label: "The Science",       href: "#the-science" },
-  { label: "Research",          href: "#research" },
+  // { label: "Research",          href: "#research" },
   { label: "For Practitioners", href: "#for-practitioners" },
 ];
 
