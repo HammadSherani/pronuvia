@@ -192,8 +192,33 @@ const COLS: Record<TabId, Col[]> = {
   "customer-history": [
     { key: "orderNumber",    label: "Order #" },
     { key: "date",           label: "Date" },
-    { key: "doctor",         label: "Doctor" },
-    { key: "salesRep",       label: "Sales Rep" },
+    { key: "doctor",         label: "Doctor", render: (v, row) => (
+      <div>
+        <p className="font-medium text-gray-800">{(v != null && v !== "") ? String(v) : "–"}</p>
+        {(row.doctorEmail != null && row.doctorEmail !== "") && (
+          <a href={`mailto:${String(row.doctorEmail)}`} className="text-[11px] text-blue-500 hover:underline mt-0.5 block">{String(row.doctorEmail)}</a>
+        )}
+      </div>
+    )},
+    { key: "salesRep",       label: "Sales Rep", render: (v, row) => (
+      <div>
+        <p className="font-medium text-gray-800">{(v != null && v !== "") ? String(v) : "–"}</p>
+        {(row.salesRepEmail != null && row.salesRepEmail !== "") && (
+          <a href={`mailto:${String(row.salesRepEmail)}`} className="text-[11px] text-blue-500 hover:underline mt-0.5 block">{String(row.salesRepEmail)}</a>
+        )}
+      </div>
+    )},
+    { key: "patientEmail",   label: "Patient Email", render: (v, row) => {
+      const pe = (v != null && v !== "") ? String(v) : "";
+      if (pe) return <a href={`mailto:${pe}`} className="text-xs text-blue-600 hover:underline">{pe}</a>;
+      const de = (row.doctorEmail != null && row.doctorEmail !== "") ? String(row.doctorEmail) : "";
+      if (de) return (
+        <span className="text-xs text-gray-400">
+          {de}{" "}<span className="text-[10px] bg-gray-100 text-gray-400 px-1 rounded">Dr</span>
+        </span>
+      );
+      return <span className="text-gray-300">–</span>;
+    }},
     { key: "status",         label: "Status", render: v => <StatusBadge status={String(v)} /> },
     { key: "itemsSummary",   label: "Items", render: v => (
       <span className="max-w-xs truncate block" title={String(v)}>{String(v) || "–"}</span>

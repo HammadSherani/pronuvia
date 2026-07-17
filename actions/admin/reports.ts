@@ -370,7 +370,10 @@ export async function getDoctorCommissionReport(f: ReportFilters): Promise<Docto
 // ─────────────────────────────────────────────
 export type CustomerHistoryRow = {
   id: string; orderNumber: string; date: string;
-  doctor: string; salesRep: string; status: string;
+  doctor: string; doctorEmail: string;
+  salesRep: string; salesRepEmail: string;
+  patientEmail: string;
+  status: string;
   itemsSummary: string; subtotal: number; total: number;
   shippingAddress: string; billingAddress: string;
 };
@@ -382,9 +385,10 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
     select: {
       id: true, orderNumber: true, status: true, createdAt: true,
       items: true, subtotal: true, total: true,
+      customerEmail: true,
       shippingAddress: true, billingAddress: true,
-      physician: { select: { firstName: true, lastName: true } },
-      salesRep:  { select: { name: true } },
+      physician: { select: { firstName: true, lastName: true, email: true } },
+      salesRep:  { select: { name: true, email: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -397,8 +401,11 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
       id:              o.id,
       orderNumber:     o.orderNumber,
       date:            o.createdAt.toISOString().slice(0, 10),
-      doctor:          o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
+      doctor:          o.physician ? `${o.physician.firstName} ${o.physician.lastName}` : "–",
+      doctorEmail:     o.physician?.email ?? "",
       salesRep:        o.salesRep?.name ?? "–",
+      salesRepEmail:   o.salesRep?.email ?? "",
+      patientEmail:    o.customerEmail ?? "",
       status:          o.status,
       itemsSummary,
       subtotal:        o.subtotal,
