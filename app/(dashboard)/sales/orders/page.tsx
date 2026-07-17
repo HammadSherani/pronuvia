@@ -5,6 +5,7 @@ import { OrderStatus } from "@/generated/prisma/enums";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { SalesDownloadOrdersButton } from "@/components/sales/download-orders-button";
 
 export const metadata = { title: "Order – Pronuvia" };
 
@@ -70,15 +71,18 @@ export default async function SalesOrdersPage({
           <h1 className="text-xl font-bold text-gray-800">Order</h1>
           <p className="text-sm text-gray-500 mt-0.5">All orders you have placed</p>
         </div>
-        <Link
-          href="/sales/shop"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New Order
-        </Link>
+        <div className="flex items-center gap-2">
+          <SalesDownloadOrdersButton />
+          <Link
+            href="/sales/shop"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 transition-colors shadow-sm"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New Order
+          </Link>
+        </div>
       </div>
 
       {/* Summary cards */}

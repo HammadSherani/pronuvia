@@ -17,8 +17,9 @@ type Order = {
   placedBySalesRep: boolean;
   commissionPaid:   boolean;
   shippingAddress:  string | null;
-  physician:      { firstName: string; lastName: string } | null;
-  salesRep:       { name: string } | null;
+  customerEmail:    string | null;
+  physician:      { firstName: string; lastName: string; email: string } | null;
+  salesRep:       { name: string; email: string } | null;
 };
 
 function patientName(shippingAddress: string | null): string | null {
@@ -192,10 +193,10 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                     )}
                   </td>
 
-                  {/* ── Order # + physician ── */}
+                  {/* ── Order # + physician + emails ── */}
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
                         <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                           <path strokeLinecap="round" strokeLinejoin="round"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -210,8 +211,34 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                             <span className="font-normal text-gray-500"> · {patientName(o.shippingAddress) ?? o.salesRep?.name}</span>
                           ) : null}
                         </p>
+
+                        {/* Emails */}
+                        <div className="mt-1 space-y-0.5">
+                          {o.customerEmail && (
+                            <p className="text-[11px] text-gray-400 leading-none">
+                              <span className="font-medium text-gray-500">Patient:</span>{" "}
+                              <a href={`mailto:${o.customerEmail}`} onClick={e => e.stopPropagation()}
+                                className="hover:text-gray-700 hover:underline transition-colors">{o.customerEmail}</a>
+                            </p>
+                          )}
+                          {o.physician?.email && (
+                            <p className="text-[11px] text-gray-400 leading-none">
+                              <span className="font-medium text-gray-500">Dr:</span>{" "}
+                              <a href={`mailto:${o.physician.email}`} onClick={e => e.stopPropagation()}
+                                className="hover:text-gray-700 hover:underline transition-colors">{o.physician.email}</a>
+                            </p>
+                          )}
+                          {o.salesRep?.email && (
+                            <p className="text-[11px] text-gray-400 leading-none">
+                              <span className="font-medium text-gray-500">Rep:</span>{" "}
+                              <a href={`mailto:${o.salesRep.email}`} onClick={e => e.stopPropagation()}
+                                className="hover:text-gray-700 hover:underline transition-colors">{o.salesRep.email}</a>
+                            </p>
+                          )}
+                        </div>
+
                         {isReturned && (
-                          <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-semibold rounded-full border border-orange-200">
+                          <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-semibold rounded-full border border-orange-200">
                             <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
                             </svg>
