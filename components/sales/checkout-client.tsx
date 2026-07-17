@@ -829,7 +829,7 @@ export function CheckoutClient({
                   <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
                 </div>
               )}
-              {walletBalance > 0 && (
+              {/* {walletBalance > 0 && (
                 <div className="flex items-center justify-between text-xs py-2 border-y border-gray-100">
                   <span>
                     You have{" "}
@@ -837,7 +837,7 @@ export function CheckoutClient({
                     in your wallet to spend!
                   </span>
                 </div>
-              )}
+              )} */}
               <div className="flex justify-between">
                 <span>{selectedShipping?.label ?? "Shipping"}</span>
                 {loadingShipping ? (
