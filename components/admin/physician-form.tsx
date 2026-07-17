@@ -64,12 +64,14 @@ export function PhysicianForm({
   const [accNumError, setAccNumError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [selectedCountry, setSelectedCountry] = useState(
-    state?.values?.country ?? defaults?.country ?? ""
-  );
-  const [selectedState, setSelectedState] = useState(
-    state?.values?.state ?? defaults?.state ?? ""
-  );
+  const [selectedCountry, setSelectedCountry] = useState(defaults?.country ?? "");
+  const [selectedState, setSelectedState]     = useState(defaults?.state ?? "");
+
+  // Bank fields as controlled state so they survive React's form-reset after server action
+  const [bankName, setBankName]               = useState(defaults?.bankName ?? "");
+  const [swiftCode, setSwiftCode]             = useState(defaults?.swiftCode ?? "");
+  const [bankAccountName, setBankAccountName] = useState(defaults?.bankAccountName ?? "");
+  const [routingNumber, setRoutingNumber]     = useState(defaults?.routingNumber ?? "");
 
   const allCountries = Country.getAllCountries();
   const statesForCountry = selectedCountry ? State.getStatesOfCountry(selectedCountry) : [];
@@ -102,6 +104,21 @@ export function PhysicianForm({
     } else if (state.errors) {
       const firstError = Object.values(state.errors).flat()[0];
       if (firstError) toast.error(firstError);
+    }
+
+    // Restore controlled fields after server-action form reset
+    if (state.values) {
+      const v = state.values;
+      if (v.country)          setSelectedCountry(v.country);
+      if (v.state)            setSelectedState(v.state);
+      if (v.bankName)         setBankName(v.bankName);
+      if (v.swiftCode)        setSwiftCode(v.swiftCode);
+      if (v.bankAccountName)  setBankAccountName(v.bankAccountName);
+      if (v.bankAccountNumber) {
+        setAccNum(v.bankAccountNumber);
+        setConfirmAccNum(v.bankAccountNumber);
+      }
+      if (v.routingNumber)    setRoutingNumber(v.routingNumber);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
@@ -415,16 +432,19 @@ export function PhysicianForm({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Bank Name</label>
-            <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={state?.values?.bankName ?? defaults?.bankName} />
+            <input name="bankName" className={icls()} placeholder="e.g. Chase Bank"
+              value={bankName} onChange={(e) => setBankName(e.target.value)} />
           </div>
           <div>
             <label className={lbl}>Swift Code</label>
-            <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33" defaultValue={state?.values?.swiftCode ?? defaults?.swiftCode} />
+            <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33"
+              value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} />
           </div>
         </div>
         <div className="mb-4">
           <label className={lbl}>Account Name</label>
-          <input name="bankAccountName" className={icls()} placeholder="Jane Doe" defaultValue={state?.values?.bankAccountName ?? defaults?.bankAccountName} />
+          <input name="bankAccountName" className={icls()} placeholder="Jane Doe"
+            value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
@@ -442,7 +462,7 @@ export function PhysicianForm({
         <div>
           <label className={lbl}>Routing Number</label>
           <input name="routingNumber" className={icls()} placeholder="e.g. 021000021"
-            defaultValue={state?.values?.routingNumber ?? defaults?.routingNumber} />
+            value={routingNumber} onChange={(e) => setRoutingNumber(e.target.value)} />
         </div>
       </div>
 

@@ -41,9 +41,12 @@ export async function salesRepAddPhysician(
     officeContactNumber: (formData.get("officeContactNumber") as string) || undefined,
     fax: (formData.get("fax") as string) || undefined,
     nameOfPractice: (formData.get("nameOfPractice") as string) || undefined,
-    yearsInPractice: formData.get("yearsInPractice")
-      ? Number(formData.get("yearsInPractice"))
-      : undefined,
+    yearsInPractice: (formData.get("yearsInPractice") as string) || undefined,
+    bankName: (formData.get("bankName") as string) || undefined,
+    swiftCode: (formData.get("swiftCode") as string) || undefined,
+    bankAccountName: (formData.get("bankAccountName") as string) || undefined,
+    bankAccountNumber: (formData.get("bankAccountNumber") as string) || undefined,
+    routingNumber: (formData.get("routingNumber") as string) || undefined,
     fieldsOfSpeciality: formData.get("fieldsOfSpeciality")
       ? JSON.parse(formData.get("fieldsOfSpeciality") as string)
       : [],

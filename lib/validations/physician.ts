@@ -10,14 +10,14 @@ export const CreatePhysicianSchema = z.object({
   addressOne:          z.string().optional(),
   addressTwo:          z.string().optional(),
   city:                z.string().optional(),
-  state:               z.string().min(1, "State / Province is required"),
+  state:               z.string({ error: "State / Province is required" }).min(1, "State / Province is required"),
   zipCode:             z.string().optional(),
-  country:             z.string().min(1, "Country is required"),
+  country:             z.string({ error: "Country is required" }).min(1, "Country is required"),
   phone:               z.string().optional(),
   officeContactNumber: z.string().optional(),
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().optional(),
-  yearsInPractice:     z.string()
+  yearsInPractice:     z.string({ error: "Years in practice is required" })
     .min(1, "Years in practice is required")
     .transform((val, ctx) => {
       const n = Number(val);
