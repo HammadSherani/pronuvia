@@ -1,4 +1,20 @@
-const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+// ─── Brand tokens ─────────────────────────────────────────────────────────────
+const C = {
+  ink:        "#0B1220",   // website --color-ink  (footer, dark surfaces)
+  navy:       "#1b3b6f",   // website --color-ion  (primary buttons, headings)
+  teal:       "#3DBFA4",   // brand teal           (links, accents, borders)
+  lightBlue:  "#5bb8d4",   // website --pronuvia-blue
+  body:       "#f3f4f6",   // email body background
+  card:       "#ffffff",
+  surface:    "#f9fafb",   // info boxes
+  border:     "#e5e7eb",
+  muted:      "#6b7280",
+  dimmed:     "#9ca3af",
+  text:       "#111827",   // primary text
+  textSoft:   "#374151",   // body text
+};
 
 const base = (content: string) => `
 <!DOCTYPE html>
@@ -8,34 +24,33 @@ const base = (content: string) => `
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pronuvia</title>
 </head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:40px 16px;">
+<body style="margin:0;padding:0;background:${C.body};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${C.body};padding:40px 16px;">
     <tr>
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
           <!-- Logo / Brand -->
           <tr>
-            <td align="center" style="padding-bottom:28px;">
-              <div style="display:inline-block;background:#3DBFA4;border-radius:12px;padding:10px 22px;">
-                <span style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-0.5px;">Pronuvia</span>
+            <td align="center" style="padding-bottom:24px;">
+              <div style="display:inline-block;background:${C.ink};border-radius:10px;padding:10px 24px;">
+                <span style="color:#ffffff;font-size:18px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">PRONUVIA</span>
               </div>
             </td>
           </tr>
 
           <!-- Card -->
           <tr>
-            <td style="background:#fff;border-radius:16px;padding:40px 40px 32px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <td style="background:${C.card};border-radius:16px;padding:40px 40px 32px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
               ${content}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td align="center" style="padding-top:24px;">
-              <p style="margin:0;font-size:12px;color:#9ca3af;">
-                This email was sent by Pronuvia Partner Portal.
-                Please do not reply to this email.
+            <td align="center" style="padding-top:20px;">
+              <p style="margin:0;font-size:12px;color:${C.dimmed};">
+                This email was sent by Pronuvia Partner Portal. Please do not reply.
               </p>
             </td>
           </tr>
@@ -46,6 +61,26 @@ const base = (content: string) => `
   </table>
 </body>
 </html>`;
+
+// Shared helpers
+const btn = (href: string, label: string) =>
+  `<div style="text-align:center;margin:28px 0;">
+    <a href="${href}" style="display:inline-block;background:${C.navy};color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.3px;">
+      ${label}
+    </a>
+  </div>`;
+
+const sectionLabel = (text: string) =>
+  `<p style="margin:24px 0 6px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${C.teal};">${text}</p>`;
+
+const infoBox = (inner: string) =>
+  `<div style="background:${C.surface};border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:24px;">${inner}</div>`;
+
+const accentBar = (inner: string) =>
+  `<div style="background:#f0fdf9;border-left:3px solid ${C.teal};border-radius:0 8px 8px 0;padding:14px 20px;margin-bottom:20px;">${inner}</div>`;
+
+const addrLabel = (text: string) =>
+  `<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${C.navy};">${text}</p>`;
 
 // ─────────────────────────────────────────────
 // Password setup email (new accounts — sales rep or physician)
@@ -60,35 +95,26 @@ export function passwordSetupEmail(opts: {
   const roleLabel = opts.role === "salesRep" ? "Sales Representative" : "Partnering Physician";
   const subject = "Welcome to Pronuvia — Set Your Password";
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
-      Dear , ${opts.firstName}!
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
+      Welcome, ${opts.firstName}!
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
       Your Pronuvia ${roleLabel} account has been created.
       Click the button below to set your password and activate your account.
     </p>
 
-    <!-- Email box -->
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 24px;margin-bottom:28px;">
-      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Your Login Email</p>
-      <p style="margin:8px 0 0;font-size:14px;font-weight:600;color:#111827;">${opts.email}</p>
-    </div>
+    ${infoBox(`
+      <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.06em;">Your Login Email</p>
+      <p style="margin:8px 0 0;font-size:14px;font-weight:600;color:${C.text};">${opts.email}</p>
+    `)}
 
-    <!-- CTA -->
-    <div style="text-align:center;margin-bottom:28px;">
-      <a href="${resetLink}"
-        style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;">
-        Set My Password
-      </a>
-    </div>
+    ${btn(resetLink, "Set My Password")}
 
-    <p style="margin:0 0 12px;font-size:13px;color:#9ca3af;line-height:1.6;">
-      This link will expire in <strong style="color:#6b7280;">72 hours</strong>.
+    <p style="margin:0 0 12px;font-size:13px;color:${C.dimmed};line-height:1.6;">
+      This link will expire in <strong style="color:${C.muted};">72 hours</strong>.
       If you did not expect this email, please ignore it.
     </p>
-    <p style="margin:0;font-size:12px;color:#d1d5db;word-break:break-all;">
-      ${resetLink}
-    </p>
+    <p style="margin:0;font-size:11px;color:#d1d5db;word-break:break-all;">${resetLink}</p>
   `);
   return { subject, html };
 }
@@ -100,23 +126,23 @@ export function salesRepDoctorApprovedEmail(opts: {
   doctorFirstName: string;
   doctorLastName:  string;
 }) {
-  const subject = ` ${opts.doctorFirstName} ${opts.doctorLastName} has been approved`;
+  const subject = `${opts.doctorFirstName} ${opts.doctorLastName} has been approved`;
   const html = base(`
-    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:${C.ink};">
       Physician Approved
     </h1>
-    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 20px;font-size:15px;color:${C.textSoft};line-height:1.7;">
       We are glad to inform you that
-      <strong> ${opts.doctorFirstName} ${opts.doctorLastName}</strong>
+      <strong style="color:${C.text};"> ${opts.doctorFirstName} ${opts.doctorLastName}</strong>
       has been confirmed and their account is now active.
     </p>
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-      <p style="margin:0;font-size:13px;font-weight:700;color:#15803d;">&#10003; Account Confirmed</p>
-      <p style="margin:4px 0 0;font-size:13px;color:#166534;line-height:1.5;">
-         ${opts.doctorFirstName} ${opts.doctorLastName} can now log in and place orders through the Pronuvia portal.
+    <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;font-weight:700;color:#065f46;">&#10003; Account Confirmed</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#047857;line-height:1.5;">
+        ${opts.doctorFirstName} ${opts.doctorLastName} can now log in and place orders through the Pronuvia portal.
       </p>
     </div>
-    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0;font-size:14px;color:${C.muted};line-height:1.6;">
       Thank you for bringing them on board. Any orders they place will be reflected in your commission.
     </p>
   `);
@@ -130,17 +156,17 @@ export function salesRepDoctorSignupEmail(opts: {
   doctorFirstName: string;
   doctorLastName:  string;
 }) {
-  const subject = ` ${opts.doctorFirstName} ${opts.doctorLastName} has signed up`;
+  const subject = `${opts.doctorFirstName} ${opts.doctorLastName} has signed up`;
   const html = base(`
-    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:${C.ink};">
       New Physician Sign-Up
     </h1>
-    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 20px;font-size:15px;color:${C.textSoft};line-height:1.7;">
       We are glad to inform you that
-      <strong>${opts.doctorFirstName} ${opts.doctorLastName}</strong>
+      <strong style="color:${C.text};">${opts.doctorFirstName} ${opts.doctorLastName}</strong>
       signed up for you.
     </p>
-    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0;font-size:14px;color:${C.muted};line-height:1.6;">
       Their application is now pending admin approval. You will be notified once it is reviewed.
     </p>
   `);
@@ -161,137 +187,130 @@ export function physicianApprovalEmail(opts: {
 
   const row = (label: string, value: string) =>
     `<tr>
-      <td style="padding:7px 0;font-size:13px;color:#6b7280;white-space:nowrap;vertical-align:top;width:160px;">${label}</td>
-      <td style="padding:7px 0 7px 12px;font-size:13px;color:#111827;font-weight:600;word-break:break-all;">${value}</td>
+      <td style="padding:7px 0;font-size:13px;color:${C.muted};white-space:nowrap;vertical-align:top;width:160px;">${label}</td>
+      <td style="padding:7px 0 7px 12px;font-size:13px;color:${C.text};font-weight:600;word-break:break-all;">${value}</td>
     </tr>`;
 
-  const h2 = (t: string) =>
-    `<p style="margin:24px 0 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3DBFA4;">${t}</p>`;
-
   const html = base(`
-    <p style="margin:0 0 6px;font-size:15px;color:#111827;line-height:1.6;">Dear  ${opts.firstName} ${opts.lastName},</p>
-    <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 6px;font-size:15px;color:${C.text};line-height:1.6;">Dear ${opts.firstName} ${opts.lastName},</p>
+    <p style="margin:0 0 18px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       I am Jason from Pronuvia and am glad to welcome you as a participating physician for AIC Therapy.
     </p>
-    <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.7;">
-      Your application to set up an account with us is now <strong>approved</strong>. Congratulations.
+    <p style="margin:0 0 18px;font-size:14px;color:${C.textSoft};line-height:1.7;">
+      Your application to set up an account with us is now <strong style="color:${C.navy};">approved</strong>. Congratulations.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We also sent you a Welcome Aboard email with links and information on AIC Therapy for your study and reference.
       If you did not receive it yet, please check your email's Promotion or Spam folder to locate it.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       I am certain that you are excited to try out our new ionic calcium therapy for your patients, and we are equally
       excited to come alongside to provide all the needed support. However, let's get all the required legal documentation
       taken care of first so that we can move forward with full steam.
     </p>
 
-    ${h2("Login Info")}
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:6px;">
+    ${sectionLabel("Login Info")}
+    ${infoBox(`
       <table cellpadding="0" cellspacing="0" style="width:100%;">
         ${row("Website:", "www.pronuvia.com")}
         ${row("Username (Login ID):", opts.email)}
         ${row("Email:", opts.email)}
         ${row("Password:", "Click &ldquo;Forgot Your Password?&rdquo; to set your password")}
       </table>
-    </div>
-    <div style="text-align:center;margin:16px 0 24px;">
-      <a href="${resetLink}" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
-        Set My Password
-      </a>
-    </div>
+    `)}
+    ${btn(resetLink, "Set My Password")}
 
-    ${h2("B2B Order Process")}
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("B2B Order Process")}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Your office needs to enter the order through our website after login at <strong>www.pronuvia.com</strong> (not www.AICtherapy.com).
     </p>
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       After login, please go to <strong>"Account Manager"</strong> and click <strong>"Order Products"</strong> on the menu.
     </p>
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       You can put the shipping address and credit card info of your patient if you want so that we can support the drop ship to your patient.
     </p>
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Please enter patient's email address when you order so that they can receive shipment tracking number.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       You will receive the order confirmation email automatically as cc.
     </p>
 
-    ${h2("Agreement")}
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("Agreement")}
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We attached the Terms and Conditions you agreed during the application process.
     </p>
 
-    ${h2("Free Consultation")}
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("Free Consultation")}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       To help new doctors get started, we provide a 30-minute personal free consultation. You and your staff or anyone
       in the practice who needs the basic introduction to AIC Therapy can join. During the call, we can answer any
       questions that you may have.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       You can book a free consultation at:<br/>
-      <a href="https://www.aictherapy.com/book-a-consultation" style="color:#3DBFA4;">https://www.aictherapy.com/book-a-consultation</a>
+      <a href="https://www.aictherapy.com/book-a-consultation" style="color:${C.teal};">https://www.aictherapy.com/book-a-consultation</a>
     </p>
 
-    ${h2("The Scope of Practice")}
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("The Scope of Practice")}
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We ask approved doctors and health practitioners to limit the use of AIC (Anti-orbital Ionic Calcium) therapy
       within the legally allowed scope of the license in treating patients. For example, for nutritionists, AIC therapy
       can be utilized to treat ionic calcium deficiency, to restore calcium homeostasis, to boost the immune system,
       to balance the body pH, and for other general calcium-related health issues from a nutritional therapy point of view.
     </p>
 
-    ${h2("Commission Payout")}
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("Commission Payout")}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We will send you 25% of the commission in the first week of each month. Please provide the information for one of
       the following payout options (we suggest ACH as it is safer and faster):
     </p>
-    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(1) ACH</p>
-    <p style="margin:0 0 10px;font-size:13px;color:#374151;line-height:1.7;">Bank Name · Bank Routing Number · Account Number · Account Type (Checking or Savings) · Name on the Account</p>
-    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(2) Check</p>
-    <p style="margin:0 0 10px;font-size:13px;color:#374151;line-height:1.7;">Provide name for "Payable to" and mailing address.</p>
-    <p style="margin:0 0 4px;font-size:13px;color:#111827;font-weight:600;">(3) Zelle, Venmo, or PayPal</p>
-    <p style="margin:0 0 24px;font-size:13px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 4px;font-size:13px;color:${C.text};font-weight:600;">(1) ACH</p>
+    <p style="margin:0 0 10px;font-size:13px;color:${C.textSoft};line-height:1.7;">Bank Name · Bank Routing Number · Account Number · Account Type (Checking or Savings) · Name on the Account</p>
+    <p style="margin:0 0 4px;font-size:13px;color:${C.text};font-weight:600;">(2) Check</p>
+    <p style="margin:0 0 10px;font-size:13px;color:${C.textSoft};line-height:1.7;">Provide name for "Payable to" and mailing address.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:${C.text};font-weight:600;">(3) Zelle, Venmo, or PayPal</p>
+    <p style="margin:0 0 24px;font-size:13px;color:${C.textSoft};line-height:1.7;">
       Zelle: email or phone number · Venmo: username or email · PayPal: email address
     </p>
 
-    ${h2("W-9 Form")}
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("W-9 Form")}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We sent an email via QuickBooks to you for W-9 now. Please fill out the W-9 form within 24 hours as the link
       will become inactive. The email subject is <em>"Fill out your W-9 tax info for Pronuvia, Inc."</em>
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Alternatively, you may fill out the attached W-9 form with your signature and send us back the scanned file.
     </p>
 
-    ${h2("AIC Therapy Booklet and Dosing Protocol")}
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("AIC Therapy Booklet and Dosing Protocol")}
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Please read through the attached Pronuvia AIC Therapy Booklet and Dosing Protocol files. Not only the dosing
       protocol, but it will also provide a fundamental guideline for the doctor's practice.
     </p>
 
-    ${h2("Website Content Policy for Pronuvia Products")}
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.7;">
+    ${sectionLabel("Website Content Policy for Pronuvia Products")}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We suggest doctors market AIC as a therapy under a generic treatment name (e.g. AIC calcium therapy or ionic
       calcium therapy) instead of marketing branded products directly.
     </p>
-    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Please do not list our company name (Pronuvia) and product information searchable on Google on your website.</p>
-    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Please provide a doctor's phone number or email for consultations. All orders should be offline by phone.</p>
-    <p style="margin:0 0 4px;font-size:13px;color:#374151;line-height:1.7;">• Recommended treatment names: "AIC Therapy," "AIC Ionic Calcium Treatment," "Ionic Calcium Treatment," "Calcium Ion Treatment."</p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};line-height:1.7;">• Please do not list our company name (Pronuvia) and product information searchable on Google on your website.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};line-height:1.7;">• Please provide a doctor's phone number or email for consultations. All orders should be offline by phone.</p>
+    <p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};line-height:1.7;">• Recommended treatment names: "AIC Therapy," "AIC Ionic Calcium Treatment," "Ionic Calcium Treatment," "Calcium Ion Treatment."</p>
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Please note that the 30-min free consultation is a very important and useful session to understand our products.
     </p>
 
-    <p style="margin:0 0 6px;font-size:14px;color:#374151;line-height:1.7;">
+    <p style="margin:0 0 6px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       If you have any questions, please contact us at <strong>800-568-2982</strong> or
-      <a href="mailto:contact@pronuvia.com" style="color:#3DBFA4;">contact@pronuvia.com</a>.
+      <a href="mailto:contact@pronuvia.com" style="color:${C.teal};">contact@pronuvia.com</a>.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">Thank you.<br/><br/>Sincerely,<br/><strong>Jason Park</strong><br/>Pronuvia Physician Support</p>
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">Thank you.<br/><br/>Sincerely,<br/><strong style="color:${C.text};">Jason Park</strong><br/>Pronuvia Physician Support</p>
 
-    <div style="border-top:1px solid #e5e7eb;margin-top:24px;padding-top:20px;">
-      <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:0.06em;text-transform:uppercase;">Disclaimer</p>
-      <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.7;">
+    <div style="border-top:1px solid ${C.border};margin-top:24px;padding-top:20px;">
+      <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:${C.dimmed};letter-spacing:0.08em;text-transform:uppercase;">Disclaimer</p>
+      <p style="margin:0;font-size:11px;color:${C.dimmed};line-height:1.7;">
         Pronuvia thanks participating doctors, clinics, and health care practitioners for making AIC therapy available
         to consenting patients. Please note that Pronuvia hereby makes no medical claims to treat or cure any diseases.
         AIC products are registered as dietary supplements. AIC therapy is a nutritional therapy based on ionic calcium.
@@ -305,7 +324,7 @@ export function physicianApprovalEmail(opts: {
 }
 
 // ─────────────────────────────────────────────
-// Sales rep welcome email (kept for compatibility)
+// Sales rep welcome email
 // ─────────────────────────────────────────────
 export function salesRepWelcomeEmail(opts: {
   firstName: string;
@@ -315,33 +334,28 @@ export function salesRepWelcomeEmail(opts: {
 }) {
   const subject = "Welcome to Pronuvia — Your Account is Ready";
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
       Welcome, ${opts.firstName}!
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
       Your Pronuvia Sales Representative account has been created.
       You can now log in and start managing your partnering physicians.
     </p>
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
-      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Your Login Credentials</p>
+    ${infoBox(`
+      <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.06em;">Your Login Credentials</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;width:110px;">Email</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">${opts.email}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};width:110px;">Email</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.email}</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;">Password</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;font-family:monospace;">${opts.password}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};">Password</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};font-family:monospace;">${opts.password}</td>
         </tr>
       </table>
-    </div>
-    <div style="text-align:center;margin-bottom:28px;">
-      <a href="${getAppUrl()}/login"
-        style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
-        Log In to Your Account
-      </a>
-    </div>
-    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+    `)}
+    ${btn(`${getAppUrl()}/login`, "Log In to Your Account")}
+    <p style="margin:0;font-size:13px;color:${C.dimmed};line-height:1.6;">
       For security, please change your password after your first login.
     </p>
   `);
@@ -360,49 +374,41 @@ export function physicianWelcomeEmail(opts: {
 }) {
   const subject = "Welcome to Pronuvia — Your Physician Account is Ready";
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
-      Welcome,  ${opts.firstName} ${opts.lastName}!
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
+      Welcome, ${opts.firstName} ${opts.lastName}!
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
       Your Pronuvia Partnering Physician account has been created and
-      <strong style="color:#3DBFA4;">approved</strong>.
+      <strong style="color:${C.navy};">approved</strong>.
       You can log in immediately and start placing orders.
     </p>
 
     ${opts.nameOfPractice ? `
-    <p style="margin:-12px 0 24px;font-size:14px;color:#6b7280;">
-      Practice: <strong style="color:#111827;">${opts.nameOfPractice}</strong>
+    <p style="margin:-12px 0 24px;font-size:14px;color:${C.muted};">
+      Practice: <strong style="color:${C.text};">${opts.nameOfPractice}</strong>
     </p>` : ""}
 
-    <!-- Credentials box -->
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
-      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Your Login Credentials</p>
+    ${infoBox(`
+      <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.06em;">Your Login Credentials</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;width:110px;">Email</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">${opts.email}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};width:110px;">Email</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.email}</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;">Password</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;font-family:monospace;">${opts.password}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};">Password</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};font-family:monospace;">${opts.password}</td>
         </tr>
       </table>
-    </div>
+    `)}
 
-    <!-- CTA -->
-    <div style="text-align:center;margin-bottom:28px;">
-      <a href="${getAppUrl()}/login"
-        style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
-        Log In to Your Account
-      </a>
-    </div>
+    ${btn(`${getAppUrl()}/login`, "Log In to Your Account")}
 
-    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+    <p style="margin:0;font-size:13px;color:${C.dimmed};line-height:1.6;">
       For security, please change your password after your first login.
       If you have any questions, contact your sales representative or administrator.
     </p>
   `);
-
   return { subject, html };
 }
 
@@ -416,75 +422,61 @@ export function salesRepPhysicianAssignedEmail(opts: {
   physicianEmail: string;
   nameOfPractice?: string | null;
 }) {
-  const subject = `Great news!  ${opts.physicianFirstName} ${opts.physicianLastName} has joined through your referral`;
+  const subject = `Great news! ${opts.physicianFirstName} ${opts.physicianLastName} has joined through your referral`;
   const html = base(`
-    <!-- Green badge -->
-    <div style="display:inline-block;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:6px 14px;margin-bottom:20px;">
-      <span style="color:#059669;font-size:13px;font-weight:600;">&#10003; New Referral Added</span>
+    <div style="display:inline-block;background:#f0fdf9;border:1px solid #a7f3d0;border-radius:8px;padding:6px 14px;margin-bottom:20px;">
+      <span style="color:#047857;font-size:13px;font-weight:600;">&#10003; New Referral Added</span>
     </div>
 
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
       A doctor joined through your referral!
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
       Hi ${opts.salesRepFirstName}, great news!
-      The administrator has added <strong style="color:#111827;"> ${opts.physicianFirstName} ${opts.physicianLastName}</strong>
+      The administrator has added <strong style="color:${C.text};">${opts.physicianFirstName} ${opts.physicianLastName}</strong>
       to Pronuvia under your account. Their account is already active and approved.
     </p>
 
-    <!-- Physician info box -->
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
-      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Physician Details</p>
+    ${infoBox(`
+      <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.06em;">Physician Details</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;width:130px;">Name</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">
-             ${opts.physicianFirstName} ${opts.physicianLastName}
-          </td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};width:130px;">Name</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.physicianFirstName} ${opts.physicianLastName}</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;">Email</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">${opts.physicianEmail}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};">Email</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.physicianEmail}</td>
         </tr>
         ${opts.nameOfPractice ? `
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;">Practice</td>
-          <td style="padding:6px 0;font-size:13px;font-weight:600;color:#111827;">${opts.nameOfPractice}</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};">Practice</td>
+          <td style="padding:6px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.nameOfPractice}</td>
         </tr>` : ""}
         <tr>
-          <td style="padding:6px 0;font-size:13px;color:#6b7280;">Status</td>
+          <td style="padding:6px 0;font-size:13px;color:${C.muted};">Status</td>
           <td style="padding:6px 0;">
-            <span style="background:#ecfdf5;color:#059669;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;border:1px solid #6ee7b7;">
+            <span style="background:#f0fdf9;color:#047857;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;border:1px solid #a7f3d0;">
               Approved &amp; Active
             </span>
           </td>
         </tr>
       </table>
-    </div>
+    `)}
 
-    <!-- CTA -->
-    <div style="text-align:center;margin-bottom:28px;">
-      <a href="${getAppUrl()}/sales/physicians"
-        style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px;">
-        View My Physicians
-      </a>
-    </div>
+    ${btn(`${getAppUrl()}/sales/physicians`, "View My Physicians")}
 
-    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+    <p style="margin:0;font-size:13px;color:${C.dimmed};line-height:1.6;">
       Any orders placed by this physician will count towards your commission.
       Log in to your dashboard to stay updated.
     </p>
   `);
-
   return { subject, html };
 }
 
 // ─────────────────────────────────────────────
-// Order email templates (admin → physician)
+// Order email helpers
 // ─────────────────────────────────────────────
-
-// Extracts the recipient's first name from the shipping address JSON, then
-// billing address JSON, then falls back to null.
 function recipientFirstName(d: { shippingAddress?: string | null; billingAddress?: string | null }): string | null {
   for (const raw of [d.shippingAddress, d.billingAddress]) {
     if (!raw) continue;
@@ -496,6 +488,7 @@ function recipientFirstName(d: { shippingAddress?: string | null; billingAddress
   }
   return null;
 }
+
 type OrderItem = {
   title: string; variantSize?: string;
   quantity: number; unitPrice: number; lineTotal: number;
@@ -504,20 +497,20 @@ type OrderItem = {
 function orderItemsTable(items: OrderItem[]) {
   const rows = items.map((i) => `
     <tr>
-      <td style="padding:10px 0;font-size:13px;color:#111827;border-bottom:1px solid #f3f4f6;">
-        ${i.title}${i.variantSize ? ` <span style="color:#6b7280;">(${i.variantSize})</span>` : ""}
+      <td style="padding:10px 0;font-size:13px;color:${C.text};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` <span style="color:${C.muted};">(${i.variantSize})</span>` : ""}
       </td>
-      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
-      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.unitPrice.toFixed(2)}</td>
-      <td style="padding:10px 0;font-size:13px;font-weight:600;color:#111827;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+      <td style="padding:10px 0;font-size:13px;color:${C.muted};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 0;font-size:13px;color:${C.muted};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.unitPrice.toFixed(2)}</td>
+      <td style="padding:10px 0;font-size:13px;font-weight:600;color:${C.text};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
   return `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
       <thead><tr>
-        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Product</th>
-        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:center;">Qty</th>
-        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Unit</th>
-        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Total</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:left;">Product</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:center;">Qty</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:right;">Unit</th>
+        <th style="padding:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:right;">Total</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
@@ -558,14 +551,24 @@ function renderAddr(raw: string | null | undefined): string {
   }
 }
 
+const orderTableHeader = `
+  <tr style="background:${C.surface};">
+    <th style="padding:10px 12px;font-size:11px;font-weight:700;color:${C.muted};text-transform:uppercase;letter-spacing:.06em;text-align:left;border-bottom:1px solid ${C.border};">Product</th>
+    <th style="padding:10px 12px;font-size:11px;font-weight:700;color:${C.muted};text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:1px solid ${C.border};">Qty</th>
+    <th style="padding:10px 12px;font-size:11px;font-weight:700;color:${C.muted};text-transform:uppercase;letter-spacing:.06em;text-align:right;border-bottom:1px solid ${C.border};">Price</th>
+  </tr>`;
+
+// ─────────────────────────────────────────────
+// Order confirmation email
+// ─────────────────────────────────────────────
 export function orderConfirmationEmail(d: OrderEmailData) {
   const name = d.isPatientEmail ? recipientFirstName(d) : null;
   const greeting = d.isPatientEmail
     ? (name ? `Hello ${name},` : "Hello,")
     : `Hi ${d.firstName},`;
-  const dateStr   = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
-  const shipping  = d.shippingCost ?? 0;
+  const dateStr  = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const subtotal = d.items.reduce((s, i) => s + i.lineTotal, 0);
+  const shipping = d.shippingCost ?? 0;
 
   const payLabel = (() => {
     const pm = d.paymentMethod;
@@ -577,61 +580,55 @@ export function orderConfirmationEmail(d: OrderEmailData) {
 
   const itemRows = d.items.map(i => `
     <tr>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
-        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:#6b7280;">Volume: ${i.variantSize}</span>` : ""}
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:${C.muted};">Volume: ${i.variantSize}</span>` : ""}
       </td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
 
   return {
     subject: `Thank you for your order #${d.orderNumber}`,
     html: base(`
-      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111827;">Thank you for your order</h1>
-      <p style="margin:0 0 4px;font-size:14px;color:#374151;font-weight:500;">${greeting}</p>
-      <p style="margin:0 0 24px;font-size:13px;color:#6b7280;line-height:1.6;">
-        We've received your order <strong>#${d.orderNumber}</strong>, and it is now being processed.
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:${C.ink};">Thank you for your order</h1>
+      <p style="margin:0 0 4px;font-size:14px;color:${C.textSoft};font-weight:500;">${greeting}</p>
+      <p style="margin:0 0 24px;font-size:13px;color:${C.muted};line-height:1.6;">
+        We've received your order <strong style="color:${C.navy};">#${d.orderNumber}</strong>, and it is now being processed.
       </p>
 
-      <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#7c3aed;">[Order #${d.orderNumber}] (${dateStr})</p>
+      <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:${C.navy};">[Order #${d.orderNumber}] (${dateStr})</p>
 
       <table width="100%" cellpadding="0" cellspacing="0"
-        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#f9fafb;">
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Quantity</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
-          </tr>
-        </thead>
+        style="border:1px solid ${C.border};border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>${orderTableHeader}</thead>
         <tbody>
           ${itemRows}
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #e5e7eb;">Subtotal:</td>
-            <td style="border-top:1px solid #e5e7eb;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${subtotal.toFixed(2)}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid ${C.border};">Subtotal:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
           </tr>
           ${shipping > 0 ? `
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">$${shipping.toFixed(2)}</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">$${shipping.toFixed(2)}</td>
           </tr>` : ""}
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Payment method:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Payment method:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
           </tr>
-          <tr style="background:#f9fafb;">
-            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;border-top:1px solid #e5e7eb;">Total:</td>
-            <td style="border-top:1px solid #e5e7eb;"></td>
-            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;text-align:right;border-top:1px solid #e5e7eb;">$${d.total.toFixed(2)}</td>
+          <tr style="background:${C.surface};">
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};border-top:1px solid ${C.border};">Total:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};text-align:right;border-top:1px solid ${C.border};">$${d.total.toFixed(2)}</td>
           </tr>
           ${d.notes ? `
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Note:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Note:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${d.notes}</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${d.notes}</td>
           </tr>` : ""}
         </tbody>
       </table>
@@ -641,22 +638,22 @@ export function orderConfirmationEmail(d: OrderEmailData) {
         <tr>
           ${d.billingAddress ? `
           <td width="50%" style="vertical-align:top;padding-right:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(d.billingAddress)}</p>
+            ${addrLabel("Billing address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(d.billingAddress)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
           ${d.shippingAddress ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(d.shippingAddress)}</p>
+            ${addrLabel("Shipping address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(d.shippingAddress)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
       </table>` : ""}
 
-      <p style="margin:0;font-size:14px;color:#374151;">Thanks!</p>
+      <p style="margin:0;font-size:14px;color:${C.textSoft};">Thanks!</p>
     `),
   };
 }
@@ -688,56 +685,51 @@ export function newOrderNotificationEmail(opts: {
 
   const itemRows = opts.items.map(i => `
     <tr>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};border-bottom:1px solid #f3f4f6;">
         ${i.title}${i.variantSize ? ` (${i.variantSize})` : ""}
       </td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
 
   return {
     subject: `New Order: #${opts.orderNumber}`,
     html: base(`
-      <div style="background:#7c3aed;margin:-40px -40px 24px;padding:24px 40px;border-radius:16px 16px 0 0;">
-        <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">New Order: #${opts.orderNumber}</h1>
+      <div style="background:${C.ink};margin:-40px -40px 28px;padding:24px 40px;border-radius:16px 16px 0 0;">
+        <p style="margin:0 0 4px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;">New Order</p>
+        <h1 style="margin:0;font-size:24px;font-weight:700;color:#ffffff;">#${opts.orderNumber}</h1>
       </div>
 
-      <p style="margin:0 0 4px;font-size:13px;color:#6b7280;">
-        You've received the following order from <strong style="color:#374151;">${opts.orderedBy}</strong>:
+      <p style="margin:0 0 4px;font-size:13px;color:${C.muted};">
+        You've received the following order from <strong style="color:${C.textSoft};">${opts.orderedBy}</strong>:
       </p>
-      <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#7c3aed;">[Order #${opts.orderNumber}] (${dateStr})</p>
+      <p style="margin:0 0 16px;font-size:13px;font-weight:600;color:${C.navy};">[Order #${opts.orderNumber}] (${dateStr})</p>
 
       <table width="100%" cellpadding="0" cellspacing="0"
-        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#f9fafb;">
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Quantity</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
-          </tr>
-        </thead>
+        style="border:1px solid ${C.border};border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>${orderTableHeader}</thead>
         <tbody>
           ${itemRows}
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #e5e7eb;">Subtotal:</td>
-            <td style="border-top:1px solid #e5e7eb;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${opts.subtotal.toFixed(2)}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid ${C.border};">Subtotal:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${opts.subtotal.toFixed(2)}</td>
           </tr>
           ${opts.shippingCost > 0 ? `
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">$${opts.shippingCost.toFixed(2)}</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">$${opts.shippingCost.toFixed(2)}</td>
           </tr>` : ""}
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#374151;border-top:1px solid #f3f4f6;">Payment method:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Payment method:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
           </tr>
-          <tr style="background:#f9fafb;">
-            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;border-top:1px solid #e5e7eb;">Total:</td>
-            <td style="border-top:1px solid #e5e7eb;"></td>
-            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827;text-align:right;border-top:1px solid #e5e7eb;">$${opts.total.toFixed(2)}</td>
+          <tr style="background:${C.surface};">
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};border-top:1px solid ${C.border};">Total:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};text-align:right;border-top:1px solid ${C.border};">$${opts.total.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -747,22 +739,22 @@ export function newOrderNotificationEmail(opts: {
         <tr>
           ${opts.billingAddress ? `
           <td width="50%" style="vertical-align:top;padding-right:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(opts.billingAddress)}</p>
+            ${addrLabel("Billing address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.billingAddress)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
           ${opts.shippingAddress ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+            ${addrLabel("Shipping address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
       </table>` : ""}
 
-      <p style="margin:0;font-size:13px;color:#6b7280;">
+      <p style="margin:0;font-size:13px;color:${C.muted};">
         Process your orders on the go.
       </p>
     `),
@@ -773,15 +765,15 @@ export function orderProcessingEmail(d: OrderEmailData) {
   return {
     subject: `Your order ${d.orderNumber} is being processed`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order In Progress</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> is being processed and prepared for shipment.
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order In Progress</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Hi ${d.firstName}, your order <strong style="color:${C.navy};">${d.orderNumber}</strong> is being processed and prepared for shipment.
       </p>
       ${orderItemsTable(d.items)}
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-        <p style="margin:0;font-size:13px;color:#1d4ed8;font-weight:600;">We'll notify you once your order ships.</p>
+      <div style="background:#eff8ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:13px;color:${C.navy};font-weight:600;">We'll notify you once your order ships.</p>
       </div>
-      `),
+    `),
   };
 }
 
@@ -793,11 +785,11 @@ export function orderCompletedEmail(d: OrderEmailData) {
 
   const itemRows = d.items.map(i => `
     <tr>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;">
-        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:#6b7280;">Volume: ${i.variantSize}</span>` : ""}
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:${C.muted};">Volume: ${i.variantSize}</span>` : ""}
       </td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
-      <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
 
   const shippingAddrHtml = renderAddr(d.shippingAddress);
@@ -806,34 +798,28 @@ export function orderCompletedEmail(d: OrderEmailData) {
   return {
     subject: `Order ${d.orderNumber} Completed — Thank You!`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Completed!</h1>
-      <p style="margin:0 0 4px;font-size:14px;color:#374151;font-weight:500;">${greeting}</p>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Your order <strong>${d.orderNumber}</strong> has been completed. Thank you for your business!
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order Completed!</h1>
+      <p style="margin:0 0 4px;font-size:14px;color:${C.textSoft};font-weight:500;">${greeting}</p>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Your order <strong style="color:${C.navy};">${d.orderNumber}</strong> has been completed. Thank you for your business!
       </p>
 
       <table width="100%" cellpadding="0" cellspacing="0"
-        style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#f9fafb;">
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid #e5e7eb;">Product</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid #e5e7eb;">Qty</th>
-            <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;text-align:right;border-bottom:1px solid #e5e7eb;">Price</th>
-          </tr>
-        </thead>
+        style="border:1px solid ${C.border};border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>${orderTableHeader}</thead>
         <tbody>
           ${itemRows}
           <tr>
-            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#6b7280;border-top:1px solid #e5e7eb;">Subtotal</td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #e5e7eb;">$${subtotal.toFixed(2)}</td>
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};border-top:1px solid ${C.border};">Subtotal</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
           </tr>
           <tr>
-            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#6b7280;border-top:1px solid #f3f4f6;">Shipping</td>
-            <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;border-top:1px solid #f3f4f6;">${shipping > 0 ? `$${shipping.toFixed(2)}` : "Free"}</td>
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};border-top:1px solid #f3f4f6;">Shipping</td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${shipping > 0 ? `$${shipping.toFixed(2)}` : "Free"}</td>
           </tr>
-          <tr style="background:#f0fdf4;">
-            <td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:700;color:#15803d;border-top:1px solid #bbf7d0;">Total paid</td>
-            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#15803d;text-align:right;border-top:1px solid #bbf7d0;">$${d.total.toFixed(2)}</td>
+          <tr style="background:#f0fdf9;">
+            <td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:700;color:#047857;border-top:1px solid #a7f3d0;">Total paid</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#047857;text-align:right;border-top:1px solid #a7f3d0;">$${d.total.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -843,27 +829,27 @@ export function orderCompletedEmail(d: OrderEmailData) {
         <tr>
           ${shippingAddrHtml ? `
           <td width="50%" style="vertical-align:top;padding-right:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151;">Shipping address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${shippingAddrHtml}</p>
+            ${addrLabel("Shipping address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${shippingAddrHtml}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
           ${billingAddrHtml ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151;">Billing address</p>
-            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:#374151;line-height:1.7;">${billingAddrHtml}</p>
+            ${addrLabel("Billing address")}
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${billingAddrHtml}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
       </table>` : ""}
 
       ${(d.email || d.customerPhone) ? `
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-        <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Contact</p>
-        ${d.email ? `<p style="margin:0 0 4px;font-size:13px;color:#374151;"><span style="color:#6b7280;">Email:&nbsp;</span>${d.email}</p>` : ""}
-        ${d.customerPhone ? `<p style="margin:0;font-size:13px;color:#374151;"><span style="color:#6b7280;">Phone:&nbsp;</span>${d.customerPhone}</p>` : ""}
-      </div>` : ""}
+      ${infoBox(`
+        <p style="margin:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;">Contact</p>
+        ${d.email ? `<p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};"><span style="color:${C.muted};">Email:&nbsp;</span>${d.email}</p>` : ""}
+        ${d.customerPhone ? `<p style="margin:0;font-size:13px;color:${C.textSoft};"><span style="color:${C.muted};">Phone:&nbsp;</span>${d.customerPhone}</p>` : ""}
+      `)}` : ""}
     `),
   };
 }
@@ -872,18 +858,16 @@ export function orderCancelledEmail(d: OrderEmailData) {
   return {
     subject: `Order ${d.orderNumber} Cancelled`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Cancelled</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${d.firstName}, your order <strong>${d.orderNumber}</strong> has been cancelled.
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order Cancelled</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Hi ${d.firstName}, your order <strong style="color:${C.navy};">${d.orderNumber}</strong> has been cancelled.
         If you believe this is an error, please contact your administrator.
       </p>
       ${orderItemsTable(d.items)}
       <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
         <p style="margin:0;font-size:13px;color:#dc2626;font-weight:600;">For questions, please contact support.</p>
       </div>
-      <div style="text-align:center;">
-       
-      </div>`),
+    `),
   };
 }
 
@@ -891,40 +875,38 @@ export function orderDetailsEmail(d: OrderEmailData) {
   return {
     subject: `Order Details: ${d.orderNumber}`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Order Details</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${d.firstName}, here are the details for your order <strong>${d.orderNumber}</strong>.
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order Details</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Hi ${d.firstName}, here are the details for your order <strong style="color:${C.navy};">${d.orderNumber}</strong>.
       </p>
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+      ${infoBox(`
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="padding:4px 0;font-size:13px;color:#6b7280;width:140px;">Order</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.orderNumber}</td>
+            <td style="padding:4px 0;font-size:13px;color:${C.muted};width:140px;">Order</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${d.orderNumber}</td>
           </tr>
           <tr>
-            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Status</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.status.charAt(0) + d.status.slice(1).toLowerCase()}</td>
+            <td style="padding:4px 0;font-size:13px;color:${C.muted};">Status</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${d.status.charAt(0) + d.status.slice(1).toLowerCase()}</td>
           </tr>
           <tr>
-            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Total</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">$${d.total.toFixed(2)}</td>
+            <td style="padding:4px 0;font-size:13px;color:${C.muted};">Total</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">$${d.total.toFixed(2)}</td>
           </tr>
           ${d.trackingNumber ? `
           <tr>
-            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Tracking</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${d.shippingCarrier ?? ""} ${d.trackingNumber}</td>
+            <td style="padding:4px 0;font-size:13px;color:${C.muted};">Tracking</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${d.shippingCarrier ?? ""} ${d.trackingNumber}</td>
           </tr>` : ""}
           ${d.estimatedDelivery ? `
           <tr>
-            <td style="padding:4px 0;font-size:13px;color:#6b7280;">Est. Delivery</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:#111827;">${new Date(d.estimatedDelivery).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}</td>
+            <td style="padding:4px 0;font-size:13px;color:${C.muted};">Est. Delivery</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${new Date(d.estimatedDelivery).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}</td>
           </tr>` : ""}
         </table>
-      </div>
+      `)}
       ${orderItemsTable(d.items)}
-      <div style="text-align:center;">
-      
-      </div>`),
+    `),
   };
 }
 
@@ -932,25 +914,23 @@ export function forgotPasswordEmail(opts: { firstName: string; resetLink: string
   return {
     subject: "Reset Your Pronuvia Password",
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Reset your password</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Reset your password</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
         Hi ${opts.firstName}, we received a request to reset your Pronuvia password. Click the button below to choose a new one.
       </p>
-      <div style="text-align:center;margin-bottom:28px;">
-        <a href="${opts.resetLink}" style="display:inline-block;background:#3DBFA4;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:13px 36px;border-radius:8px;">Reset Password</a>
-      </div>
-      <p style="margin:0 0 8px;font-size:13px;color:#6b7280;text-align:center;">
+      ${btn(opts.resetLink, "Reset Password")}
+      <p style="margin:0 0 8px;font-size:13px;color:${C.muted};text-align:center;">
         This link will expire in <strong>1 hour</strong>.
       </p>
-      <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+      <p style="margin:0;font-size:12px;color:${C.dimmed};text-align:center;">
         If you didn&apos;t request a password reset, you can safely ignore this email.
-      </p>`),
+      </p>
+    `),
   };
 }
 
 // ─────────────────────────────────────────────
 // Doctor registration confirmation email
-// Sent immediately on account creation (all flows, PENDING status only)
 // ─────────────────────────────────────────────
 export function doctorRegistrationEmail(opts: {
   firstName:    string;
@@ -959,48 +939,42 @@ export function doctorRegistrationEmail(opts: {
 }) {
   const subject = "Thank You for Signing Up – Registration Received";
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
       Thank You for Registering!
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-      Dear  ${opts.firstName} ${opts.lastName},
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+      Dear ${opts.firstName} ${opts.lastName},
     </p>
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       ${opts.salesRepName
         ? `We are glad to inform you that ${opts.salesRepName} signed up for you.`
         : "Thank you for signing up with us."
       }
     </p>
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       We have successfully received your registration information. Our team is currently
       reviewing your details, and your account will be verified shortly.
     </p>
 
-    <!-- Status box -->
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin:24px 0;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:18px;">&#9203;</span>
-        <div>
-          <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#92400e;">Account Status: Under Review</p>
-          <p style="margin:0;font-size:12px;color:#b45309;line-height:1.5;">
-            Our team is reviewing your registration details.
-          </p>
-        </div>
-      </div>
+      <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#92400e;">&#9203; Account Status: Under Review</p>
+      <p style="margin:0;font-size:12px;color:#b45309;line-height:1.5;">
+        Our team is reviewing your registration details.
+      </p>
     </div>
 
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       Once your account has been approved, you will receive another email confirming
       that your account is active and ready to use.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       Thank you for your patience.
     </p>
 
-    <div style="border-top:1px solid #e5e7eb;padding-top:20px;margin-top:8px;">
-      <p style="margin:0;font-size:14px;color:#374151;line-height:1.75;">
+    <div style="border-top:1px solid ${C.border};padding-top:20px;margin-top:8px;">
+      <p style="margin:0;font-size:14px;color:${C.textSoft};line-height:1.75;">
         Best Regards,<br/>
-        <strong style="color:#111827;">Pronuvia</strong>
+        <strong style="color:${C.text};">Pronuvia</strong>
       </p>
     </div>
   `);
@@ -1008,7 +982,7 @@ export function doctorRegistrationEmail(opts: {
 }
 
 // ─────────────────────────────────────────────
-// Welcome Aboard email — sent on physician approval alongside the setup email
+// Welcome Aboard email
 // ─────────────────────────────────────────────
 export function welcomeAboardEmail(opts: {
   firstName: string;
@@ -1016,99 +990,88 @@ export function welcomeAboardEmail(opts: {
 }) {
   const subject = "Welcome Aboard! – Pronuvia AIC Therapy";
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Welcome Aboard!</h1>
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
-      Dear  ${opts.firstName} ${opts.lastName},
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Welcome Aboard!</h1>
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
+      Dear ${opts.firstName} ${opts.lastName},
     </p>
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
-      Thank you for your interest in AIC (Anti-orbital Ionic Calcium) Therapy.
-      Welcome aboard!
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
+      Thank you for your interest in AIC (Anti-orbital Ionic Calcium) Therapy. Welcome aboard!
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       Your application to set up an account with us is approved.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       We send you some information about AIC as follows.
     </p>
 
-    <!-- Section: AIC Resources -->
-    <div style="background:#f0fdf4;border-left:4px solid #3DBFA4;border-radius:0 8px 8px 0;padding:14px 20px;margin-bottom:24px;">
-      <p style="margin:0;font-size:13px;font-weight:700;color:#065f46;letter-spacing:0.05em;text-transform:uppercase;">AIC Calcium Resources</p>
-    </div>
+    ${accentBar(`<p style="margin:0;font-size:12px;font-weight:700;color:${C.navy};letter-spacing:0.08em;text-transform:uppercase;">AIC Calcium Resources</p>`)}
 
-    <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       AIC calcium is the world's first ionized calcium treatment that re-establishes calcium homeostasis
       by reversing cellular to systemic calcification, resulting in restored optimal cell signaling,
       reduced oxidative stress, and rejuvenated mitochondrial functions. AIC triggers our body's natural
       healing mechanisms to reverse many difficult chronic degenerative diseases that had no real hope.
     </p>
 
-    <!-- Resource 1 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111827;">AIC for Calcium Signaling (Book)</p>
-      <p style="margin:0;font-size:13px;color:#374151;line-height:1.65;">
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC for Calcium Signaling (Book)</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
         More technical information on AIC can be found from the book <em>"AIC for Calcium Signaling"</em>
-        written by the inventor of AIC,  Paul Lee.
+        written by the inventor of AIC, Paul Lee.
       </p>
     </div>
 
-    <!-- Resource 2 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111827;">AIC Therapy Dosing Protocol</p>
-      <p style="margin:0;font-size:13px;color:#374151;line-height:1.65;">
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Therapy Dosing Protocol</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
         The dosage protocol guideline provides participating physicians with suggestions on how Pronuvia's
         AIC-applied products can be utilized effectively in treating communicable and degenerative diseases.
         This dosing protocol is only for doctors.
       </p>
     </div>
 
-    <!-- Resource 3 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111827;">Introduction to AIC Therapy (Booklet)</p>
-      <p style="margin:0;font-size:13px;color:#374151;line-height:1.65;">
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">Introduction to AIC Therapy (Booklet)</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
         The booklet introduces the underlying technology of AIC and the principles behind the new and safe
         therapy based on AIC technology. This booklet can be shared with patients.
       </p>
     </div>
 
-    <!-- Resource 4 -->
-    <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111827;">AIC Brochure</p>
-      <p style="margin:0;font-size:13px;color:#374151;line-height:1.65;">
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Brochure</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
         This simple brochure provides a good summary of AIC therapy.
       </p>
     </div>
 
-    <!-- Free Consultation -->
-    <div style="background:#f0fdf4;border-left:4px solid #3DBFA4;border-radius:0 8px 8px 0;padding:14px 20px;margin-bottom:16px;">
-      <p style="margin:0;font-size:13px;font-weight:700;color:#065f46;letter-spacing:0.05em;text-transform:uppercase;">Free Consultation</p>
-    </div>
-    <p style="margin:0 0 10px;font-size:14px;color:#374151;line-height:1.75;">
+    ${accentBar(`<p style="margin:0;font-size:12px;font-weight:700;color:${C.navy};letter-spacing:0.08em;text-transform:uppercase;">Free Consultation</p>`)}
+    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       To help new doctors get started, we provide a 30-minute personal free consultation.
     </p>
-    <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       You can book a free consultation at<br/>
-      <a href="https://www.aictherapy.com/book-a-consultation" style="color:#3DBFA4;font-weight:600;">
+      <a href="https://www.aictherapy.com/book-a-consultation" style="color:${C.teal};font-weight:600;">
         https://www.aictherapy.com/book-a-consultation
       </a>
     </p>
 
-    <p style="margin:0 0 8px;font-size:14px;color:#374151;line-height:1.75;">
+    <p style="margin:0 0 8px;font-size:14px;color:${C.textSoft};line-height:1.75;">
       If you have any questions, please contact us at <strong>800-568-2982</strong> or
-      <a href="mailto:contact@pronuvia.com" style="color:#3DBFA4;">contact@pronuvia.com</a>.
+      <a href="mailto:contact@pronuvia.com" style="color:${C.teal};">contact@pronuvia.com</a>.
     </p>
 
-    <div style="border-top:1px solid #e5e7eb;margin-top:24px;padding-top:20px;">
-      <p style="margin:0 0 4px;font-size:14px;color:#374151;">Thank you.</p>
-      <p style="margin:0 0 2px;font-size:14px;color:#374151;">Sincerely,</p>
-      <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#111827;">Pronuvia Physician Support</p>
-      <p style="margin:0 0 2px;font-size:13px;color:#6b7280;">Pronuvia, Inc.</p>
-      <p style="margin:0;font-size:13px;color:#6b7280;">New York, NY USA</p>
+    <div style="border-top:1px solid ${C.border};margin-top:24px;padding-top:20px;">
+      <p style="margin:0 0 4px;font-size:14px;color:${C.textSoft};">Thank you.</p>
+      <p style="margin:0 0 2px;font-size:14px;color:${C.textSoft};">Sincerely,</p>
+      <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:${C.text};">Pronuvia Physician Support</p>
+      <p style="margin:0 0 2px;font-size:13px;color:${C.muted};">Pronuvia, Inc.</p>
+      <p style="margin:0;font-size:13px;color:${C.muted};">New York, NY USA</p>
     </div>
 
-    <div style="border-top:1px solid #e5e7eb;margin-top:20px;padding-top:16px;">
-      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:0.06em;text-transform:uppercase;">Disclaimer</p>
-      <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.7;">
+    <div style="border-top:1px solid ${C.border};margin-top:20px;padding-top:16px;">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:700;color:${C.dimmed};letter-spacing:0.08em;text-transform:uppercase;">Disclaimer</p>
+      <p style="margin:0;font-size:11px;color:${C.dimmed};line-height:1.7;">
         The information in this email has not been evaluated by the Food &amp; Drug Administration or any other
         medical body. We do not aim to diagnose, treat, cure, or prevent any illness or disease. The information
         shared here is for educational purposes only. You must consult your doctor or healthcare professional
@@ -1124,7 +1087,7 @@ export function welcomeAboardEmail(opts: {
 }
 
 // ─────────────────────────────────────────────
-// Order refund email — sent to patient when admin processes a refund
+// Order refund email
 // ─────────────────────────────────────────────
 export function orderRefundEmail(opts: {
   orderNumber:     string;
@@ -1143,11 +1106,11 @@ export function orderRefundEmail(opts: {
 
   const rows = opts.items.map((i) => `
     <tr>
-      <td style="padding:10px 0;font-size:13px;color:#111827;border-bottom:1px solid #f3f4f6;">
-        ${i.title}${i.variantSize ? ` <span style="color:#6b7280;">(${i.variantSize})</span>` : ""}
+      <td style="padding:10px 12px;font-size:13px;color:${C.text};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` <span style="color:${C.muted};">(${i.variantSize})</span>` : ""}
       </td>
-      <td style="padding:10px 0;font-size:13px;color:#6b7280;text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
-      <td style="padding:10px 0;font-size:13px;font-weight:600;color:#111827;text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.muted};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
 
   const payLabel = opts.paymentMethod === "CARD"
@@ -1157,59 +1120,42 @@ export function orderRefundEmail(opts: {
     : (opts.paymentMethod ?? "—");
 
   const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#7c3aed;">Order Refunded: ${opts.orderNumber}</h1>
-    <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order Refunded: ${opts.orderNumber}</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:${C.textSoft};line-height:1.6;">
       Hello, your order on Pronuvia has been refunded. Here are the details for your reference:
     </p>
 
-    <!-- Order label -->
-    <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#7c3aed;">
+    <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:${C.navy};">
       [Order #${opts.orderNumber}] (${new Date(opts.orderDate).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})})
     </p>
 
-    <!-- Items table -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px;">
-      <thead>
-        <tr style="background:#f9fafb;">
-          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:left;letter-spacing:.05em;">Product</th>
-          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:center;letter-spacing:.05em;">Quantity</th>
-          <th style="padding:10px 12px;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;text-align:right;letter-spacing:.05em;">Price</th>
-        </tr>
-      </thead>
-      <tbody style="padding:0 12px;">${rows.replace(/<td/g, '<td style="padding:10px 12px;" ').replace(/<\/td>/g, '</td>')}</tbody>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:8px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+      <thead>${orderTableHeader}</thead>
+      <tbody>${rows}</tbody>
       <tbody>
-        <tr><td colspan="3" style="border-top:1px solid #e5e7eb;padding:10px 12px;font-size:13px;color:#6b7280;">Subtotal</td></tr>
-        <tr style="border-top:0;">
-          <td colspan="2" style="padding:0 12px 10px;font-size:13px;color:#6b7280;"></td>
-          <td style="padding:0 12px 10px;font-size:13px;font-weight:600;color:#111827;text-align:right;">$${opts.subtotal.toFixed(2)}</td>
+        <tr style="border-top:1px solid ${C.border};">
+          <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">Subtotal</td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;">$${opts.subtotal.toFixed(2)}</td>
         </tr>
-
-        <tr style="border-top:1px solid #e5e7eb;">
-          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">Shipping</td>
-          <td></td>
-          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#111827;text-align:right;">
-            ${opts.shippingCost > 0 ? `$${opts.shippingCost.toFixed(2)}` : '<span style="color:#059669;">Free</span>'}
+        <tr style="border-top:1px solid ${C.border};">
+          <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">Shipping</td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;">
+            ${opts.shippingCost > 0 ? `$${opts.shippingCost.toFixed(2)}` : '<span style="color:#047857;">Free</span>'}
           </td>
         </tr>
-
-        <tr style="border-top:1px solid #e5e7eb;">
-          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">Payment method</td>
-          <td></td>
-          <td style="padding:10px 12px;font-size:13px;color:#374151;text-align:right;">${payLabel}</td>
+        <tr style="border-top:1px solid ${C.border};">
+          <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">Payment method</td>
+          <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;">${payLabel}</td>
         </tr>
-
         ${opts.refundAmount > 0 ? `
-        <tr style="border-top:1px solid #e5e7eb;">
-          <td style="padding:10px 12px;font-size:13px;color:#6b7280;">${opts.reason ? opts.reason : "Refund"}</td>
-          <td></td>
+        <tr style="border-top:1px solid ${C.border};">
+          <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">${opts.reason ? opts.reason : "Refund"}</td>
           <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#dc2626;text-align:right;">−$${opts.refundAmount.toFixed(2)}</td>
         </tr>` : ""}
-
-        <tr style="border-top:2px solid #e5e7eb;background:#f9fafb;">
-          <td style="padding:12px;font-size:13px;font-weight:700;color:#111827;">Total</td>
-          <td></td>
-          <td style="padding:12px;font-size:13px;font-weight:700;color:#111827;text-align:right;">
-            <span style="text-decoration:line-through;color:#9ca3af;margin-right:8px;">$${(opts.subtotal + opts.shippingCost).toFixed(2)}</span>
+        <tr style="border-top:2px solid ${C.border};background:${C.surface};">
+          <td colspan="2" style="padding:12px;font-size:13px;font-weight:700;color:${C.text};">Total</td>
+          <td style="padding:12px;font-size:13px;font-weight:700;color:${C.text};text-align:right;">
+            <span style="text-decoration:line-through;color:${C.dimmed};margin-right:8px;">$${(opts.subtotal + opts.shippingCost).toFixed(2)}</span>
             $${Math.max(0, opts.subtotal + opts.shippingCost - opts.refundAmount).toFixed(2)}
           </td>
         </tr>
@@ -1217,22 +1163,20 @@ export function orderRefundEmail(opts: {
     </table>
 
     ${(opts.billingAddress || opts.shippingAddress) ? `
-    <!-- Addresses -->
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
       <tr>
         ${opts.billingAddress ? `
         <td width="50%" style="vertical-align:top;padding-right:12px;">
-          <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#7c3aed;">Billing address</p>
-          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px;">
-            <p style="margin:0;font-size:13px;color:#374151;white-space:pre-line;line-height:1.7;">${(() => {
+          ${addrLabel("Billing address")}
+          <div style="border:1px solid ${C.border};border-radius:8px;padding:14px;">
+            <p style="margin:0;font-size:13px;color:${C.textSoft};white-space:pre-line;line-height:1.7;">${(() => {
               try {
                 const a = JSON.parse(opts.billingAddress!);
                 return [
                   [a.firstName, a.lastName].filter(Boolean).join(" "),
                   a.address1, a.address2,
                   [a.city, a.state, a.zip].filter(Boolean).join(", "),
-                  a.country,
-                  a.phone,
+                  a.country, a.phone,
                 ].filter(Boolean).join("\n");
               } catch { return opts.billingAddress!; }
             })()}</p>
@@ -1240,17 +1184,16 @@ export function orderRefundEmail(opts: {
         </td>` : "<td width='50%'></td>"}
         ${opts.shippingAddress ? `
         <td width="50%" style="vertical-align:top;padding-left:12px;">
-          <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#7c3aed;">Shipping address</p>
-          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px;">
-            <p style="margin:0;font-size:13px;color:#374151;white-space:pre-line;line-height:1.7;">${(() => {
+          ${addrLabel("Shipping address")}
+          <div style="border:1px solid ${C.border};border-radius:8px;padding:14px;">
+            <p style="margin:0;font-size:13px;color:${C.textSoft};white-space:pre-line;line-height:1.7;">${(() => {
               try {
                 const a = JSON.parse(opts.shippingAddress!);
                 return [
                   [a.firstName, a.lastName].filter(Boolean).join(" "),
                   a.address1, a.address2,
                   [a.city, a.state, a.zip].filter(Boolean).join(", "),
-                  a.country,
-                  a.phone,
+                  a.country, a.phone,
                 ].filter(Boolean).join("\n");
               } catch { return opts.shippingAddress!; }
             })()}</p>
@@ -1260,16 +1203,15 @@ export function orderRefundEmail(opts: {
     </table>` : ""}
 
     ${opts.note ? `
-    <div style="background:#f9fafb;border-left:4px solid #7c3aed;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:24px;">
-      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.05em;">Note</p>
-      <p style="margin:0;font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap;">${opts.note}</p>
+    <div style="background:${C.surface};border-left:3px solid ${C.navy};border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:700;color:${C.navy};text-transform:uppercase;letter-spacing:0.08em;">Note</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.6;white-space:pre-wrap;">${opts.note}</p>
     </div>` : ""}
 
-    <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+    <p style="margin:0;font-size:13px;color:${C.muted};line-height:1.6;">
       We hope to see you again soon.
     </p>
   `);
-
   return { subject, html };
 }
 
@@ -1277,18 +1219,16 @@ export function orderNoteEmail(opts: { firstName: string; orderNumber: string; n
   return {
     subject: `Message regarding your order ${opts.orderNumber}`,
     html: base(`
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">A note about your order</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
-        Hi  ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong>${opts.orderNumber}</strong>.
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">A note about your order</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Hi ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong style="color:${C.navy};">${opts.orderNumber}</strong>.
       </p>
-      <div style="background:#f9fafb;border-left:4px solid #3DBFA4;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
-        <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
+      <div style="background:${C.surface};border-left:3px solid ${C.teal};border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
+        <p style="margin:0;font-size:14px;color:${C.textSoft};line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
       </div>
-      <div style="text-align:center;">
-      
-      </div>
-      <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
+      <p style="margin:20px 0 0;font-size:12px;color:${C.dimmed};text-align:center;">
         If you have questions, please contact your administrator.
-      </p>`),
+      </p>
+    `),
   };
 }
