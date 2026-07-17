@@ -1,17 +1,17 @@
-import { notFound }              from "next/navigation";
-import Link                       from "next/link";
-import { Country }                from "country-state-city";
-import { requireAdmin }           from "@/lib/auth/dal";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Country } from "country-state-city";
+import { requireAdmin } from "@/lib/auth/dal";
 import { getOrderById, getOrderRefunds } from "@/actions/admin/manage-orders";
-import { OrderStatus }            from "@/generated/prisma/enums";
-import { RefundOrderModal }       from "@/components/admin/refund-order-modal";
-import { PrintButton }            from "@/components/sales/print-button";
-import { SendOrderEmailPanel }    from "@/components/admin/send-order-email-panel";
-import { OrderActionsPanel }      from "@/components/admin/order-actions-panel";
-import { getOrderShipments }      from "@/actions/admin/shipping";
+import { OrderStatus } from "@/generated/prisma/enums";
+import { RefundOrderModal } from "@/components/admin/refund-order-modal";
+import { PrintButton } from "@/components/sales/print-button";
+import { SendOrderEmailPanel } from "@/components/admin/send-order-email-panel";
+import { OrderActionsPanel } from "@/components/admin/order-actions-panel";
+import { getOrderShipments } from "@/actions/admin/shipping";
 import type { OrderItem, StoredRefundItem } from "@/actions/admin/manage-orders";
-import { getOrderNotes }          from "@/actions/admin/order-notes";
-import { OrderNotesPanel }        from "@/components/admin/order-notes-panel";
+import { getOrderNotes } from "@/actions/admin/order-notes";
+import { OrderNotesPanel } from "@/components/admin/order-notes-panel";
 import { EditOrderAddress, EditOrderEmail, EditOrderPhone } from "@/components/admin/edit-order-address";
 
 type Props = { params: Promise<{ id: string }> };
@@ -91,21 +91,21 @@ function fmtDateTime(d: Date | string | null | undefined) {
 
 function carrierTrackingUrl(carrier: string | null | undefined, trackingNumber: string): string {
   const c = (carrier ?? "").toLowerCase();
-  if (c.includes("ups"))   return `https://www.ups.com/track?tracknum=${trackingNumber}`;
-  if (c.includes("usps"))  return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
+  if (c.includes("ups")) return `https://www.ups.com/track?tracknum=${trackingNumber}`;
+  if (c.includes("usps")) return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
   if (c.includes("fedex")) return `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`;
-  if (c.includes("dhl"))   return `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
+  if (c.includes("dhl")) return `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
   return `https://www.google.com/search?q=${encodeURIComponent(`${carrier ?? ""} tracking ${trackingNumber}`)}`;
 }
 
 const statusStyle: Record<OrderStatus, string> = {
-  PENDING:    "bg-amber-50   text-amber-700   border-amber-200",
+  PENDING: "bg-amber-50   text-amber-700   border-amber-200",
   PROCESSING: "bg-blue-50    text-blue-700    border-blue-200",
-  SHIPPED:    "bg-indigo-50  text-indigo-700  border-indigo-200",
-  DELIVERED:  "bg-emerald-50 text-emerald-700 border-emerald-200",
-  COMPLETED:  "bg-teal-50    text-teal-700    border-teal-200",
-  CANCELLED:  "bg-red-50     text-red-700     border-red-200",
-  REFUNDED:   "bg-orange-50  text-orange-700  border-orange-200",
+  SHIPPED: "bg-indigo-50  text-indigo-700  border-indigo-200",
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  COMPLETED: "bg-teal-50    text-teal-700    border-teal-200",
+  CANCELLED: "bg-red-50     text-red-700     border-red-200",
+  REFUNDED: "bg-orange-50  text-orange-700  border-orange-200",
 };
 
 export default async function AdminOrderDetailPage({ params }: Props) {
@@ -123,8 +123,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   const items = order.items as unknown as OrderItem[];
 
   // Build per-item refunded qty from OrderRefund records (multi-refund system)
-  const refundQtyByIdx         = new Map<number, number>();
-  const refundLineTotalByIdx   = new Map<number, number>();
+  const refundQtyByIdx = new Map<number, number>();
+  const refundLineTotalByIdx = new Map<number, number>();
 
   if (refunds.length > 0) {
     for (const r of refunds) {
@@ -167,7 +167,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   const allItemsFullyRefunded = items.length > 0 && items.every((item, idx) => (refundQtyByIdx.get(idx) ?? 0) >= item.quantity);
   const isReturned = !!order.returnedAt;
   const customerPhone: string | null = order.customerPhone ?? null;
-  const payStatus  = order.paymentStatus ?? "PENDING";
+  const payStatus = order.paymentStatus ?? "PENDING";
 
   const physAddr = [
     order.physician?.addressOne,
@@ -337,7 +337,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         <p className="text-sm text-gray-700"> (Direct)</p>
                       </div>
                     )}
-                    {order.customerEmail && (
+                    {/* {order.customerEmail && (
                       <div>
                         <p className="text-[11px] text-gray-400 mb-0.5">
                           Patient Email:
@@ -347,7 +347,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           {order.customerEmail}
                         </a>
                       </div>
-                    )}
+                    )} */}
                     {/* {(customerPhone || order.customerEmail) && (
                       <div>
                         <p className="text-[11px] text-gray-400 mb-0.5">
@@ -415,13 +415,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-line">
                         {fmtAddressBody(order.shippingAddress)}
                       </p>
-                      {/* {(order.customerEmail || order.customerPhone) && (
-                        <div className="pt-1 border-t border-gray-100 space-y-0.5">
-                          {order.customerEmail && <p className="text-xs text-gray-500">{order.customerEmail}</p>}
-                          {order.customerPhone && <p className="text-xs text-gray-500">{order.customerPhone}</p>}
+                      {order.customerEmail && (
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-0.5">
+                            Patient Email:
+                            <EditOrderEmail orderId={order.id} current={order.customerEmail} />
+                          </p>
+                          <a href={`mailto:${order.customerEmail}`} className="text-xs text-[#3DBFA4] hover:underline break-all">
+                            {order.customerEmail}
+                          </a>
                         </div>
-                      )} */}
-                      <EditOrderAddress orderId={order.id} type="shipping" raw={order.shippingAddress} />
+                      )}
                     </div>
                   ) : order.physician ? (
                     <div className="text-sm space-y-1">
@@ -461,9 +465,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {items.map((item, idx) => {
-                      const refQty            = refundQtyByIdx.get(idx) ?? 0;
-                      const refLineTotal      = refundLineTotalByIdx.get(idx) ?? 0;
-                      const isFullyRefunded   = refQty >= item.quantity;
+                      const refQty = refundQtyByIdx.get(idx) ?? 0;
+                      const refLineTotal = refundLineTotalByIdx.get(idx) ?? 0;
+                      const isFullyRefunded = refQty >= item.quantity;
                       const isPartialRefunded = refQty > 0 && refQty < item.quantity;
                       return (
                         <tr key={idx} className={isFullyRefunded ? "opacity-50" : ""}>
@@ -495,13 +499,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                             {isFullyRefunded
                               ? <span className="line-through text-gray-300">{fmtMoney(item.lineTotal)}</span>
                               : isPartialRefunded
-                              ? (
-                                <span>
-                                  {fmtMoney(item.lineTotal - refLineTotal)}
-                                  <span className="block text-[10px] text-orange-400 line-through">{fmtMoney(item.lineTotal)}</span>
-                                </span>
-                              )
-                              : fmtMoney(item.lineTotal)}
+                                ? (
+                                  <span>
+                                    {fmtMoney(item.lineTotal - refLineTotal)}
+                                    <span className="block text-[10px] text-orange-400 line-through">{fmtMoney(item.lineTotal)}</span>
+                                  </span>
+                                )
+                                : fmtMoney(item.lineTotal)}
                           </td>
                         </tr>
                       );
@@ -530,7 +534,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         </div>
                       )}
                       {(() => {
-                        const stored  = order.shippingRate ?? 0;
+                        const stored = order.shippingRate ?? 0;
                         const implied = parseFloat((order.total - order.subtotal + (order.discountAmount ?? 0)).toFixed(2));
                         const display = stored > 0 ? stored : implied > 0 ? implied : 0;
                         return (
@@ -665,11 +669,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         )}
 
                         {refund.customerRefundMethod && (refund.customerRefundAmount as number) > 0 && (
-                          <div className={`mt-2 flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg w-fit ${
-                            refund.customerRefundMethod === "stripe"
+                          <div className={`mt-2 flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg w-fit ${refund.customerRefundMethod === "stripe"
                               ? "bg-indigo-50 text-indigo-700"
                               : "bg-emerald-50 text-emerald-700"
-                          }`}>
+                            }`}>
                             {refund.customerRefundMethod === "stripe" ? (
                               <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
