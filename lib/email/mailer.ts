@@ -3,12 +3,18 @@ import nodemailer from "nodemailer";
 
 export async function sendMail(opts: {
   to:           string;
-  cc?:          string;
+  cc?:          string | string[];
   subject:      string;
   html:         string;
   attachments?: { filename: string; path: string }[];
 }) {
   const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@pronuvia.com";
+
+  // Normalise CC: remove blanks and duplicates of `to`
+  const ccList = (Array.isArray(opts.cc) ? opts.cc : opts.cc ? [opts.cc] : [])
+    .map(e => e.trim())
+    .filter(e => e && e !== opts.to);
+  const ccUnique = [...new Set(ccList)];
 
   // ── SendGrid (preferred — works on Vercel / serverless) ───────────────────
   if (process.env.SENDGRID_API_KEY) {
@@ -20,10 +26,10 @@ export async function sendMail(opts: {
       subject: opts.subject,
       html:    opts.html,
     };
-    if (opts.cc) msg.cc = opts.cc;
+    if (ccUnique.length) msg.cc = ccUnique;
 
     const [res] = await sgMail.send(msg);
-    console.log("[mailer/sendgrid] sent to", opts.to, opts.cc ? `| cc: ${opts.cc}` : "", "| subject:", opts.subject, "| status:", res.statusCode);
+    console.log("[mailer/sendgrid] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| status:", res.statusCode);
     return res;
   }
 
@@ -45,11 +51,11 @@ export async function sendMail(opts: {
   const info = await transporter.sendMail({
     from,
     to:          opts.to,
-    cc:          opts.cc,
+    cc:          ccUnique.length ? ccUnique.join(", ") : undefined,
     subject:     opts.subject,
     html:        opts.html,
     attachments: opts.attachments,
   });
-  console.log("[mailer/smtp] sent to", opts.to, opts.cc ? `| cc: ${opts.cc}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
+  console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;
 }

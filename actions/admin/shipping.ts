@@ -311,6 +311,46 @@ export async function purchaseLabel(
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/admin/orders");
 
+  // Send tracking email to patient, CC physician + sales rep
+  try {
+    const fullOrder = await prisma.order.findUnique({
+      where:  { id: orderId },
+      select: {
+        orderNumber: true, items: true,
+        customerEmail: true, shippingAddress: true, estimatedDelivery: true,
+        physician: { select: { email: true } },
+        salesRep:  { select: { email: true } },
+      },
+    });
+
+    if (fullOrder) {
+      const { shipmentTrackingEmail } = await import("@/lib/email/templates");
+      const { sendMail }              = await import("@/lib/email/mailer");
+      type RawItem = { title?: string; variantSize?: string; quantity?: number; lineTotal?: number };
+      const items = (fullOrder.items as RawItem[]).map(i => ({
+        title:       i.title       ?? "Product",
+        variantSize: i.variantSize ?? null,
+        quantity:    i.quantity    ?? 1,
+        lineTotal:   i.lineTotal   ?? 0,
+      }));
+      const { subject, html } = shipmentTrackingEmail({
+        orderNumber:      fullOrder.orderNumber,
+        trackingNumber:   result.trackingNumber,
+        shippingCarrier:  `${result.carrierLabel} - ${result.service}`,
+        estimatedDelivery: fullOrder.estimatedDelivery,
+        items,
+        shippingAddress:  fullOrder.shippingAddress,
+      });
+
+      const to = fullOrder.customerEmail ?? fullOrder.physician?.email ?? "";
+      const cc = [fullOrder.physician?.email, fullOrder.salesRep?.email].filter(Boolean) as string[];
+
+      if (to) await sendMail({ to, cc, subject, html });
+    }
+  } catch (err) {
+    console.error("[purchaseLabel] tracking email failed:", err);
+  }
+
   return {
     success: true,
     message: `Label purchased! Tracking: ${result.trackingNumber}`,

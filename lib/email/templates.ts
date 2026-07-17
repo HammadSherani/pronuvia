@@ -1215,6 +1215,87 @@ export function orderRefundEmail(opts: {
   return { subject, html };
 }
 
+// ─────────────────────────────────────────────
+// Shipment tracking email (patient To, physician + sales rep CC)
+// ─────────────────────────────────────────────
+function carrierTrackingUrl(carrier: string | null | undefined, trackingNumber: string): string | null {
+  if (!carrier) return null;
+  const c = carrier.toLowerCase();
+  if (c.includes("fedex")) return `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`;
+  if (c.includes("ups"))   return `https://www.ups.com/track?tracknum=${trackingNumber}`;
+  if (c.includes("usps"))  return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
+  return null;
+}
+
+export function shipmentTrackingEmail(opts: {
+  orderNumber:        string;
+  trackingNumber:     string;
+  shippingCarrier?:   string | null;
+  estimatedDelivery?: Date | null;
+  items:              { title: string; variantSize?: string | null; quantity: number; lineTotal: number }[];
+  shippingAddress?:   string | null;
+}) {
+  const subject = `Your order #${opts.orderNumber} has shipped!`;
+  const trackUrl = carrierTrackingUrl(opts.shippingCarrier, opts.trackingNumber);
+
+  const itemRows = opts.items.map(i => `
+    <tr>
+      <td style="padding:9px 0;font-size:13px;color:${C.textSoft};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? ` <span style="color:${C.muted};">(${i.variantSize})</span>` : ""}
+      </td>
+      <td style="padding:9px 0;font-size:13px;color:${C.muted};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:9px 0;font-size:13px;font-weight:600;color:${C.text};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
+  const html = base(`
+    <!-- Ship banner -->
+    <div style="background:${C.ink};margin:-40px -40px 28px;padding:22px 40px;border-radius:16px 16px 0 0;">
+      <p style="margin:0 0 2px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;">Your order has shipped</p>
+      <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Order #${opts.orderNumber}</p>
+    </div>
+
+    <!-- Tracking box -->
+    <div style="border:2px solid ${C.navy};border-radius:12px;padding:20px 24px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.muted};">Tracking Number</p>
+      <p style="margin:0 0 14px;font-size:22px;font-weight:700;color:${C.navy};letter-spacing:0.05em;font-family:monospace;">${opts.trackingNumber}</p>
+      ${opts.shippingCarrier ? `<p style="margin:0 0 14px;font-size:13px;color:${C.muted};">via <strong style="color:${C.textSoft};">${opts.shippingCarrier}</strong></p>` : ""}
+      ${trackUrl ? btn(trackUrl, "Track My Package") : ""}
+    </div>
+
+    ${opts.estimatedDelivery ? `
+    <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0 0 2px;font-size:11px;font-weight:600;color:#047857;text-transform:uppercase;letter-spacing:0.08em;">Estimated Delivery</p>
+      <p style="margin:0;font-size:16px;font-weight:700;color:#047857;">${new Date(opts.estimatedDelivery).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}</p>
+    </div>` : ""}
+
+    <!-- Items -->
+    <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.08em;">Items Shipped</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <thead>
+        <tr>
+          <th style="padding:0 0 8px;font-size:11px;color:${C.dimmed};text-align:left;font-weight:600;">Product</th>
+          <th style="padding:0 0 8px;font-size:11px;color:${C.dimmed};text-align:center;font-weight:600;">Qty</th>
+          <th style="padding:0 0 8px;font-size:11px;color:${C.dimmed};text-align:right;font-weight:600;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+
+    ${opts.shippingAddress ? `
+    ${addrLabel("Shipping to")}
+    <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 16px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+    </div>` : ""}
+
+    <p style="margin:0;font-size:13px;color:${C.muted};line-height:1.6;">
+      If you have any questions about your shipment, please contact us at
+      <a href="mailto:contact@pronuvia.com" style="color:${C.teal};">contact@pronuvia.com</a>.
+    </p>
+  `);
+
+  return { subject, html };
+}
+
 export function orderNoteEmail(opts: { firstName: string; orderNumber: string; note: string }) {
   return {
     subject: `Message regarding your order ${opts.orderNumber}`,

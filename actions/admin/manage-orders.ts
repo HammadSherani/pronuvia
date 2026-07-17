@@ -141,8 +141,19 @@ export async function shipOrder(
 ): Promise<OrderActionState> {
   await requireAdmin();
 
-  const order = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true, status: true } });
+  const order = await prisma.order.findUnique({
+    where:  { id: orderId },
+    select: {
+      id: true, status: true,
+      orderNumber: true, items: true,
+      customerEmail: true, shippingAddress: true,
+      physician: { select: { email: true, firstName: true, lastName: true } },
+      salesRep:  { select: { email: true } },
+    },
+  });
   if (!order) return { message: "Order not found." };
+
+  const estimatedDelivery = payload.estimatedDelivery ? new Date(payload.estimatedDelivery) : null;
 
   await prisma.order.update({
     where: { id: orderId },
@@ -151,7 +162,7 @@ export async function shipOrder(
       shippingCarrier:  payload.carrier || null,
       trackingNumber:   payload.trackingNumber.trim() || null,
       shippingRate:     payload.shippingCost,
-      estimatedDelivery: payload.estimatedDelivery ? new Date(payload.estimatedDelivery) : null,
+      estimatedDelivery,
     },
   });
 
@@ -159,6 +170,37 @@ export async function shipOrder(
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/sales/orders");
   revalidatePath("/physician/orders");
+
+  // Send tracking email
+  const trackingNum = payload.trackingNumber.trim();
+  if (trackingNum) {
+    try {
+      const { shipmentTrackingEmail } = await import("@/lib/email/templates");
+      type RawItem = { title?: string; variantSize?: string; quantity?: number; lineTotal?: number };
+      const items = (order.items as RawItem[]).map(i => ({
+        title:       i.title       ?? "Product",
+        variantSize: i.variantSize ?? null,
+        quantity:    i.quantity    ?? 1,
+        lineTotal:   i.lineTotal   ?? 0,
+      }));
+      const { subject, html } = shipmentTrackingEmail({
+        orderNumber:      order.orderNumber,
+        trackingNumber:   trackingNum,
+        shippingCarrier:  payload.carrier || null,
+        estimatedDelivery,
+        items,
+        shippingAddress:  order.shippingAddress,
+      });
+
+      const to = order.customerEmail ?? order.physician?.email ?? "";
+      const cc = [order.physician?.email, order.salesRep?.email].filter(Boolean) as string[];
+
+      if (to) await sendMail({ to, cc, subject, html });
+    } catch (err) {
+      console.error("[shipOrder] tracking email failed:", err);
+    }
+  }
+
   return { success: true, message: "Order marked as shipped." };
 }
 
