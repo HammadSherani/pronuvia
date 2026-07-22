@@ -16,7 +16,7 @@ type Category = { id: string; name: string };
 
 function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
   const allVariants = product.variants as Variant[];
-  const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(a.size ?? "0") - parseFloat(b.size ?? "0"));
+  const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(b.size ?? "0") - parseFloat(a.size ?? "0"));
   const { addItem, items, updateQty, removeItem } = useCart();
 
   const firstAvailableIdx = variants.findIndex(isAvailable);
@@ -39,7 +39,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   const minPrice   = Math.min(...prices);
   const maxPrice   = Math.max(...prices);
   const priceLabel = variants.length > 1 && minPrice !== maxPrice
-    ? `$${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)}`
+    ? `$${maxPrice.toFixed(2)} – $${minPrice.toFixed(2)}`
     : `$${unitPrice.toFixed(2)}`;
 
   function handleAddToCart() {
