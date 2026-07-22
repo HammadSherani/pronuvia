@@ -6,7 +6,7 @@ import { prisma }           from "@/lib/db/prisma";
 export async function savePhysicianAddress(data: {
   address1: string; address2: string;
   city: string; state: string; zip: string;
-  country: string;
+  country: string; phone?: string;
 }): Promise<{ success: boolean; message?: string }> {
   try {
     const session = await requirePhysician();
@@ -18,6 +18,8 @@ export async function savePhysicianAddress(data: {
         city:       data.city,
         state:      data.state,
         zipCode:    data.zip,
+        country:    data.country || undefined,
+        phone:      data.phone   || undefined,
       },
     });
     return { success: true };

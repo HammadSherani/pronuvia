@@ -166,6 +166,7 @@ export async function confirmPhysicianCardOrder(
         shippingAddress: payload.shippingAddress || null,
         notes:           payload.notes           || null,
         orderDate:       new Date(),
+        customerPhone:   payload.customerPhone   || null,
       });
       const cc = physician?.email && physician.email !== payload.customerEmail
         ? physician.email
@@ -195,6 +196,8 @@ export async function confirmPhysicianCardOrder(
       total:           payload.total,
       billingAddress:  payload.billingAddress  || null,
       shippingAddress: payload.shippingAddress || null,
+      contactEmail:    payload.customerEmail   || null,
+      contactPhone:    payload.customerPhone   || null,
     });
     await sendMail({ to: "info@pronuvia.com", subject, html });
   } catch (err) {

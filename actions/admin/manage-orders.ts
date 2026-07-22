@@ -190,6 +190,8 @@ export async function shipOrder(
         estimatedDelivery,
         items,
         shippingAddress:  order.shippingAddress,
+        contactEmail:     order.customerEmail ?? null,
+        contactPhone:     order.customerPhone ?? null,
       });
 
       const to = order.customerEmail ?? order.physician?.email ?? "";
@@ -775,12 +777,18 @@ export async function processReturn(
   }
 
   // ── Create OrderRefund record ────────────────────────────────────────────
+  // recordedTotal = actual amount back to customer (items + shipping if included)
+  // eventTotal (items-only) is kept separate for commission clawback math
+  const recordedTotal = (customerRefund?.amount && customerRefund.amount > 0)
+    ? customerRefund.amount
+    : eventTotal;
+
   await prisma.orderRefund.create({
     data: {
       orderId,
       refundNumber,
       items:                storedRefundItems as object[],
-      total:                eventTotal,
+      total:                recordedTotal,
       salesRepClawback,
       physicianClawback,
       reason:               reason.trim() || null,
@@ -862,7 +870,7 @@ export async function processReturn(
   }));
 
   // ── Update order aggregate fields ────────────────────────────────────────
-  const newReturnedTotal     = parseFloat(((order.returnedTotal ?? 0) + eventTotal).toFixed(2));
+  const newReturnedTotal     = parseFloat(((order.returnedTotal ?? 0) + recordedTotal).toFixed(2));
   const newSalesRepClawback  = parseFloat((existingSalesRepClawback + salesRepClawback).toFixed(2));
   const newPhysicianClawback = parseFloat((existingPhysicianClawback + physicianClawback).toFixed(2));
 
@@ -915,6 +923,8 @@ export async function processReturn(
         paymentMethod:   order.paymentMethod ?? null,
         billingAddress:  order.billingAddress ?? null,
         shippingAddress: order.shippingAddress ?? null,
+        contactEmail:    order.customerEmail ?? null,
+        contactPhone:    order.customerPhone ?? null,
       });
 
       const sends: Promise<unknown>[] = [];

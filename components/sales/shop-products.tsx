@@ -16,7 +16,7 @@ type Category = { id: string; name: string };
 
 function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
   const allVariants = product.variants as Variant[];
-  const variants    = allVariants.filter(isVisible);
+  const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(a.size ?? "0") - parseFloat(b.size ?? "0"));
   const { addItem, items, updateQty, removeItem } = useCart();
 
   const firstAvailableIdx = variants.findIndex(isAvailable);

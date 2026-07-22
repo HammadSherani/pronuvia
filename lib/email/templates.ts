@@ -1,4 +1,16 @@
+import fs from "fs";
+import path from "path";
+
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+function getLogoDataUri(): string {
+  try {
+    const buf = fs.readFileSync(path.join(process.cwd(), "public/assets/logo-white.png"));
+    return `data:image/png;base64,${buf.toString("base64")}`;
+  } catch {
+    return `${getAppUrl()}/assets/logo-white.png`;
+  }
+}
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -33,8 +45,8 @@ const base = (content: string) => `
           <!-- Logo / Brand -->
           <tr>
             <td align="center" style="padding-bottom:24px;">
-              <div style="display:inline-block;background:${C.ink};border-radius:10px;padding:10px 24px;">
-                <span style="color:#ffffff;font-size:18px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">PRONUVIA</span>
+              <div style="display:inline-block;background:${C.ink};border-radius:10px;padding:12px 28px;">
+                <img src="${getLogoDataUri()}" alt="Pronuvia" width="150" height="auto" style="display:block;border:0;max-width:150px;" />
               </div>
             </td>
           </tr>
@@ -551,6 +563,14 @@ function renderAddr(raw: string | null | undefined): string {
   }
 }
 
+function addrWithContact(raw: string | null | undefined, email?: string | null, phone?: string | null): string {
+  const addrHtml = renderAddr(raw);
+  let extra = "";
+  if (phone) extra += `<br/><span style="color:${C.muted};">Phone:&nbsp;</span>${phone}`;
+  if (email) extra += `<br/><span style="color:${C.muted};">Email:&nbsp;</span>${email}`;
+  return addrHtml + extra;
+}
+
 const orderTableHeader = `
   <tr style="background:${C.surface};">
     <th style="padding:10px 12px;font-size:11px;font-weight:700;color:${C.muted};text-transform:uppercase;letter-spacing:.06em;text-align:left;border-bottom:1px solid ${C.border};">Product</th>
@@ -640,14 +660,14 @@ export function orderConfirmationEmail(d: OrderEmailData) {
           <td width="50%" style="vertical-align:top;padding-right:10px;">
             ${addrLabel("Billing address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(d.billingAddress)}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(d.billingAddress, d.email, d.customerPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
           ${d.shippingAddress ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
             ${addrLabel("Shipping address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(d.shippingAddress)}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(d.shippingAddress, d.email, d.customerPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
@@ -670,8 +690,10 @@ export function newOrderNotificationEmail(opts: {
   shippingCost:    number;
   paymentMethod:   string | null;
   total:           number;
-  billingAddress?: string | null;
+  billingAddress?:  string | null;
   shippingAddress?: string | null;
+  contactEmail?:    string | null;
+  contactPhone?:    string | null;
 }) {
   const dateStr = opts.orderDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
@@ -741,14 +763,14 @@ export function newOrderNotificationEmail(opts: {
           <td width="50%" style="vertical-align:top;padding-right:10px;">
             ${addrLabel("Billing address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.billingAddress)}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(opts.billingAddress, opts.contactEmail, opts.contactPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
           ${opts.shippingAddress ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
             ${addrLabel("Shipping address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(opts.shippingAddress, opts.contactEmail, opts.contactPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
@@ -824,32 +846,25 @@ export function orderCompletedEmail(d: OrderEmailData) {
         </tbody>
       </table>
 
-      ${(shippingAddrHtml || billingAddrHtml) ? `
+      ${(d.shippingAddress || d.billingAddress) ? `
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
         <tr>
-          ${shippingAddrHtml ? `
+          ${d.shippingAddress ? `
           <td width="50%" style="vertical-align:top;padding-right:10px;">
             ${addrLabel("Shipping address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${shippingAddrHtml}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(d.shippingAddress, d.email, d.customerPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
-          ${billingAddrHtml ? `
+          ${d.billingAddress ? `
           <td width="50%" style="vertical-align:top;padding-left:10px;">
             ${addrLabel("Billing address")}
             <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
-              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${billingAddrHtml}</p>
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(d.billingAddress, d.email, d.customerPhone)}</p>
             </div>
           </td>` : "<td width='50%'></td>"}
         </tr>
       </table>` : ""}
-
-      ${(d.email || d.customerPhone) ? `
-      ${infoBox(`
-        <p style="margin:0 0 8px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;">Contact</p>
-        ${d.email ? `<p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};"><span style="color:${C.muted};">Email:&nbsp;</span>${d.email}</p>` : ""}
-        ${d.customerPhone ? `<p style="margin:0;font-size:13px;color:${C.textSoft};"><span style="color:${C.muted};">Phone:&nbsp;</span>${d.customerPhone}</p>` : ""}
-      `)}` : ""}
     `),
   };
 }
@@ -1090,17 +1105,19 @@ export function welcomeAboardEmail(opts: {
 // Order refund email
 // ─────────────────────────────────────────────
 export function orderRefundEmail(opts: {
-  orderNumber:     string;
-  orderDate:       Date;
-  refundAmount:    number;
-  reason?:         string | null;
-  note?:           string | null;
-  items:           { title: string; variantSize?: string; quantity: number; unitPrice: number; lineTotal: number }[];
-  subtotal:        number;
-  shippingCost:    number;
-  paymentMethod:   string | null;
-  billingAddress?: string | null;
+  orderNumber:      string;
+  orderDate:        Date;
+  refundAmount:     number;
+  reason?:          string | null;
+  note?:            string | null;
+  items:            { title: string; variantSize?: string; quantity: number; unitPrice: number; lineTotal: number }[];
+  subtotal:         number;
+  shippingCost:     number;
+  paymentMethod:    string | null;
+  billingAddress?:  string | null;
   shippingAddress?: string | null;
+  contactEmail?:    string | null;
+  contactPhone?:    string | null;
 }) {
   const subject = `Order Refunded: ${opts.orderNumber}`;
 
@@ -1169,34 +1186,14 @@ export function orderRefundEmail(opts: {
         <td width="50%" style="vertical-align:top;padding-right:12px;">
           ${addrLabel("Billing address")}
           <div style="border:1px solid ${C.border};border-radius:8px;padding:14px;">
-            <p style="margin:0;font-size:13px;color:${C.textSoft};white-space:pre-line;line-height:1.7;">${(() => {
-              try {
-                const a = JSON.parse(opts.billingAddress!);
-                return [
-                  [a.firstName, a.lastName].filter(Boolean).join(" "),
-                  a.address1, a.address2,
-                  [a.city, a.state, a.zip].filter(Boolean).join(", "),
-                  a.country, a.phone,
-                ].filter(Boolean).join("\n");
-              } catch { return opts.billingAddress!; }
-            })()}</p>
+            <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(opts.billingAddress, opts.contactEmail, opts.contactPhone)}</p>
           </div>
         </td>` : "<td width='50%'></td>"}
         ${opts.shippingAddress ? `
         <td width="50%" style="vertical-align:top;padding-left:12px;">
           ${addrLabel("Shipping address")}
           <div style="border:1px solid ${C.border};border-radius:8px;padding:14px;">
-            <p style="margin:0;font-size:13px;color:${C.textSoft};white-space:pre-line;line-height:1.7;">${(() => {
-              try {
-                const a = JSON.parse(opts.shippingAddress!);
-                return [
-                  [a.firstName, a.lastName].filter(Boolean).join(" "),
-                  a.address1, a.address2,
-                  [a.city, a.state, a.zip].filter(Boolean).join(", "),
-                  a.country, a.phone,
-                ].filter(Boolean).join("\n");
-              } catch { return opts.shippingAddress!; }
-            })()}</p>
+            <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(opts.shippingAddress, opts.contactEmail, opts.contactPhone)}</p>
           </div>
         </td>` : "<td width='50%'></td>"}
       </tr>
@@ -1234,6 +1231,8 @@ export function shipmentTrackingEmail(opts: {
   estimatedDelivery?: Date | null;
   items:              { title: string; variantSize?: string | null; quantity: number; lineTotal: number }[];
   shippingAddress?:   string | null;
+  contactEmail?:      string | null;
+  contactPhone?:      string | null;
 }) {
   const subject = `Your order #${opts.orderNumber} has shipped!`;
   const trackUrl = carrierTrackingUrl(opts.shippingCarrier, opts.trackingNumber);
@@ -1284,7 +1283,7 @@ export function shipmentTrackingEmail(opts: {
     ${opts.shippingAddress ? `
     ${addrLabel("Shipping to")}
     <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 16px;margin-bottom:24px;">
-      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${addrWithContact(opts.shippingAddress, opts.contactEmail, opts.contactPhone)}</p>
     </div>` : ""}
 
     <p style="margin:0;font-size:13px;color:${C.muted};line-height:1.6;">

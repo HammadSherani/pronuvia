@@ -177,6 +177,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
       state:    shipping.state,
       zip:      shipping.zip,
       country:  shipping.country,
+      phone:    shipping.phone,
     });
     setSavingAddr(false);
     if (res.success) {
@@ -356,7 +357,9 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
             <h2 className="text-base font-semibold text-gray-800 mb-3">Contact information</h2>
             <div className="border border-gray-300 rounded px-4 py-3 space-y-3">
               <div>
-                <label className="text-xs text-gray-400 mb-0.5 block">Patient’s Email Address</label>
+                <label className="text-xs text-gray-400 mb-0.5 block">
+                  Patient’s Email Address <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="email"
                   value={email}
@@ -495,11 +498,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                     className="accent-gray-900"
                   />
                   <span className="flex-1 text-sm font-medium text-gray-800">Credit / Debit Card</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
-                  </div>
                 </label>
                 <label className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
@@ -523,12 +521,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                 {!canWallet && (
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
-                    <div className="ml-auto flex items-center gap-1">
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
                     </div>
-                  </div>
                 )}
                 {!stripeReady ? (
                   <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">
@@ -638,7 +631,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
           </p>
 
           <button type="button" onClick={handlePlaceOrder}
-            disabled={cardProcessing || walletPending || !hasAddr(shipping)}
+            disabled={cardProcessing || walletPending || !email.trim() || !hasAddr(shipping)}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded transition-colors">
             {(cardProcessing || walletPending) ? (
               <span className="flex items-center justify-center gap-2">

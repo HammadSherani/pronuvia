@@ -350,6 +350,10 @@ export function CheckoutClient({
 
   // place order
   const handlePlaceOrder = () => {
+    if (!patientEmail.trim()) {
+      toast.error("Please enter the patient's email address.");
+      return;
+    }
     if (!hasAddr(shipping)) {
       toast.error("Please enter a shipping address.");
       return;
@@ -369,6 +373,7 @@ export function CheckoutClient({
     cardProcessing ||
     walletPending  ||
     (payMethod === "WALLET" && !canWallet) ||
+    !patientEmail.trim() ||
     !hasAddr(shipping);
 
   // empty cart
@@ -417,7 +422,9 @@ export function CheckoutClient({
             <h2 className="text-base font-semibold text-gray-800 mb-3">Patient contact information</h2>
             <div className="border border-gray-300 rounded divide-y divide-gray-200">
               <div className="px-4 py-3">
-                <label className="text-xs text-gray-400 mb-0.5 block">Patient email address</label>
+                <label className="text-xs text-gray-400 mb-0.5 block">
+                  Patient email address <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="email"
                   value={patientEmail}
@@ -576,11 +583,6 @@ export function CheckoutClient({
                     className="accent-gray-900"
                   />
                   <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
-                  <div className="ml-auto flex items-center gap-1">
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
-                  </div>
                 </label>
 
                 {payMethod === "CARD" && (

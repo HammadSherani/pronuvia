@@ -33,7 +33,7 @@ type Props = {
 // ── Related product mini-card
 function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
   const allVariants = p.variants as Variant[];
-  const variants    = allVariants.filter(isVisible);
+  const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(a.size ?? "0") - parseFloat(b.size ?? "0"));
   const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);
   const [qty,     setQty]     = useState(1);
   const [modal,   setModal]   = useState(false);
@@ -127,7 +127,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
 // ── Main product detail client component
 export function ProductDetailClient({ product, related, basePath = "/sales/shop" }: Props & { basePath?: string }) {
   const allVariants = product.variants as Variant[];
-  const variants    = allVariants.filter(isVisible);
+  const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(a.size ?? "0") - parseFloat(b.size ?? "0"));
 
   const [activeImage, setActiveImage]   = useState(product.image ?? "");
   const [selectedIdx, setSelectedIdx]   = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);

@@ -172,6 +172,7 @@ export async function payWithPhysicianWallet(
         shippingAddress: shippingAddress || null,
         notes:           notes           || null,
         orderDate:       new Date(),
+        customerPhone:   customerPhone   || null,
       });
       const cc = physician.email && physician.email !== customerEmail ? physician.email : undefined;
       await sendMail({ to: customerEmail, cc, subject, html });
@@ -193,6 +194,8 @@ export async function payWithPhysicianWallet(
       total,
       billingAddress:  billingAddress  || null,
       shippingAddress: shippingAddress || null,
+      contactEmail:    customerEmail   || null,
+      contactPhone:    customerPhone   || null,
     });
     await sendMail({ to: "info@pronuvia.com", subject, html });
   } catch (err) {

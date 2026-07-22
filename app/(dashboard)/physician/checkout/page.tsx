@@ -13,11 +13,13 @@ export default async function PhysicianCheckoutPage() {
       email:         true,
       firstName:     true,
       lastName:      true,
+      phone:         true,
       addressOne:    true,
       addressTwo:    true,
       city:          true,
       state:         true,
       zipCode:       true,
+      country:       true,
       walletBalance: true,
     },
   });
@@ -25,12 +27,13 @@ export default async function PhysicianCheckoutPage() {
   const initialAddress = {
     firstName: physician?.firstName  ?? "",
     lastName:  physician?.lastName   ?? "",
+    phone:     physician?.phone      ?? "",
     address1:  physician?.addressOne ?? "",
     address2:  physician?.addressTwo ?? "",
     city:      physician?.city       ?? "",
     state:     physician?.state      ?? "",
     zip:       physician?.zipCode    ?? "",
-    country:   "United States",
+    country:   physician?.country    ?? "US",
   };
 
   return (

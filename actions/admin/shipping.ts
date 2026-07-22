@@ -340,6 +340,8 @@ export async function purchaseLabel(
         estimatedDelivery: fullOrder.estimatedDelivery,
         items,
         shippingAddress:  fullOrder.shippingAddress,
+        contactEmail:     fullOrder.customerEmail ?? null,
+        contactPhone:     fullOrder.customerPhone ?? null,
       });
 
       const to = fullOrder.customerEmail ?? fullOrder.physician?.email ?? "";

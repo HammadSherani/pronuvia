@@ -161,6 +161,7 @@ export async function confirmBehalfCardOrder(
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
+        customerPhone: payload.customerPhone || null,
       });
       const cc = physician?.email && physician.email !== payload.customerEmail
         ? physician.email

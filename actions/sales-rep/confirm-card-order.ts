@@ -162,6 +162,7 @@ export async function confirmCardOrder(
         shippingAddress: payload.shippingAddress || null,
         notes:           payload.notes           || null,
         orderDate:       new Date(),
+        customerPhone:   payload.customerPhone   || null,
       });
       const cc = rep?.email && rep.email !== payload.customerEmail ? rep.email : undefined;
       await sendMail({ to: payload.customerEmail, cc, subject, html });
@@ -185,6 +186,8 @@ export async function confirmCardOrder(
       total:           payload.total,
       billingAddress:  payload.billingAddress  || null,
       shippingAddress: payload.shippingAddress || null,
+      contactEmail:    payload.customerEmail   || null,
+      contactPhone:    payload.customerPhone   || null,
     });
     await sendMail({ to: "info@pronuvia.com", subject, html });
   } catch (err) {

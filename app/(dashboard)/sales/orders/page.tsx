@@ -134,6 +134,7 @@ export default async function SalesOrdersPage({
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-5 text-nowrap py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
@@ -141,7 +142,6 @@ export default async function SalesOrdersPage({
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Origin</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
@@ -155,6 +155,11 @@ export default async function SalesOrdersPage({
                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">
                         {o.orderNumber}
+                      </td>
+                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                        {new Date(o.createdAt).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
                       </td>
                       <td className="px-5 py-4 text-gray-600">
                         {itemCount} item{itemCount !== 1 ? "s" : ""}
@@ -209,11 +214,6 @@ export default async function SalesOrdersPage({
                         ) : (
                           <span className="text-xs text-gray-500 font-medium">Myself</span>
                         )}
-                      </td>
-                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
                       </td>
                       <td className="px-5 py-4">
                         <Link

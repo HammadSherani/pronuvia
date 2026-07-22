@@ -418,11 +418,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             <div className="border border-gray-300 rounded p-4">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm text-gray-800 font-medium">Credit / Debit Card</span>
-                <div className="ml-auto flex items-center gap-1">
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#1a1f71] text-white">VISA</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#eb001b] text-white">MC</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#2e77bc] text-white">AMEX</span>
-                </div>
               </div>
               {!stripeReady ? (
                 <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">Stripe is not configured.</div>

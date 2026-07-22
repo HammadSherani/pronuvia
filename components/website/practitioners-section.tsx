@@ -17,16 +17,16 @@ export function PractitionersSection() {
             
             // style={{ color: "var(--color-ion)" }}
             >
-              For patients &amp; practitioners — Offer AIC in your practice.
+              For practitioners
             </p>
             <h2
               className="mt-5 text-[clamp(2rem,4.5vw,3.6rem)] leading-[1.02] text-white"
               style={{ fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.02em" }}
             >
-              Available through
+              Offer AIC
               <br />
               <em className="font-normal italic text-ion" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
-                your practitioner.
+                in your practice.
               </em>
             </h2>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
