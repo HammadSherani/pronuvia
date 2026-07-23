@@ -301,9 +301,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       )}
                     </p>
                   </div>
-                  <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[order.status]}`}>
+                  {/* <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[order.status]}`}>
                     {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
-                  </span>
+                  </span> */}
                 </div>
               </div>
 
