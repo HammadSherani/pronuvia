@@ -1,5 +1,16 @@
-import sgMail   from "@sendgrid/mail";
+import sgMail    from "@sendgrid/mail";
 import nodemailer from "nodemailer";
+import fs         from "fs";
+import path       from "path";
+
+function getLogoBase64(): string | null {
+  try {
+    const buf = fs.readFileSync(path.join(process.cwd(), "public/assets/logo-white.png"));
+    return buf.toString("base64");
+  } catch {
+    return null;
+  }
+}
 
 export async function sendMail(opts: {
   to:           string;
@@ -20,11 +31,21 @@ export async function sendMail(opts: {
   if (process.env.SENDGRID_API_KEY) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+    const logoB64 = getLogoBase64();
     const msg: Parameters<typeof sgMail.send>[0] = {
       to:      opts.to,
       from,
       subject: opts.subject,
       html:    opts.html,
+      ...(logoB64 ? {
+        attachments: [{
+          content:    logoB64,
+          filename:   "logo-white.png",
+          type:       "image/png",
+          disposition: "inline",
+          content_id: "pronuvia-logo",
+        }],
+      } : {}),
     };
     if (ccUnique.length) msg.cc = ccUnique;
 
@@ -48,13 +69,20 @@ export async function sendMail(opts: {
     },
   });
 
+  const logoB64 = getLogoBase64();
+  const logoAttachment = logoB64 ? [{
+    filename: "logo-white.png",
+    content:  Buffer.from(logoB64, "base64"),
+    cid:      "pronuvia-logo",
+  }] : [];
+
   const info = await transporter.sendMail({
     from,
     to:          opts.to,
     cc:          ccUnique.length ? ccUnique.join(", ") : undefined,
     subject:     opts.subject,
     html:        opts.html,
-    attachments: opts.attachments,
+    attachments: [...logoAttachment, ...(opts.attachments ?? [])],
   });
   console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;

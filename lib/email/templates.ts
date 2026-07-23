@@ -1,16 +1,4 @@
-import fs from "fs";
-import path from "path";
-
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-function getLogoDataUri(): string {
-  try {
-    const buf = fs.readFileSync(path.join(process.cwd(), "public/assets/logo-white.png"));
-    return `data:image/png;base64,${buf.toString("base64")}`;
-  } catch {
-    return `${getAppUrl()}/assets/logo-white.png`;
-  }
-}
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -37,16 +25,16 @@ const base = (content: string) => `
   <title>Pronuvia</title>
 </head>
 <body style="margin:0;padding:0;background:${C.body};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:${C.body};padding:40px 16px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${C.body};padding:24px 16px 40px;">
     <tr>
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
           <!-- Logo / Brand -->
           <tr>
-            <td align="center" style="padding-bottom:24px;">
+            <td align="center" style="padding-bottom:24px;padding-top:0;">
               <div style="display:inline-block;background:${C.ink};border-radius:10px;padding:12px 28px;">
-                <img src="${getLogoDataUri()}" alt="Pronuvia" width="150" height="auto" style="display:block;border:0;max-width:150px;" />
+                <img src="cid:pronuvia-logo" alt="Pronuvia" width="150" height="auto" style="display:block;border:0;max-width:150px;" />
               </div>
             </td>
           </tr>
