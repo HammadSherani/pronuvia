@@ -317,7 +317,7 @@ export async function purchaseLabel(
       where:  { id: orderId },
       select: {
         orderNumber: true, items: true,
-        customerEmail: true, shippingAddress: true, estimatedDelivery: true,
+        customerEmail: true, customerPhone: true, shippingAddress: true, estimatedDelivery: true,
         physician: { select: { email: true } },
         salesRep:  { select: { email: true } },
       },

@@ -146,7 +146,7 @@ export async function shipOrder(
     select: {
       id: true, status: true,
       orderNumber: true, items: true,
-      customerEmail: true, shippingAddress: true,
+      customerEmail: true, customerPhone: true, shippingAddress: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
       salesRep:  { select: { email: true } },
     },
@@ -653,7 +653,7 @@ export async function processReturn(
       returnedAt: true, returnedTotal: true, returnReason: true,
       salesRepClawback: true, physicianClawback: true,
       stripePaymentIntentId: true,
-      customerEmail: true, shippingRate: true, paymentMethod: true, createdAt: true,
+      customerEmail: true, customerPhone: true, shippingRate: true, paymentMethod: true, createdAt: true,
       billingAddress: true, shippingAddress: true, notes: true,
       salesRep:  { select: { walletBalance: true } },
       physician: { select: { walletBalance: true, email: true, firstName: true } },
