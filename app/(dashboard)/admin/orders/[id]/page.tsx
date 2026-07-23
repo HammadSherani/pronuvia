@@ -66,7 +66,6 @@ function fmtAddressBody(raw: string | null | undefined): string | null {
       a.address2,
       [a.city, a.state, a.zip].filter(Boolean).join(", "),
       a.country,
-      a.phone,
     ].filter(Boolean).join("\n");
   } catch { return raw; }
 }
@@ -375,6 +374,21 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="text-gray-500 text-xs leading-relaxed whitespace-pre-line">
                         {fmtAddressBody(order.billingAddress)}
                       </p>
+                      {(parseAddrPhone(order.billingAddress) || customerPhone) && (
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-0.5">Phone:</p>
+                          {parseAddrPhone(order.billingAddress) && (
+                            <a href={`tel:${parseAddrPhone(order.billingAddress)}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                              {parseAddrPhone(order.billingAddress)}
+                            </a>
+                          )}
+                          {customerPhone && customerPhone !== parseAddrPhone(order.billingAddress) && (
+                            <a href={`tel:${customerPhone}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                              {customerPhone}
+                            </a>
+                          )}
+                        </div>
+                      )}
                       <EditOrderAddress orderId={order.id} type="billing" raw={order.billingAddress} />
                     </div>
                   ) : order.physician ? (
@@ -426,6 +440,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                           </a>
                         </div>
                       )}
+                      {(parseAddrPhone(order.shippingAddress) || customerPhone) && (
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-0.5">Phone:</p>
+                          {parseAddrPhone(order.shippingAddress) && (
+                            <a href={`tel:${parseAddrPhone(order.shippingAddress)}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                              {parseAddrPhone(order.shippingAddress)}
+                            </a>
+                          )}
+                          {customerPhone && customerPhone !== parseAddrPhone(order.shippingAddress) && (
+                            <a href={`tel:${customerPhone}`} className="block text-xs text-[#3DBFA4] hover:underline">
+                              {customerPhone}
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      <EditOrderAddress orderId={order.id} type="shipping" raw={order.shippingAddress} />
                     </div>
                   ) : order.physician ? (
                     <div className="text-sm space-y-1">

@@ -32,24 +32,23 @@ export async function sendMail(opts: {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const logoB64 = getLogoBase64();
-    const msg: Parameters<typeof sgMail.send>[0] = {
+    const [res] = await sgMail.send({
       to:      opts.to,
       from,
       subject: opts.subject,
       html:    opts.html,
+      text:    "",
+      ...(ccUnique.length ? { cc: ccUnique } : {}),
       ...(logoB64 ? {
         attachments: [{
-          content:    logoB64,
-          filename:   "logo-white.png",
-          type:       "image/png",
+          content:     logoB64,
+          filename:    "logo-white.png",
+          type:        "image/png",
           disposition: "inline",
-          content_id: "pronuvia-logo",
+          contentId:   "pronuvia-logo",
         }],
       } : {}),
-    };
-    if (ccUnique.length) msg.cc = ccUnique;
-
-    const [res] = await sgMail.send(msg);
+    });
     console.log("[mailer/sendgrid] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| status:", res.statusCode);
     return res;
   }

@@ -43,10 +43,10 @@ export function PractitionersSection() {
                 <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            {/* <a href="/login"
+            <a href="#"
               className="inline-flex items-center rounded-full border border-white/30 px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/10">
-              Partner login
-            </a> */}
+              Find a Practitioner
+            </a>
           </div>
 
         </div>
