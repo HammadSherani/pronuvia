@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Sales Representatives – Pronuvia Admin" };
+export const metadata = { title: "Medical Representatives – Pronuvia Admin" };
 
 export default async function SalesRepsPage({
   searchParams,
@@ -20,9 +20,9 @@ export default async function SalesRepsPage({
   return (
     <div>
       <PageHeader
-        title="Sales Representatives"
+        title="Medical Representatives"
         description={`Manage your sales team accounts (${total} total)`}
-        actionLabel="Add Sales Rep"
+        actionLabel="Add Medical Rep"
         actionHref="/admin/sales-reps/new"
       />
 

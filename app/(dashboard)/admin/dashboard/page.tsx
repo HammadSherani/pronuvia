@@ -86,7 +86,7 @@ export default async function AdminDashboardPage({
       ),
     },
     {
-      label: "Sales Representatives",
+      label: "Medical Representatives",
       value: kpis.salesRepsCount.toLocaleString(),
       change: null as number | null,
       href: "/admin/sales-reps",
@@ -324,7 +324,7 @@ export default async function AdminDashboardPage({
               {[
                 { label: "Manage Orders",     href: "/admin/orders",      color: "#3DBFA4" },
                 { label: "Manage Physicians", href: "/admin/physicians",  color: "#8b5cf6" },
-                { label: "Manage Sales Reps", href: "/admin/sales-reps",  color: "#f59e0b" },
+                { label: "Manage Medical Reps", href: "/admin/sales-reps",  color: "#f59e0b" },
                 { label: "Withdrawals",       href: "/admin/withdrawals", color: "#5BB8D4" },
                 { label: "Products",          href: "/admin/products",    color: "#10b981" },
                 { label: "Coupons",           href: "/admin/coupons",     color: "#ec4899" },

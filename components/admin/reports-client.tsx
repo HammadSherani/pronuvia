@@ -26,7 +26,7 @@ const TABS = [
   { id: "overall-sales",       label: "Overall Sales" },
   { id: "by-product",          label: "Sales by Product" },
   { id: "returns",             label: "Return Orders" },
-  { id: "salesrep-commission", label: "Sales Rep Commission" },
+  { id: "salesrep-commission", label: "Medical Rep Commission" },
   { id: "overall-commission",  label: "Overall Commission" },
   { id: "doctor-commission",   label: "Doctor Commission" },
   { id: "customer-history",    label: "Customer Order" },
@@ -124,7 +124,7 @@ const COLS: Record<TabId, Col[]> = {
     { key: "orderNumber", label: "Order #" },
     { key: "date",        label: "Date" },
     { key: "doctor",      label: "Doctor" },
-    { key: "salesRep",    label: "Sales Rep" },
+    { key: "salesRep",    label: "Medical Rep" },
     { key: "status",      label: "Status", render: v => <StatusBadge status={String(v)} /> },
     { key: "subtotal",    label: "Subtotal",  align: "right", render: v => usd(Number(v)) },
     { key: "shipping",    label: "Shipping",  align: "right", render: v => usd(Number(v)) },
@@ -146,7 +146,7 @@ const COLS: Record<TabId, Col[]> = {
     { key: "orderDate",         label: "Order Date" },
     { key: "returnDate",        label: "Return Date" },
     { key: "doctor",            label: "Doctor" },
-    { key: "salesRep",          label: "Sales Rep" },
+    { key: "salesRep",          label: "Medical Rep" },
     { key: "originalTotal",     label: "Original Total",  align: "right", render: v => usd(Number(v)) },
     { key: "returnedTotal",     label: "Returned Total",  align: "right", render: v => usd(Number(v)) },
     { key: "returnReason",      label: "Reason" },
@@ -154,7 +154,7 @@ const COLS: Record<TabId, Col[]> = {
     { key: "physicianClawback", label: "Dr Clawback",     align: "right", render: v => usd(Number(v)) },
   ],
   "salesrep-commission": [
-    { key: "repName",          label: "Sales Rep" },
+    { key: "repName",          label: "Medical Rep" },
     { key: "orderCount",       label: "Orders",             align: "right" },
     { key: "totalSales",       label: "Total Sales",        align: "right", render: v => usd(Number(v)) },
     { key: "avgRate",          label: "Avg Rate",           align: "right", render: v => pct(Number(v)) },
@@ -168,7 +168,7 @@ const COLS: Record<TabId, Col[]> = {
     { key: "orderNumber",    label: "Order #" },
     { key: "date",           label: "Date" },
     { key: "doctor",         label: "Doctor" },
-    { key: "salesRep",       label: "Sales Rep" },
+    { key: "salesRep",       label: "Medical Rep" },
     { key: "orderTotal",     label: "Order Total",    align: "right", render: v => usd(Number(v)) },
     { key: "srCommRate",     label: "SR Rate",        align: "right", render: v => pct(Number(v)) },
     { key: "srCommAmount",   label: "SR Commission",  align: "right", render: v => usd(Number(v)) },
@@ -200,7 +200,7 @@ const COLS: Record<TabId, Col[]> = {
         )}
       </div>
     )},
-    { key: "salesRep",       label: "Sales Rep", render: (v, row) => (
+    { key: "salesRep",       label: "Medical Rep", render: (v, row) => (
       <div>
         <p className="font-medium text-gray-800">{(v != null && v !== "") ? String(v) : "–"}</p>
         {(row.salesRepEmail != null && row.salesRepEmail !== "") && (
@@ -289,7 +289,7 @@ function SummaryCards({ tab, data }: { tab: TabId; data: Record<string, unknown>
       const doc    = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.docCommAmount, 0);
       return [
         { label: "Total Commissions", value: usd(total) },
-        { label: "Sales Rep Share",   value: usd(sr) },
+        { label: "Medical Rep Share",   value: usd(sr) },
         { label: "Doctor Share",      value: usd(doc) },
       ];
     }
@@ -440,10 +440,10 @@ export function ReportsClient({ doctors, salesReps, products }: Props) {
 
           {tf.salesRep && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Sales Rep</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Medical Rep</label>
               <select className={sel} value={filters.salesRepId ?? ""}
                 onChange={e => setFilters(f => ({ ...f, salesRepId: e.target.value || undefined }))}>
-                <option value="">All Sales Reps</option>
+                <option value="">All Medical Reps</option>
                 {salesReps.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
             </div>

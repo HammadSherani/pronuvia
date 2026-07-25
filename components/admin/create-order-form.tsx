@@ -134,7 +134,7 @@ export function CreateOrderForm({ physicians, products }: Props) {
             </div>
             <div className="rounded-lg bg-gray-900/5 border border-[#5BB8D4]/20 p-3">
               <p className="text-xs text-gray-500 mb-1">
-                Sales Rep Commission {physician.salesRep ? `(${physician.salesRep.name})` : "(none linked)"}
+                Medical Rep Commission {physician.salesRep ? `(${physician.salesRep.name})` : "(none linked)"}
               </p>
               <p className="text-lg font-bold text-[#5BB8D4]">{salesRepCommission}%</p>
               <p className="text-xs text-gray-400 mt-0.5">Projected: {fmt(projectedRepAmt)}</p>

@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { getSalesRepById, updateSalesRep } from "@/actions/admin/manage-sales-reps";
 import { SalesRepForm } from "@/components/admin/sales-rep-form";
 
-export const metadata = { title: "Edit Sales Rep – Pronuvia Admin" };
+export const metadata = { title: "Edit Medical Rep – Pronuvia Admin" };
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -24,9 +24,9 @@ export default async function EditSalesRepPage({ params }: Props) {
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Sales Representatives
+        Back to Medical Representatives
       </Link>
-      <h1 className="text-xl font-bold text-gray-800 mb-6">Edit Sales Representative</h1>
+      <h1 className="text-xl font-bold text-gray-800 mb-6">Edit Medical Representative</h1>
 
       <SalesRepForm
         action={boundUpdate}

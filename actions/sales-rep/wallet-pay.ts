@@ -139,7 +139,7 @@ export async function payWithWallet(
     try {
       const { subject, html } = orderConfirmationEmail({
         orderNumber,
-        firstName:       rep?.firstName ?? "Sales Rep",
+        firstName:       rep?.firstName ?? "Medical Rep",
         total,
         status:          "PAID",
         isPatientEmail:  true,
@@ -167,7 +167,7 @@ export async function payWithWallet(
 
   // Internal notification to Pronuvia
   try {
-    const orderedBy = [rep?.firstName, rep?.lastName].filter(Boolean).join(" ") || "Sales Rep";
+    const orderedBy = [rep?.firstName, rep?.lastName].filter(Boolean).join(" ") || "Medical Rep";
     const subtotal  = items.reduce((s, i) => s + i.lineTotal, 0);
     const { subject, html } = newOrderNotificationEmail({
       orderNumber,

@@ -69,7 +69,7 @@ export default async function SalesRepViewPage({ params }: Props) {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Sales Representatives
+          Back to Medical Representatives
         </Link>
         <Link href={`/admin/sales-reps/${id}/edit`}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#3DBFA4] text-white text-sm font-medium rounded-lg hover:bg-[#35a993] transition-colors">

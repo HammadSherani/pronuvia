@@ -231,7 +231,7 @@ export function PhysiciansPageClient({
                   <tr className="border-b border-gray-100 bg-gray-50/60">
                     <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[30%]">Doctor</th>
                     <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">Practice</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[24%]">Sales Rep</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[24%]">Medical Rep</th>
                     <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">Status</th>
                     <th className="px-3 py-3 w-[12%]" />
                   </tr>

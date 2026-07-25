@@ -39,7 +39,7 @@ function buildNav(role: Role): NavItem[] {
       {
         label: "Account Management",
         children: [
-          { label: "Sales Representatives", href: "/admin/sales-reps" },
+          { label: "Medical Representatives", href: "/admin/sales-reps" },
           { label: "Partnering Physicians", href: "/admin/physicians" },
           { label: "Pending Approvals", href: "/admin/approvals" },
         ],

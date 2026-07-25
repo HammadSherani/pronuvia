@@ -92,7 +92,7 @@ export function passwordSetupEmail(opts: {
   role: "salesRep" | "physician";
 }) {
   const resetLink = `${getAppUrl()}/reset-password/${opts.resetToken}`;
-  const roleLabel = opts.role === "salesRep" ? "Sales Representative" : "Partnering Physician";
+  const roleLabel = opts.role === "salesRep" ? "Medical Representative" : "Partnering Physician";
   const subject = "Welcome to Pronuvia — Set Your Password";
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">
@@ -338,7 +338,7 @@ export function salesRepWelcomeEmail(opts: {
       Welcome, ${opts.firstName}!
     </h1>
     <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
-      Your Pronuvia Sales Representative account has been created.
+      Your Pronuvia Medical Representative account has been created.
       You can now log in and start managing your partnering physicians.
     </p>
     ${infoBox(`

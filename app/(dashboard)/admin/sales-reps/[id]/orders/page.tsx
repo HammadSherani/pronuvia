@@ -6,7 +6,7 @@ import { Pagination }            from "@/components/shared/pagination";
 import { parsePagination }       from "@/lib/pagination";
 import { Suspense }              from "react";
 
-export const metadata = { title: "Sales Rep Orders – Pronuvia Admin" };
+export const metadata = { title: "Medical Rep Orders – Pronuvia Admin" };
 
 type Props = {
   params:       Promise<{ id: string }>;
@@ -58,7 +58,7 @@ export default async function SalesRepOrdersPage({ params, searchParams }: Props
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Sales Representatives
+        Back to Medical Representatives
       </Link>
 
       {/* Header */}

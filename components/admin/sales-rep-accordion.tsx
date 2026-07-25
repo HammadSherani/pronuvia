@@ -204,7 +204,7 @@ export function SalesRepAccordionList({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Representative</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Representative</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission %</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Downline</th>

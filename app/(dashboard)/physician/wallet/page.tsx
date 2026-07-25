@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { PhysicianWalletPanel } from "@/components/physician/wallet-panel";
 
-export const metadata = { title: "Wallet – Pronuvia" };
+export const metadata = { title: "Commission – Pronuvia" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -87,8 +87,8 @@ export default async function PhysicianWalletPage() {
   return (
     <div className="max-w-6xl">
       <div className="mb-7">
-        <h1 className="text-xl font-bold text-gray-800">Wallet</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Commission earnings and withdrawal history</p>
+        <h1 className="text-xl font-bold text-gray-800">Commission</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Commission earnings and payout history</p>
       </div>
 
       <PhysicianWalletPanel
@@ -176,7 +176,7 @@ export default async function PhysicianWalletPage() {
                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
-                              Paid to Wallet
+                              Credited
                             </span>
                           ) : CLOSED.has(o.status) ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-full text-xs font-medium">
@@ -238,7 +238,7 @@ export default async function PhysicianWalletPage() {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-gray-100 bg-gray-50/60">
-                  <td colSpan={4} className="px-5 py-3.5 text-xs font-bold text-gray-500 text-right">Paid to Wallet</td>
+                  <td colSpan={4} className="px-5 py-3.5 text-xs font-bold text-gray-500 text-right">Total Credited</td>
                   <td className="px-5 py-3.5 text-right">
                     <span className="text-sm font-black text-emerald-600">{fmt(totalPaid)}</span>
                   </td>
@@ -262,7 +262,7 @@ export default async function PhysicianWalletPage() {
       {/* Withdrawal History */}
       {withdrawRequests.length > 0 && (
         <div>
-          <h2 className="text-sm font-bold text-gray-700 mb-3">Withdrawal Requests</h2>
+          <h2 className="text-sm font-bold text-gray-700 mb-3">Payout History</h2>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>

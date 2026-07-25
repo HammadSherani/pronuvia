@@ -278,12 +278,12 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                     ) : o.placedBySalesRep && o.physician ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-gray-900" />
-                        Sales Rep (for Doctor)
+                        Medical Rep (for Doctor)
                       </span>
                     ) : o.placedBySalesRep ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-600 border border-violet-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                        Sales Rep (Self)
+                        Medical Rep (Self)
                       </span>
                     ) : o.physician ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">
@@ -293,7 +293,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-600 border border-violet-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                        Sales Rep (Self)
+                        Medical Rep (Self)
                       </span>
                     )}
                   </td>

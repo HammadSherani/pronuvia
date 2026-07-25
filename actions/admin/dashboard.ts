@@ -136,7 +136,7 @@ export async function getDashboardStats(opts?: { from?: Date; to?: Date }) {
     charts: {
       statusBreakdown: Object.entries(statusCounts).map(([status, count]) => ({ status, count })),
       commissionBreakdown: [
-        { name: "Sales Rep", value: Math.round(totalRepCommission * 100) / 100 },
+        { name: "Medical Rep", value: Math.round(totalRepCommission * 100) / 100 },
         { name: "Physician", value: Math.round(totalDrCommission  * 100) / 100 },
       ],
       daily:   buildChartData("daily",   30),

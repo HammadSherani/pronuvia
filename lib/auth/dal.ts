@@ -18,7 +18,7 @@ export const requireAuth = cache(async (): Promise<SessionPayload> => {
 export const requireRole = cache(
   async (...roles: Role[]): Promise<SessionPayload> => {
     const session = await requireAuth();
-    if (!roles.includes(session.role)) redirect("/unauthorized");
+    if (!roles.includes(session.role)) redirect("/login");
     return session;
   }
 );

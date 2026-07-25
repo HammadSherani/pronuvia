@@ -236,7 +236,7 @@ export function DashboardChartsPanel({ charts }: { charts: DashboardStats["chart
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-5">
         <div className="mb-4">
           <h3 className="text-sm font-bold text-gray-800">Commission Split</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Sales Rep vs Physician · last 12 months</p>
+          <p className="text-xs text-gray-400 mt-0.5">Medical Rep vs Physician · last 12 months</p>
         </div>
         <CommissionDonut data={charts.commissionBreakdown} />
       </div>

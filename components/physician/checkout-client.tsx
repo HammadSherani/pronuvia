@@ -68,6 +68,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 }>(function StripeInnerForm({ itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
+  const [elementsReady, setElementsReady] = useState(false);
 
   const handlePay = async () => {
     if (!stripe || !elements) return;
@@ -113,13 +114,24 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 
   useImperativeHandle(ref, () => ({ submit: handlePay }));
   return (
-    <PaymentElement
-      options={{
-        layout: "tabs",
-        wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
-        terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
-      }}
-    />
+    <div className="relative min-h-[180px]">
+      <PaymentElement
+        onReady={() => setElementsReady(true)}
+        options={{
+          layout: "tabs",
+          wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
+          terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
+        }}
+      />
+      {!elementsReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white rounded">
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+            Loading secure payment fields…
+          </div>
+        </div>
+      )}
+    </div>
   );
 });
 

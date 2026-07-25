@@ -117,7 +117,7 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
                   <td className="px-5 py-4">
                     {person.userType === "REP" ? (
                       <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">
-                        Sales Rep
+                        Medical Rep
                       </span>
                     ) : (
                       <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">
@@ -183,10 +183,10 @@ export function AllWalletAdjustmentClient({ reps, physicians }: Props) {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
+                <h3 className="text-base font-bold text-gray-800">Commission Adjustment</h3>
                 <div className="flex items-center gap-2 mt-1">
                   {selected.userType === "REP" ? (
-                    <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">Sales Rep</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-gray-900/10 text-[#3DBFA4] border border-gray-900/30">Medical Rep</span>
                   ) : (
                     <span className="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">Doctor</span>
                   )}

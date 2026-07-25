@@ -15,8 +15,8 @@ function buildSubNav(role: Role): SubNavItem[] {
     return [
       { label: "Dashboard",       href: "/admin/dashboard" },
       { label: "Orders",          href: "/admin/orders" },
-      { label: "Withdrawals",     href: "/admin/withdrawals" },
-      { label: "Wallet Adjustment", href: "/admin/wallet-adjustment" },
+      { label: "Commission Payout", href: "/admin/withdrawals" },
+      { label: "Commission Adjustment", href: "/admin/wallet-adjustment" },
       { label: "Promotional Banners",         href: "/admin/banners" },
       { label: "Coupons",         href: "/admin/coupons" },
       { label: "Shipping Rates",   href: "/admin/shipping-rates" },
@@ -33,10 +33,10 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Partnering Physicians", href: "/sales/physicians" },
       { label: "Shop",      href: "/sales/shop" },
       { label: "Orders",    href: "/sales/orders" },
-      { label: "Wallet",    href: "/sales/wallet" },
+      { label: "Commission",    href: "/sales/wallet" },
       // { label: "Downloads", href: "/sales/downloads" },
       // { label: "Account",    href: "/sales/account" },
-      { label: "Withdrawals", href: "/sales/withdrawals" },
+      { label: "Commission Payout", href: "/sales/withdrawals" },
       // { label: "Log out",   action: async () => { await logout(); } },
     ];
   }
@@ -46,8 +46,8 @@ function buildSubNav(role: Role): SubNavItem[] {
     { label: "Dashboard",   href: "/physician/dashboard" },
     { label: "Shop",        href: "/physician/shop" },
     { label: "Orders",      href: "/physician/orders" },
-    { label: "Wallet",      href: "/physician/wallet" },
-    { label: "Withdrawals", href: "/physician/withdrawals" },
+    { label: "Commission",        href: "/physician/wallet" },
+    { label: "Commission Payout", href: "/physician/withdrawals" },
   ];
 }
 

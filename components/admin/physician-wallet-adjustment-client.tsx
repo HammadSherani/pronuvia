@@ -132,7 +132,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
+                <h3 className="text-base font-bold text-gray-800">Commission Adjustment</h3>
                 <p className="text-sm text-gray-500 mt-0.5"> {selected.firstName} {selected.lastName}</p>
               </div>
               <button type="button" onClick={close} className="text-gray-400 hover:text-gray-600 transition-colors">

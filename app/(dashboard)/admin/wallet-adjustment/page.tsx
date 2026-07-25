@@ -3,7 +3,7 @@ import { prisma }        from "@/lib/db/prisma";
 import { PageHeader }    from "@/components/admin/page-header";
 import { AllWalletAdjustmentClient } from "@/components/admin/all-wallet-adjustment-client";
 
-export const metadata = { title: "Wallet Adjustment – Pronuvia Admin" };
+export const metadata = { title: "Commission Adjustment – Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -30,13 +30,13 @@ export default async function WalletAdjustmentPage() {
   return (
     <div>
       <PageHeader
-        title="Wallet Adjustment"
+        title="Commission Adjustment"
         description="Manually credit or debit sales rep and doctor wallet balances"
       />
 
       <div className="grid grid-cols-4 gap-5 mb-6">
         {[
-          { label: "Total Sales Reps",      value: reps.length,         color: "#3DBFA4", text: "text-[#3DBFA4]" },
+          { label: "Total Medical Reps",      value: reps.length,         color: "#3DBFA4", text: "text-[#3DBFA4]" },
           { label: "Rep Wallet Total",       value: fmt(totalRepWallet), color: "#3DBFA4", text: "text-[#3DBFA4]" },
           { label: "Total Doctors",          value: physicians.length,   color: "#6366f1", text: "text-indigo-600" },
           { label: "Doctor Wallet Total",    value: fmt(totalDrWallet),  color: "#6366f1", text: "text-indigo-600" },

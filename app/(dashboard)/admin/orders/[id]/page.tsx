@@ -325,7 +325,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                     </div>
                     {order.salesRep && (
                       <div>
-                        <p className="text-[11px] text-gray-400 mb-0.5">Sales Rep:</p>
+                        <p className="text-[11px] text-gray-400 mb-0.5">Medical Rep:</p>
                         <p className="text-sm font-medium text-gray-700">{order.salesRep.name}</p>
                         <p className="text-xs text-gray-400">{order.salesRep.email}</p>
                       </div>

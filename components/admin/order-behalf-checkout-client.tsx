@@ -50,6 +50,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 }>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
+  const [elementsReady, setElementsReady] = useState(false);
 
   const handlePay = async () => {
     if (!stripe || !elements) return;
@@ -93,13 +94,24 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 
   useImperativeHandle(ref, () => ({ submit: handlePay }));
   return (
-    <PaymentElement
-      options={{
-        layout: "tabs",
-        wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
-        terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
-      }}
-    />
+    <div className="relative min-h-[180px]">
+      <PaymentElement
+        onReady={() => setElementsReady(true)}
+        options={{
+          layout: "tabs",
+          wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
+          terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
+        }}
+      />
+      {!elementsReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white rounded">
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+            Loading secure payment fields…
+          </div>
+        </div>
+      )}
+    </div>
   );
 });
 
@@ -116,7 +128,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   const migrated = migrateAddressData({ ...EMPTY_ADDRESS, ...initialAddress });
   const [email,         setEmail]         = useState("");
-  const [phone,         setPhone]         = useState("");
   const [shipping,      setShipping]      = useState<AddressData>(migrated);
   const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
@@ -269,17 +280,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   return (
     <div className="">
-      {/* On-behalf banner */}
-      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 mb-6">
-        <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        <p className="text-sm text-amber-800">
-          <span className="font-semibold">Ordering on behalf of</span> {physicianName}
-          <span className="text-amber-600 ml-2 text-xs">({physicianEmail})</span>
-        </p>
-      </div>
-
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-gray-900 mb-6" />
 
@@ -299,16 +299,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter patient's email (for order confirmation)"
-                  className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
-                />
-              </div>
-              <div className="border-t border-gray-100 pt-3">
-                <label className="text-xs text-gray-400 mb-0.5 block">Patient&apos;s Phone Number <span className="text-gray-300">(optional)</span></label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter patient's phone"
                   className="text-sm text-gray-800 w-full outline-none bg-transparent placeholder:text-gray-300"
                 />
               </div>
@@ -438,7 +428,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                     total={total}
                     shippingRate={shippingCost}
                     customerEmail={email || undefined}
-                    customerPhone={phone || undefined}
+                    customerPhone={shipping.phone || undefined}
                     couponId={appliedCoupon?.couponId}
                     couponCode={appliedCoupon?.code}
                     discountAmount={discountAmount}

@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Withdrawal History – Pronuvia" };
+export const metadata = { title: "Commission Payout – Pronuvia" };
 
 const statusStyle: Record<string, string> = {
   PENDING:  "bg-amber-50 text-amber-700 border-amber-200",
@@ -49,30 +49,17 @@ export default async function PhysicianWithdrawalsPage({
 
   return (
     <div className=" space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Withdrawal Requests</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Your withdrawal request history and status ({total} total)</p>
-        </div>
-        {!hasPending && (
-          <Link
-            href="/physician/withdrawals/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            New Request
-          </Link>
-        )}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">Commission Payout</h1>
+        <p className="text-sm text-gray-400 mt-0.5">Your commission payout history and status ({total} total)</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Wallet Balance",  value: fmt(balance),   color: "#3DBFA4" },
-          { label: "Total Withdrawn", value: fmt(totalPaid), color: "#5BB8D4" },
-          { label: "Total Requests",  value: String(total),  color: "#8b5cf6" },
+          { label: "Commission Balance", value: fmt(balance),   color: "#3DBFA4" },
+          { label: "Total Paid Out",     value: fmt(totalPaid), color: "#5BB8D4" },
+          { label: "Total Payouts",      value: String(total),  color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
@@ -92,7 +79,7 @@ export default async function PhysicianWithdrawalsPage({
             <p className="text-xs text-amber-600 mt-0.5">
               Add your bank details in{" "}
               <Link href="/physician/account" className="underline font-medium">Account Settings</Link>
-              {" "}before requesting a withdrawal.
+              {" "}so payouts can be processed.
             </p>
           </div>
         </div>
@@ -102,7 +89,7 @@ export default async function PhysicianWithdrawalsPage({
         <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3.5">
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
           <p className="text-sm font-medium text-blue-700">
-            You have a pending request. You can submit a new one once it is processed.
+            You have a payout in progress.
           </p>
         </div>
       )}
@@ -116,13 +103,8 @@ export default async function PhysicianWithdrawalsPage({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-500">No withdrawal requests yet</p>
-            <p className="text-xs text-gray-400 mt-1">Your requests will appear here once submitted.</p>
-            {physician?.bankName && (
-              <Link href="/physician/withdrawals/new" className="mt-4 text-sm text-[#3DBFA4] hover:underline font-medium">
-                Submit your first request →
-              </Link>
-            )}
+            <p className="text-sm font-medium text-gray-500">No payouts yet</p>
+            <p className="text-xs text-gray-400 mt-1">Your payout history will appear here.</p>
           </div>
         ) : (
           <>

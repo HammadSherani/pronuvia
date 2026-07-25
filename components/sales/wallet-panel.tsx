@@ -57,7 +57,7 @@ export function WalletPanel({
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
-            Withdraw Balance
+            Request Payout
           </button>
         </div>
 
@@ -73,7 +73,7 @@ export function WalletPanel({
           </div>
           <div>
             <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPaid)}</p>
-            <p className="text-xs text-gray-400 mt-1">Credited to wallet</p>
+            <p className="text-xs text-gray-400 mt-1">Credited to account</p>
             {totalPending > 0 && (
               <p className="text-xs text-amber-500 mt-1 font-medium">
                 + {fmt(totalPending)} pending
@@ -94,7 +94,7 @@ export function WalletPanel({
           </div>
           <div>
             <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalWithdrawn)}</p>
-            <p className="text-xs text-gray-400 mt-1">Approved withdrawals</p>
+            <p className="text-xs text-gray-400 mt-1">Approved payouts</p>
           </div>
         </div>
 

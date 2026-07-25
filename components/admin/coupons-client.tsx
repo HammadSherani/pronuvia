@@ -191,7 +191,7 @@ function CouponFormModal({
                 className={inp()}
               >
                 <option value="ALL">Everyone</option>
-                <option value="SALES_REP">Sales Reps only</option>
+                <option value="SALES_REP">Medical Reps only</option>
                 <option value="PHYSICIAN">Physicians only</option>
               </select>
             </div>
@@ -267,7 +267,7 @@ export function CouponsClient({ coupons: initial }: Props) {
     c.discountType === "PERCENTAGE" ? `${c.discountValue}% off` : `$${c.discountValue.toFixed(2)} off`;
 
   const applicableLabel = (v: string) =>
-    v === "ALL" ? "Everyone" : v === "SALES_REP" ? "Sales Reps" : "Physicians";
+    v === "ALL" ? "Everyone" : v === "SALES_REP" ? "Medical Reps" : "Physicians";
 
   return (
     <>

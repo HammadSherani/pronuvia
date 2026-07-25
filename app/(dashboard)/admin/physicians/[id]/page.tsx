@@ -153,14 +153,14 @@ export default async function PhysicianViewPage({ params }: Props) {
             <p className="text-xs text-emerald-500 mt-0.5">Earned on own sales</p>
           </div>
           <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
-            <p className="text-xs text-blue-600 font-medium mb-1">Upline (Sales Rep) Commission</p>
+            <p className="text-xs text-blue-600 font-medium mb-1">Upline (Medical Rep) Commission</p>
             <p className="text-2xl font-bold text-blue-700">{p.uplineCommission}%</p>
             <p className="text-xs text-blue-500 mt-0.5">Per order from this doctor</p>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <InfoRow label="Assigned Sales Rep" value={p.salesRep?.name ?? "—"} />
-          <InfoRow label="Sales Rep Email"     value={p.salesRep?.email ?? "—"} />
+          <InfoRow label="Assigned Medical Rep" value={p.salesRep?.name ?? "—"} />
+          <InfoRow label="Medical Rep Email"     value={p.salesRep?.email ?? "—"} />
         </dl>
       </div>
 

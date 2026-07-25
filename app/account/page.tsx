@@ -134,7 +134,7 @@ export default async function AccountPage() {
               </Section>
 
               {physician.salesRep && (
-                <Section title="Upline Sales Representative">
+                <Section title="Upline Medical Representative">
                   <Row label="Name"  value={`${physician.salesRep.firstName} ${physician.salesRep.lastName}`} />
                   <Row label="Email" value={physician.salesRep.email} />
                   <Row label="Phone" value={physician.salesRep.phone} />

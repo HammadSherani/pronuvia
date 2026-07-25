@@ -43,12 +43,6 @@ function FE({ msg }: { msg?: string }) {
 }
 function Req() { return <span className="text-red-400"> *</span>; }
 
-const SPECIALTIES = [
-  "Cardiology", "Dermatology", "Endocrinology", "Family Medicine", "Gastroenterology",
-  "General Practice", "Internal Medicine", "Neurology", "Obstetrics & Gynecology",
-  "Oncology", "Ophthalmology", "Orthopedics", "Pediatrics", "Psychiatry",
-  "Pulmonology", "Radiology", "Rheumatology", "Surgery", "Urology",
-];
 
 // ── Main form ──────────────────────────────────────────────────────
 export function PhysicianForm({
@@ -231,7 +225,7 @@ export function PhysicianForm({
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${hasUpline ? "translate-x-5" : "translate-x-0"}`} />
               </div>
               <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                Assign Sales Representative (Upline)
+                Assign Medical Representative (Upline)
               </span>
             </button>
           </div>
@@ -242,7 +236,7 @@ export function PhysicianForm({
           {/* Sales Rep selector */}
           {hasUpline && (
             <div className="border border-gray-100 rounded-xl bg-gray-50 p-4 mb-4 space-y-3">
-              <label className={lbl}>Select Sales Representative<Req /></label>
+              <label className={lbl}>Select Medical Representative<Req /></label>
 
               {/* Selected rep display */}
               {selectedRep && (
@@ -273,7 +267,7 @@ export function PhysicianForm({
                   />
                   {salesReps.length === 0 ? (
                     <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                      No Sales Representatives found. Add one first under Admin → Sales Reps.
+                      No Medical Representatives found. Add one first under Admin → Sales Reps.
                     </p>
                   ) : filteredReps.length === 0 ? (
                     <p className="text-xs text-gray-400 px-1">No results for &ldquo;{repSearch}&rdquo;</p>
@@ -299,7 +293,7 @@ export function PhysicianForm({
               {selectedRepId && (
                 <div className="pt-1">
                   <label className={lbl}>
-                    Sales Rep&apos;s Upline Commission %
+                    Medical Rep&apos;s Upline Commission %
                     <span className="ml-1.5 text-xs font-normal text-gray-400">
                       {`earned by ${selectedRep?.name ?? "this rep"} on this doctor's orders`}
                     </span>
@@ -469,17 +463,6 @@ export function PhysicianForm({
       {/* ── Specialties ───────────────────────────────────── */}
       <div className={sec}>
         <p className={head}>Fields of Speciality</p>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {SPECIALTIES.map((s) => (
-            <button key={s} type="button" onClick={() => toggleSpecialty(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${specialties.includes(s)
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-900"
-                }`}>
-              {s}
-            </button>
-          ))}
-        </div>
         <div className="flex gap-2">
           <input value={customSpecialty} onChange={(e) => setCustom(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}

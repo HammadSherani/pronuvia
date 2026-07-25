@@ -71,7 +71,7 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
             <tr className="border-b border-gray-100 bg-gray-50/60">
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Practice</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Rep</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied</th>
               <th className="px-5 py-3.5" />

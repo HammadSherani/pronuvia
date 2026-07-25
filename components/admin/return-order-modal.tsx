@@ -241,7 +241,7 @@ function SelectStep({ order, onBack, onDone }: { order: OrderData; onBack: () =>
           <div className="border-t border-gray-200 pt-3 space-y-2.5">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-semibold text-gray-700">Sales Rep Commission</p>
+                <p className="text-xs font-semibold text-gray-700">Medical Rep Commission</p>
                 <p className="text-[10px] text-gray-400 mt-0.5">
                   {fmt(order.salesRepCommissionAmount)} × {(ratio * 100).toFixed(1)}%
                   {!commissionPaid && <span className="text-amber-500 ml-1">· not yet paid</span>}

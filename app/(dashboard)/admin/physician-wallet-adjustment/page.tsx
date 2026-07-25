@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { PhysicianWalletAdjustmentClient } from "@/components/admin/physician-wallet-adjustment-client";
 
-export const metadata = { title: "Physician Wallet Adjustment – Pronuvia Admin" };
+export const metadata = { title: "Physician Commission Adjustment – Pronuvia Admin" };
 
 export default async function PhysicianWalletAdjustmentPage() {
   await requireAdmin();
@@ -25,7 +25,7 @@ export default async function PhysicianWalletAdjustmentPage() {
   return (
     <div>
       <PageHeader
-        title="Physician Wallet Adjustment"
+        title="Physician Commission Adjustment"
         description="Manually credit or debit physician wallet balances"
       />
 

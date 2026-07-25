@@ -90,7 +90,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Rep</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
                 <th className="px-5 py-3.5" />
@@ -151,7 +151,7 @@ export function WalletAdjustmentClient({ reps }: { reps: Rep[] }) {
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h3 className="text-base font-bold text-gray-800">Wallet Adjustment</h3>
+                <h3 className="text-base font-bold text-gray-800">Commission Adjustment</h3>
                 <p className="text-sm text-gray-500 mt-0.5">
                   {selected.firstName} {selected.lastName}
                 </p>

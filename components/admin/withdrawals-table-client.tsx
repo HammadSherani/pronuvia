@@ -149,7 +149,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                 />
               )}
             </th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Rep</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
