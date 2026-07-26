@@ -136,20 +136,20 @@ export async function purchaseUPSLabel(
             BillShipper: { AccountNumber: process.env.UPS_ACCOUNT_NUMBER ?? "" },
           },
         },
-        Service:  { Code: serviceCode },
-        Package:  {
-          PackagingType: { Code: "02" },
+        Service:  { Code: serviceCode, Description: "UPS Service" },
+        Package: [{
+          Packaging: { Code: "02", Description: "Customer Supplied Package" },
           Dimensions: pkg.lengthIn ? {
-            UnitOfMeasurement: { Code: "IN" },
+            UnitOfMeasurement: { Code: "IN", Description: "Inches" },
             Length: String(Math.round(pkg.lengthIn)),
             Width:  String(Math.round(pkg.widthIn  ?? 1)),
             Height: String(Math.round(pkg.heightIn ?? 1)),
           } : undefined,
           PackageWeight: {
-            UnitOfMeasurement: { Code: "LBS" },
+            UnitOfMeasurement: { Code: "LBS", Description: "Pounds" },
             Weight: String(pkg.weightLbs),
           },
-        },
+        }],
       },
       LabelSpecification: {
         LabelImageFormat:  { Code: "PNG" },

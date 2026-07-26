@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { getUPSRates } from "@/lib/shipping/ups";
+import { getUPSRates, purchaseUPSLabel } from "@/lib/shipping/ups";
 import type { ShipAddress, PackageInfo } from "@/lib/shipping/types";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get("mode") ?? "rates"; // ?mode=label to test label
+
   const from: ShipAddress = {
     name:    process.env.SHIP_FROM_NAME    ?? "Pronuvia",
     company: process.env.SHIP_FROM_COMPANY ?? "Pronuvia LLC",
@@ -21,11 +24,23 @@ export async function GET() {
     state:   "CA",
     zip:     "94043",
     country: "US",
+    phone:   "6505551234",
   };
 
   const pkg: PackageInfo = { weightLbs: 2, lengthIn: 10, widthIn: 8, heightIn: 4 };
 
   try {
+    if (mode === "label") {
+      const label = await purchaseUPSLabel(from, to, pkg, "03", "UPS Ground");
+      return NextResponse.json({
+        success:        true,
+        trackingNumber: label.trackingNumber,
+        cost:           label.cost,
+        hasLabel:       !!label.labelBase64,
+        labelLength:    label.labelBase64?.length ?? 0,
+      });
+    }
+
     const rates = await getUPSRates(from, to, pkg);
     return NextResponse.json({ success: true, rates, count: rates.length });
   } catch (err: unknown) {

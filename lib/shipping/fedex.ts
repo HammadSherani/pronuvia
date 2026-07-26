@@ -1,7 +1,6 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
 
 const BASE = process.env.FEDEX_API_URL ?? "https://apis-sandbox.fedex.com";
-console.log("[FedEx] Using API:", BASE);
 
 async function getToken(): Promise<string> {
   const res = await fetch(`${BASE}/oauth/token`, {
@@ -57,8 +56,6 @@ export async function getFedExRates(
     },
   };
 
-  console.log("[FedEx] Rates request body:", JSON.stringify(body, null, 2));
-
   const res = await fetch(`${BASE}/rate/v1/rates/quotes`, {
     method: "POST",
     headers: {
@@ -71,7 +68,6 @@ export async function getFedExRates(
   });
 
   const data = await res.json();
-  console.log("[FedEx] Rates response:", JSON.stringify(data, null, 2));
 
   if (!res.ok || (data?.errors?.length ?? 0) > 0) {
     const errs = (data?.errors ?? []) as { message?: string; code?: string }[];
@@ -164,11 +160,6 @@ export async function purchaseFedExLabel(
   });
 
   const data = await res.json();
-  console.log("[FedEx] Label response status:", res.status);
-  console.log("[FedEx] Label response:", JSON.stringify({
-    errors: (data as Record<string,unknown>).errors,
-    output: (data as Record<string,unknown>).output ? "present" : "missing",
-  }));
 
   if (!res.ok) {
     throw new Error(`FedEx label error: ${JSON.stringify(data)}`);
