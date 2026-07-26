@@ -43,24 +43,19 @@ export async function sendMail(opts: {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const from    = parseFromAddress(rawFrom);
-    const logoB64 = getLogoBase64();
+
+    // SendGrid doesn't support CID inline attachments reliably — swap to public URL
+    const appUrl  = (process.env.NEXT_PUBLIC_APP_URL ?? "https://pronuvia.vercel.app").replace(/\/$/, "");
+    const logoUrl = `${appUrl}/assets/logo-white.png`;
+    const html    = opts.html.replace(/cid:pronuvia-logo/g, logoUrl);
 
     try {
       const [res] = await sgMail.send({
         to:      opts.to,
         from,
         subject: opts.subject,
-        html:    opts.html,
+        html,
         ...(ccUnique.length ? { cc: ccUnique } : {}),
-        ...(logoB64 ? {
-          attachments: [{
-            content:     logoB64,
-            filename:    "logo-white.png",
-            type:        "image/png",
-            disposition: "inline",
-            content_id:  "pronuvia-logo",
-          }],
-        } : {}),
       });
       console.log("[mailer/sendgrid] sent to", opts.to, "| subject:", opts.subject, "| status:", res.statusCode);
       return res;
@@ -94,7 +89,7 @@ export async function sendMail(opts: {
   }] : [];
 
   const info = await transporter.sendMail({
-    from,
+    from:        rawFrom,
     to:          opts.to,
     cc:          ccUnique.length ? ccUnique.join(", ") : undefined,
     subject:     opts.subject,
