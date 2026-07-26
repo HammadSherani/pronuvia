@@ -12,6 +12,17 @@ function getLogoBase64(): string | null {
   }
 }
 
+// Parse "Name <email@x.com>" or plain "email@x.com" into { name?, email }
+function parseFromAddress(raw: string): { email: string; name?: string } {
+  const match = raw.match(/^(.*?)\s*<([^>]+)>\s*$/);
+  if (match) {
+    const name  = match[1].trim().replace(/^["']|["']$/g, "");
+    const email = match[2].trim();
+    return name ? { name, email } : { email };
+  }
+  return { email: raw.trim() };
+}
+
 export async function sendMail(opts: {
   to:           string;
   cc?:          string | string[];
@@ -19,7 +30,7 @@ export async function sendMail(opts: {
   html:         string;
   attachments?: { filename: string; path: string }[];
 }) {
-  const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@pronuvia.com";
+  const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@pronuvia.com";
 
   // Normalise CC: remove blanks and duplicates of `to`
   const ccList = (Array.isArray(opts.cc) ? opts.cc : opts.cc ? [opts.cc] : [])
@@ -31,26 +42,33 @@ export async function sendMail(opts: {
   if (process.env.SENDGRID_API_KEY) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+    const from    = parseFromAddress(rawFrom);
     const logoB64 = getLogoBase64();
-    const [res] = await sgMail.send({
-      to:      opts.to,
-      from,
-      subject: opts.subject,
-      html:    opts.html,
-      text:    "",
-      ...(ccUnique.length ? { cc: ccUnique } : {}),
-      ...(logoB64 ? {
-        attachments: [{
-          content:     logoB64,
-          filename:    "logo-white.png",
-          type:        "image/png",
-          disposition: "inline",
-          contentId:   "pronuvia-logo",
-        }],
-      } : {}),
-    });
-    console.log("[mailer/sendgrid] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| status:", res.statusCode);
-    return res;
+
+    try {
+      const [res] = await sgMail.send({
+        to:      opts.to,
+        from,
+        subject: opts.subject,
+        html:    opts.html,
+        ...(ccUnique.length ? { cc: ccUnique } : {}),
+        ...(logoB64 ? {
+          attachments: [{
+            content:     logoB64,
+            filename:    "logo-white.png",
+            type:        "image/png",
+            disposition: "inline",
+            content_id:  "pronuvia-logo",
+          }],
+        } : {}),
+      });
+      console.log("[mailer/sendgrid] sent to", opts.to, "| subject:", opts.subject, "| status:", res.statusCode);
+      return res;
+    } catch (err: unknown) {
+      const sgErr = err as { code?: number; response?: { body?: unknown } };
+      console.error("[mailer/sendgrid] FAILED — code:", sgErr.code, "| body:", JSON.stringify(sgErr.response?.body));
+      throw err;
+    }
   }
 
   // ── Nodemailer SMTP fallback (local dev) ──────────────────────────────────
