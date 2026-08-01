@@ -47,7 +47,8 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   onSuccess:       (orderNumber: string) => void;
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
-}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError }, ref) {
+  onStripeReady:   () => void;
+}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError, onStripeReady }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
   const [elementsReady, setElementsReady] = useState(false);
@@ -91,6 +92,11 @@ const StripeInnerForm = forwardRef<StripeHandle, {
       onProcessing(false);
     }
   };
+
+  useEffect(() => {
+    if (elementsReady) onStripeReady();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elementsReady]);
 
   useImperativeHandle(ref, () => ({ submit: handlePay }));
   return (
@@ -162,6 +168,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const [showNotes,      setShowNotes]      = useState(false);
   const [clientSecret,   setClientSecret]   = useState("");
   const [fetchingIntent, setFetchingIntent] = useState(false);
+  const [paymentReady,   setPaymentReady]   = useState(false);
   const [stripeError,    setStripeError]    = useState("");
   const [cardProcessing, setCardProcessing] = useState(false);
 
@@ -280,6 +287,14 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   return (
     <div className="">
+      {/* Full-page Stripe loading overlay */}
+      {(fetchingIntent || (clientSecret && !paymentReady)) && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
+          <span className="w-10 h-10 border-4 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin mb-4" />
+          <p className="text-sm font-medium text-gray-500">Loading secure checkout…</p>
+        </div>
+      )}
+
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-gray-900 mb-6" />
 
@@ -435,6 +450,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                     onSuccess={handleCardSuccess}
                     onProcessing={setCardProcessing}
                     onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+                    onStripeReady={() => setPaymentReady(true)}
                   />
                 </Elements>
               ) : (
