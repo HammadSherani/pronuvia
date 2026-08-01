@@ -11,7 +11,7 @@ export default async function NewPhysicianPage() {
   const { reps } = await listSalesReps();
 
   return (
-    <div className="max-w-3xl">
+    <div className="">
       <Link href="/admin/physicians"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-5 transition-colors">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

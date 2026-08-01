@@ -7,12 +7,6 @@ import { registerPhysician, type RegisterPhysicianState } from "@/actions/websit
 
 const ALL_COUNTRIES = Country.getAllCountries();
 
-const SPECIALTIES = [
-  "Cardiology","Dermatology","Endocrinology","Family Medicine","Gastroenterology",
-  "General Practice","Internal Medicine","Neurology","Obstetrics & Gynecology",
-  "Oncology","Ophthalmology","Orthopedics","Pediatrics","Psychiatry",
-  "Pulmonology","Radiology","Rheumatology","Surgery","Urology",
-];
 
 
 const inp    = "w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#1b3b6f] focus:ring-1 focus:ring-[#1b3b6f]/30 transition bg-white";
@@ -213,18 +207,6 @@ export function PhysicianRegisterForm() {
       {/* Specialties */}
       <div>
         <label className={lbl}>Fields of Specialties<R /></label>
-        <div className="flex flex-wrap gap-2 mt-1">
-          {SPECIALTIES.map((s) => (
-            <button key={s} type="button" onClick={() => toggleSpecialty(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                specialties.includes(s)
-                  ? "bg-[#1b3b6f] text-white border-[#1b3b6f]"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-[#1b3b6f]"
-              }`}>
-              {s}
-            </button>
-          ))}
-        </div>
 
         {/* Custom specialty */}
         <div className="flex gap-2 mt-3">
