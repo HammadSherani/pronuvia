@@ -82,14 +82,15 @@ export async function confirmCardOrder(
   const availability = await validateCartItemsAvailability(items);
   if (!availability.valid) return { success: false, message: availability.message };
 
-  const subtotal = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const subtotal       = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const commissionBase = parseFloat((subtotal - (payload.discountAmount ?? 0)).toFixed(2));
 
   const rep = await prisma.salesRepresentative.findUnique({
     where:  { id: session.userId },
     select: { commission: true, email: true, firstName: true, lastName: true },
   });
   const commissionRate   = rep?.commission ?? 0;
-  const commissionAmount = parseFloat(((subtotal * commissionRate) / 100).toFixed(2));
+  const commissionAmount = parseFloat(((commissionBase * commissionRate) / 100).toFixed(2));
 
   const orderNumber = await generateOrderNumber();
 
@@ -164,7 +165,10 @@ export async function confirmCardOrder(
         orderDate:       new Date(),
         customerPhone:   payload.customerPhone   || null,
       });
-      const cc = rep?.email && rep.email !== payload.customerEmail ? rep.email : undefined;
+      const cc = [
+        rep?.email !== payload.customerEmail ? rep?.email : null,
+        "sales1.pronuvia@gmail.com",
+      ].filter(Boolean) as string[];
       await sendMail({ to: payload.customerEmail, cc, subject, html });
     } catch (err) {
       console.error("[sales-rep order] confirmation email failed:", err);

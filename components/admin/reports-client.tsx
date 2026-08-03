@@ -3,12 +3,10 @@
 import { useState, useTransition, useCallback, useMemo } from "react";
 import * as XLSX from "xlsx";
 import {
-  getOverallSalesReport,    type SalesRow,
-  getSalesByProductReport,  type ProductRow,
-  getReturnOrdersReport,    type ReturnRow,
-  getSalesRepCommissionReport, type SalesRepCommRow,
-  getOverallCommissionReport,  type OverallCommRow,
-  getDoctorCommissionReport,   type DoctorCommRow,
+  getOverallSalesReport,         type SalesRow,
+  getSalesByProductReport,       type ProductRow,
+  getReturnOrdersReport,         type ReturnRow,
+  getOverallCommissionReport,    type OverallCommRow,
   getCustomerOrderHistoryReport, type CustomerHistoryRow,
   type ReportFilters,
 } from "@/actions/admin/reports";
@@ -23,13 +21,11 @@ interface Props {
 
 // ── Tabs ──────────────────────────────────────────────────────
 const TABS = [
-  { id: "overall-sales",       label: "Overall Sales" },
-  { id: "by-product",          label: "Sales by Product" },
-  { id: "returns",             label: "Return Orders" },
-  { id: "salesrep-commission", label: "Medical Rep Commission" },
-  { id: "overall-commission",  label: "Overall Commission" },
-  { id: "doctor-commission",   label: "Doctor Commission" },
-  { id: "customer-history",    label: "Customer Order" },
+  { id: "overall-sales",      label: "Overall Sales" },
+  { id: "by-product",         label: "Sales by Product" },
+  { id: "returns",            label: "Return Orders" },
+  { id: "overall-commission", label: "Overall Commission" },
+  { id: "customer-history",   label: "Order Details" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -104,14 +100,49 @@ function ReportTable({ cols, rows, loading }: {
   );
 }
 
-// ── Export helper ─────────────────────────────────────────────
-function exportExcel(data: Record<string, unknown>[], cols: Col[], filename: string) {
+// ── Export helpers ────────────────────────────────────────────
+function exportExcel(
+  data: Record<string, unknown>[],
+  cols: Col[],
+  filename: string,
+  tab: TabId,
+) {
   if (!data.length) return;
-  const exportData = data.map(row => {
-    const out: Record<string, unknown> = {};
-    cols.forEach(c => { out[c.label] = row[c.key] ?? ""; });
-    return out;
-  });
+
+  let exportData: Record<string, unknown>[];
+
+  if (tab === "customer-history") {
+    // Full detailed export for Order Details tab
+    exportData = (data as unknown as CustomerHistoryRow[]).map(r => ({
+      "Order #":             r.orderNumber,
+      "Order Date":          r.date,
+      "Status":              r.status,
+      "Items":               r.itemsSummary,
+      "Patient Email":       r.patientEmail,
+      "Patient Phone":       r.patientPhone,
+      "Doctor":              r.doctor,
+      "Doctor Email":        r.doctorEmail,
+      "Medical Rep":         r.salesRep,
+      "Medical Rep Email":   r.salesRepEmail,
+      "Subtotal":            r.subtotal,
+      "Shipping":            r.shippingRate,
+      "Coupon Code":         r.couponCode,
+      "Discount":            r.discountAmount,
+      "Total":               r.total,
+      "Payment Method":      r.paymentMethod,
+      "Tracking #":          r.trackingNumber,
+      "Carrier":             r.shippingCarrier,
+      "Billing Address":     r.billingAddress,
+      "Shipping Address":    r.shippingAddress,
+    }));
+  } else {
+    exportData = data.map(row => {
+      const out: Record<string, unknown> = {};
+      cols.forEach(c => { out[c.label] = row[c.key] ?? ""; });
+      return out;
+    });
+  }
+
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Report");
@@ -153,17 +184,6 @@ const COLS: Record<TabId, Col[]> = {
     { key: "srClawback",        label: "SR Clawback",     align: "right", render: v => usd(Number(v)) },
     { key: "physicianClawback", label: "Dr Clawback",     align: "right", render: v => usd(Number(v)) },
   ],
-  "salesrep-commission": [
-    { key: "repName",          label: "Medical Rep" },
-    { key: "orderCount",       label: "Orders",             align: "right" },
-    { key: "totalSales",       label: "Total Sales",        align: "right", render: v => usd(Number(v)) },
-    { key: "avgRate",          label: "Avg Rate",           align: "right", render: v => pct(Number(v)) },
-    { key: "totalCommission",  label: "Total Commission",   align: "right", render: v => usd(Number(v)) },
-    { key: "paidCommission",   label: "Paid",               align: "right", render: v => <span className="text-green-600">{usd(Number(v))}</span> },
-    { key: "unpaidCommission", label: "Unpaid",             align: "right", render: v => <span className="text-orange-600">{usd(Number(v))}</span> },
-    { key: "totalClawback",    label: "Clawback",           align: "right", render: v => usd(Number(v)) },
-    { key: "netCommission",    label: "Net Commission",     align: "right", render: v => <span className="font-bold">{usd(Number(v))}</span> },
-  ],
   "overall-commission": [
     { key: "orderNumber",    label: "Order #" },
     { key: "date",           label: "Date" },
@@ -179,20 +199,10 @@ const COLS: Record<TabId, Col[]> = {
       ? <span className="text-green-600 font-semibold">Yes</span>
       : <span className="text-orange-500">No</span> },
   ],
-  "doctor-commission": [
-    { key: "doctorName",       label: "Doctor" },
-    { key: "practice",         label: "Practice" },
-    { key: "orderCount",       label: "Orders",           align: "right" },
-    { key: "totalSales",       label: "Total Sales",      align: "right", render: v => usd(Number(v)) },
-    { key: "avgRate",          label: "Avg Rate",         align: "right", render: v => pct(Number(v)) },
-    { key: "totalCommission",  label: "Total Commission", align: "right", render: v => usd(Number(v)) },
-    { key: "paidCommission",   label: "Paid",             align: "right", render: v => <span className="text-green-600">{usd(Number(v))}</span> },
-    { key: "unpaidCommission", label: "Unpaid",           align: "right", render: v => <span className="text-orange-600">{usd(Number(v))}</span> },
-  ],
   "customer-history": [
-    { key: "orderNumber",    label: "Order #" },
-    { key: "date",           label: "Date" },
-    { key: "doctor",         label: "Doctor", render: (v, row) => (
+    { key: "orderNumber",  label: "Order #" },
+    { key: "date",         label: "Date" },
+    { key: "doctor",       label: "Doctor", render: (v, row) => (
       <div>
         <p className="font-medium text-gray-800">{(v != null && v !== "") ? String(v) : "–"}</p>
         {(row.doctorEmail != null && row.doctorEmail !== "") && (
@@ -200,7 +210,7 @@ const COLS: Record<TabId, Col[]> = {
         )}
       </div>
     )},
-    { key: "salesRep",       label: "Medical Rep", render: (v, row) => (
+    { key: "salesRep",     label: "Medical Rep", render: (v, row) => (
       <div>
         <p className="font-medium text-gray-800">{(v != null && v !== "") ? String(v) : "–"}</p>
         {(row.salesRepEmail != null && row.salesRepEmail !== "") && (
@@ -208,9 +218,15 @@ const COLS: Record<TabId, Col[]> = {
         )}
       </div>
     )},
-    { key: "patientEmail",   label: "Patient Email", render: (v, row) => {
+    { key: "patientEmail", label: "Patient", render: (v, row) => {
       const pe = (v != null && v !== "") ? String(v) : "";
-      if (pe) return <a href={`mailto:${pe}`} className="text-xs text-blue-600 hover:underline">{pe}</a>;
+      const ph = (row.patientPhone != null && row.patientPhone !== "") ? String(row.patientPhone) : "";
+      if (pe || ph) return (
+        <div>
+          {pe && <a href={`mailto:${pe}`} className="text-xs text-blue-600 hover:underline block">{pe}</a>}
+          {ph && <p className="text-[11px] text-gray-400 mt-0.5">{ph}</p>}
+        </div>
+      );
       const de = (row.doctorEmail != null && row.doctorEmail !== "") ? String(row.doctorEmail) : "";
       if (de) return (
         <span className="text-xs text-gray-400">
@@ -219,26 +235,34 @@ const COLS: Record<TabId, Col[]> = {
       );
       return <span className="text-gray-300">–</span>;
     }},
-    { key: "status",         label: "Status", render: v => <StatusBadge status={String(v)} /> },
-    { key: "itemsSummary",   label: "Items", render: v => (
+    { key: "status",       label: "Status", render: v => <StatusBadge status={String(v)} /> },
+    { key: "itemsSummary", label: "Items", render: v => (
       <span className="max-w-xs truncate block" title={String(v)}>{String(v) || "–"}</span>
     )},
-    { key: "subtotal",       label: "Subtotal",          align: "right", render: v => usd(Number(v)) },
-    { key: "total",          label: "Total",             align: "right", render: v => <span className="font-bold">{usd(Number(v))}</span> },
-    { key: "shippingAddress",label: "Shipping Address",  render: v => <span className="max-w-xs truncate block text-xs text-gray-500" title={String(v)}>{String(v) || "–"}</span> },
-    { key: "billingAddress", label: "Billing Address",   render: v => <span className="max-w-xs truncate block text-xs text-gray-500" title={String(v)}>{String(v) || "–"}</span> },
+    { key: "subtotal",     label: "Subtotal",  align: "right", render: v => usd(Number(v)) },
+    { key: "shippingRate", label: "Shipping",  align: "right", render: v => Number(v) > 0 ? usd(Number(v)) : <span className="text-[#3DBFA4] font-medium">Free</span> },
+    { key: "total",        label: "Total",     align: "right", render: v => <span className="font-bold">{usd(Number(v))}</span> },
+    { key: "trackingNumber", label: "Tracking", render: (v, row) => {
+      const tn = v != null && v !== "" ? String(v) : "";
+      if (!tn) return <span className="text-gray-300 text-xs">–</span>;
+      const carrier = row.shippingCarrier != null && row.shippingCarrier !== "" ? String(row.shippingCarrier) : "";
+      return (
+        <div>
+          {carrier && <p className="text-[11px] text-gray-400">{carrier}</p>}
+          <p className="text-xs font-mono font-semibold text-indigo-600">{tn}</p>
+        </div>
+      );
+    }},
   ],
 };
 
 // ── Filters shown per tab ────────────────────────────────────
 const TAB_FILTERS: Record<TabId, { doctor?: boolean; salesRep?: boolean; status?: boolean; product?: boolean }> = {
-  "overall-sales":       { doctor: true, salesRep: true, status: true },
-  "by-product":          { doctor: true, salesRep: true, product: true },
-  "returns":             { doctor: true, salesRep: true },
-  "salesrep-commission": { salesRep: true },
-  "overall-commission":  { doctor: true, salesRep: true, status: true },
-  "doctor-commission":   { doctor: true },
-  "customer-history":    { doctor: true, salesRep: true, status: true },
+  "overall-sales":      { doctor: true, salesRep: true, status: true },
+  "by-product":         { doctor: true, salesRep: true, product: true },
+  "returns":            { doctor: true, salesRep: true },
+  "overall-commission": { doctor: true, salesRep: true, status: true },
+  "customer-history":   { doctor: true, salesRep: true, status: true },
 };
 
 // ── Summary cards ────────────────────────────────────────────
@@ -246,13 +270,12 @@ function SummaryCards({ tab, data }: { tab: TabId; data: Record<string, unknown>
   const cards = useMemo(() => {
     if (!data.length) return [];
     if (tab === "overall-sales") {
-      const total   = (data as unknown as SalesRow[]).reduce((s, r) => s + r.total, 0);
-      const orders  = data.length;
-      const avgOrd  = total / orders;
+      const total  = (data as unknown as SalesRow[]).reduce((s, r) => s + r.total, 0);
+      const orders = data.length;
       return [
-        { label: "Total Orders",   value: orders.toString() },
-        { label: "Revenue",        value: usd(total) },
-        { label: "Avg Order Value",value: usd(avgOrd) },
+        { label: "Total Orders",    value: orders.toString() },
+        { label: "Revenue",         value: usd(total) },
+        { label: "Avg Order Value", value: usd(total / orders) },
       ];
     }
     if (tab === "by-product") {
@@ -268,46 +291,28 @@ function SummaryCards({ tab, data }: { tab: TabId; data: Record<string, unknown>
       const returnedTotal = (data as unknown as ReturnRow[]).reduce((s, r) => s + r.returnedTotal, 0);
       const clawback      = (data as unknown as ReturnRow[]).reduce((s, r) => s + r.srClawback, 0);
       return [
-        { label: "Total Returns",      value: data.length.toString() },
-        { label: "Amount Returned",    value: usd(returnedTotal) },
-        { label: "Total SR Clawback",  value: usd(clawback) },
-      ];
-    }
-    if (tab === "salesrep-commission") {
-      const total  = (data as unknown as SalesRepCommRow[]).reduce((s, r) => s + r.totalCommission, 0);
-      const paid   = (data as unknown as SalesRepCommRow[]).reduce((s, r) => s + r.paidCommission, 0);
-      const unpaid = (data as unknown as SalesRepCommRow[]).reduce((s, r) => s + r.unpaidCommission, 0);
-      return [
-        { label: "Total Commission",  value: usd(total) },
-        { label: "Paid",              value: usd(paid) },
-        { label: "Unpaid",            value: usd(unpaid) },
+        { label: "Total Returns",     value: data.length.toString() },
+        { label: "Amount Returned",   value: usd(returnedTotal) },
+        { label: "Total SR Clawback", value: usd(clawback) },
       ];
     }
     if (tab === "overall-commission") {
-      const total  = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.totalCommission, 0);
-      const sr     = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.srCommAmount, 0);
-      const doc    = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.docCommAmount, 0);
+      const total = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.totalCommission, 0);
+      const sr    = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.srCommAmount, 0);
+      const doc   = (data as unknown as OverallCommRow[]).reduce((s, r) => s + r.docCommAmount, 0);
       return [
         { label: "Total Commissions", value: usd(total) },
-        { label: "Medical Rep Share",   value: usd(sr) },
+        { label: "Medical Rep Share", value: usd(sr) },
         { label: "Doctor Share",      value: usd(doc) },
       ];
     }
-    if (tab === "doctor-commission") {
-      const total  = (data as unknown as DoctorCommRow[]).reduce((s, r) => s + r.totalCommission, 0);
-      const paid   = (data as unknown as DoctorCommRow[]).reduce((s, r) => s + r.paidCommission, 0);
-      const unpaid = (data as unknown as DoctorCommRow[]).reduce((s, r) => s + r.unpaidCommission, 0);
-      return [
-        { label: "Total Commission", value: usd(total) },
-        { label: "Paid",             value: usd(paid) },
-        { label: "Unpaid",           value: usd(unpaid) },
-      ];
-    }
     if (tab === "customer-history") {
-      const total = (data as unknown as CustomerHistoryRow[]).reduce((s, r) => s + r.total, 0);
+      const total    = (data as unknown as CustomerHistoryRow[]).reduce((s, r) => s + r.total, 0);
+      const shipping = (data as unknown as CustomerHistoryRow[]).reduce((s, r) => s + r.shippingRate, 0);
       return [
-        { label: "Total Orders",  value: data.length.toString() },
-        { label: "Total Revenue", value: usd(total) },
+        { label: "Total Orders",   value: data.length.toString() },
+        { label: "Total Revenue",  value: usd(total) },
+        { label: "Total Shipping", value: usd(shipping) },
       ];
     }
     return [];
@@ -336,19 +341,17 @@ export function ReportsClient({ doctors, salesReps, products }: Props) {
   const [page,      setPage]      = useState(1);
   const [isPending, startTransition] = useTransition();
 
-  const tf = TAB_FILTERS[activeTab];
+  const tf   = TAB_FILTERS[activeTab];
   const cols = COLS[activeTab];
 
   const runReport = useCallback((tab: TabId, f: ReportFilters) => {
     startTransition(async () => {
       let rows: Record<string, unknown>[] = [];
-      if (tab === "overall-sales")       rows = (await getOverallSalesReport(f))         as unknown as Record<string, unknown>[];
-      else if (tab === "by-product")     rows = (await getSalesByProductReport(f))       as unknown as Record<string, unknown>[];
-      else if (tab === "returns")        rows = (await getReturnOrdersReport(f))         as unknown as Record<string, unknown>[];
-      else if (tab === "salesrep-commission") rows = (await getSalesRepCommissionReport(f)) as unknown as Record<string, unknown>[];
-      else if (tab === "overall-commission")  rows = (await getOverallCommissionReport(f))  as unknown as Record<string, unknown>[];
-      else if (tab === "doctor-commission")   rows = (await getDoctorCommissionReport(f))   as unknown as Record<string, unknown>[];
-      else if (tab === "customer-history")    rows = (await getCustomerOrderHistoryReport(f)) as unknown as Record<string, unknown>[];
+      if (tab === "overall-sales")      rows = (await getOverallSalesReport(f))           as unknown as Record<string, unknown>[];
+      else if (tab === "by-product")    rows = (await getSalesByProductReport(f))         as unknown as Record<string, unknown>[];
+      else if (tab === "returns")       rows = (await getReturnOrdersReport(f))           as unknown as Record<string, unknown>[];
+      else if (tab === "overall-commission") rows = (await getOverallCommissionReport(f)) as unknown as Record<string, unknown>[];
+      else if (tab === "customer-history")  rows = (await getCustomerOrderHistoryReport(f)) as unknown as Record<string, unknown>[];
       setData(rows);
       setLoaded(true);
       setPage(1);
@@ -366,8 +369,7 @@ export function ReportsClient({ doctors, salesReps, products }: Props) {
   const handleApply = () => runReport(activeTab, filters);
 
   const handleReset = () => {
-    const f: ReportFilters = {};
-    setFilters(f);
+    setFilters({});
     setSearch("");
     setData([]);
     setLoaded(false);
@@ -504,7 +506,7 @@ export function ReportsClient({ doctors, salesReps, products }: Props) {
             <button
               type="button"
               disabled={!filteredData.length}
-              onClick={() => exportExcel(filteredData, cols, activeTab)}
+              onClick={() => exportExcel(filteredData, cols, activeTab, activeTab)}
               className="inline-flex items-center gap-1.5 px-4 py-1.5 border border-emerald-300 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-lg hover:bg-emerald-100 disabled:opacity-40 transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

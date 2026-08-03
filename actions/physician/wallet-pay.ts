@@ -77,14 +77,15 @@ export async function payWithPhysicianWallet(
   }
 
   const subtotal                   = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const commissionBase             = parseFloat((subtotal - discountAmount).toFixed(2));
   const physicianCommissionRate    = physician.commission ?? 0;
-  const physicianCommissionAmount  = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
+  const physicianCommissionAmount  = parseFloat(((commissionBase * physicianCommissionRate) / 100).toFixed(2));
 
   let salesRepCommissionRate   = 0;
   let salesRepCommissionAmount = 0;
   if (physician.salesRepId) {
     salesRepCommissionRate   = physician.uplineCommission ?? 0;
-    salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
+    salesRepCommissionAmount = parseFloat(((commissionBase * salesRepCommissionRate) / 100).toFixed(2));
   }
 
   const newBalance   = parseFloat((physician.walletBalance - total).toFixed(2));
@@ -174,7 +175,10 @@ export async function payWithPhysicianWallet(
         orderDate:       new Date(),
         customerPhone:   customerPhone   || null,
       });
-      const cc = physician.email && physician.email !== customerEmail ? physician.email : undefined;
+      const cc = [
+        physician.email !== customerEmail ? physician.email : null,
+        "sales1.pronuvia@gmail.com",
+      ].filter(Boolean) as string[];
       await sendMail({ to: customerEmail, cc, subject, html });
     } catch (err) {
       console.error("[physician wallet] confirmation email failed:", err);

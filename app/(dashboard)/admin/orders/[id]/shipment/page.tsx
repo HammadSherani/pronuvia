@@ -48,6 +48,11 @@ export default async function OrderShipmentPage({ params }: Props) {
       subtotal={order.subtotal}
       shippingRate={order.shippingRate}
       shippingCarrier={order.shippingCarrier ?? null}
+      testModeCarriers={{
+        ups:   (process.env.UPS_API_URL   ?? "").includes("wwwcie"),
+        fedex: (process.env.FEDEX_API_URL ?? "").includes("sandbox"),
+        usps:  (process.env.USPS_BASE_URL ?? "").includes("tem"),
+      }}
     />
   );
 }

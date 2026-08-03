@@ -146,7 +146,9 @@ export async function shipOrder(
     select: {
       id: true, status: true,
       orderNumber: true, items: true,
-      customerEmail: true, customerPhone: true, shippingAddress: true,
+      customerEmail: true, customerPhone: true,
+      shippingAddress: true, billingAddress: true,
+      total: true, shippingRate: true, paymentMethod: true,
       physician: { select: { email: true, firstName: true, lastName: true } },
       salesRep:  { select: { email: true } },
     },
@@ -190,12 +192,16 @@ export async function shipOrder(
         estimatedDelivery,
         items,
         shippingAddress:  order.shippingAddress,
+        billingAddress:   order.billingAddress,
+        total:            order.total,
+        shippingCost:     order.shippingRate ?? 0,
+        paymentMethod:    order.paymentMethod,
         contactEmail:     order.customerEmail ?? null,
         contactPhone:     order.customerPhone ?? null,
       });
 
       const to = order.customerEmail ?? order.physician?.email ?? "";
-      const cc = [order.physician?.email, order.salesRep?.email].filter(Boolean) as string[];
+      const cc = [order.physician?.email, order.salesRep?.email, "sales1.pronuvia@gmail.com"].filter(Boolean) as string[];
 
       if (to) await sendMail({ to, cc, subject, html });
     } catch (err) {
@@ -333,6 +339,7 @@ export async function listOrders(opts?: { skip?: number; take?: number; status?:
       where: whereArg,
       select: {
         id: true, orderNumber: true, status: true, total: true,
+        items: true,
         subtotal: true, placedByAdmin: true, placedBySalesRep: true, commissionPaid: true,
         salesRepCommissionRate: true, salesRepCommissionAmount: true,
         physicianCommissionRate: true, physicianCommissionAmount: true,
@@ -573,9 +580,10 @@ export async function sendOrderEmail(
   const { subject, html } = templateFns[emailType](emailData);
 
   const toEmail = primaryEmail;
-  // CC: if patient email is the To, CC the physician or sales rep
-  const ccCandidate = order.physician?.email ?? order.salesRep?.email;
-  const ccEmail = ccCandidate && ccCandidate !== toEmail ? ccCandidate : undefined;
+  // CC both physician and sales rep (deduplicated, excluding the To address)
+  const ccEmails = [order.physician?.email, order.salesRep?.email, "sales1.pronuvia@gmail.com"]
+    .filter((e): e is string => !!e && e !== toEmail);
+  const ccList = [...new Set(ccEmails)];
 
   // Map email type → order status (only for status-bearing emails)
   const statusMap: Partial<Record<OrderEmailType, string>> = {
@@ -585,7 +593,7 @@ export async function sendOrderEmail(
   };
 
   try {
-    await sendMail({ to: toEmail, cc: ccEmail, subject, html });
+    await sendMail({ to: toEmail, cc: ccList.length ? ccList : undefined, subject, html });
 
     const newStatus = statusMap[emailType];
     if (newStatus) {
@@ -655,7 +663,7 @@ export async function processReturn(
       stripePaymentIntentId: true,
       customerEmail: true, customerPhone: true, shippingRate: true, paymentMethod: true, createdAt: true,
       billingAddress: true, shippingAddress: true, notes: true,
-      salesRep:  { select: { walletBalance: true } },
+      salesRep:  { select: { walletBalance: true, email: true } },
       physician: { select: { walletBalance: true, email: true, firstName: true } },
     },
   });
@@ -898,8 +906,8 @@ export async function processReturn(
     ? ` Manual refund $${customerRefund.amount.toFixed(2)} recorded.`
     : "";
 
-  // Send refund confirmation email to patient and doctor
-  if (order.customerEmail || order.physician?.email) {
+  // Send refund confirmation email to patient, CC doctor / sales rep
+  if (order.customerEmail || order.physician?.email || order.salesRep?.email) {
     try {
       const refundedItems = linesToProcess.map((l) => {
         const item = items[l.index];
@@ -927,14 +935,13 @@ export async function processReturn(
         contactPhone:    order.customerPhone ?? null,
       });
 
-      const sends: Promise<unknown>[] = [];
-      if (order.customerEmail) {
-        sends.push(sendMail({ to: order.customerEmail, subject, html }));
+      const refundTo = order.customerEmail ?? order.physician?.email ?? "";
+      if (refundTo) {
+        const refundCc = [order.physician?.email, order.salesRep?.email]
+          .filter((e): e is string => !!e && e !== refundTo);
+        const refundCcUnique = [...new Set(refundCc)];
+        await sendMail({ to: refundTo, cc: refundCcUnique.length ? refundCcUnique : undefined, subject, html });
       }
-      if (order.physician?.email) {
-        sends.push(sendMail({ to: order.physician.email, subject, html }));
-      }
-      await Promise.all(sends);
     } catch (err) {
       console.error("[processReturn] refund email failed:", err);
     }

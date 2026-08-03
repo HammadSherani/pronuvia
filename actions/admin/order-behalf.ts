@@ -79,20 +79,21 @@ export async function confirmBehalfCardOrder(
   const availability = await validateCartItemsAvailability(items);
   if (!availability.valid) return { success: false, message: availability.message };
 
-  const subtotal = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const subtotal       = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const commissionBase = parseFloat((subtotal - (payload.discountAmount ?? 0)).toFixed(2));
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: payload.physicianId },
     select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
-  const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
+  const physicianCommissionAmount = parseFloat(((commissionBase * physicianCommissionRate) / 100).toFixed(2));
 
   let salesRepCommissionRate   = 0;
   let salesRepCommissionAmount = 0;
   if (physician?.salesRepId) {
     salesRepCommissionRate   = physician.uplineCommission ?? 0;
-    salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
+    salesRepCommissionAmount = parseFloat(((commissionBase * salesRepCommissionRate) / 100).toFixed(2));
   }
 
   const orderNumber = await generateOrderNumber();
@@ -163,9 +164,10 @@ export async function confirmBehalfCardOrder(
         })),
         customerPhone: payload.customerPhone || null,
       });
-      const cc = physician?.email && physician.email !== payload.customerEmail
-        ? physician.email
-        : undefined;
+      const cc = [
+        physician?.email !== payload.customerEmail ? physician?.email : null,
+        "sales1.pronuvia@gmail.com",
+      ].filter(Boolean) as string[];
       await sendMail({ to: payload.customerEmail, cc, subject, html });
     } catch (err) {
       console.error("[behalf order] confirmation email failed:", err);

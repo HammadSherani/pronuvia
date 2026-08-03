@@ -22,12 +22,6 @@ function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
 }
 
-function displayAddr(a: AddressData) {
-  const name  = `${a.firstName} ${a.lastName}`.trim();
-  const line2 = [[a.address1, a.address2].filter(Boolean).join(", "), [a.city, a.state, a.zip].filter(Boolean).join(", "), a.countryName].filter(Boolean).join(", ");
-  return { name, line2 };
-}
-
 type AppliedCoupon = { couponId: string; code: string; discountAmount: number };
 type StripeHandle  = { submit: () => void };
 
@@ -137,8 +131,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const [shipping,      setShipping]      = useState<AddressData>(migrated);
   const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [editShip,      setEditShip]      = useState(!hasAddr(migrated));
-  const [editBill,      setEditBill]      = useState(false);
 
   // Shipping options
   const [shippingOptions,  setShippingOptions]  = useState<ShippingOption[]>([]);
@@ -213,8 +205,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const effectiveBilling = sameAsBilling ? shipping : billing;
   const shipStr = serializeAddress(shipping);
   const billStr = serializeAddress(effectiveBilling);
-  const shipDsp = displayAddr(shipping);
-  const billDsp = displayAddr(effectiveBilling);
 
   const handleCardSuccess = (_orderNumber: string) => {
     toast.success("Order placed successfully!");
@@ -323,31 +313,9 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
           {/* Shipping address */}
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
-            {editShip ? (
-              <div className="border border-gray-300 rounded p-4 space-y-4">
-                <AddressFields value={shipping} onChange={setShipping} />
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setEditShip(false)}
-                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
-                    Use this address
-                  </button>
-                  {hasAddr(shipping) && (
-                    <button type="button" onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
-                </div>
-                <button type="button" onClick={() => setEditShip(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
-              </div>
-            )}
+            <div className="border border-gray-300 rounded p-4">
+              <AddressFields value={shipping} onChange={setShipping} />
+            </div>
 
             <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
               <input type="checkbox" checked={sameAsBilling}
@@ -359,29 +327,15 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
             {!sameAsBilling && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
-                {editBill ? (
-                  <div className="border border-gray-300 rounded p-4 space-y-3">
-                    <AddressFields value={billing} onChange={setBilling} />
-                    <button type="button" onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
-                      Done
-                    </button>
-                  </div>
-                ) : (
-                  <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
-                    </div>
-                    <button type="button" onClick={() => setEditBill(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
-                  </div>
-                )}
+                <div className="border border-gray-300 rounded p-4">
+                  <AddressFields value={billing} onChange={setBilling} />
+                </div>
               </div>
             )}
           </section>
 
           {/* Shipping method */}
-          {shipping.country && !editShip && (
+          {shipping.country && (
             <section>
               <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
               {loadingShipping ? (

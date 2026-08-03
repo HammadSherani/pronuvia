@@ -78,21 +78,22 @@ export async function confirmPhysicianCardOrder(
   const availability = await validateCartItemsAvailability(items);
   if (!availability.valid) return { success: false, message: availability.message };
 
-  const subtotal = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const subtotal        = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const commissionBase  = parseFloat((subtotal - (payload.discountAmount ?? 0)).toFixed(2));
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
     select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true, lastName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
-  const physicianCommissionAmount = parseFloat(((subtotal * physicianCommissionRate) / 100).toFixed(2));
+  const physicianCommissionAmount = parseFloat(((commissionBase * physicianCommissionRate) / 100).toFixed(2));
 
   // Use uplineCommission (set by admin per doctor) for the sales rep's cut on this doctor's orders
   let salesRepCommissionRate   = 0;
   let salesRepCommissionAmount = 0;
   if (physician?.salesRepId) {
     salesRepCommissionRate   = physician.uplineCommission ?? 0;
-    salesRepCommissionAmount = parseFloat(((subtotal * salesRepCommissionRate) / 100).toFixed(2));
+    salesRepCommissionAmount = parseFloat(((commissionBase * salesRepCommissionRate) / 100).toFixed(2));
   }
 
   const orderNumber = await generateOrderNumber();
@@ -168,10 +169,11 @@ export async function confirmPhysicianCardOrder(
         orderDate:       new Date(),
         customerPhone:   payload.customerPhone   || null,
       });
-      const cc = physician?.email && physician.email !== payload.customerEmail
-        ? physician.email
-        : undefined;
-      console.log("[physician order] sending confirmation email to:", payload.customerEmail, cc ? `| cc: ${cc}` : "");
+      const cc = [
+        physician?.email !== payload.customerEmail ? physician?.email : null,
+        "sales1.pronuvia@gmail.com",
+      ].filter(Boolean) as string[];
+      console.log("[physician order] sending confirmation email to:", payload.customerEmail, "| cc:", cc);
       await sendMail({ to: payload.customerEmail, cc, subject, html });
       console.log("[physician order] confirmation email sent successfully");
     } catch (err) {

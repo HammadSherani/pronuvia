@@ -139,7 +139,6 @@ export default async function SalesOrdersPage({
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Origin</th>
                   <th className="px-5 py-3.5" />
@@ -167,7 +166,7 @@ export default async function SalesOrdersPage({
                       <td className="px-5 py-4">
                         <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
                         {o.shippingRate > 0 && (
-                          <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
+                          <p className="text-xs text-gray-400">{fmt(o.subtotal)} + {fmt(o.shippingRate)} ship</p>
                         )}
                       </td>
                       <td className="px-5 py-4">
@@ -183,23 +182,6 @@ export default async function SalesOrdersPage({
                       <td className="px-5 py-4">
                         <span className="text-[#5BB8D4] font-semibold">{fmt(o.salesRepCommissionAmount)}</span>
                         <span className="text-xs text-gray-400 ml-1">({o.salesRepCommissionRate}%)</span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-col gap-1">
-                          {o.paymentMethod && (
-                            <span className="text-xs text-gray-500">
-                              {o.paymentMethod === "CARD" ? "💳 Card" : "👛 Wallet"}
-                            </span>
-                          )}
-                          <span className={`inline-flex items-center px-2 py-0.5 border rounded-full text-xs font-medium w-fit ${payCls}`}>
-                            {payStatus === "PAID" && (
-                              <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                            {payStatus}
-                          </span>
-                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${stsCls}`}>

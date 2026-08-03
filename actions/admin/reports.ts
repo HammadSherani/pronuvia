@@ -366,15 +366,18 @@ export async function getDoctorCommissionReport(f: ReportFilters): Promise<Docto
 }
 
 // ─────────────────────────────────────────────
-// 7. Customer Order
+// 7. Order Details
 // ─────────────────────────────────────────────
 export type CustomerHistoryRow = {
   id: string; orderNumber: string; date: string;
   doctor: string; doctorEmail: string;
   salesRep: string; salesRepEmail: string;
-  patientEmail: string;
+  patientEmail: string; patientPhone: string;
   status: string;
-  itemsSummary: string; subtotal: number; total: number;
+  itemsSummary: string;
+  subtotal: number; shippingRate: number; discountAmount: number; total: number;
+  couponCode: string; paymentMethod: string;
+  trackingNumber: string; shippingCarrier: string;
   shippingAddress: string; billingAddress: string;
 };
 
@@ -384,9 +387,11 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
     where: baseWhere(f),
     select: {
       id: true, orderNumber: true, status: true, createdAt: true,
-      items: true, subtotal: true, total: true,
-      customerEmail: true,
+      items: true, subtotal: true, total: true, shippingRate: true,
+      couponCode: true, discountAmount: true,
+      customerEmail: true, customerPhone: true,
       shippingAddress: true, billingAddress: true,
+      paymentMethod: true, trackingNumber: true, shippingCarrier: true,
       physician: { select: { firstName: true, lastName: true, email: true } },
       salesRep:  { select: { name: true, email: true } },
     },
@@ -406,10 +411,17 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
       salesRep:        o.salesRep?.name ?? "–",
       salesRepEmail:   o.salesRep?.email ?? "",
       patientEmail:    o.customerEmail ?? "",
+      patientPhone:    o.customerPhone ?? "",
       status:          o.status,
       itemsSummary,
       subtotal:        o.subtotal,
+      shippingRate:    o.shippingRate ?? 0,
+      discountAmount:  o.discountAmount ?? 0,
       total:           o.total,
+      couponCode:      o.couponCode ?? "",
+      paymentMethod:   o.paymentMethod ?? "–",
+      trackingNumber:  o.trackingNumber ?? "",
+      shippingCarrier: o.shippingCarrier ?? "",
       shippingAddress: parseAddr(o.shippingAddress),
       billingAddress:  parseAddr(o.billingAddress),
     };

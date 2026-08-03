@@ -2,6 +2,7 @@
 import { listSalesReps, deleteSalesRep } from "@/actions/admin/manage-sales-reps";
 import { PageHeader } from "@/components/admin/page-header";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { SalesRepsExportButton } from "@/components/admin/sales-reps-export-button";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
@@ -19,12 +20,24 @@ export default async function SalesRepsPage({
 
   return (
     <div>
-      <PageHeader
-        title="Medical Representatives"
-        description={`Manage your sales team accounts (${total} total)`}
-        actionLabel="Add Medical Rep"
-        actionHref="/admin/sales-reps/new"
-      />
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Medical Representatives</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage your sales team accounts ({total} total)</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <SalesRepsExportButton />
+          <Link
+            href="/admin/sales-reps/new"
+            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Medical Rep
+          </Link>
+        </div>
+      </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {total === 0 ? (

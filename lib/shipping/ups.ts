@@ -32,10 +32,11 @@ const UPS_SERVICES: Record<string, string> = {
 };
 
 function toUPSAddress(a: ShipAddress) {
+  const phone = (a.phone ?? "").replace(/[^a-zA-Z0-9]/g, "") || "0000000000";
   return {
     Name:            a.name,
     AttentionName:   a.company ?? a.name,
-    Phone:           { Number: a.phone ?? "0000000000" },
+    Phone:           { Number: phone },
     Address: {
       AddressLine:       [a.street1, ...(a.street2 ? [a.street2] : [])],
       City:              a.city,
@@ -90,8 +91,13 @@ export async function getUPSRates(
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`UPS rates error: ${err}`);
+    let msg = `UPS rates error (HTTP ${res.status})`;
+    try {
+      const errData = await res.json();
+      const errs = errData?.response?.errors as { code?: string; message?: string }[] ?? [];
+      if (errs.length) msg = errs.map(e => [e.code, e.message].filter(Boolean).join(": ")).join("; ");
+    } catch { /* keep default */ }
+    throw new Error(msg);
   }
 
   const data   = await res.json();
@@ -172,8 +178,13 @@ export async function purchaseUPSLabel(
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`UPS label error: ${err}`);
+    let msg = `UPS label error (HTTP ${res.status})`;
+    try {
+      const errData = await res.json();
+      const errs = errData?.response?.errors as { code?: string; message?: string }[] ?? [];
+      if (errs.length) msg = errs.map(e => [e.code, e.message].filter(Boolean).join(": ")).join("; ");
+    } catch { /* keep default */ }
+    throw new Error(msg);
   }
 
   const data     = await res.json();

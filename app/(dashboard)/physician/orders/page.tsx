@@ -126,13 +126,12 @@ export default async function PhysicianOrdersPage({
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
@@ -145,11 +144,16 @@ export default async function PhysicianOrdersPage({
                   return (
                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">{o.orderNumber}</td>
+                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                        {new Date(o.createdAt).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                      </td>
                       <td className="px-5 py-4 text-gray-600">{itemCount} item{itemCount !== 1 ? "s" : ""}</td>
                       <td className="px-5 py-4">
                         <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
                         {o.shippingRate > 0 && (
-                          <p className="text-xs text-gray-400">+{fmt(o.shippingRate)} shipping</p>
+                          <p className="text-xs text-gray-400">{fmt(o.subtotal)} + {fmt(o.shippingRate)} ship</p>
                         )}
                       </td>
                       <td className="px-5 py-4">
@@ -167,31 +171,9 @@ export default async function PhysicianOrdersPage({
                         <span className="text-xs text-gray-400 ml-1">({o.physicianCommissionRate}%)</span>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="flex flex-col gap-1">
-                          {o.paymentMethod && (
-                            <span className="text-xs text-gray-500">
-                              {o.paymentMethod === "CARD" ? "💳 Card" : "👛 Wallet"}
-                            </span>
-                          )}
-                          <span className={`inline-flex items-center px-2 py-0.5 border rounded-full text-xs font-medium w-fit ${payCls}`}>
-                            {payStatus === "PAID" && (
-                              <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                            {payStatus}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
                         <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${stsCls}`}>
                           {o.status.charAt(0) + o.status.slice(1).toLowerCase()}
                         </span>
-                      </td>
-                      <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
                       </td>
                       <td className="px-5 py-4">
                         <Link href={`/physician/invoice/${o.orderNumber}`}

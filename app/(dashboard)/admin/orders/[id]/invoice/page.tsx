@@ -1,44 +1,21 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Country } from "country-state-city";
-import { requirePhysician } from "@/lib/auth/dal";
-import { prisma } from "@/lib/db/prisma";
+import { requireAdmin } from "@/lib/auth/dal";
+import { getOrderById } from "@/actions/admin/manage-orders";
 import { PrintButton } from "@/components/sales/print-button";
+import type { OrderItem } from "@/actions/admin/manage-orders";
 
-type Props = { params: Promise<{ orderNumber: string }> };
+type Props = { params: Promise<{ id: string }> };
 
-type OrderItem = {
-  productId:   string;
-  title:       string;
-  variantSize: string;
-  sku:         string;
-  unitPrice:   number;
-  quantity:    number;
-  lineTotal:   number;
+type AddrObj = {
+  firstName?: string; lastName?: string; phone?: string;
+  address1?: string; address2?: string; city?: string;
+  state?: string; zip?: string; country?: string;
 };
 
 function fmtMoney(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-}
-
-type AddrObj = { firstName?: string; lastName?: string; phone?: string; address1?: string; address2?: string; city?: string; state?: string; zip?: string; country?: string };
-
-function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
-  if (shippingRate <= 0) return "Free Shipping";
-  if (!shippingAddress) return "Shipping";
-  // Try JSON format first
-  try {
-    const a: AddrObj = JSON.parse(shippingAddress);
-    if (a.country) {
-      const countryName = Country.getCountryByCode(a.country)?.name ?? a.country;
-      return `Shipping ${countryName} Flat Rate`;
-    }
-  } catch { /* fall through to plain text */ }
-  // Plain text: formatAddress() puts country name as the last line
-  const lines = shippingAddress.split("\n").map(l => l.trim()).filter(Boolean);
-  const lastLine = lines[lines.length - 1];
-  if (lastLine) return `Shipping ${lastLine} Flat Rate`;
-  return "Shipping";
 }
 
 function fmtAddress(raw: string | null | undefined): string {
@@ -62,39 +39,46 @@ function fmtDate(d: Date | string | null) {
   });
 }
 
+function getShippingLabel(shippingAddress: string | null | undefined, shippingRate: number): string {
+  if (shippingRate <= 0) return "Free Shipping";
+  if (!shippingAddress) return "Shipping";
+  try {
+    const a: AddrObj = JSON.parse(shippingAddress);
+    if (a.country) {
+      const countryName = Country.getCountryByCode(a.country)?.name ?? a.country;
+      return `Shipping ${countryName} Flat Rate`;
+    }
+  } catch { /* fall through */ }
+  const lines = shippingAddress.split("\n").map(l => l.trim()).filter(Boolean);
+  const lastLine = lines[lines.length - 1];
+  if (lastLine) return `Shipping ${lastLine} Flat Rate`;
+  return "Shipping";
+}
+
 const STATUS_STYLES: Record<string, string> = {
   PAID:    "bg-emerald-50 text-emerald-700 border-emerald-200",
-  PENDING: "bg-amber-50  text-amber-700  border-amber-200",
-  FAILED:  "bg-red-50    text-red-700    border-red-200",
+  PENDING: "bg-amber-50   text-amber-700   border-amber-200",
+  FAILED:  "bg-red-50     text-red-700     border-red-200",
 };
 
-export default async function PhysicianInvoicePage({ params }: Props) {
-  const session = await requirePhysician();
-  const { orderNumber } = await params;
+export default async function AdminInvoicePage({ params }: Props) {
+  await requireAdmin();
+  const { id } = await params;
 
-  const order = await prisma.order.findUnique({
-    where:  { orderNumber },
-    select: {
-      id: true, orderNumber: true, createdAt: true,
-      paymentMethod: true, paymentStatus: true, transactionId: true,
-      subtotal: true, total: true, shippingRate: true,
-      couponCode: true, discountAmount: true,
-      shippingCarrier: true, trackingNumber: true,
-      billingAddress: true, shippingAddress: true,
-      notes: true, items: true,
-      customerEmail: true, customerPhone: true,
-      physicianId: true,
-      physician: {
-        select: { firstName: true, lastName: true, email: true, phone: true },
-      },
-    },
-  });
-
-  if (!order || order.physicianId !== session.userId) notFound();
+  const order = await getOrderById(id);
+  if (!order) notFound();
 
   const items     = order.items as unknown as OrderItem[];
   const payStatus = order.paymentStatus ?? "PENDING";
   const statusCls = STATUS_STYLES[payStatus] ?? STATUS_STYLES["PENDING"];
+
+  const physAddr = [
+    order.physician?.addressOne,
+    order.physician?.addressTwo,
+    order.physician?.city,
+    order.physician?.state,
+    order.physician?.zipCode,
+  ].filter(Boolean).join(", ");
 
   return (
     <>
@@ -131,14 +115,17 @@ export default async function PhysicianInvoicePage({ params }: Props) {
       `}</style>
 
       <div id="inv-root" className="max-w-3xl mx-auto">
+
         {/* Toolbar */}
         <div className="no-print flex items-center justify-between mb-6">
-          <Link href="/physician/orders"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+          <Link
+            href={`/admin/orders/${id}`}
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Order
+            Back to Order
           </Link>
           <PrintButton />
         </div>
@@ -151,7 +138,6 @@ export default async function PhysicianInvoicePage({ params }: Props) {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-2xl font-black tracking-tight">PRONUVIA</p>
-                {/* <p className="text-sm text-white/70 mt-0.5">Health & Wellness Products</p> */}
               </div>
               <div className="text-right">
                 <p className="text-xs text-white/60 uppercase tracking-wider">Invoice</p>
@@ -183,23 +169,34 @@ export default async function PhysicianInvoicePage({ params }: Props) {
           {/* Body */}
           <div id="inv-body" className="px-8 py-6 space-y-6">
 
+            {/* Billing / Shipping addresses */}
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bill To</p>
                 {order.billingAddress ? (
-                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{fmtAddress(order.billingAddress)}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                    {fmtAddress(order.billingAddress)}
+                  </p>
                 ) : order.physician ? (
                   <div className="text-sm text-gray-700 space-y-0.5">
                     <p className="font-semibold">{order.physician.firstName} {order.physician.lastName}</p>
+                    {physAddr && <p className="text-gray-500 text-xs">{physAddr}</p>}
                     <p className="text-gray-500">{order.physician.email}</p>
                     {order.physician.phone && <p className="text-gray-500">{order.physician.phone}</p>}
+                  </div>
+                ) : order.salesRep ? (
+                  <div className="text-sm text-gray-700 space-y-0.5">
+                    <p className="font-semibold">{order.salesRep.name}</p>
+                    <p className="text-gray-500">{order.salesRep.email}</p>
                   </div>
                 ) : <p className="text-sm text-gray-400">—</p>}
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ship To</p>
                 {order.shippingAddress ? (
-                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{fmtAddress(order.shippingAddress)}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                    {fmtAddress(order.shippingAddress)}
+                  </p>
                 ) : (
                   <p className="text-sm text-gray-400">No shipping address provided.</p>
                 )}
@@ -212,6 +209,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </div>
             </div>
 
+            {/* Info boxes */}
             <div className="grid grid-cols-2 gap-4">
               <InfoBox
                 label="Shipping / Tracking"
@@ -221,7 +219,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                 icon={
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 001 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" />
                   </svg>
                 }
               />
@@ -238,6 +236,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               />
             </div>
 
+            {/* Items table */}
             <div className="rounded-xl border border-gray-100 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
@@ -265,6 +264,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
                 </tbody>
               </table>
 
+              {/* Totals */}
               <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 space-y-1.5">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Subtotal</span>
@@ -304,6 +304,7 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </div>
             </div>
 
+            {/* Order notes */}
             {order.notes && (
               <div className="bg-gray-50 rounded-xl px-4 py-3">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Notes</p>
@@ -311,12 +312,14 @@ export default async function PhysicianInvoicePage({ params }: Props) {
               </div>
             )}
 
+            {/* Footer */}
             <div className="border-t border-gray-100 pt-5 text-center">
               <p className="text-sm font-semibold text-gray-700">Thank you for your order!</p>
               <p className="text-xs text-gray-400 mt-1">
                 For questions, contact your account manager or reach us at support@pronuvia.com
               </p>
             </div>
+
           </div>
         </div>
       </div>

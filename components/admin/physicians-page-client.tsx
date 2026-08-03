@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import * as XLSX from "xlsx";
 import { deletePhysician } from "@/actions/admin/manage-physicians";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { PhysicianApprovalActions } from "@/components/admin/physician-approval-actions";
@@ -14,7 +15,13 @@ type Physician = {
   id: string; isApproved: ApprovalStatus;
   firstName: string; lastName: string; email: string;
   nameOfPractice: string | null; phone: string | null;
+  officeContactNumber: string | null; fax: string | null;
+  addressOne: string | null; addressTwo: string | null;
+  city: string | null; state: string | null; zipCode: string | null; country: string | null;
+  license: string | null; aictherapy: string | null; websiteLink: string | null;
+  fieldsOfSpeciality: string[]; yearsInPractice: number | null;
   commission: number; uplineCommission: number;
+  walletBalance: number; ordersCount: number;
   addedByRole: string; salesRepId: string | null;
   salesRep: { id: string; name: string; firstName: string; lastName: string; email: string; commission: number } | null;
   createdAt: Date;
@@ -30,6 +37,42 @@ const statusBadge: Record<ApprovalStatus, { label: string; cls: string }> = {
 
 function match(text: string, q: string) {
   return text.toLowerCase().includes(q.toLowerCase());
+}
+
+function exportToExcel(physicians: Physician[]) {
+  const rows = physicians.map((p) => ({
+    "First Name":               p.firstName,
+    "Last Name":                p.lastName,
+    "Email":                    p.email,
+    "Phone":                    p.phone ?? "",
+    "Office Phone":             p.officeContactNumber ?? "",
+    "Fax":                      p.fax ?? "",
+    "Practice Name":            p.nameOfPractice ?? "",
+    "Website":                  p.websiteLink ?? "",
+    "License":                  p.license ?? "",
+    "AIC Therapy":              p.aictherapy ?? "",
+    "Fields of Specialty":      p.fieldsOfSpeciality.join(", "),
+    "Years in Practice":        p.yearsInPractice ?? "",
+    "Address 1":                p.addressOne ?? "",
+    "Address 2":                p.addressTwo ?? "",
+    "City":                     p.city ?? "",
+    "State":                    p.state ?? "",
+    "Zip Code":                 p.zipCode ?? "",
+    "Country":                  p.country ?? "",
+    "Status":                   p.isApproved,
+    "Doctor Commission (%)":    p.commission,
+    "Rep Upline Commission (%)":p.uplineCommission,
+    "Medical Rep":              p.salesRep?.name ?? "",
+    "Medical Rep Email":        p.salesRep?.email ?? "",
+    "Wallet Balance ($)":       p.walletBalance,
+    "Total Orders":             p.ordersCount,
+    "Sign-up Date":             new Date(p.createdAt).toLocaleDateString("en-US"),
+    "Added By":                 p.addedByRole,
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Physicians");
+  XLSX.writeFile(wb, `physicians-${new Date().toISOString().split("T")[0]}.xlsx`);
 }
 
 // ─── Doctor table row ─────────────────────────────────────────────────────────
@@ -50,7 +93,11 @@ function DoctorTableRow({ p }: { p: Physician }) {
           </div>
         </div>
       </td>
-      <td className="px-3 py-3 text-gray-500 text-xs truncate">{p.nameOfPractice ?? "—"}</td>
+      <td className="px-3 py-3 text-gray-500 text-xs truncate max-w-[120px]">{p.nameOfPractice ?? "—"}</td>
+      <td className="px-3 py-3">
+        <span className="text-xs font-medium text-gray-700">{p.state ?? "—"}</span>
+        {p.city && <p className="text-[10px] text-gray-400">{p.city}</p>}
+      </td>
       <td className="px-3 py-3">
         {p.salesRep ? (
           <div className="min-w-0">
@@ -118,22 +165,41 @@ export function PhysiciansPageClient({
   physicians: Physician[];
   total: number;
 }) {
-  const [query,    setQuery]    = useState("");
-  const [page,     setPage]     = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [query,       setQuery]       = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [page,        setPage]        = useState(1);
+  const [pageSize,    setPageSize]    = useState(10);
+
+  // Unique state codes present in the data, sorted
+  const stateOptions = useMemo(() => {
+    const codes = [...new Set(physicians.map((p) => p.state).filter(Boolean) as string[])].sort();
+    return codes;
+  }, [physicians]);
 
   const filteredPhysicians = useMemo(() => {
-    if (!query.trim()) return physicians;
-    const q = query.trim();
-    return physicians.filter(
-      (p) =>
-        match(`${p.firstName} ${p.lastName}`, q) ||
-        match(p.email, q) ||
-        match(p.id, q) ||
-        (p.nameOfPractice && match(p.nameOfPractice, q)) ||
-        (p.salesRep && match(p.salesRep.name, q)),
-    );
-  }, [query, physicians]);
+    let list = physicians;
+
+    if (stateFilter) {
+      list = list.filter((p) => p.state === stateFilter);
+    }
+
+    if (query.trim()) {
+      const q = query.trim();
+      list = list.filter(
+        (p) =>
+          match(`${p.firstName} ${p.lastName}`, q) ||
+          match(p.email, q) ||
+          match(p.id, q) ||
+          (p.nameOfPractice && match(p.nameOfPractice, q)) ||
+          (p.salesRep && match(p.salesRep.name, q)) ||
+          (p.state && match(p.state, q)) ||
+          (p.city && match(p.city, q)) ||
+          (p.zipCode && match(p.zipCode, q)),
+      );
+    }
+
+    return list;
+  }, [query, stateFilter, physicians]);
 
   useEffect(() => { setPage(1); }, [filteredPhysicians]);
 
@@ -142,7 +208,7 @@ export function PhysiciansPageClient({
     return filteredPhysicians.slice(start, start + pageSize);
   }, [filteredPhysicians, page, pageSize]);
 
-  const isSearching = query.trim().length > 0;
+  const isFiltering = query.trim().length > 0 || stateFilter !== "";
 
   return (
     <div>
@@ -154,51 +220,84 @@ export function PhysiciansPageClient({
             Manage doctors, downline structure, and commission rates ({total} total)
           </p>
         </div>
-        <Link
-          href="/admin/physicians/new"
-          className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Physician
-        </Link>
-      </div>
-
-      {/* ── Search Bar ── */}
-      <div className="relative mb-6">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" />
-          </svg>
-        </div>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search doctors or sales reps by name, email, or ID…"
-          className="w-full pl-10 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors placeholder:text-gray-400"
-        />
-        {query && (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setQuery("")}
-            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+            onClick={() => exportToExcel(filteredPhysicians)}
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
+            Export Excel
           </button>
-        )}
+          <Link
+            href="/admin/physicians/new"
+            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Physician
+          </Link>
+        </div>
       </div>
 
-      {isSearching && (
+      {/* ── Search + State filter ── */}
+      <div className="flex gap-3 mb-6">
+        <div className="relative flex-1">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, email, state, city, practice, or ID…"
+            className="w-full pl-10 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors placeholder:text-gray-400"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        <div className="relative">
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="h-full pl-3 pr-8 py-3 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900/40 focus:border-gray-900 transition-colors appearance-none min-w-[130px]"
+          >
+            <option value="">All States</option>
+            {stateOptions.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {isFiltering && (
         <div className="flex items-center gap-3 mb-4 text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-gray-900" />
             {filteredPhysicians.length} doctor{filteredPhysicians.length !== 1 ? "s" : ""}
           </span>
-          <span className="text-gray-300">for "{query}"</span>
+          {query && <span className="text-gray-300">for "{query}"</span>}
+          {stateFilter && <span className="text-gray-300">in {stateFilter}</span>}
         </div>
       )}
 
@@ -208,7 +307,7 @@ export function PhysiciansPageClient({
           <span className="w-2 h-2 rounded-full bg-gray-900" />
           Partnering Doctors
           <span className="text-gray-300 font-normal normal-case tracking-normal">
-            ({filteredPhysicians.length}{isSearching ? " found" : ""})
+            ({filteredPhysicians.length}{isFiltering ? " found" : ""})
           </span>
         </h2>
 
@@ -216,9 +315,9 @@ export function PhysiciansPageClient({
           {filteredPhysicians.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <p className="text-sm font-medium text-gray-400">
-                {isSearching ? `No doctors match "${query}"` : "No physicians yet"}
+                {isFiltering ? "No doctors match the current filter" : "No physicians yet"}
               </p>
-              {!isSearching && (
+              {!isFiltering && (
                 <Link href="/admin/physicians/new" className="mt-2 text-sm text-[#3DBFA4] hover:underline font-medium">
                   Add your first physician
                 </Link>
@@ -229,11 +328,12 @@ export function PhysiciansPageClient({
               <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[30%]">Doctor</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">Practice</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[24%]">Medical Rep</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">Status</th>
-                    <th className="px-3 py-3 w-[12%]" />
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[26%]">Doctor</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">Practice</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">State</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">Medical Rep</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">Status</th>
+                    <th className="px-3 py-3 w-[16%]" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">

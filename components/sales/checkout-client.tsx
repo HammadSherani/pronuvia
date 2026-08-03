@@ -22,7 +22,6 @@ import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
-import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
 import { validateCoupon }      from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
@@ -43,14 +42,6 @@ function parseAddr(raw: string): AddressData {
 
 function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
-}
-
-function displayAddr(a: AddressData) {
-  const name  = `${a.firstName} ${a.lastName}`.trim();
-  const street = [a.address1, a.address2].filter(Boolean).join(", ");
-  const city   = [a.city, a.state, a.zip].filter(Boolean).join(", ");
-  const line2  = [street, city, a.countryName].filter(Boolean).join(", ");
-  return { name, line2 };
 }
 
 function addrToString(a: AddressData): string {
@@ -189,9 +180,6 @@ export function CheckoutClient({
     return hasAddr(b) ? b : parseAddr(savedShippingAddress);
   });
   const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [editShip,      setEditShip]      = useState(!hasAddr(parseAddr(savedShippingAddress)));
-  const [editBill,      setEditBill]      = useState(false);
-  const [savingAddr,    setSavingAddr]    = useState(false);
 
   // shipping options
   const [shippingOptions,  setShippingOptions]  = useState<ShippingOption[]>([]);
@@ -263,22 +251,6 @@ export function CheckoutClient({
   const shipStr = addrToString(shipping);
   const billStr = addrToString(sameAsBilling ? shipping : billing);
 
-  const handleUseAddress = () => {
-    setEditShip(false);
-  };
-
-  const handleSaveForLater = async () => {
-    setSavingAddr(true);
-    const billingToSave = sameAsBilling ? shipping : billing;
-    const res = await saveCheckoutAddress({ shipping, billing: billingToSave });
-    setSavingAddr(false);
-    if (res.success) {
-      toast.success("Address saved for later.");
-      setEditShip(false);
-    } else {
-      toast.error(res.message ?? "Failed to save address.");
-    }
-  };
 
   // fetch stripe payment intent — AbortController prevents stale responses from overwriting a newer secret
   useEffect(() => {
@@ -409,8 +381,6 @@ export function CheckoutClient({
   }
 
   const stripeReady = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-  const shipDsp     = displayAddr(shipping);
-  const billDsp     = displayAddr(billing);
 
   return (
     <div className="">
@@ -467,47 +437,9 @@ export function CheckoutClient({
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
 
-            {editShip ? (
-              <div className="border border-gray-300 rounded p-4 space-y-4">
-                <AddressFields value={shipping} onChange={setShipping} />
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={handleUseAddress}
-                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors"
-                  >
-                    Use this address
-                  </button>
-                  <button
-                    onClick={handleSaveForLater}
-                    disabled={savingAddr}
-                    className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700"
-                  >
-                    {savingAddr ? "Saving…" : "Save address only"}
-                  </button>
-                  {hasAddr(shipping) && (
-                    <button
-                      onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
-                </div>
-                <button
-                  onClick={() => setEditShip(true)}
-                  className="text-sm text-[#3DBFA4] hover:underline shrink-0"
-                >
-                  Edit
-                </button>
-              </div>
-            )}
+            <div className="border border-gray-300 rounded p-4">
+              <AddressFields value={shipping} onChange={setShipping} />
+            </div>
 
             {/* Same as billing */}
             <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
@@ -529,36 +461,15 @@ export function CheckoutClient({
             {!sameAsBilling && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
-                {editBill ? (
-                  <div className="border border-gray-300 rounded p-4 space-y-3">
-                    <AddressFields value={billing} onChange={setBilling} />
-                    <button
-                      onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors"
-                    >
-                      Done
-                    </button>
-                  </div>
-                ) : (
-                  <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
-                    </div>
-                    <button
-                      onClick={() => setEditBill(true)}
-                      className="text-sm text-[#3DBFA4] hover:underline shrink-0"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                )}
+                <div className="border border-gray-300 rounded p-4">
+                  <AddressFields value={billing} onChange={setBilling} />
+                </div>
               </div>
             )}
           </section>
 
           {/* 3. Shipping method */}
-          {shipping.country && !editShip && (
+          {shipping.country && (
             <section>
               <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
               {loadingShipping ? (

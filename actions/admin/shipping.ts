@@ -200,29 +200,35 @@ export async function purchaseLabel(
 ): Promise<{ success: boolean; message: string; shipment?: { trackingNumber: string; labelBase64: string; labelFormat: string; cost: number } }> {
   await requireAdmin();
 
-  const from = getFromAddress();
-  let to: ShipAddress;
-  if (overrideAddress) {
-    to = overrideAddress;
-  } else {
-    const [toOrNull2, toErr2] = await buildToAddress(orderId);
-    if (toErr2 || !toOrNull2) return { success: false, message: toErr2 ?? "Address unavailable." };
-    to = toOrNull2;
-  }
-
-  let result: LabelResult;
-
   try {
-    if (carrier === "fedex") {
-      result = await purchaseFedExLabel(from, to, pkg, serviceCode, service);
-    } else if (carrier === "ups") {
-      result = await purchaseUPSLabel(from, to, pkg, serviceCode, service);
+    const from = getFromAddress();
+    let to: ShipAddress;
+    if (overrideAddress) {
+      to = overrideAddress;
     } else {
-      result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service);
+      const [toOrNull2, toErr2] = await buildToAddress(orderId);
+      if (toErr2 || !toOrNull2) return { success: false, message: toErr2 ?? "Address unavailable." };
+      to = toOrNull2;
     }
-  } catch (e) {
-    return { success: false, message: (e as Error).message };
-  }
+
+    let result: LabelResult;
+
+    try {
+      if (carrier === "fedex") {
+        result = await purchaseFedExLabel(from, to, pkg, serviceCode, service);
+      } else if (carrier === "ups") {
+        result = await purchaseUPSLabel(from, to, pkg, serviceCode, service);
+      } else {
+        result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service);
+      }
+    } catch (e) {
+      return { success: false, message: (e as Error).message };
+    }
+
+    // Truncate label data if it is excessively large (MongoDB 16 MB doc limit)
+    const safeLabel = result.labelBase64.length > 2_000_000
+      ? ""
+      : result.labelBase64;
 
   await prisma.shipment.create({
     data: {
@@ -232,7 +238,7 @@ export async function purchaseLabel(
       service:        result.service,
       serviceCode:    result.serviceCode,
       trackingNumber: result.trackingNumber,
-      labelBase64:    result.labelBase64,
+      labelBase64:    safeLabel,
       labelFormat:    result.labelFormat,
       fromAddress:    from as object,
       toAddress:      to as object,
@@ -317,7 +323,10 @@ export async function purchaseLabel(
       where:  { id: orderId },
       select: {
         orderNumber: true, items: true,
-        customerEmail: true, customerPhone: true, shippingAddress: true, estimatedDelivery: true,
+        customerEmail: true, customerPhone: true,
+        shippingAddress: true, billingAddress: true,
+        total: true, shippingRate: true, paymentMethod: true,
+        estimatedDelivery: true,
         physician: { select: { email: true } },
         salesRep:  { select: { email: true } },
       },
@@ -340,6 +349,10 @@ export async function purchaseLabel(
         estimatedDelivery: fullOrder.estimatedDelivery,
         items,
         shippingAddress:  fullOrder.shippingAddress,
+        billingAddress:   fullOrder.billingAddress,
+        total:            fullOrder.total,
+        shippingCost:     fullOrder.shippingRate ?? 0,
+        paymentMethod:    fullOrder.paymentMethod,
         contactEmail:     fullOrder.customerEmail ?? null,
         contactPhone:     fullOrder.customerPhone ?? null,
       });
@@ -353,14 +366,20 @@ export async function purchaseLabel(
     console.error("[purchaseLabel] tracking email failed:", err);
   }
 
-  return {
-    success: true,
-    message: `Label purchased! Tracking: ${result.trackingNumber}`,
-    shipment: {
-      trackingNumber: result.trackingNumber,
-      labelBase64:    result.labelBase64,
-      labelFormat:    result.labelFormat,
-      cost:           result.cost,
-    },
-  };
+    return {
+      success: true,
+      message: `Label purchased! Tracking: ${result.trackingNumber}`,
+      shipment: {
+        trackingNumber: result.trackingNumber,
+        labelBase64:    safeLabel,
+        labelFormat:    result.labelFormat,
+        cost:           result.cost,
+      },
+    };
+  } catch (e) {
+    const raw = e instanceof Error ? e.message : String(e);
+    console.error("[purchaseLabel] unexpected error:", e);
+    const message = raw.length > 400 ? raw.slice(0, 400) + "…" : raw;
+    return { success: false, message };
+  }
 }

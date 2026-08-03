@@ -100,9 +100,39 @@ export default async function InvoicePage({ params }: Props) {
   return (
     <>
       {/* Print-only page break control */}
-      <style>{`@media print { .no-print { display: none !important; } body { background: white; } }`}</style>
+      <style>{`
+        @page { margin: 8mm 10mm; }
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white; }
+          #inv-root { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          #inv-card { box-shadow: none !important; break-inside: avoid; }
+          #inv-header { padding: 14px 28px !important; }
+          #inv-header .text-2xl { font-size: 17px !important; }
+          #inv-header .text-xl  { font-size: 14px !important; }
+          #inv-header .text-xs  { font-size: 9px  !important; }
+          #inv-header .mt-5     { margin-top: 8px !important; }
+          #inv-body { padding: 14px 28px !important; }
+          #inv-body > .space-y-6 > * + * { margin-top: 10px !important; }
+          #inv-body .text-sm  { font-size: 11px !important; }
+          #inv-body .text-xs  { font-size: 10px !important; }
+          #inv-body .text-base { font-size: 12px !important; }
+          #inv-body .gap-6    { gap: 14px !important; }
+          #inv-body .gap-4    { gap: 10px !important; }
+          #inv-body td, #inv-body th { padding: 5px 10px !important; font-size: 11px !important; }
+          #inv-body .px-4.py-3   { padding: 6px 12px !important; }
+          #inv-body .px-4.py-3\\.5 { padding: 6px 12px !important; }
+          #inv-body .py-6 { padding-top: 12px !important; padding-bottom: 12px !important; }
+          #inv-body .px-8 { padding-left: 0 !important; padding-right: 0 !important; }
+          #inv-body .space-y-1\\.5 > * + * { margin-top: 3px !important; }
+          #inv-body .space-y-0\\.5 > * + * { margin-top: 2px !important; }
+          #inv-body .pt-5 { padding-top: 10px !important; }
+          #inv-body .py-4 { padding: 8px 12px !important; }
+          #inv-body .rounded-xl { border-radius: 6px !important; }
+        }
+      `}</style>
 
-      <div className="max-w-3xl mx-auto">
+      <div id="inv-root" className="max-w-3xl mx-auto">
         {/* Toolbar */}
         <div className="no-print flex items-center justify-between mb-6">
           <Link
@@ -118,10 +148,10 @@ export default async function InvoicePage({ params }: Props) {
         </div>
 
         {/* Invoice card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div id="inv-card" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#3DBFA4] to-[#35a993] px-8 py-7 text-white">
+          <div id="inv-header" className="bg-gradient-to-r from-[#3DBFA4] to-[#35a993] px-8 py-7 text-white">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-2xl font-black tracking-tight">PRONUVIA</p>
@@ -156,7 +186,7 @@ export default async function InvoicePage({ params }: Props) {
           </div>
 
           {/* Body */}
-          <div className="px-8 py-6 space-y-6">
+          <div id="inv-body" className="px-8 py-6 space-y-6">
 
             {/* Bill To / Ship To */}
             <div className="grid grid-cols-2 gap-6">

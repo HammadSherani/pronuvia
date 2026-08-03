@@ -12,8 +12,12 @@ export default async function PhysiciansPage() {
       select: {
         id: true, isApproved: true,
         firstName: true, lastName: true, email: true,
-        nameOfPractice: true, phone: true,
+        nameOfPractice: true, phone: true, officeContactNumber: true, fax: true,
+        addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
+        license: true, aictherapy: true, websiteLink: true,
+        fieldsOfSpeciality: true, yearsInPractice: true,
         commission: true, uplineCommission: true,
+        walletBalance: true, ordersCount: true,
         addedByRole: true, salesRepId: true,
         salesRep: { select: { id: true, name: true, firstName: true, lastName: true, email: true, commission: true } },
         createdAt: true,

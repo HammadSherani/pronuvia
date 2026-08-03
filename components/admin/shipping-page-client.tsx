@@ -35,6 +35,7 @@ interface Props {
   subtotal:       number;
   shippingRate:   number;
   shippingCarrier: string | null;
+  testModeCarriers?: { ups: boolean; fedex: boolean; usps: boolean };
 }
 
 // ── Static carrier package data ───────────────────────────────────────────────
@@ -385,10 +386,11 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
 
 type PkgTab = "custom" | "carrier" | "saved";
 
-function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier }: {
+function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier, testModeCarriers }: {
   orderId: string; orderNumber: string; items: OrderItem[]; orderValue: number; subtotal: number;
   shippingRate: number; shippingCarrier: string | null;
   shipTo: Props["shipTo"]; shipFrom: Props["shipFrom"];
+  testModeCarriers?: Props["testModeCarriers"];
 }) {
   const router = useRouter();
 
@@ -514,10 +516,14 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     if (pkgTab === "carrier" && !selectedCarrierPkg) { toast.error("Select a carrier package."); return; }
     setRates(null); setSelectedRate(null); setRateError(null);
     startGetRates(async () => {
-      const res = await getShippingRates(orderId, pkg, selectedCarriers);
-      if (res.error) setRateError(res.error);
-      if (res.rates.length > 0) { setRates(res.rates); setSelectedRate(res.rates[0]); }
-      else if (!res.error) setRateError("No rates returned. Check credentials and package details.");
+      try {
+        const res = await getShippingRates(orderId, pkg, selectedCarriers);
+        if (res.error) setRateError(res.error);
+        if (res.rates.length > 0) { setRates(res.rates); setSelectedRate(res.rates[0]); }
+        else if (!res.error) setRateError("No rates returned. Check credentials and package details.");
+      } catch (e) {
+        setRateError(e instanceof Error ? e.message : "Failed to get rates. Check server logs.");
+      }
     });
   }
 
@@ -526,13 +532,17 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     const pkg = buildPkg();
     if (!pkg) { toast.error("Invalid package weight."); return; }
     startPurchase(async () => {
-      const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service);
-      if (res.success && res.shipment) {
-        setPurchased(res.shipment);
-        toast.success(res.message);
-        router.refresh();
-      } else {
-        toast.error(res.message);
+      try {
+        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service);
+        if (res.success && res.shipment) {
+          setPurchased(res.shipment);
+          toast.success(res.message);
+          router.refresh();
+        } else {
+          toast.error(res.message || "Label purchase failed. Check server logs for details.");
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "An unexpected error occurred purchasing the label.");
       }
     });
   }
@@ -623,8 +633,31 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     );
   }
 
+  const testCarrierNames: string[] = [];
+  if (testModeCarriers?.ups)   testCarrierNames.push("UPS");
+  if (testModeCarriers?.fedex) testCarrierNames.push("FedEx");
+  if (testModeCarriers?.usps)  testCarrierNames.push("USPS");
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
+
+      {/* ── Sandbox / test-mode banner ── */}
+      {testCarrierNames.length > 0 && (
+        <div className="xl:col-span-2 flex gap-3 items-start bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+          <div className="text-sm">
+            <p className="font-semibold text-amber-800">
+              {testCarrierNames.join(" & ")} {testCarrierNames.length === 1 ? "is" : "are"} connected to the sandbox / test environment.
+            </p>
+            <p className="text-amber-700 mt-0.5">
+              Rate quotes work, but label purchase may fail or return test tracking numbers that cannot be used for real shipments.
+              To go live, update <code className="font-mono bg-amber-100 px-1 rounded">UPS_API_URL</code> / <code className="font-mono bg-amber-100 px-1 rounded">FEDEX_API_URL</code> in <code className="font-mono bg-amber-100 px-1 rounded">.env</code> to the production endpoints and supply production credentials.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── LEFT ── */}
       <div className="space-y-6">
@@ -1108,6 +1141,7 @@ export function ShippingPageClient(props: Props) {
                 subtotal={props.subtotal}
                 shippingRate={props.shippingRate}
                 shippingCarrier={props.shippingCarrier}
+                testModeCarriers={props.testModeCarriers}
               />}
         </div>
       </div>

@@ -22,7 +22,6 @@ import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmPhysicianCardOrder }  from "@/actions/physician/confirm-card-order";
 import { payWithPhysicianWallet }     from "@/actions/physician/wallet-pay";
-import { savePhysicianAddress }       from "@/actions/physician/save-address";
 import { validateCoupon }            from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
@@ -32,14 +31,6 @@ type ShippingOption = { id: string; method: string; label: string; cost: number 
 
 function hasAddr(a: AddressData) {
   return !!(a.firstName || a.address1 || a.city);
-}
-
-function displayAddr(a: AddressData) {
-  const name   = `${a.firstName} ${a.lastName}`.trim();
-  const street = [a.address1, a.address2].filter(Boolean).join(", ");
-  const city   = [a.city, a.state, a.zip].filter(Boolean).join(", ");
-  const line2  = [street, city, a.countryName].filter(Boolean).join(", ");
-  return { name, line2 };
 }
 
 function addrToString(a: AddressData): string {
@@ -157,9 +148,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
   const [shipping,      setShipping]      = useState<AddressData>(migrated);
   const [billing,       setBilling]       = useState<AddressData>(migrated);
   const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [editShip,      setEditShip]      = useState(!hasAddr(migrated));
-  const [editBill,      setEditBill]      = useState(false);
-  const [savingAddr,    setSavingAddr]    = useState(false);
 
   // Shipping options
   const [shippingOptions,    setShippingOptions]    = useState<ShippingOption[]>([]);
@@ -186,25 +174,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
       .finally(() => setLoadingShipping(false));
   }, [shipping.country, shipping.state]);
 
-  const handleSaveForLater = async () => {
-    setSavingAddr(true);
-    const res = await savePhysicianAddress({
-      address1: shipping.address1,
-      address2: shipping.address2,
-      city:     shipping.city,
-      state:    shipping.state,
-      zip:      shipping.zip,
-      country:  shipping.country,
-      phone:    shipping.phone,
-    });
-    setSavingAddr(false);
-    if (res.success) {
-      toast.success("Address saved for later.");
-      setEditShip(false);
-    } else {
-      toast.error(res.message ?? "Failed to save address.");
-    }
-  };
 
   const [notes,          setNotes]          = useState("");
   const [showNotes,      setShowNotes]      = useState(false);
@@ -358,8 +327,6 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
   }
 
   const stripeReady = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-  const shipDsp     = displayAddr(shipping);
-  const billDsp     = displayAddr(billing);
 
   return (
     <div className="">
@@ -402,35 +369,9 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
           <section>
             <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping address</h2>
 
-            {editShip ? (
-              <div className="border border-gray-300 rounded p-4 space-y-4">
-                <AddressFields value={shipping} onChange={setShipping} />
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setEditShip(false)}
-                    className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
-                    Use this address
-                  </button>
-                  <button type="button" onClick={handleSaveForLater} disabled={savingAddr}
-                    className="px-5 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors text-gray-700">
-                    {savingAddr ? "Saving…" : "Save address only"}
-                  </button>
-                  {hasAddr(shipping) && (
-                    <button type="button" onClick={() => setEditShip(false)}
-                      className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm text-gray-800">{shipDsp.name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{shipDsp.line2}</p>
-                </div>
-                <button type="button" onClick={() => setEditShip(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
-              </div>
-            )}
+            <div className="border border-gray-300 rounded p-4">
+              <AddressFields value={shipping} onChange={setShipping} />
+            </div>
 
             {/* Same as billing checkbox */}
             <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
@@ -451,29 +392,15 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
             {!sameAsBilling && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">Billing address</p>
-                {editBill ? (
-                  <div className="border border-gray-300 rounded p-4 space-y-3">
-                    <AddressFields value={billing} onChange={setBilling} />
-                    <button type="button" onClick={() => setEditBill(false)}
-                      className="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
-                      Done
-                    </button>
-                  </div>
-                ) : (
-                  <div className="border border-gray-300 rounded px-4 py-3 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-gray-800">{billDsp.name}</p>
-                      <p className="text-sm text-gray-500">{billDsp.line2}</p>
-                    </div>
-                    <button type="button" onClick={() => setEditBill(true)} className="text-sm text-[#3DBFA4] hover:underline shrink-0">Edit</button>
-                  </div>
-                )}
+                <div className="border border-gray-300 rounded p-4">
+                  <AddressFields value={billing} onChange={setBilling} />
+                </div>
               </div>
             )}
           </section>
 
           {/* 3. Shipping method */}
-          {shipping.country && !editShip && (
+          {shipping.country && (
             <section>
               <h2 className="text-base font-semibold text-gray-800 mb-3">Shipping method</h2>
               {loadingShipping ? (

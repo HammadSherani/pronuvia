@@ -161,8 +161,10 @@ export async function purchaseFedExLabel(
 
   const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(`FedEx label error: ${JSON.stringify(data)}`);
+  if (!res.ok || (data?.errors?.length ?? 0) > 0) {
+    const errs = (data?.errors ?? []) as { message?: string; code?: string }[];
+    const msg  = errs.map(e => [e.code, e.message].filter(Boolean).join(": ")).filter(Boolean).join("; ");
+    throw new Error(msg || `FedEx label failed (HTTP ${res.status})`);
   }
   const shipment   = data?.output?.transactionShipments?.[0];
   const piece      = shipment?.pieceResponses?.[0];

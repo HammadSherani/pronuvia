@@ -199,6 +199,24 @@ export async function listSalesReps(opts?: { skip?: number; take?: number }) {
   return { reps, total };
 }
 
+export async function getAllSalesRepsForExport() {
+  await requireAdmin();
+  return prisma.salesRepresentative.findMany({
+    select: {
+      id: true, name: true, firstName: true, lastName: true,
+      email: true, phone: true, commission: true, ordersCount: true, walletBalance: true,
+      billingAddress: true, shippingAddress: true,
+      bankName: true, bankAccountNumber: true, bankAccountName: true,
+      swiftCode: true, routingNumber: true,
+      createdAt: true,
+      physicians: {
+        select: { firstName: true, lastName: true, email: true, state: true, nameOfPractice: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function getSalesRepById(id: string) {
   await requireAdmin();
   return prisma.salesRepresentative.findUnique({

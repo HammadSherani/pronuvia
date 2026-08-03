@@ -69,8 +69,9 @@ export async function payWithWallet(
   }
 
   const subtotal         = parseFloat(items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2));
+  const commissionBase   = parseFloat((subtotal - discountAmount).toFixed(2));
   const commissionRate   = rep.commission;
-  const commissionAmount = parseFloat(((subtotal * commissionRate) / 100).toFixed(2));
+  const commissionAmount = parseFloat(((commissionBase * commissionRate) / 100).toFixed(2));
   const newBalance       = parseFloat((rep.walletBalance - total).toFixed(2));
   const txId             = `WALLET-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   const deliveryDate     = estimatedDeliveryDate(7);
@@ -158,7 +159,10 @@ export async function payWithWallet(
         orderDate:       new Date(),
         customerPhone:   customerPhone   || null,
       });
-      const cc = rep?.email && rep.email !== customerEmail ? rep.email : undefined;
+      const cc = [
+        rep?.email !== customerEmail ? rep?.email : null,
+        "sales1.pronuvia@gmail.com",
+      ].filter(Boolean) as string[];
       await sendMail({ to: customerEmail, cc, subject, html });
     } catch (err) {
       console.error("[sales-rep wallet] confirmation email failed:", err);

@@ -3,7 +3,7 @@ import { SiteHeader }        from "./site-header";
 
 const DASHBOARD: Record<string, string> = {
   ADMIN:     "/admin/dashboard",
-  SALES_REP: "/sales/shop",
+  SALES_REP: "/sales/dashboard",
   PHYSICIAN: "/physician/dashboard",
 };
 

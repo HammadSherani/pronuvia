@@ -175,13 +175,17 @@ function AddShipmentForm({
     setRateError(null);
 
     startGetRates(async () => {
-      const res = await getShippingRates(orderId, pkg, selectedCarriers);
-      if (res.error) setRateError(res.error);
-      if (res.rates.length > 0) {
-        setRates(res.rates);
-        setSelectedRate(res.rates[0]);
-      } else if (!res.error) {
-        setRateError("No rates returned. Check package details and carrier credentials.");
+      try {
+        const res = await getShippingRates(orderId, pkg, selectedCarriers);
+        if (res.error) setRateError(res.error);
+        if (res.rates.length > 0) {
+          setRates(res.rates);
+          setSelectedRate(res.rates[0]);
+        } else if (!res.error) {
+          setRateError("No rates returned. Check package details and carrier credentials.");
+        }
+      } catch (e) {
+        setRateError(e instanceof Error ? e.message : "Failed to get rates. Check server logs.");
       }
     });
   };
@@ -189,13 +193,17 @@ function AddShipmentForm({
   const handlePurchase = () => {
     if (!selectedRate) { toast.error("Select a rate first."); return; }
     startPurchase(async () => {
-      const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service);
-      if (res.success && res.shipment) {
-        setPurchased(res.shipment);
-        toast.success(res.message);
-        router.refresh();
-      } else {
-        toast.error(res.message);
+      try {
+        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service);
+        if (res.success && res.shipment) {
+          setPurchased(res.shipment);
+          toast.success(res.message);
+          router.refresh();
+        } else {
+          toast.error(res.message || "Label purchase failed. Check server logs for details.");
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "An unexpected error occurred purchasing the label.");
       }
     });
   };
