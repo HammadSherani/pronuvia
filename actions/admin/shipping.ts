@@ -52,16 +52,20 @@ function toCountryCode(s: string): string {
   return s.trim().toUpperCase().slice(0, 2) || "US";
 }
 
-function parseAddressString(raw: string): { street: string; city: string; state: string; zip: string; country: string } | null {
+function parseAddressString(raw: string): { street: string; street2?: string; city: string; state: string; zip: string; country: string } | null {
   // Try JSON format first (new format from serializeAddress)
   try {
     const j = JSON.parse(raw);
     if (j && j.address1 && j.city && j.zip) {
+      const a1 = (j.address1 as string).trim();
+      const a2 = j.address2 ? (j.address2 as string).trim() : "";
       return {
-        street:  [j.address1, j.address2].filter(Boolean).join(", "),
-        city:    j.city,
+        street:  a1,
+        // Only include street2 when it differs from street1 (avoid duplicate "3180 18th St, 3180 18th St")
+        street2: a2 && a2 !== a1 ? a2 : undefined,
+        city:    (j.city as string).trim(),
         state:   toStateCode(j.state ?? ""),
-        zip:     j.zip,
+        zip:     (j.zip as string).trim(),
         country: j.country ? toCountryCode(j.country) : "US",
       };
     }
@@ -122,6 +126,7 @@ async function buildToAddress(orderId: string): Promise<[ShipAddress, null] | [n
       return [{
         name,
         street1: parsed.street,
+        street2: parsed.street2,
         city:    parsed.city,
         state:   parsed.state,
         zip:     parsed.zip,

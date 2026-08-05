@@ -91,6 +91,7 @@ export function RefundOrderModal({
     return max === 0 || qty >= max;
   });
 
+  // Pre-coupon item amounts (used for commission clawback ratios)
   const returnedTotal = isFullRefund
     ? items.reduce((s, item, idx) => s + item.lineTotal * (maxByIdx[idx] / item.quantity), 0)
     : quantities.reduce((sum, qty, idx) => {
@@ -101,6 +102,14 @@ export function RefundOrderModal({
 
   const itemsSubtotal = items.reduce((s, item) => s + item.lineTotal, 0);
   const eventRatio    = isFullRefund ? 1.0 : (itemsSubtotal > 0 ? Math.min(1.0, returnedTotal / itemsSubtotal) : 0);
+
+  // Coupon-adjusted amount: what the customer actually paid for products
+  // total = post-coupon grand total (includes shipping); subtract shipping to get product-only amount
+  const actualProductsPaid  = Math.max(0, total - (shippingRate ?? 0));
+  const couponFactor        = itemsSubtotal > 0 ? Math.min(1, actualProductsPaid / itemsSubtotal) : 1;
+  const hasCoupon           = couponFactor < 0.9999;
+  // Amount to auto-fill: scale pre-coupon returnedTotal by the coupon factor
+  const adjustedReturnedTotal = isFullRefund ? actualProductsPaid : returnedTotal * couponFactor;
 
   const remainingSalesRepCommission  = Math.max(0, salesRepCommissionAmount  - existingSalesRepClawback);
   const remainingPhysicianCommission = Math.max(0, physicianCommissionAmount - existingPhysicianClawback);
@@ -114,12 +123,12 @@ export function RefundOrderModal({
 
   const hasSelection = quantities.some(q => q > 0);
 
-  // Auto-fill customer refund amount when event total or shipping checkbox changes
+  // Auto-fill customer refund amount using the coupon-adjusted amount
   useEffect(() => {
-    const base = returnedTotal + (includeShipping ? (shippingRate ?? 0) : 0);
+    const base = adjustedReturnedTotal + (includeShipping ? (shippingRate ?? 0) : 0);
     setCustAmount(base.toFixed(2));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [returnedTotal, includeShipping]);
+  }, [adjustedReturnedTotal, includeShipping]);
 
   function setAllFull()  { setQtys(items.map((_, idx) => maxByIdx[idx])); }
   function setAllZero()  { setQtys(items.map(() => 0)); }
@@ -299,8 +308,16 @@ export function RefundOrderModal({
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Refund Preview</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">Refund amount</span>
-                    <span className="text-sm font-bold text-gray-800">{fmt(returnedTotal)}</span>
+                    <span className="text-sm font-bold text-gray-800">{fmt(adjustedReturnedTotal)}</span>
                   </div>
+                  {hasCoupon && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-violet-600 bg-violet-50 rounded-lg px-2.5 py-1.5">
+                      <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      Coupon applied — refunding actual amount paid, not pre-coupon total
+                    </div>
+                  )}
                   <div className="border-t border-gray-100 pt-3 space-y-2.5">
                     {/* Sales rep clawback */}
                     <div className="flex items-start justify-between gap-2">

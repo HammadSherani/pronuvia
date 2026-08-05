@@ -12,7 +12,7 @@ const FAQS = [
   { q: "Where does the benefit come from?",
     a: "Pronuvia's role is to deliver and sustain ionic calcium. The responses that follow come from your body's own natural processes as it works to maintain healthy calcium homeostasis." },
   { q: "How do I get AIC?",
-    a: `AIC is offered through partnering physicians and health practitioners. Ask your practitioner, or use "Find a practitioner" to connect with a provider in our network.` },
+    a: `AIC is offered exclusively through partnering physicians and health practitioners. Contact us to connect with a provider in our network.` },
 ];
 
 export function FaqSectionNew() {

@@ -46,7 +46,14 @@ export async function addOrderNote(
         orderNumber:     true,
         customerEmail:   true,
         shippingAddress: true,
-        physician: { select: { email: true, firstName: true } },
+        billingAddress:  true,
+        subtotal:        true,
+        total:           true,
+        shippingRate:    true,
+        paymentMethod:   true,
+        items:           true,
+        physician: { select: { email: true, firstName: true, lastName: true } },
+        salesRep:  { select: { email: true } },
       },
     });
 
@@ -54,19 +61,32 @@ export async function addOrderNote(
       const { sendMail }       = await import("@/lib/email/mailer");
       const { orderNoteEmail } = await import("@/lib/email/templates");
 
+      type RawItem = { title?: string; variantSize?: string | null; quantity?: number; lineTotal?: number };
+      const items = (order.items as RawItem[]).map(i => ({
+        title:       i.title       ?? "Product",
+        variantSize: i.variantSize ?? null,
+        quantity:    i.quantity    ?? 1,
+        lineTotal:   i.lineTotal   ?? 0,
+      }));
+
+      const orderData = {
+        orderNumber:    order.orderNumber,
+        note:           trimmed,
+        items,
+        subtotal:       order.subtotal,
+        shippingCost:   order.shippingRate ?? 0,
+        total:          order.total,
+        paymentMethod:  order.paymentMethod,
+        billingAddress: order.billingAddress,
+        shippingAddress: order.shippingAddress,
+      };
+
+      // CC list: doctor + medical rep (filter out nulls)
+      const ccList = [order.physician?.email, order.salesRep?.email].filter(Boolean) as string[];
+
       const sends: Promise<unknown>[] = [];
 
-      // Email to doctor
-      if (order.physician?.email) {
-        const { subject, html } = orderNoteEmail({
-          firstName:   order.physician.firstName,
-          orderNumber: order.orderNumber,
-          note:        trimmed,
-        });
-        sends.push(sendMail({ to: order.physician.email, subject, html }));
-      }
-
-      // Email to patient
+      // Single email to patient with full order details, CC'd to doctor and rep
       if (order.customerEmail) {
         let patientFirstName = "Patient";
         if (order.shippingAddress) {
@@ -75,12 +95,14 @@ export async function addOrderNote(
             if (addr?.firstName) patientFirstName = addr.firstName;
           } catch {}
         }
-        const { subject, html } = orderNoteEmail({
-          firstName:   patientFirstName,
-          orderNumber: order.orderNumber,
-          note:        trimmed,
-        });
-        sends.push(sendMail({ to: order.customerEmail, subject, html }));
+        const { subject, html } = orderNoteEmail({ firstName: patientFirstName, ...orderData });
+        sends.push(sendMail({ to: order.customerEmail, cc: ccList, subject, html }));
+      } else if (order.physician?.email) {
+        // No patient email — send directly to doctor (still CC rep)
+        const drName = `${order.physician.firstName} ${order.physician.lastName}`.trim();
+        const drCc   = order.salesRep?.email ? [order.salesRep.email] : [];
+        const { subject, html } = orderNoteEmail({ firstName: drName, ...orderData });
+        sends.push(sendMail({ to: order.physician.email, cc: drCc, subject, html }));
       }
 
       try {

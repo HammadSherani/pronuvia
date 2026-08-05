@@ -1332,17 +1332,111 @@ export function shipmentTrackingEmail(opts: {
   return { subject, html };
 }
 
-export function orderNoteEmail(opts: { firstName: string; orderNumber: string; note: string }) {
+export function orderNoteEmail(opts: {
+  firstName:      string;
+  orderNumber:    string;
+  note:           string;
+  items?:         { title: string; variantSize?: string | null; quantity: number; lineTotal: number }[];
+  subtotal?:      number;
+  shippingCost?:  number;
+  total?:         number;
+  paymentMethod?: string | null;
+  billingAddress?:  string | null;
+  shippingAddress?: string | null;
+}) {
+  const items       = opts.items ?? [];
+  const subtotal    = opts.subtotal ?? items.reduce((s, i) => s + i.lineTotal, 0);
+  const shipping    = opts.shippingCost ?? 0;
+  const grandTotal  = opts.total ?? subtotal + shipping;
+  const hasItems    = items.length > 0;
+
+  const payLabel = (() => {
+    const pm = opts.paymentMethod;
+    if (!pm) return null;
+    if (pm === "CARD")   return "Credit / Debit Card";
+    if (pm === "WALLET") return "Wallet";
+    return pm;
+  })();
+
+  const itemRows = items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};border-bottom:1px solid #f3f4f6;">
+        ${i.title}${i.variantSize ? `<br/><span style="font-size:12px;color:${C.muted};">Volume: ${i.variantSize}</span>` : ""}
+      </td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:center;border-bottom:1px solid #f3f4f6;">${i.quantity}</td>
+      <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
+    </tr>`).join("");
+
   return {
-    subject: `Message regarding your order ${opts.orderNumber}`,
+    subject: `Message regarding your order #${opts.orderNumber}`,
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">A note about your order</h1>
-      <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
-        Hi ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong style="color:${C.navy};">${opts.orderNumber}</strong>.
+      <p style="margin:0 0 20px;font-size:15px;color:${C.muted};line-height:1.6;">
+        Hi ${opts.firstName}, the Pronuvia team has left a message regarding your order <strong style="color:${C.navy};">#${opts.orderNumber}</strong>.
       </p>
       <div style="background:${C.surface};border-left:3px solid ${C.teal};border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
         <p style="margin:0;font-size:14px;color:${C.textSoft};line-height:1.7;white-space:pre-wrap;">${opts.note}</p>
       </div>
+
+      ${hasItems ? `
+      <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.08em;">Order Summary</p>
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="border:1px solid ${C.border};border-radius:10px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:${C.surface};">
+            <th style="padding:10px 12px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:left;">Product</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:center;">Qty</th>
+            <th style="padding:10px 12px;font-size:11px;font-weight:600;color:${C.dimmed};text-transform:uppercase;letter-spacing:.06em;text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemRows}
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid ${C.border};">Subtotal:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
+          </tr>
+          ${shipping > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">$${shipping.toFixed(2)}</td>
+          </tr>` : ""}
+          ${payLabel ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Payment:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${payLabel}</td>
+          </tr>` : ""}
+          <tr style="background:${C.surface};">
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};border-top:1px solid ${C.border};">Total:</td>
+            <td style="border-top:1px solid ${C.border};"></td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${C.text};text-align:right;border-top:1px solid ${C.border};">$${grandTotal.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${(opts.billingAddress || opts.shippingAddress) ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          ${opts.billingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-right:10px;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.08em;">Billing Address</p>
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.billingAddress)}</p>
+            </div>
+          </td>` : ""}
+          ${opts.shippingAddress ? `
+          <td width="50%" style="vertical-align:top;padding-left:10px;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:${C.dimmed};text-transform:uppercase;letter-spacing:0.08em;">Shipping Address</p>
+            <div style="border:1px solid ${C.border};border-radius:8px;padding:12px 14px;">
+              <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.7;">${renderAddr(opts.shippingAddress)}</p>
+            </div>
+          </td>` : ""}
+        </tr>
+      </table>` : ""}
+      ` : ""}
+
       <p style="margin:20px 0 0;font-size:12px;color:${C.dimmed};text-align:center;">
         If you have questions, please contact your administrator.
       </p>

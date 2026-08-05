@@ -136,6 +136,8 @@ export default async function SalesOrdersPage({
                   <th className="text-left px-5 text-nowrap py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Subtotal</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Shipping</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tracking</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
@@ -163,12 +165,11 @@ export default async function SalesOrdersPage({
                       <td className="px-5 py-4 text-gray-600">
                         {itemCount} item{itemCount !== 1 ? "s" : ""}
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="font-semibold text-gray-800">{fmt(o.total)}</span>
-                        {o.shippingRate > 0 && (
-                          <p className="text-xs text-gray-400">{fmt(o.subtotal)} + {fmt(o.shippingRate)} ship</p>
-                        )}
+                      <td className="px-5 py-4 text-xs font-semibold text-gray-700">{fmt(o.subtotal)}</td>
+                      <td className="px-5 py-4 text-xs text-gray-500">
+                        {o.shippingRate > 0 ? fmt(o.shippingRate) : <span className="text-gray-300 italic">—</span>}
                       </td>
+                      <td className="px-5 py-4 font-semibold text-gray-800">{fmt(o.total)}</td>
                       <td className="px-5 py-4">
                         {o.trackingNumber ? (
                           <div>
