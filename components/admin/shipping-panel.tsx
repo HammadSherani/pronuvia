@@ -147,7 +147,7 @@ function AddShipmentForm({
   const [lengthIn,           setLengthIn]           = useState("");
   const [widthIn,            setWidthIn]            = useState("");
   const [heightIn,           setHeightIn]           = useState("");
-  const [signatureRequired,  setSignatureRequired]  = useState(false);
+  const [selectedSignatureCode, setSelectedSignatureCode] = useState<number | null>(null);
 
   const [rates,        setRates]        = useState<RateResult[] | null>(null);
   const [selectedRate, setSelectedRate] = useState<RateResult | null>(null);
@@ -177,11 +177,12 @@ function AddShipmentForm({
 
     startGetRates(async () => {
       try {
-        const res = await getShippingRates(orderId, pkg, selectedCarriers, undefined, signatureRequired);
+        const res = await getShippingRates(orderId, pkg, selectedCarriers, undefined);
         if (res.error) setRateError(res.error);
         if (res.rates.length > 0) {
           setRates(res.rates);
           setSelectedRate(res.rates[0]);
+          setSelectedSignatureCode(null);
         } else if (!res.error) {
           setRateError("No rates returned. Check package details and carrier credentials.");
         }
@@ -195,7 +196,7 @@ function AddShipmentForm({
     if (!selectedRate) { toast.error("Select a rate first."); return; }
     startPurchase(async () => {
       try {
-        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, signatureRequired);
+        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, selectedSignatureCode ?? 0);
         if (res.success && res.shipment) {
           setPurchased(res.shipment);
           toast.success(res.message);
@@ -302,37 +303,6 @@ function AddShipmentForm({
           </div>
         </div>
 
-        {/* Signature Required */}
-        <label className="flex items-start gap-3 cursor-pointer select-none group">
-          <div className="relative mt-0.5">
-            <input
-              type="checkbox"
-              checked={signatureRequired}
-              onChange={(e) => {
-                setSignatureRequired(e.target.checked);
-                setRates(null);
-                setSelectedRate(null);
-              }}
-              className="sr-only peer"
-            />
-            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-              signatureRequired ? "bg-gray-900 border-gray-900" : "border-gray-300 group-hover:border-gray-400"
-            }`}>
-              {signatureRequired && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </div>
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-700">Signature Required</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Recipient must sign on delivery (USPS code 910). Additional fee applies — re-fetch rates after toggling.
-            </p>
-          </div>
-        </label>
-
         {/* Get rates button */}
         <button
           type="button"
@@ -359,54 +329,80 @@ function AddShipmentForm({
           <div>
             <h4 className="text-sm font-semibold text-gray-700 mb-3">Available Rates</h4>
             <div className="space-y-2">
-              {rates.map((r, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setSelectedRate(r)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
-                    selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier
-                      ? "border-gray-900 bg-gray-900/5"
-                      : "border-gray-100 hover:border-gray-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier
-                        ? "border-gray-900"
-                        : "border-gray-300"
-                    }`}>
-                      {selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier && (
-                        <div className="w-2 h-2 rounded-full bg-gray-900" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CarrierLogo carrier={r.carrier} />
-                        <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+              {rates.map((r, i) => {
+                const active = selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier;
+                const sigAddOn = active && selectedSignatureCode
+                  ? (r.signatureOptions?.find(o => o.code === selectedSignatureCode)?.price ?? 0)
+                  : 0;
+                return (
+                  <div key={i} className={`rounded-xl border-2 transition-all ${active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 bg-white"}`}>
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedRate(r); setSelectedSignatureCode(null); }}
+                      className="w-full flex items-center justify-between px-4 py-3.5 text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${active ? "border-gray-900" : "border-gray-300"}`}>
+                          {active && <div className="w-2 h-2 rounded-full bg-gray-900" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <CarrierLogo carrier={r.carrier} />
+                            <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+                          </div>
+                          {r.deliveryDays && (
+                            <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
+                          )}
+                        </div>
                       </div>
-                      {r.deliveryDays && (
-                        <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
-                      )}
-                    </div>
+                      <span className="text-base font-bold text-gray-900">{fmt(r.totalCost + sigAddOn)}</span>
+                    </button>
+                    {active && ((r.features?.length ?? 0) > 0 || (r.signatureOptions?.length ?? 0) > 0) && (
+                      <div className="px-4 pb-3.5 border-t border-gray-100 pt-2.5 space-y-2">
+                        {r.features?.map(f => (
+                          <div key={f} className="flex items-center gap-2 text-xs text-gray-500">
+                            <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {f}
+                          </div>
+                        ))}
+                        {r.signatureOptions?.map(opt => (
+                          <label key={opt.code} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300"
+                              checked={selectedSignatureCode === opt.code}
+                              onChange={e => setSelectedSignatureCode(e.target.checked ? opt.code : null)}
+                            />
+                            <span className="text-xs text-gray-600">{opt.name}</span>
+                            <span className="text-xs text-gray-400 ml-auto">( +${opt.price.toFixed(2)} )</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <span className="text-base font-bold text-gray-900">{fmt(r.totalCost)}</span>
-                </button>
-              ))}
+                );
+              })}
             </div>
 
-            {selectedRate && (
-              <button
-                type="button"
-                onClick={handlePurchase}
-                disabled={isPurchasing}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl transition-colors"
-              >
-                {isPurchasing
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Purchasing label…</>
-                  : <>Purchase Label — {fmt(selectedRate.totalCost)}</>}
-              </button>
-            )}
+            {selectedRate && (() => {
+              const sigPrice = selectedSignatureCode
+                ? (selectedRate.signatureOptions?.find(o => o.code === selectedSignatureCode)?.price ?? 0)
+                : 0;
+              return (
+                <button
+                  type="button"
+                  onClick={handlePurchase}
+                  disabled={isPurchasing}
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl transition-colors"
+                >
+                  {isPurchasing
+                    ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Purchasing label…</>
+                    : <>Purchase Label — {fmt(selectedRate.totalCost + sigPrice)}</>}
+                </button>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -465,18 +461,19 @@ function AddShipmentForm({
                 <span className="text-gray-500">Service</span>
                 <span className="text-gray-800 font-medium text-right">{selectedRate.service}</span>
               </div>
+              {selectedSignatureCode && (() => {
+                const sigOpt = selectedRate.signatureOptions?.find(o => o.code === selectedSignatureCode);
+                return sigOpt ? (
+                  <div className="flex justify-between gap-2 text-xs text-amber-600">
+                    <span>{sigOpt.name}</span>
+                    <span>+{fmt(sigOpt.price)}</span>
+                  </div>
+                ) : null;
+              })()}
               <div className="flex justify-between gap-2 pt-1 border-t border-gray-200">
                 <span className="font-semibold text-gray-700">Total</span>
-                <span className="font-bold text-gray-900">{fmt(selectedRate.totalCost)}</span>
+                <span className="font-bold text-gray-900">{fmt(selectedRate.totalCost + (selectedSignatureCode ? (selectedRate.signatureOptions?.find(o => o.code === selectedSignatureCode)?.price ?? 0) : 0))}</span>
               </div>
-              {signatureRequired && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <svg className="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                  <span className="text-[11px] text-amber-600 font-medium">Signature confirmation included</span>
-                </div>
-              )}
             </div>
           </div>
         )}
