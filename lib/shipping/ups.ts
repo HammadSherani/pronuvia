@@ -47,6 +47,12 @@ function toUPSAddress(a: ShipAddress) {
   };
 }
 
+const UPS_FEATURES         = ["Tracking", "Insurance included"];
+const UPS_SIGNATURE_OPTIONS = [
+  { code: 1, name: "Signature required",      price: 5.35 },
+  { code: 2, name: "Adult signature required", price: 8.75 },
+];
+
 export async function getUPSRates(
   from: ShipAddress,
   to:   ShipAddress,
@@ -108,23 +114,26 @@ export async function getUPSRates(
     const svcCode  = (r.Service as Record<string, unknown>)?.Code as string;
     const totalAmt = (r.TotalCharges as Record<string, unknown>)?.MonetaryValue;
     return {
-      carrier:      "ups",
-      carrierLabel: "UPS",
-      service:      UPS_SERVICES[svcCode] ?? `UPS Service ${svcCode}`,
-      serviceCode:  svcCode,
-      totalCost:    parseFloat(String(totalAmt ?? 0)),
-      currency:     "USD",
-      deliveryDays: (r.GuaranteedDelivery as Record<string, unknown>)?.BusinessDaysInTransit as number | undefined,
+      carrier:          "ups",
+      carrierLabel:     "UPS",
+      service:          UPS_SERVICES[svcCode] ?? `UPS Service ${svcCode}`,
+      serviceCode:      svcCode,
+      totalCost:        parseFloat(String(totalAmt ?? 0)),
+      currency:         "USD",
+      deliveryDays:     (r.GuaranteedDelivery as Record<string, unknown>)?.BusinessDaysInTransit as number | undefined,
+      features:         UPS_FEATURES,
+      signatureOptions: UPS_SIGNATURE_OPTIONS,
     } satisfies RateResult;
   });
 }
 
 export async function purchaseUPSLabel(
-  from:        ShipAddress,
-  to:          ShipAddress,
-  pkg:         PackageInfo,
-  serviceCode: string,
-  service:     string
+  from:          ShipAddress,
+  to:            ShipAddress,
+  pkg:           PackageInfo,
+  serviceCode:   string,
+  service:       string,
+  signatureCode = 0,
 ): Promise<LabelResult> {
   const token = await getToken();
 
@@ -155,6 +164,11 @@ export async function purchaseUPSLabel(
             UnitOfMeasurement: { Code: "LBS", Description: "Pounds" },
             Weight: String(pkg.weightLbs),
           },
+          ...(signatureCode > 0 ? {
+            PackageServiceOptions: {
+              DeliveryConfirmation: { DCISType: signatureCode === 2 ? "3" : "2" },
+            },
+          } : {}),
         }],
       },
       LabelSpecification: {

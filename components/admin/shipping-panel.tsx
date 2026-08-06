@@ -142,11 +142,12 @@ function AddShipmentForm({
 }: { orderId: string; orderValue: number; itemCount: number; physician: Props["physician"] }) {
   const router = useRouter();
 
-  const [selectedCarriers, setSelectedCarriers] = useState<CarrierCode[]>(["fedex", "ups", "usps"]);
-  const [weightLbs, setWeightLbs] = useState("0.5");
-  const [lengthIn,  setLengthIn]  = useState("");
-  const [widthIn,   setWidthIn]   = useState("");
-  const [heightIn,  setHeightIn]  = useState("");
+  const [selectedCarriers,   setSelectedCarriers]   = useState<CarrierCode[]>(["fedex", "ups", "usps"]);
+  const [weightLbs,          setWeightLbs]          = useState("0.5");
+  const [lengthIn,           setLengthIn]           = useState("");
+  const [widthIn,            setWidthIn]            = useState("");
+  const [heightIn,           setHeightIn]           = useState("");
+  const [signatureRequired,  setSignatureRequired]  = useState(false);
 
   const [rates,        setRates]        = useState<RateResult[] | null>(null);
   const [selectedRate, setSelectedRate] = useState<RateResult | null>(null);
@@ -176,7 +177,7 @@ function AddShipmentForm({
 
     startGetRates(async () => {
       try {
-        const res = await getShippingRates(orderId, pkg, selectedCarriers);
+        const res = await getShippingRates(orderId, pkg, selectedCarriers, undefined, signatureRequired);
         if (res.error) setRateError(res.error);
         if (res.rates.length > 0) {
           setRates(res.rates);
@@ -194,7 +195,7 @@ function AddShipmentForm({
     if (!selectedRate) { toast.error("Select a rate first."); return; }
     startPurchase(async () => {
       try {
-        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service);
+        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, signatureRequired);
         if (res.success && res.shipment) {
           setPurchased(res.shipment);
           toast.success(res.message);
@@ -300,6 +301,37 @@ function AddShipmentForm({
             </div>
           </div>
         </div>
+
+        {/* Signature Required */}
+        <label className="flex items-start gap-3 cursor-pointer select-none group">
+          <div className="relative mt-0.5">
+            <input
+              type="checkbox"
+              checked={signatureRequired}
+              onChange={(e) => {
+                setSignatureRequired(e.target.checked);
+                setRates(null);
+                setSelectedRate(null);
+              }}
+              className="sr-only peer"
+            />
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+              signatureRequired ? "bg-gray-900 border-gray-900" : "border-gray-300 group-hover:border-gray-400"
+            }`}>
+              {signatureRequired && (
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-700">Signature Required</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Recipient must sign on delivery (USPS code 910). Additional fee applies — re-fetch rates after toggling.
+            </p>
+          </div>
+        </label>
 
         {/* Get rates button */}
         <button
@@ -437,6 +469,14 @@ function AddShipmentForm({
                 <span className="font-semibold text-gray-700">Total</span>
                 <span className="font-bold text-gray-900">{fmt(selectedRate.totalCost)}</span>
               </div>
+              {signatureRequired && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <svg className="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  <span className="text-[11px] text-amber-600 font-medium">Signature confirmation included</span>
+                </div>
+              )}
             </div>
           </div>
         )}

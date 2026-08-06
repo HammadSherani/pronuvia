@@ -99,10 +99,21 @@ function pkgProcessingCategory(pkg: PackageInfo): string {
   return "MACHINABLE";
 }
 
+const USPS_FEATURES: Record<string, string[]> = {
+  USPS_GROUND_ADVANTAGE: ["Tracking", "Insurance (up to $100.00)", "Free pickup"],
+  PRIORITY_MAIL:         ["Tracking", "Insurance (up to $100.00)", "Free pickup"],
+  PRIORITY_MAIL_EXPRESS: ["Tracking", "Insurance (up to $100.00)"],
+};
+
+const USPS_SIGNATURE_OPTIONS = [
+  { code: 1, name: "Signature required",      price: 4.15 },
+  { code: 2, name: "Adult signature required", price: 9.70 },
+];
+
 export async function getUSPSRates(
   from: ShipAddress,
   to:   ShipAddress,
-  pkg:  PackageInfo
+  pkg:  PackageInfo,
 ): Promise<RateResult[]> {
   const token     = await getToken();
   const originZip = from.zip.slice(0, 5);
@@ -122,7 +133,7 @@ export async function getUSPSRates(
 
     for (const cat of categories) {
       try {
-        const reqBody = {
+        const reqBody: Record<string, unknown> = {
           originZIPCode:               originZip,
           destinationZIPCode:          destZip,
           weight:                      wLbs,
@@ -160,12 +171,14 @@ export async function getUSPSRates(
         const productName = best.rates?.[0]?.productName ?? best.rates?.[0]?.description ?? label;
 
         return {
-          carrier:      "usps",
-          carrierLabel: "USPS",
-          service:      productName,
-          serviceCode:  code,
-          totalCost:    parseFloat(String(total)),
-          currency:     "USD",
+          carrier:          "usps",
+          carrierLabel:     "USPS",
+          service:          productName,
+          serviceCode:      code,
+          totalCost:        parseFloat(String(total)),
+          currency:         "USD",
+          features:         USPS_FEATURES[code] ?? [],
+          signatureOptions: USPS_SIGNATURE_OPTIONS,
         } satisfies RateResult;
       } catch (e) {
         console.error(`USPS rate [${code}/${cat}] exception:`, e);
@@ -224,11 +237,12 @@ async function getPaymentToken(oauthToken: string): Promise<string> {
 }
 
 export async function purchaseUSPSLabel(
-  from:        ShipAddress,
-  to:          ShipAddress,
-  pkg:         PackageInfo,
-  serviceCode: string,
-  service:     string
+  from:          ShipAddress,
+  to:            ShipAddress,
+  pkg:           PackageInfo,
+  serviceCode:   string,
+  service:       string,
+  signatureCode = 0,
 ): Promise<LabelResult> {
   const token        = await getToken();
   const paymentToken = await getPaymentToken(token);
@@ -270,7 +284,7 @@ export async function purchaseUSPSLabel(
       width:                        Math.ceil(pkg.widthIn  ?? 4),
       height:                       Math.ceil(pkg.heightIn ?? 2),
       mailingDate:                  new Date().toISOString().split("T")[0],
-      extraServices:                [],
+      extraServices:                signatureCode === 1 ? [910] : signatureCode === 2 ? [911] : [],
     },
     imageInfo: {
       imageType: "PDF",

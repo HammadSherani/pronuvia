@@ -29,6 +29,12 @@ function toFedExAddress(a: ShipAddress) {
   };
 }
 
+const FEDEX_FEATURES         = ["Tracking", "Insurance included"];
+const FEDEX_SIGNATURE_OPTIONS = [
+  { code: 1, name: "Signature required",      price: 5.55 },
+  { code: 2, name: "Adult signature required", price: 6.95 },
+];
+
 export async function getFedExRates(
   from: ShipAddress,
   to:   ShipAddress,
@@ -94,23 +100,26 @@ export async function getFedExRates(
     const total   = (costs?.[0] as Record<string, unknown>)?.totalNetCharge ?? 0;
     const svcCode = r.serviceType as string;
     return {
-      carrier:      "fedex",
-      carrierLabel: "FedEx",
-      service:      SERVICE_NAMES[svcCode] ?? svcCode,
-      serviceCode:  svcCode,
-      totalCost:    parseFloat(String(total)),
-      currency:     "USD",
-      deliveryDays: r.commit ? (r.commit as Record<string, unknown>).transitDays as number : undefined,
+      carrier:          "fedex",
+      carrierLabel:     "FedEx",
+      service:          SERVICE_NAMES[svcCode] ?? svcCode,
+      serviceCode:      svcCode,
+      totalCost:        parseFloat(String(total)),
+      currency:         "USD",
+      deliveryDays:     r.commit ? (r.commit as Record<string, unknown>).transitDays as number : undefined,
+      features:         FEDEX_FEATURES,
+      signatureOptions: FEDEX_SIGNATURE_OPTIONS,
     } satisfies RateResult;
   });
 }
 
 export async function purchaseFedExLabel(
-  from:        ShipAddress,
-  to:          ShipAddress,
-  pkg:         PackageInfo,
-  serviceCode: string,
-  service:     string
+  from:          ShipAddress,
+  to:            ShipAddress,
+  pkg:           PackageInfo,
+  serviceCode:   string,
+  service:       string,
+  signatureCode = 0,
 ): Promise<LabelResult> {
   const token = await getToken();
 
@@ -144,6 +153,14 @@ export async function purchaseFedExLabel(
           height: Math.round(pkg.heightIn ?? 1),
           units:  "IN",
         } : undefined,
+        ...(signatureCode > 0 ? {
+          specialServicesRequested: {
+            specialServiceTypes:  ["SIGNATURE_OPTION"],
+            signatureOptionDetail: {
+              optionType: signatureCode === 2 ? "ADULT" : "DIRECT",
+            },
+          },
+        } : {}),
       }],
     },
   };

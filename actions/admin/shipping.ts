@@ -150,10 +150,10 @@ export async function getOrderShipments(orderId: string) {
 }
 
 export async function getShippingRates(
-  orderId:  string,
-  pkg:      PackageInfo,
-  carriers: CarrierCode[],
-  overrideAddress?: ShipAddress
+  orderId:          string,
+  pkg:              PackageInfo,
+  carriers:         CarrierCode[],
+  overrideAddress?: ShipAddress,
 ): Promise<{ rates: RateResult[]; error?: string }> {
   await requireAdmin();
 
@@ -196,12 +196,13 @@ export async function getShippingRates(
 }
 
 export async function purchaseLabel(
-  orderId:     string,
-  pkg:         PackageInfo,
-  carrier:     CarrierCode,
-  serviceCode: string,
-  service:     string,
-  overrideAddress?: ShipAddress
+  orderId:          string,
+  pkg:              PackageInfo,
+  carrier:          CarrierCode,
+  serviceCode:      string,
+  service:          string,
+  overrideAddress?: ShipAddress,
+  signatureCode     = 0,
 ): Promise<{ success: boolean; message: string; shipment?: { trackingNumber: string; labelBase64: string; labelFormat: string; cost: number } }> {
   await requireAdmin();
 
@@ -220,11 +221,11 @@ export async function purchaseLabel(
 
     try {
       if (carrier === "fedex") {
-        result = await purchaseFedExLabel(from, to, pkg, serviceCode, service);
+        result = await purchaseFedExLabel(from, to, pkg, serviceCode, service, signatureCode);
       } else if (carrier === "ups") {
-        result = await purchaseUPSLabel(from, to, pkg, serviceCode, service);
+        result = await purchaseUPSLabel(from, to, pkg, serviceCode, service, signatureCode);
       } else {
-        result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service);
+        result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service, signatureCode);
       }
     } catch (e) {
       return { success: false, message: (e as Error).message };

@@ -20,14 +20,16 @@ export interface PackageInfo {
 }
 
 export interface RateResult {
-  carrier:       CarrierCode;
-  carrierLabel:  string;
-  service:       string;
-  serviceCode:   string;
-  totalCost:     number;
-  currency:      string;
-  deliveryDays?: number;
-  deliveryDate?: string;
+  carrier:          CarrierCode;
+  carrierLabel:     string;
+  service:          string;
+  serviceCode:      string;
+  totalCost:        number;
+  currency:         string;
+  deliveryDays?:    number;
+  deliveryDate?:    string;
+  features?:        string[];
+  signatureOptions?: { code: number; name: string; price: number }[];
 }
 
 export interface LabelResult {
