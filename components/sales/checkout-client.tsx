@@ -258,6 +258,7 @@ export function CheckoutClient({
     let active = true;
     const controller = new AbortController();
     setClientSecret("");
+    setPaymentReady(false);
     setIntentError(false);
     setFetchingIntent(true);
     fetch("/api/checkout/create-payment-intent", {
@@ -384,8 +385,8 @@ export function CheckoutClient({
 
   return (
     <div className="">
-      {/* Full-page Stripe loading overlay */}
-      {(fetchingIntent || (clientSecret && !paymentReady)) && (
+      {/* Full-page overlay — only while the PaymentIntent network request is in flight */}
+      {fetchingIntent && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
           <span className="w-10 h-10 border-4 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin mb-4" />
           <p className="text-sm font-medium text-gray-500">Loading secure checkout…</p>
@@ -535,35 +536,51 @@ export function CheckoutClient({
                         Initializing secure payment…
                       </div>
                     ) : clientSecret ? (
-                      <Elements
-                        stripe={stripePromise}
-                        options={{
-                          clientSecret,
-                          appearance: {
-                            theme: "stripe",
-                            variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" },
-                          },
-                        }}
-                      >
-                        <StripeInnerForm
-                          ref={stripeRef}
-                          itemsJson={itemsJson}
-                          shippingAddress={shipStr}
-                          billingAddress={billStr}
-                          notes={notes}
-                          shippingRate={shippingCost}
-                          total={total}
-                          couponId={appliedCoupon?.couponId}
-                          couponCode={appliedCoupon?.code}
-                          discountAmount={discountAmount}
-                          customerEmail={patientEmail || undefined}
-                          customerPhone={patientPhone || undefined}
-                          onSuccess={handleCardSuccess}
-                          onProcessing={setCardProcessing}
-                          onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
-                          onStripeReady={() => setPaymentReady(true)}
-                        />
-                      </Elements>
+                      <div className="relative">
+                        {!paymentReady && (
+                          <div className="absolute inset-0 z-10 bg-white flex flex-col gap-3 py-1 pointer-events-none">
+                            <div className="h-12 rounded bg-gray-100 animate-pulse" />
+                            <div className="flex gap-3">
+                              <div className="h-12 rounded bg-gray-100 animate-pulse flex-1" />
+                              <div className="h-12 rounded bg-gray-100 animate-pulse flex-1" />
+                            </div>
+                            <div className="h-4 rounded bg-gray-100 animate-pulse w-3/5" />
+                            <div className="flex items-center justify-center gap-2 pt-1 text-xs text-gray-400">
+                              <span className="w-3 h-3 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
+                              Loading secure payment fields…
+                            </div>
+                          </div>
+                        )}
+                        <Elements
+                          stripe={stripePromise}
+                          options={{
+                            clientSecret,
+                            appearance: {
+                              theme: "stripe",
+                              variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" },
+                            },
+                          }}
+                        >
+                          <StripeInnerForm
+                            ref={stripeRef}
+                            itemsJson={itemsJson}
+                            shippingAddress={shipStr}
+                            billingAddress={billStr}
+                            notes={notes}
+                            shippingRate={shippingCost}
+                            total={total}
+                            couponId={appliedCoupon?.couponId}
+                            couponCode={appliedCoupon?.code}
+                            discountAmount={discountAmount}
+                            customerEmail={patientEmail || undefined}
+                            customerPhone={patientPhone || undefined}
+                            onSuccess={handleCardSuccess}
+                            onProcessing={setCardProcessing}
+                            onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+                            onStripeReady={() => setPaymentReady(true)}
+                          />
+                        </Elements>
+                      </div>
                     ) : intentError ? (
                       <div className="py-6 flex flex-col items-center gap-3 text-center">
                         <p className="text-sm text-red-500">Could not initialize payment.</p>

@@ -26,17 +26,24 @@ function parseFromAddress(raw: string): { email: string; name?: string } {
 export async function sendMail(opts: {
   to:           string;
   cc?:          string | string[];
+  bcc?:         string | string[];
   subject:      string;
   html:         string;
   attachments?: { filename: string; path: string }[];
 }) {
-  const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@pronuvia.com";
+  const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "sales1.pronuvia@gmail.com";
 
   // Normalise CC: remove blanks and duplicates of `to`
   const ccList = (Array.isArray(opts.cc) ? opts.cc : opts.cc ? [opts.cc] : [])
     .map(e => e.trim())
     .filter(e => e && e !== opts.to);
   const ccUnique = [...new Set(ccList)];
+
+  // Normalise BCC: remove blanks and duplicates of `to` and `cc`
+  const bccList = (Array.isArray(opts.bcc) ? opts.bcc : opts.bcc ? [opts.bcc] : [])
+    .map(e => e.trim())
+    .filter(e => e && e !== opts.to && !ccUnique.includes(e));
+  const bccUnique = [...new Set(bccList)];
 
   // ── SendGrid (preferred — works on Vercel / serverless) ───────────────────
   if (process.env.SENDGRID_API_KEY) {
@@ -55,7 +62,8 @@ export async function sendMail(opts: {
         from,
         subject: opts.subject,
         html,
-        ...(ccUnique.length ? { cc: ccUnique } : {}),
+        ...(ccUnique.length  ? { cc:  ccUnique  } : {}),
+        ...(bccUnique.length ? { bcc: bccUnique } : {}),
       });
       console.log("[mailer/sendgrid] sent to", opts.to, "| subject:", opts.subject, "| status:", res.statusCode);
       return res;
@@ -91,11 +99,12 @@ export async function sendMail(opts: {
   const info = await transporter.sendMail({
     from:        rawFrom,
     to:          opts.to,
-    cc:          ccUnique.length ? ccUnique.join(", ") : undefined,
+    cc:          ccUnique.length  ? ccUnique.join(", ")  : undefined,
+    bcc:         bccUnique.length ? bccUnique.join(", ") : undefined,
     subject:     opts.subject,
     html:        opts.html,
     attachments: [...logoAttachment, ...(opts.attachments ?? [])],
   });
-  console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
+  console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", bccUnique.length ? `| bcc: ${bccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;
 }

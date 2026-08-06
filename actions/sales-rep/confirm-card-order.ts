@@ -158,6 +158,8 @@ export async function confirmCardOrder(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    payload.shippingRate,
+        couponCode:      payload.couponCode     || null,
+        discountAmount:  payload.discountAmount || 0,
         paymentMethod:   "CARD",
         billingAddress:  payload.billingAddress  || null,
         shippingAddress: payload.shippingAddress || null,
@@ -165,11 +167,8 @@ export async function confirmCardOrder(
         orderDate:       new Date(),
         customerPhone:   payload.customerPhone   || null,
       });
-      const cc = [
-        rep?.email !== payload.customerEmail ? rep?.email : null,
-        "sales1.pronuvia@gmail.com",
-      ].filter(Boolean) as string[];
-      await sendMail({ to: payload.customerEmail, cc, subject, html });
+      const bcc = rep?.email && rep.email !== payload.customerEmail ? [rep.email] : [];
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
     } catch (err) {
       console.error("[sales-rep order] confirmation email failed:", err);
     }
@@ -186,6 +185,8 @@ export async function confirmCardOrder(
       items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
       subtotal,
       shippingCost:    payload.shippingRate,
+      couponCode:      payload.couponCode     || null,
+      discountAmount:  payload.discountAmount || 0,
       paymentMethod:   "CARD",
       total:           payload.total,
       billingAddress:  payload.billingAddress  || null,
@@ -193,7 +194,7 @@ export async function confirmCardOrder(
       contactEmail:    payload.customerEmail   || null,
       contactPhone:    payload.customerPhone   || null,
     });
-    await sendMail({ to: "info@pronuvia.com", subject, html });
+    await sendMail({ to: "sales1.pronuvia@gmail.com", subject, html });
   } catch (err) {
     console.error("[sales-rep order] internal notification email failed:", err);
   }

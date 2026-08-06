@@ -168,6 +168,8 @@ export async function payWithPhysicianWallet(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    shippingRate,
+        couponCode:      couponCode      || null,
+        discountAmount:  discountAmount  || 0,
         paymentMethod:   "WALLET",
         billingAddress:  billingAddress  || null,
         shippingAddress: shippingAddress || null,
@@ -175,11 +177,8 @@ export async function payWithPhysicianWallet(
         orderDate:       new Date(),
         customerPhone:   customerPhone   || null,
       });
-      const cc = [
-        physician.email !== customerEmail ? physician.email : null,
-        "sales1.pronuvia@gmail.com",
-      ].filter(Boolean) as string[];
-      await sendMail({ to: customerEmail, cc, subject, html });
+      const bcc = physician.email !== customerEmail ? [physician.email] : [];
+      await sendMail({ to: customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
     } catch (err) {
       console.error("[physician wallet] confirmation email failed:", err);
     }
@@ -194,6 +193,8 @@ export async function payWithPhysicianWallet(
       items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
       subtotal,
       shippingCost:    shippingRate,
+      couponCode:      couponCode     || null,
+      discountAmount:  discountAmount || 0,
       paymentMethod:   "WALLET",
       total,
       billingAddress:  billingAddress  || null,
@@ -201,7 +202,7 @@ export async function payWithPhysicianWallet(
       contactEmail:    customerEmail   || null,
       contactPhone:    customerPhone   || null,
     });
-    await sendMail({ to: "info@pronuvia.com", subject, html });
+    await sendMail({ to: "sales1.pronuvia@gmail.com", subject, html });
   } catch (err) {
     console.error("[physician wallet] internal notification email failed:", err);
   }

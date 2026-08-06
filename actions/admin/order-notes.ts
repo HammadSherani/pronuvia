@@ -51,6 +51,8 @@ export async function addOrderNote(
         total:           true,
         shippingRate:    true,
         paymentMethod:   true,
+        couponCode:      true,
+        discountAmount:  true,
         items:           true,
         physician: { select: { email: true, firstName: true, lastName: true } },
         salesRep:  { select: { email: true } },
@@ -70,23 +72,25 @@ export async function addOrderNote(
       }));
 
       const orderData = {
-        orderNumber:    order.orderNumber,
-        note:           trimmed,
+        orderNumber:     order.orderNumber,
+        note:            trimmed,
         items,
-        subtotal:       order.subtotal,
-        shippingCost:   order.shippingRate ?? 0,
-        total:          order.total,
-        paymentMethod:  order.paymentMethod,
-        billingAddress: order.billingAddress,
+        subtotal:        order.subtotal,
+        shippingCost:    order.shippingRate ?? 0,
+        couponCode:      order.couponCode   ?? null,
+        discountAmount:  order.discountAmount ?? 0,
+        total:           order.total,
+        paymentMethod:   order.paymentMethod,
+        billingAddress:  order.billingAddress,
         shippingAddress: order.shippingAddress,
       };
 
-      // CC list: doctor + medical rep (filter out nulls)
-      const ccList = [order.physician?.email, order.salesRep?.email].filter(Boolean) as string[];
+      const physicianEmail = order.physician?.email ?? null;
+      const salesRepEmail  = order.salesRep?.email  ?? null;
 
       const sends: Promise<unknown>[] = [];
 
-      // Single email to patient with full order details, CC'd to doctor and rep
+      // Single email to patient — doctor BCC'd, rep CC'd
       if (order.customerEmail) {
         let patientFirstName = "Patient";
         if (order.shippingAddress) {
@@ -95,14 +99,16 @@ export async function addOrderNote(
             if (addr?.firstName) patientFirstName = addr.firstName;
           } catch {}
         }
+        const patientCc: string[] = [];
+        const patientBcc = physicianEmail ? [physicianEmail] : [];
         const { subject, html } = orderNoteEmail({ firstName: patientFirstName, ...orderData });
-        sends.push(sendMail({ to: order.customerEmail, cc: ccList, subject, html }));
+        sends.push(sendMail({ to: order.customerEmail, cc: patientCc.length ? patientCc : undefined, bcc: patientBcc.length ? patientBcc : undefined, subject, html }));
       } else if (order.physician?.email) {
-        // No patient email — send directly to doctor (still CC rep)
+        // No patient email — send directly to doctor; rep BCC'd so doctor can't see the upline
         const drName = `${order.physician.firstName} ${order.physician.lastName}`.trim();
-        const drCc   = order.salesRep?.email ? [order.salesRep.email] : [];
+        const drBcc  = order.salesRep?.email ? [order.salesRep.email] : [];
         const { subject, html } = orderNoteEmail({ firstName: drName, ...orderData });
-        sends.push(sendMail({ to: order.physician.email, cc: drCc, subject, html }));
+        sends.push(sendMail({ to: order.physician.email, bcc: drBcc.length ? drBcc : undefined, subject, html }));
       }
 
       try {
