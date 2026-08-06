@@ -162,6 +162,8 @@ export async function confirmPhysicianCardOrder(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    payload.shippingRate,
+        couponCode:      payload.couponCode     || null,
+        discountAmount:  payload.discountAmount || 0,
         paymentMethod:   "CARD",
         billingAddress:  payload.billingAddress  || null,
         shippingAddress: payload.shippingAddress || null,
@@ -169,12 +171,9 @@ export async function confirmPhysicianCardOrder(
         orderDate:       new Date(),
         customerPhone:   payload.customerPhone   || null,
       });
-      const cc = [
-        physician?.email !== payload.customerEmail ? physician?.email : null,
-        "sales1.pronuvia@gmail.com",
-      ].filter(Boolean) as string[];
-      console.log("[physician order] sending confirmation email to:", payload.customerEmail, "| cc:", cc);
-      await sendMail({ to: payload.customerEmail, cc, subject, html });
+      const bcc = physician?.email && physician.email !== payload.customerEmail ? [physician.email] : [];
+      console.log("[physician order] sending confirmation email to:", payload.customerEmail, "| bcc:", bcc);
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
       console.log("[physician order] confirmation email sent successfully");
     } catch (err) {
       console.error("[physician order] confirmation email FAILED:", err);
@@ -194,6 +193,8 @@ export async function confirmPhysicianCardOrder(
       items:           items.map((i) => ({ title: i.title, variantSize: i.variantSize, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
       subtotal,
       shippingCost:    payload.shippingRate,
+      couponCode:      payload.couponCode     || null,
+      discountAmount:  payload.discountAmount || 0,
       paymentMethod:   "CARD",
       total:           payload.total,
       billingAddress:  payload.billingAddress  || null,
@@ -201,7 +202,7 @@ export async function confirmPhysicianCardOrder(
       contactEmail:    payload.customerEmail   || null,
       contactPhone:    payload.customerPhone   || null,
     });
-    await sendMail({ to: "info@pronuvia.com", subject, html });
+    await sendMail({ to: "sales1.pronuvia@gmail.com", subject, html });
   } catch (err) {
     console.error("[physician order] internal notification email failed:", err);
   }

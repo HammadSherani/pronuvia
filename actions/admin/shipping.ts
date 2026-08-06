@@ -331,6 +331,7 @@ export async function purchaseLabel(
         customerEmail: true, customerPhone: true,
         shippingAddress: true, billingAddress: true,
         total: true, shippingRate: true, paymentMethod: true,
+        couponCode: true, discountAmount: true,
         estimatedDelivery: true,
         physician: { select: { email: true } },
         salesRep:  { select: { email: true } },
@@ -357,15 +358,19 @@ export async function purchaseLabel(
         billingAddress:   fullOrder.billingAddress,
         total:            fullOrder.total,
         shippingCost:     fullOrder.shippingRate ?? 0,
+        couponCode:       fullOrder.couponCode   ?? null,
+        discountAmount:   fullOrder.discountAmount ?? 0,
         paymentMethod:    fullOrder.paymentMethod,
         contactEmail:     fullOrder.customerEmail ?? null,
         contactPhone:     fullOrder.customerPhone ?? null,
       });
 
       const to = fullOrder.customerEmail ?? fullOrder.physician?.email ?? "";
-      const cc = [fullOrder.physician?.email, fullOrder.salesRep?.email].filter(Boolean) as string[];
+      const toIsPatient = !!fullOrder.customerEmail;
+      const cc  = [toIsPatient ? null : fullOrder.physician?.email, toIsPatient ? null : fullOrder.salesRep?.email].filter(Boolean) as string[];
+      const bcc = toIsPatient && fullOrder.physician?.email ? [fullOrder.physician.email] : [];
 
-      if (to) await sendMail({ to, cc, subject, html });
+      if (to) await sendMail({ to, cc, bcc: bcc.length ? bcc : undefined, subject, html });
     }
   } catch (err) {
     console.error("[purchaseLabel] tracking email failed:", err);

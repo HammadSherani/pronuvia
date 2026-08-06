@@ -46,15 +46,6 @@ const base = (content: string) => `
             </td>
           </tr>
 
-          <!-- Footer -->
-          <tr>
-            <td align="center" style="padding-top:20px;">
-              <p style="margin:0;font-size:12px;color:${C.dimmed};">
-                This email was sent by Pronuvia Partner Portal. Please do not reply.
-              </p>
-            </td>
-          </tr>
-
         </table>
       </td>
     </tr>
@@ -527,6 +518,8 @@ export type OrderEmailData = {
   estimatedDelivery?: Date | null;
   isPatientEmail?:    boolean;
   shippingCost?:      number;
+  couponCode?:        string | null;
+  discountAmount?:    number;
   paymentMethod?:     string | null;
   billingAddress?:    string | null;
   shippingAddress?:   string | null;
@@ -575,8 +568,9 @@ export function orderConfirmationEmail(d: OrderEmailData) {
     ? (name ? `Hello ${name},` : "Hello,")
     : `Hi ${d.firstName},`;
   const dateStr  = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  const subtotal = d.items.reduce((s, i) => s + i.lineTotal, 0);
-  const shipping = d.shippingCost ?? 0;
+  const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
+  const shipping  = d.shippingCost ?? 0;
+  const discount  = d.discountAmount ?? 0;
 
   const payLabel = (() => {
     const pm = d.paymentMethod;
@@ -616,6 +610,12 @@ export function orderConfirmationEmail(d: OrderEmailData) {
             <td style="border-top:1px solid ${C.border};"></td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
           </tr>
+          ${discount > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#16a34a;border-top:1px solid #f3f4f6;">Coupon${d.couponCode ? ` (${d.couponCode})` : ""}:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#16a34a;text-align:right;border-top:1px solid #f3f4f6;">−$${discount.toFixed(2)}</td>
+          </tr>` : ""}
           ${shipping > 0 ? `
           <tr>
             <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
@@ -667,7 +667,7 @@ export function orderConfirmationEmail(d: OrderEmailData) {
 }
 
 // ─────────────────────────────────────────────
-// New-order notification (internal — sent to info@pronuvia.com)
+// New-order notification (internal — sent to sales1.pronuvia@gmail.com)
 // ─────────────────────────────────────────────
 export function newOrderNotificationEmail(opts: {
   orderNumber:     string;
@@ -676,6 +676,8 @@ export function newOrderNotificationEmail(opts: {
   items:           OrderItem[];
   subtotal:        number;
   shippingCost:    number;
+  couponCode?:     string | null;
+  discountAmount?: number;
   paymentMethod:   string | null;
   total:           number;
   billingAddress?:  string | null;
@@ -725,6 +727,12 @@ export function newOrderNotificationEmail(opts: {
             <td style="border-top:1px solid ${C.border};"></td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${opts.subtotal.toFixed(2)}</td>
           </tr>
+          ${(opts.discountAmount ?? 0) > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#16a34a;border-top:1px solid #f3f4f6;">Coupon${opts.couponCode ? ` (${opts.couponCode})` : ""}:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#16a34a;text-align:right;border-top:1px solid #f3f4f6;">−$${(opts.discountAmount ?? 0).toFixed(2)}</td>
+          </tr>` : ""}
           ${opts.shippingCost > 0 ? `
           <tr>
             <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
@@ -790,6 +798,7 @@ export function orderProcessingEmail(d: OrderEmailData) {
 export function orderCompletedEmail(d: OrderEmailData) {
   const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping  = d.shippingCost ?? 0;
+  const discount  = d.discountAmount ?? 0;
   const recipient = recipientFirstName(d);
   const greeting  = recipient ? `Hello ${recipient},` : "Hello,";
 
@@ -823,6 +832,11 @@ export function orderCompletedEmail(d: OrderEmailData) {
             <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};border-top:1px solid ${C.border};">Subtotal</td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
           </tr>
+          ${discount > 0 ? `
+          <tr>
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#16a34a;border-top:1px solid #f3f4f6;">Coupon${d.couponCode ? ` (${d.couponCode})` : ""}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#16a34a;text-align:right;border-top:1px solid #f3f4f6;">−$${discount.toFixed(2)}</td>
+          </tr>` : ""}
           <tr>
             <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};border-top:1px solid #f3f4f6;">Shipping</td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">${shipping > 0 ? `$${shipping.toFixed(2)}` : "Free"}</td>
@@ -1222,6 +1236,8 @@ export function shipmentTrackingEmail(opts: {
   billingAddress?:    string | null;
   total?:             number | null;
   shippingCost?:      number | null;
+  couponCode?:        string | null;
+  discountAmount?:    number;
   paymentMethod?:     string | null;
   contactEmail?:      string | null;
   contactPhone?:      string | null;
@@ -1231,6 +1247,7 @@ export function shipmentTrackingEmail(opts: {
 
   const subtotal   = opts.items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping   = opts.shippingCost ?? 0;
+  const discount   = opts.discountAmount ?? 0;
   const grandTotal = opts.total ?? subtotal + shipping;
 
   const payLabel = (() => {
@@ -1283,6 +1300,12 @@ export function shipmentTrackingEmail(opts: {
           <td style="border-top:1px solid ${C.border};"></td>
           <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
         </tr>
+        ${discount > 0 ? `
+        <tr>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#16a34a;border-top:1px solid #f3f4f6;">Coupon${opts.couponCode ? ` (${opts.couponCode})` : ""}:</td>
+          <td style="border-top:1px solid #f3f4f6;"></td>
+          <td style="padding:10px 12px;font-size:13px;color:#16a34a;text-align:right;border-top:1px solid #f3f4f6;">−$${discount.toFixed(2)}</td>
+        </tr>` : ""}
         ${shipping > 0 ? `
         <tr>
           <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
@@ -1339,6 +1362,8 @@ export function orderNoteEmail(opts: {
   items?:         { title: string; variantSize?: string | null; quantity: number; lineTotal: number }[];
   subtotal?:      number;
   shippingCost?:  number;
+  couponCode?:    string | null;
+  discountAmount?: number;
   total?:         number;
   paymentMethod?: string | null;
   billingAddress?:  string | null;
@@ -1347,6 +1372,7 @@ export function orderNoteEmail(opts: {
   const items       = opts.items ?? [];
   const subtotal    = opts.subtotal ?? items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping    = opts.shippingCost ?? 0;
+  const discount    = opts.discountAmount ?? 0;
   const grandTotal  = opts.total ?? subtotal + shipping;
   const hasItems    = items.length > 0;
 
@@ -1396,6 +1422,12 @@ export function orderNoteEmail(opts: {
             <td style="border-top:1px solid ${C.border};"></td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid ${C.border};">$${subtotal.toFixed(2)}</td>
           </tr>
+          ${discount > 0 ? `
+          <tr>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#16a34a;border-top:1px solid #f3f4f6;">Coupon${opts.couponCode ? ` (${opts.couponCode})` : ""}:</td>
+            <td style="border-top:1px solid #f3f4f6;"></td>
+            <td style="padding:10px 12px;font-size:13px;color:#16a34a;text-align:right;border-top:1px solid #f3f4f6;">−$${discount.toFixed(2)}</td>
+          </tr>` : ""}
           ${shipping > 0 ? `
           <tr>
             <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>

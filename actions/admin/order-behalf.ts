@@ -162,13 +162,12 @@ export async function confirmBehalfCardOrder(
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
+        couponCode:     payload.couponCode     || null,
+        discountAmount: payload.discountAmount || 0,
         customerPhone: payload.customerPhone || null,
       });
-      const cc = [
-        physician?.email !== payload.customerEmail ? physician?.email : null,
-        "sales1.pronuvia@gmail.com",
-      ].filter(Boolean) as string[];
-      await sendMail({ to: payload.customerEmail, cc, subject, html });
+      const bcc = physician?.email && physician.email !== payload.customerEmail ? [physician.email] : [];
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
     } catch (err) {
       console.error("[behalf order] confirmation email failed:", err);
     }

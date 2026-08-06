@@ -18,7 +18,7 @@ function CartIcon({ href }: { href: string }) {
         <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
       </svg>
       {totalItems > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-gray-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+        <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center leading-none shadow-md ring-2 ring-white">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
@@ -37,7 +37,7 @@ function buildNav(role: Role): NavItem[] {
   if (role === "ADMIN") {
     return [
       {
-        label: "Account Management",
+        label: "Account",
         children: [
           { label: "Medical Representatives", href: "/admin/sales-reps" },
           { label: "Partnering Physicians", href: "/admin/physicians" },
@@ -45,7 +45,7 @@ function buildNav(role: Role): NavItem[] {
         ],
       },
       {
-        label: "Product Management",
+        label: "Product",
         children: [
           { label: "Products", href: "/admin/products" },
           { label: "Categories", href: "/admin/categories" },
@@ -54,7 +54,7 @@ function buildNav(role: Role): NavItem[] {
       },
       // { label: "Coupons", href: "/admin/coupons" },
       {
-        label: "Website Management",
+        label: "Website",
         children: [
           { label: "Website Banners", href: "/admin/website-banners" },
           { label: "Blog Posts", href: "/admin/blogs" },
