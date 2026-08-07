@@ -45,6 +45,14 @@ function buildNav(role: Role): NavItem[] {
         ],
       },
       {
+        label: "Commission Management",
+        children: [
+          { label: "Commission Payout",      href: "/admin/withdrawals" },
+          { label: "Commission History",     href: "/admin/payout-requests" },
+          { label: "Commission Adjustment",  href: "/admin/wallet-adjustment" },
+        ],
+      },
+      {
         label: "Product",
         children: [
           { label: "Products", href: "/admin/products" },

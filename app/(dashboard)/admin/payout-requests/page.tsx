@@ -4,7 +4,7 @@ import { PageHeader }                         from "@/components/admin/page-head
 import { WithdrawalsTableClient }             from "@/components/admin/withdrawals-table-client";
 import { PhysicianWithdrawalsTableClient }    from "@/components/admin/physician-withdrawals-table-client";
 
-export const metadata = { title: "Payout Requests – Pronuvia Admin" };
+export const metadata = { title: "Commission History – Pronuvia Admin" };
 
 export default async function PayoutRequestsPage() {
   await requireAdmin();
@@ -76,7 +76,7 @@ export default async function PayoutRequestsPage() {
   return (
     <div>
       <PageHeader
-        title="Payout Requests"
+        title="Commission History"
         description="Approve or reject withdrawal requests submitted by Medical Reps and Doctors"
       />
 

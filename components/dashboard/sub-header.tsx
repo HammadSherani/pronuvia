@@ -15,9 +15,6 @@ function buildSubNav(role: Role): SubNavItem[] {
     return [
       { label: "Dashboard",       href: "/admin/dashboard" },
       { label: "Orders",          href: "/admin/orders" },
-      { label: "Commission Payout",    href: "/admin/withdrawals" },
-      { label: "Payout Requests",      href: "/admin/payout-requests" },
-      { label: "Commission Adjustment", href: "/admin/wallet-adjustment" },
       { label: "Promotional Banners",         href: "/admin/banners" },
       { label: "Coupons",         href: "/admin/coupons" },
       { label: "Shipping Rates",   href: "/admin/shipping-rates" },
