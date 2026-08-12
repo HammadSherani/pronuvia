@@ -33,9 +33,7 @@ const base = (content: string) => `
           <!-- Logo / Brand -->
           <tr>
             <td align="center" style="padding-bottom:24px;padding-top:0;">
-              <div style="display:inline-block;background:${C.ink};border-radius:10px;padding:12px 28px;">
-                <img src="cid:pronuvia-logo" alt="Pronuvia" width="150" height="auto" style="display:block;border:0;max-width:150px;" />
-              </div>
+              <img src="cid:pronuvia-logo" alt="Pronuvia" width="160" height="auto" style="display:block;border:0;max-width:160px;" />
             </td>
           </tr>
 

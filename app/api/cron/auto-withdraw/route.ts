@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   const repIds = salesReps.map((r) => r.id);
   const docIds = physicians.map((d) => d.id);
 
-  // Find any that already have a PENDING withdrawal (auto or manual — either blocks a new request)
+  // Find any that already have a PENDING withdrawal — store IDs so we can update amounts
   const pendingRequests = await prisma.withdrawRequest.findMany({
     where: {
       status: "PENDING",
@@ -42,10 +42,11 @@ export async function GET(req: NextRequest) {
         { userRole: "PHYSICIAN", userId: { in: docIds } },
       ],
     },
-    select: { userId: true, userRole: true },
+    select: { id: true, userId: true, userRole: true },
   });
 
-  const hasPending = new Set(pendingRequests.map((r) => `${r.userRole}:${r.userId}`));
+  // "ROLE:userId" → existing request id
+  const pendingMap = new Map(pendingRequests.map((r) => [`${r.userRole}:${r.userId}`, r.id]));
 
   const toCreate: {
     userId:   string;
@@ -53,38 +54,50 @@ export async function GET(req: NextRequest) {
     amount:   number;
     note:     string;
   }[] = [];
+  const updateOps: Promise<unknown>[] = [];
 
   for (const rep of salesReps) {
-    const key = `SALES_REP:${rep.id}`;
-    if (hasPending.has(key)) {
-      console.log(`[auto-withdraw] SKIP sales rep ${rep.id} – pending request exists`);
+    const existingId = pendingMap.get(`SALES_REP:${rep.id}`);
+    if (existingId) {
+      console.log(`[auto-withdraw] UPDATE sales rep ${rep.id} – balance $${rep.walletBalance.toFixed(2)}`);
+      updateOps.push(
+        prisma.withdrawRequest.update({ where: { id: existingId }, data: { amount: rep.walletBalance, note: autoNote } })
+      );
     } else {
-      console.log(`[auto-withdraw] QUEUE sales rep ${rep.id} – balance $${rep.walletBalance.toFixed(2)}`);
+      console.log(`[auto-withdraw] CREATE sales rep ${rep.id} – balance $${rep.walletBalance.toFixed(2)}`);
       toCreate.push({ userId: rep.id, userRole: "SALES_REP", amount: rep.walletBalance, note: autoNote });
     }
   }
 
   for (const doc of physicians) {
-    const key = `PHYSICIAN:${doc.id}`;
-    if (hasPending.has(key)) {
-      console.log(`[auto-withdraw] SKIP physician ${doc.id} – pending request exists`);
+    const existingId = pendingMap.get(`PHYSICIAN:${doc.id}`);
+    if (existingId) {
+      console.log(`[auto-withdraw] UPDATE physician ${doc.id} – balance $${doc.walletBalance.toFixed(2)}`);
+      updateOps.push(
+        prisma.withdrawRequest.update({ where: { id: existingId }, data: { amount: doc.walletBalance, note: autoNote } })
+      );
     } else {
-      console.log(`[auto-withdraw] QUEUE physician ${doc.id} – balance $${doc.walletBalance.toFixed(2)}`);
+      console.log(`[auto-withdraw] CREATE physician ${doc.id} – balance $${doc.walletBalance.toFixed(2)}`);
       toCreate.push({ userId: doc.id, userRole: "PHYSICIAN", amount: doc.walletBalance, note: autoNote });
     }
   }
 
-  if (toCreate.length === 0) {
-    console.log("[auto-withdraw] cron completed – no new requests needed");
-    return NextResponse.json({ success: true, created: 0, message: "No new withdrawal requests needed." });
+  await Promise.all(updateOps);
+  if (toCreate.length > 0) await prisma.withdrawRequest.createMany({ data: toCreate });
+
+  const updated = updateOps.length;
+  const created = toCreate.length;
+
+  if (updated === 0 && created === 0) {
+    console.log("[auto-withdraw] cron completed – no eligible users");
+    return NextResponse.json({ success: true, updated: 0, created: 0, message: "No eligible users." });
   }
 
-  await prisma.withdrawRequest.createMany({ data: toCreate });
-
-  console.log(`[auto-withdraw] cron completed – created ${toCreate.length} request(s) for ${monthLabel}`);
+  console.log(`[auto-withdraw] cron completed – ${created} created, ${updated} updated for ${monthLabel}`);
   return NextResponse.json({
     success: true,
-    created: toCreate.length,
-    message: `Created ${toCreate.length} auto withdrawal request(s) for ${monthLabel}.`,
+    created,
+    updated,
+    message: `${created} created, ${updated} updated for ${monthLabel}.`,
   });
 }

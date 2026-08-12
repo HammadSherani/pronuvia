@@ -3,7 +3,7 @@ import { prisma }              from "@/lib/db/prisma";
 import { PageHeader }          from "@/components/admin/page-header";
 import { AllWithdrawalsTable, type CommissionEntry } from "@/components/admin/all-withdrawals-table";
 
-export const metadata = { title: "Commission Payout – Pronuvia Admin" };
+export const metadata = { title: "Commission History – Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -84,7 +84,7 @@ export default async function WithdrawalsPage() {
   return (
     <div>
       <PageHeader
-        title="Commission Payout"
+        title="Commission History"
         description="Commissions automatically credited when orders are completed"
       />
 

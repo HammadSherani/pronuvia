@@ -3,15 +3,6 @@ import nodemailer from "nodemailer";
 import fs         from "fs";
 import path       from "path";
 
-function getLogoBase64(): string | null {
-  try {
-    const buf = fs.readFileSync(path.join(process.cwd(), "public/assets/logo-white.png"));
-    return buf.toString("base64");
-  } catch {
-    return null;
-  }
-}
-
 // Parse "Name <email@x.com>" or plain "email@x.com" into { name?, email }
 function parseFromAddress(raw: string): { email: string; name?: string } {
   const match = raw.match(/^(.*?)\s*<([^>]+)>\s*$/);
@@ -53,7 +44,7 @@ export async function sendMail(opts: {
 
     // SendGrid doesn't support CID inline attachments reliably — swap to public URL
     const appUrl  = (process.env.NEXT_PUBLIC_APP_URL ?? "https://pronuvia.vercel.app").replace(/\/$/, "");
-    const logoUrl = `${appUrl}/assets/logo-white.png`;
+    const logoUrl = `${appUrl}/assets/logo.png`;
     const html    = opts.html.replace(/cid:pronuvia-logo/g, logoUrl);
 
     try {
@@ -70,7 +61,11 @@ export async function sendMail(opts: {
     } catch (err: unknown) {
       const sgErr = err as { code?: number; response?: { body?: unknown } };
       console.error("[mailer/sendgrid] FAILED — code:", sgErr.code, "| body:", JSON.stringify(sgErr.response?.body));
-      throw err;
+
+      // Fall through to SMTP for: 403 (unverified sender), DNS failures, network errors.
+      const isNetworkError = typeof sgErr.code === "string" && ["EAI_AGAIN", "ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"].includes(sgErr.code);
+      if (!isNetworkError && sgErr.code !== 403) throw err;
+      console.warn(`[mailer/sendgrid] falling back to SMTP (reason: ${sgErr.code ?? "unknown"})`);
     }
   }
 
@@ -89,11 +84,16 @@ export async function sendMail(opts: {
     },
   });
 
-  const logoB64 = getLogoBase64();
-  const logoAttachment = logoB64 ? [{
-    filename: "logo-white.png",
-    content:  Buffer.from(logoB64, "base64"),
-    cid:      "pronuvia-logo",
+  // Build CID logo attachment (inline, so Gmail renders it inside the email body)
+  const logoBuf = (() => {
+    try { return fs.readFileSync(path.join(process.cwd(), "public/assets/logo.png")); }
+    catch { return null; }
+  })();
+  const logoAttachments = logoBuf ? [{
+    filename:           "logo.png",
+    content:            logoBuf,
+    cid:                "pronuvia-logo",
+    contentDisposition: "inline" as const,
   }] : [];
 
   const info = await transporter.sendMail({
@@ -103,7 +103,7 @@ export async function sendMail(opts: {
     bcc:         bccUnique.length ? bccUnique.join(", ") : undefined,
     subject:     opts.subject,
     html:        opts.html,
-    attachments: [...logoAttachment, ...(opts.attachments ?? [])],
+    attachments: [...logoAttachments, ...(opts.attachments ?? [])],
   });
   console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", bccUnique.length ? `| bcc: ${bccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;

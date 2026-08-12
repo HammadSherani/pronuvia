@@ -54,6 +54,18 @@ export async function updateWithdrawRequest(
   return { success: true, message: `Request ${action.toLowerCase()} successfully.` };
 }
 
+export async function deleteWithdrawRequest(
+  requestId: string,
+): Promise<WithdrawalActionState> {
+  await requireAdmin();
+  const req = await prisma.withdrawRequest.findUnique({ where: { id: requestId }, select: { status: true } });
+  if (!req)                     return { success: false, message: "Request not found." };
+  if (req.status !== "PENDING") return { success: false, message: "Only pending requests can be deleted." };
+  await prisma.withdrawRequest.delete({ where: { id: requestId } });
+  revalidatePath("/admin/payout-requests");
+  return { success: true, message: "Request removed." };
+}
+
 export async function bulkUpdateWithdrawals(
   ids:    string[],
   action: "APPROVED" | "REJECTED",

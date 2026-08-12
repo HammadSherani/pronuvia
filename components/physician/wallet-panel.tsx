@@ -59,7 +59,7 @@ export function PhysicianWalletPanel({
         {/* Paid Commissions */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Paid Commissions</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Earned</p>
             <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
               <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -68,7 +68,7 @@ export function PhysicianWalletPanel({
           </div>
           <div>
             <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPaid)}</p>
-            <p className="text-xs text-gray-400 mt-1">Credited to account</p>
+            <p className="text-xs text-gray-400 mt-1">Credited from orders</p>
             {totalPending > 0 && (
               <p className="text-xs text-amber-500 mt-1 font-medium">+ {fmt(totalPending)} pending</p>
             )}
@@ -78,7 +78,7 @@ export function PhysicianWalletPanel({
         {/* Withdrawn */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Withdrawn</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Paid Out</p>
             <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />

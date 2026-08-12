@@ -2,4 +2,5 @@
 export {
   updateWithdrawRequest  as updatePhysicianWithdrawRequest,
   bulkUpdateWithdrawals  as bulkUpdatePhysicianWithdrawals,
+  deleteWithdrawRequest  as deletePhysicianWithdrawRequest,
 } from "@/actions/admin/manage-withdrawals";
