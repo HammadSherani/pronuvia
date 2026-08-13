@@ -44,8 +44,8 @@ function buildSubNav(role: Role): SubNavItem[] {
     { label: "Dashboard",   href: "/physician/dashboard" },
     { label: "Shop",        href: "/physician/shop" },
     { label: "Orders",      href: "/physician/orders" },
-    { label: "Commission",        href: "/physician/wallet" },
-    { label: "Commission Payout", href: "/physician/withdrawals" },
+    { label: "Commission",    href: "/physician/wallet" },
+    { label: "Payout History", href: "/physician/withdrawals" },
   ];
 }
 

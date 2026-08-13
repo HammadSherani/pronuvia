@@ -96,116 +96,126 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="px-4 py-3.5">
-                {pendingIds.length > 0 && (
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll}
-                    title="Select all pending"
-                    className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
-                )}
-              </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Details</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet Balance</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Wallet</th>
-              <th className="px-5 py-3.5" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {requests.map((r) => {
-              const rowPending = r.status === "PENDING";
-              const isChecked  = selected.has(r.id);
-              return (
-                <tr key={r.id} className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
-                  <td className="px-4 py-4">
-                    {rowPending
-                      ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
-                          className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
-                      : <span className="block w-4 h-4" />}
-                  </td>
+      <table className="w-full text-sm table-fixed">
+        <colgroup>
+          <col className="w-8" />
+          <col className="w-[18%]" />
+          <col className="w-[17%]" />
+          <col className="w-[9%]" />
+          <col className="w-[10%]" />
+          <col className="w-[13%]" />
+          <col className="w-[9%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50/60">
+            <th className="px-3 py-3">
+              {pendingIds.length > 0 && (
+                <input type="checkbox" checked={allSelected} onChange={toggleAll}
+                  title="Select all pending"
+                  className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
+              )}
+            </th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Doctor</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Comm. Balance</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Wallet</th>
+            <th className="px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-50">
+          {requests.map((r) => {
+            const rowPending = r.status === "PENDING";
+            const isChecked  = selected.has(r.id);
+            return (
+              <tr key={r.id} className={`hover:bg-gray-50/50 transition-colors ${isChecked ? "bg-blue-50/40" : ""}`}>
+                <td className="px-3 py-3">
+                  {rowPending
+                    ? <input type="checkbox" checked={isChecked} onChange={() => toggle(r.id)}
+                        className="w-4 h-4 rounded border-gray-300 accent-gray-900 cursor-pointer" />
+                    : <span className="block w-4 h-4" />}
+                </td>
 
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-[#3DBFA4]">
-                          {r.physician.firstName[0]}{r.physician.lastName[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-800 text-xs"> {r.physician.firstName} {r.physician.lastName}</p>
-                        <p className="text-xs text-gray-400">{r.physician.email}</p>
-                      </div>
+                <td className="px-3 py-3">
+                  <p className="font-semibold text-gray-800 text-xs truncate">
+                    {r.physician.firstName} {r.physician.lastName}
+                  </p>
+                  <p className="text-[11px] text-gray-400 truncate">{r.physician.email}</p>
+                </td>
+
+                <td className="px-3 py-3">
+                  {r.physician.bankName ? (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800 truncate">{r.physician.bankAccountName}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{r.physician.bankName}</p>
+                      {r.physician.bankAccountNumber && (
+                        <p className="text-[11px] font-mono text-gray-600 truncate">{r.physician.bankAccountNumber}</p>
+                      )}
                     </div>
-                  </td>
+                  ) : (
+                    <span className="text-xs text-red-400 font-medium">No bank</span>
+                  )}
+                </td>
 
-                  <td className="px-5 py-4">
-                    {r.physician.bankName ? (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800">{r.physician.bankAccountName}</p>
-                        <p className="text-xs text-gray-500">{r.physician.bankName}</p>
-                        {r.physician.bankAccountNumber && (
-                          <p className="text-xs font-mono font-semibold text-gray-700 mt-0.5">{r.physician.bankAccountNumber}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-red-400 font-medium">No bank linked</span>
-                    )}
-                  </td>
+                <td className="px-3 py-3">
+                  <span className="text-sm font-bold text-gray-800">{fmt(r.amount)}</span>
+                </td>
 
-                  <td className="px-5 py-4">
-                    <span className="text-base font-black text-gray-800">{fmt(r.amount)}</span>
-                  </td>
+                <td className="px-3 py-3">
+                  <span className={`text-xs font-semibold ${r.physician.walletBalance >= r.amount ? "text-emerald-600" : "text-red-500"}`}>
+                    {fmt(r.physician.walletBalance)}
+                  </span>
+                  {r.physician.walletBalance < r.amount && r.status === "PENDING" && (
+                    <p className="text-[10px] text-red-400">Low</p>
+                  )}
+                </td>
 
-                  <td className="px-5 py-4">
-                    <span className={`text-sm font-semibold ${r.physician.walletBalance >= r.amount ? "text-emerald-600" : "text-red-500"}`}>
-                      {fmt(r.physician.walletBalance)}
-                    </span>
-                    {r.physician.walletBalance < r.amount && r.status === "PENDING" && (
-                      <p className="text-[10px] text-red-400 mt-0.5">Insufficient</p>
-                    )}
-                  </td>
+                <td className="px-3 py-3 space-y-1">
+                  {r.note
+                    ? <p className="text-[11px] text-gray-500 italic line-clamp-2" title={r.note}>"{r.note}"</p>
+                    : <span className="text-gray-300 text-xs">—</span>}
+                  {r.adminNote && (
+                    <div className="mt-1">
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
+                        Admin
+                      </span>
+                      <p className="text-[11px] text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                        {r.adminNote}
+                      </p>
+                    </div>
+                  )}
+                </td>
 
-                  <td className="px-5 py-4 max-w-[160px]">
-                    {r.note
-                      ? <p className="text-xs text-gray-500 italic truncate" title={r.note}>"{r.note}"</p>
-                      : <span className="text-gray-300 text-xs">—</span>}
-                    {r.adminNote && (
-                      <p className="text-xs text-[#3DBFA4] mt-0.5 truncate" title={r.adminNote}>↳ {r.adminNote}</p>
-                    )}
-                  </td>
+                <td className="px-3 py-3 text-[11px] text-gray-400">
+                  {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })}
+                </td>
 
-                  <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                    {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </td>
+                <td className="px-3 py-3">
+                  <span className={`inline-flex px-1.5 py-0.5 border rounded-full text-[11px] font-medium ${statusStyle[r.status]}`}>
+                    {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
+                  </span>
+                </td>
 
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex px-2 py-0.5 border rounded-full text-xs font-medium ${statusStyle[r.status]}`}>
-                      {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
-                    </span>
-                  </td>
+                <td className="px-3 py-3 text-center">
+                  <PhysicianWalletModal physicianId={r.physicianId} physicianName={`${r.physician.firstName} ${r.physician.lastName}`} />
+                </td>
 
-                  <td className="px-5 py-4">
-                    <PhysicianWalletModal physicianId={r.physicianId} physicianName={`${r.physician.firstName} ${r.physician.lastName}`} />
-                  </td>
-
-                  <td className="px-5 py-4">
-                    {r.status === "PENDING"
-                      ? <PhysicianWithdrawalActions requestId={r.id} />
-                      : <span className="text-xs text-gray-300">—</span>}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                <td className="px-3 py-3 text-right">
+                  {r.status === "PENDING"
+                    ? <PhysicianWithdrawalActions requestId={r.id} />
+                    : <span className="text-xs text-gray-300">—</span>}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -215,7 +225,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
             </h3>
             <p className="text-sm text-gray-500 mb-6">
               {confirmAction === "APPROVED"
-                ? "Amounts will be deducted from each physician's wallet balance."
+                ? "Amounts will be deducted from each physician's commission balance."
                 : "All selected requests will be marked as rejected."}
             </p>
             <div className="flex gap-3">

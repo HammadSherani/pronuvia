@@ -1113,6 +1113,8 @@ export function orderRefundEmail(opts: {
   items:            { title: string; variantSize?: string; quantity: number; unitPrice: number; lineTotal: number }[];
   subtotal:         number;
   shippingCost:     number;
+  couponCode?:      string | null;
+  discountAmount?:  number;
   paymentMethod:    string | null;
   billingAddress?:  string | null;
   shippingAddress?: string | null;
@@ -1130,11 +1132,16 @@ export function orderRefundEmail(opts: {
       <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;border-bottom:1px solid #f3f4f6;">$${i.lineTotal.toFixed(2)}</td>
     </tr>`).join("");
 
+  const discount = opts.discountAmount ?? 0;
+
   const payLabel = opts.paymentMethod === "CARD"
     ? "Credit card / debit card"
     : opts.paymentMethod === "WALLET"
     ? "Wallet balance"
     : (opts.paymentMethod ?? "—");
+
+  // Pre-refund order total (what the customer actually paid before refund)
+  const originalTotal = opts.subtotal + opts.shippingCost - discount;
 
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Order Refunded: ${opts.orderNumber}</h1>
@@ -1154,6 +1161,11 @@ export function orderRefundEmail(opts: {
           <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">Subtotal</td>
           <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;">$${opts.subtotal.toFixed(2)}</td>
         </tr>
+        ${discount > 0 ? `
+        <tr style="border-top:1px solid #f3f4f6;">
+          <td colspan="2" style="padding:10px 12px;font-size:13px;color:#16a34a;">Coupon${opts.couponCode ? ` (${opts.couponCode})` : ""}</td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#16a34a;text-align:right;">−$${discount.toFixed(2)}</td>
+        </tr>` : ""}
         <tr style="border-top:1px solid ${C.border};">
           <td colspan="2" style="padding:10px 12px;font-size:13px;color:${C.muted};">Shipping</td>
           <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.text};text-align:right;">
@@ -1172,8 +1184,8 @@ export function orderRefundEmail(opts: {
         <tr style="border-top:2px solid ${C.border};background:${C.surface};">
           <td colspan="2" style="padding:12px;font-size:13px;font-weight:700;color:${C.text};">Total</td>
           <td style="padding:12px;font-size:13px;font-weight:700;color:${C.text};text-align:right;">
-            <span style="text-decoration:line-through;color:${C.dimmed};margin-right:8px;">$${(opts.subtotal + opts.shippingCost).toFixed(2)}</span>
-            $${Math.max(0, opts.subtotal + opts.shippingCost - opts.refundAmount).toFixed(2)}
+            <span style="text-decoration:line-through;color:${C.dimmed};margin-right:8px;">$${originalTotal.toFixed(2)}</span>
+            $${Math.max(0, originalTotal - opts.refundAmount).toFixed(2)}
           </td>
         </tr>
       </tbody>
@@ -1371,7 +1383,7 @@ export function orderNoteEmail(opts: {
   const subtotal    = opts.subtotal ?? items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping    = opts.shippingCost ?? 0;
   const discount    = opts.discountAmount ?? 0;
-  const grandTotal  = opts.total ?? subtotal + shipping;
+  const grandTotal  = opts.total ?? (subtotal + shipping - discount);
   const hasItems    = items.length > 0;
 
   const payLabel = (() => {
@@ -1472,4 +1484,53 @@ export function orderNoteEmail(opts: {
       </p>
     `),
   };
+}
+
+// ─────────────────────────────────────────────
+// Commission payout approval notification
+// ─────────────────────────────────────────────
+export function commissionPayoutEmail(opts: {
+  firstName:  string;
+  amount:     number;
+  period:     string;
+  orderCount: number;
+}) {
+  const subject = `Commission Payout Approved – ${opts.period}`;
+  const html = base(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Commission Payout Approved</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
+      Hi ${opts.firstName}, your commission payout for <strong style="color:${C.navy};">${opts.period}</strong> has been reviewed and approved.
+    </p>
+
+    ${infoBox(`
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:${C.muted};width:140px;">Period</td>
+          <td style="padding:5px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.period}</td>
+        </tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:${C.muted};">Orders</td>
+          <td style="padding:5px 0;font-size:13px;font-weight:600;color:${C.text};">${opts.orderCount} commission order${opts.orderCount !== 1 ? "s" : ""}</td>
+        </tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:${C.muted};">Payout Amount</td>
+          <td style="padding:5px 0;font-size:16px;font-weight:700;color:#047857;">$${opts.amount.toFixed(2)}</td>
+        </tr>
+      </table>
+    `)}
+
+    <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:#047857;font-weight:600;">
+        &#10003; Payment is being processed to your registered bank account.
+      </p>
+    </div>
+
+    <p style="margin:0 0 8px;font-size:14px;color:${C.textSoft};line-height:1.6;">
+      A detailed commission statement is attached to this email as a PDF. You can download it for your records.
+    </p>
+    <p style="margin:0;font-size:13px;color:${C.dimmed};line-height:1.6;">
+      If you have any questions about your payout, please contact your administrator.
+    </p>
+  `);
+  return { subject, html };
 }

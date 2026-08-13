@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { prisma }        from "@/lib/db/prisma";
 import { PageHeader }    from "@/components/admin/page-header";
 import { AllWalletAdjustmentClient } from "@/components/admin/all-wallet-adjustment-client";
+import { CommissionAdjustmentHistory, type AdjustmentEntry } from "@/components/admin/commission-adjustment-history";
 
 export const metadata = { title: "Commission Adjustment – Pronuvia Admin" };
 
@@ -12,7 +13,7 @@ function fmt(n: number) {
 export default async function WalletAdjustmentPage() {
   await requireAdmin();
 
-  const [reps, physicians] = await Promise.all([
+  const [reps, physicians, rawTxns] = await Promise.all([
     prisma.salesRepresentative.findMany({
       select: { id: true, firstName: true, lastName: true, email: true, walletBalance: true },
       orderBy: { firstName: "asc" },
@@ -22,7 +23,50 @@ export default async function WalletAdjustmentPage() {
       select: { id: true, firstName: true, lastName: true, email: true, walletBalance: true },
       orderBy: { firstName: "asc" },
     }),
+    prisma.walletTransaction.findMany({
+      where:   { description: { startsWith: "Admin" } },
+      orderBy: { createdAt: "desc" },
+      select:  { id: true, userId: true, userRole: true, amount: true, type: true, description: true, balance: true, createdAt: true },
+    }),
   ]);
+
+  // Resolve user names for all unique user IDs in history
+  const repIds = [...new Set(rawTxns.filter((t) => t.userRole === "SALES_REP").map((t) => t.userId))];
+  const drIds  = [...new Set(rawTxns.filter((t) => t.userRole === "PHYSICIAN").map((t) => t.userId))];
+  const [histReps, histDrs] = await Promise.all([
+    repIds.length ? prisma.salesRepresentative.findMany({ where: { id: { in: repIds } }, select: { id: true, firstName: true, lastName: true } }) : [],
+    drIds.length  ? prisma.partneringPhysician.findMany({ where: { id: { in: drIds  } }, select: { id: true, firstName: true, lastName: true } }) : [],
+  ]);
+  const nameMap = new Map<string, string>();
+  histReps.forEach((r) => nameMap.set(r.id, `${r.firstName} ${r.lastName}`));
+  histDrs.forEach((d)  => nameMap.set(d.id, `${d.firstName} ${d.lastName}`));
+
+  function parseAdminTxn(desc: string | null): { adminEmail: string; note: string } {
+    if (!desc) return { adminEmail: "Admin", note: "" };
+    // new format: "Admin [email]: note"
+    const m1 = desc.match(/^Admin \[(.+?)\]: (.+)$/);
+    if (m1) return { adminEmail: m1[1], note: m1[2] };
+    // legacy format: "Admin adjustment: note"
+    const m2 = desc.match(/^Admin adjustment: (.+)$/);
+    if (m2) return { adminEmail: "Admin", note: m2[1] };
+    return { adminEmail: "Admin", note: desc };
+  }
+
+  const historyEntries: AdjustmentEntry[] = rawTxns.map((t) => {
+    const { adminEmail, note } = parseAdminTxn(t.description);
+    return {
+      id:         t.id,
+      userId:     t.userId,
+      userRole:   t.userRole,
+      userName:   nameMap.get(t.userId) ?? "Unknown User",
+      amount:     t.amount,
+      type:       t.type,
+      adminEmail,
+      note,
+      balance:    t.balance,
+      createdAt:  t.createdAt.toISOString(),
+    };
+  });
 
   const totalRepWallet = reps.reduce((s, r) => s + (r.walletBalance ?? 0), 0);
   const totalDrWallet  = physicians.reduce((s, p) => s + (p.walletBalance ?? 0), 0);
@@ -31,7 +75,7 @@ export default async function WalletAdjustmentPage() {
     <div>
       <PageHeader
         title="Commission Adjustment"
-        description="Manually credit or debit sales rep and doctor wallet balances"
+        description="Manually credit or debit Medical Rep and Physician commission balances"
       />
 
       <div className="grid grid-cols-4 gap-5 mb-6">
@@ -50,6 +94,8 @@ export default async function WalletAdjustmentPage() {
       </div>
 
       <AllWalletAdjustmentClient reps={reps} physicians={physicians} />
+
+      <CommissionAdjustmentHistory entries={historyEntries} />
     </div>
   );
 }

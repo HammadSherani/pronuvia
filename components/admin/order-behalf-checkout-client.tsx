@@ -47,17 +47,51 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   const elements = useElements();
   const [elementsReady, setElementsReady] = useState(false);
 
+  // Keep Elements amount in sync without remounting
+  useEffect(() => {
+    if (!elements) return;
+    elements.update({ amount: Math.max(50, Math.round(total * 100)) });
+  }, [elements, total]);
+
   const handlePay = async () => {
     if (!stripe || !elements) return;
     onProcessing(true);
     onError("");
+
+    // Step 1: validate card fields without a network call
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      onError(submitError.message ?? "Please complete your payment details.");
+      onProcessing(false);
+      return;
+    }
+
+    // Step 2: create PaymentIntent server-side
+    let clientSecret: string;
+    try {
+      const res  = await fetch("/api/checkout/admin-behalf-payment-intent", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ amountInCents: Math.max(50, Math.round(total * 100)), physicianId }),
+      });
+      const data = await res.json();
+      if (!data.clientSecret) throw new Error("No client secret returned.");
+      clientSecret = data.clientSecret;
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Could not start payment. Try again.");
+      onProcessing(false);
+      return;
+    }
+
     sessionStorage.setItem("ab_order", JSON.stringify({
       physicianId, itemsJson, billingAddress, shippingAddress,
       notes, shippingRate, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
     }));
 
+    // Step 3: confirm with the real clientSecret
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements,
+      clientSecret,
       redirect: "if_required",
       confirmParams: { return_url: `${window.location.origin}${window.location.pathname}` },
     });
@@ -158,8 +192,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   const [notes,          setNotes]          = useState("");
   const [showNotes,      setShowNotes]      = useState(false);
-  const [clientSecret,   setClientSecret]   = useState("");
-  const [fetchingIntent, setFetchingIntent] = useState(false);
   const [paymentReady,   setPaymentReady]   = useState(false);
   const [stripeError,    setStripeError]    = useState("");
   const [cardProcessing, setCardProcessing] = useState(false);
@@ -175,22 +207,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
   const shippingCost   = selectedShipping?.cost ?? 0;
   const discountAmount = appliedCoupon?.discountAmount ?? 0;
   const total          = parseFloat(Math.max(0, subtotal - discountAmount + shippingCost).toFixed(2));
-
-  useEffect(() => {
-    if (!items.length || total <= 0) return;
-    setClientSecret("");
-    setFetchingIntent(true);
-    fetch("/api/checkout/admin-behalf-payment-intent", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ amountInCents: Math.round(total * 100), physicianId }),
-    })
-      .then((r) => r.json())
-      .then(({ clientSecret: cs }) => setClientSecret(cs ?? ""))
-      .catch(() => toast.error("Could not initialize card payment."))
-      .finally(() => setFetchingIntent(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [total, physicianId]);
 
   const itemsJson = JSON.stringify(items.map((i) => ({
     productId:   i.productId,
@@ -277,14 +293,6 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
 
   return (
     <div className="">
-      {/* Full-page Stripe loading overlay */}
-      {(fetchingIntent || (clientSecret && !paymentReady)) && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
-          <span className="w-10 h-10 border-4 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin mb-4" />
-          <p className="text-sm font-medium text-gray-500">Loading secure checkout…</p>
-        </div>
-      )}
-
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-gray-900 mb-6" />
 
@@ -380,35 +388,48 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
               </div>
               {!stripeReady ? (
                 <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-700">Stripe is not configured.</div>
-              ) : fetchingIntent ? (
-                <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
-                  <span className="w-4 h-4 border-2 border-gray-200 border-t-[#3DBFA4] rounded-full animate-spin" />
-                  Initializing secure payment…
-                </div>
-              ) : clientSecret ? (
-                <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" } } }}>
-                  <StripeInnerForm
-                    ref={stripeRef}
-                    physicianId={physicianId}
-                    itemsJson={itemsJson}
-                    billingAddress={billStr}
-                    shippingAddress={shipStr}
-                    notes={notes}
-                    total={total}
-                    shippingRate={shippingCost}
-                    customerEmail={email || undefined}
-                    customerPhone={shipping.phone || undefined}
-                    couponId={appliedCoupon?.couponId}
-                    couponCode={appliedCoupon?.code}
-                    discountAmount={discountAmount}
-                    onSuccess={handleCardSuccess}
-                    onProcessing={setCardProcessing}
-                    onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
-                    onStripeReady={() => setPaymentReady(true)}
-                  />
-                </Elements>
               ) : (
-                <p className="text-sm text-red-500 py-6 text-center">Could not initialize payment. Please refresh.</p>
+                <div className="relative">
+                  {!paymentReady && (
+                    <div className="absolute inset-0 z-10 bg-white flex flex-col gap-3 py-1 pointer-events-none">
+                      <div className="h-12 rounded bg-gray-100 animate-pulse" />
+                      <div className="flex gap-3">
+                        <div className="h-12 rounded bg-gray-100 animate-pulse flex-1" />
+                        <div className="h-12 rounded bg-gray-100 animate-pulse flex-1" />
+                      </div>
+                      <div className="h-4 rounded bg-gray-100 animate-pulse w-3/5" />
+                    </div>
+                  )}
+                  <Elements
+                    stripe={stripePromise}
+                    options={{
+                      mode:       "payment",
+                      amount:     Math.max(50, Math.round(total * 100)),
+                      currency:   "usd",
+                      appearance: { theme: "stripe", variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" } },
+                    }}
+                  >
+                    <StripeInnerForm
+                      ref={stripeRef}
+                      physicianId={physicianId}
+                      itemsJson={itemsJson}
+                      billingAddress={billStr}
+                      shippingAddress={shipStr}
+                      notes={notes}
+                      total={total}
+                      shippingRate={shippingCost}
+                      customerEmail={email || undefined}
+                      customerPhone={shipping.phone || undefined}
+                      couponId={appliedCoupon?.couponId}
+                      couponCode={appliedCoupon?.code}
+                      discountAmount={discountAmount}
+                      onSuccess={handleCardSuccess}
+                      onProcessing={setCardProcessing}
+                      onError={(msg) => { setStripeError(msg); if (msg) toast.error(msg); }}
+                      onStripeReady={() => setPaymentReady(true)}
+                    />
+                  </Elements>
+                </div>
               )}
               {stripeError && <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">{stripeError}</p>}
             </div>

@@ -152,7 +152,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Rep</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Balance</th>
+            <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Comm. Balance</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
             <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -288,7 +288,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
             </h3>
             <p className="text-sm text-gray-500 mb-6">
               {confirmAction === "APPROVED"
-                ? "Amounts will be deducted from each user's wallet balance."
+                ? "Amounts will be deducted from each user's commission balance."
                 : "All selected requests will be marked as rejected."}
             </p>
             <div className="flex gap-3">

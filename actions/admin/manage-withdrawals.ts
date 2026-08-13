@@ -1,9 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { prisma }         from "@/lib/db/prisma";
-import { requireAdmin }   from "@/lib/auth/dal";
-import { Role }           from "@/generated/prisma/enums";
+import { revalidatePath }                          from "next/cache";
+import { prisma }                                  from "@/lib/db/prisma";
+import { requireAdmin }                            from "@/lib/auth/dal";
+import { Role }                                    from "@/generated/prisma/enums";
+import { sendMail }                                from "@/lib/email/mailer";
+import { commissionPayoutEmail }                   from "@/lib/email/templates";
+import { generateCommissionStatementPdf }          from "@/lib/pdf/commission-statement";
 
 export type WithdrawalActionState = {
   success?: boolean;
@@ -33,7 +36,7 @@ export async function updateWithdrawRequest(
 
   const request = await prisma.withdrawRequest.findUnique({
     where:  { id: requestId },
-    select: { id: true, status: true, amount: true, userId: true, userRole: true },
+    select: { id: true, status: true, amount: true, userId: true, userRole: true, note: true },
   });
 
   if (!request) return { success: false, message: "Request not found." };
@@ -46,12 +49,95 @@ export async function updateWithdrawRequest(
 
   if (action === "APPROVED") {
     await deductWallet(request.userId, request.userRole as Role, request.amount, "Withdrawal approved by admin");
+    // Fire-and-forget — don't let email failure block the approval
+    sendPayoutApprovalEmail(request.userId, request.userRole as Role, request.amount, request.note).catch(
+      (err) => console.error("[payout-email] failed:", err),
+    );
   }
 
   revalidatePath("/admin/withdrawals");
+  revalidatePath("/admin/payout-requests");
   revalidatePath("/sales/wallet");
   revalidatePath("/physician/wallet");
   return { success: true, message: `Request ${action.toLowerCase()} successfully.` };
+}
+
+async function sendPayoutApprovalEmail(
+  userId:   string,
+  userRole: Role,
+  amount:   number,
+  note:     string | null,
+) {
+  const isPhysician = userRole === "PHYSICIAN";
+
+  const [user, orders] = await Promise.all([
+    isPhysician
+      ? prisma.partneringPhysician.findUnique({
+          where:  { id: userId },
+          select: { firstName: true, lastName: true, email: true, bankName: true, bankAccountName: true },
+        })
+      : prisma.salesRepresentative.findUnique({
+          where:  { id: userId },
+          select: { firstName: true, lastName: true, email: true, bankName: true, bankAccountName: true },
+        }),
+    isPhysician
+      ? prisma.order.findMany({
+          where:   { physicianId: userId, commissionPaid: true },
+          select:  { orderNumber: true, createdAt: true, physicianCommissionAmount: true, physicianCommissionRate: true },
+          orderBy: { createdAt: "asc" },
+        })
+      : prisma.order.findMany({
+          where:   { salesRepId: userId, commissionPaid: true },
+          select:  { orderNumber: true, createdAt: true, salesRepCommissionAmount: true, salesRepCommissionRate: true },
+          orderBy: { createdAt: "asc" },
+        }),
+  ]);
+
+  if (!user) return;
+
+  const period = note?.replace(/^Auto withdrawal\s*[–-]\s*/i, "").trim()
+    || new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const pdfOrders = orders.map((o) => ({
+    orderNumber: o.orderNumber,
+    createdAt:   o.createdAt.toISOString(),
+    amount:      isPhysician
+      ? ((o as { physicianCommissionAmount: number | null }).physicianCommissionAmount ?? 0)
+      : ((o as { salesRepCommissionAmount:  number | null }).salesRepCommissionAmount  ?? 0),
+    rate: isPhysician
+      ? ((o as { physicianCommissionRate: number | null }).physicianCommissionRate ?? 0)
+      : ((o as { salesRepCommissionRate:  number | null }).salesRepCommissionRate  ?? 0),
+  }));
+
+  const [pdfBuffer, { subject, html }] = await Promise.all([
+    generateCommissionStatementPdf({
+      recipientName:    `${user.firstName} ${user.lastName}`,
+      role:             isPhysician ? "Partnering Physician" : "Medical Representative",
+      period,
+      orders:           pdfOrders,
+      totalAmount:      amount,
+      bankName:         user.bankName,
+      bankAccountName:  user.bankAccountName ?? null,
+    }),
+    Promise.resolve(commissionPayoutEmail({
+      firstName:  user.firstName,
+      amount,
+      period,
+      orderCount: orders.length,
+    })),
+  ]);
+
+  const safePeriod = period.replace(/[^a-zA-Z0-9]+/g, "-");
+  await sendMail({
+    to:          user.email,
+    subject,
+    html,
+    attachments: [{
+      filename: `commission-statement-${safePeriod}.pdf`,
+      content:  pdfBuffer,
+      type:     "application/pdf",
+    }],
+  });
 }
 
 export async function deleteWithdrawRequest(

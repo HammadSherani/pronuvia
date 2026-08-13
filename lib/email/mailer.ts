@@ -14,13 +14,15 @@ function parseFromAddress(raw: string): { email: string; name?: string } {
   return { email: raw.trim() };
 }
 
+export type MailAttachment = { filename: string; path?: string; content?: Buffer; type?: string };
+
 export async function sendMail(opts: {
   to:           string;
   cc?:          string | string[];
   bcc?:         string | string[];
   subject:      string;
   html:         string;
-  attachments?: { filename: string; path: string }[];
+  attachments?: MailAttachment[];
 }) {
   const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "sales1.pronuvia@gmail.com";
 
@@ -48,13 +50,24 @@ export async function sendMail(opts: {
     const html    = opts.html.replace(/cid:pronuvia-logo/g, logoUrl);
 
     try {
+      // Convert Buffer attachments to base64 for SendGrid
+      const sgAttachments = (opts.attachments ?? [])
+        .filter((a) => a.content !== undefined)
+        .map((a) => ({
+          filename:    a.filename,
+          content:     a.content!.toString("base64"),
+          type:        a.type ?? "application/octet-stream",
+          disposition: "attachment" as const,
+        }));
+
       const [res] = await sgMail.send({
         to:      opts.to,
         from,
         subject: opts.subject,
         html,
-        ...(ccUnique.length  ? { cc:  ccUnique  } : {}),
-        ...(bccUnique.length ? { bcc: bccUnique } : {}),
+        ...(ccUnique.length       ? { cc:          ccUnique       } : {}),
+        ...(bccUnique.length      ? { bcc:         bccUnique      } : {}),
+        ...(sgAttachments.length  ? { attachments: sgAttachments  } : {}),
       });
       console.log("[mailer/sendgrid] sent to", opts.to, "| subject:", opts.subject, "| status:", res.statusCode);
       return res;

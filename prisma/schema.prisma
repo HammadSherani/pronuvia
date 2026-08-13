@@ -123,6 +123,7 @@ model PartneringPhysician {
   firstName           String
   lastName            String
   email               String         @unique
+  loginId             String?        @unique
   password            String
   aictherapy          String?
   license             String?

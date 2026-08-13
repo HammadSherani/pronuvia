@@ -109,7 +109,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
-                      Adjust Wallet
+                      Adjust Commission
                     </button>
                   </td>
                 </tr>
@@ -213,7 +213,7 @@ export function PhysicianWalletAdjustmentClient({ physicians }: { physicians: Ph
                 }`}>
                 {isPending
                   ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : type === "CREDIT" ? "Add to Wallet" : "Deduct from Wallet"}
+                  : type === "CREDIT" ? "Add Commission" : "Deduct Commission"}
               </button>
             </div>
           </div>

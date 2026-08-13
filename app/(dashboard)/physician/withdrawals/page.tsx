@@ -6,7 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
-export const metadata = { title: "Commission Payout – Pronuvia" };
+export const metadata = { title: "Payout History – Pronuvia" };
 
 const statusStyle: Record<string, string> = {
   PENDING:  "bg-amber-50 text-amber-700 border-amber-200",
@@ -18,7 +18,7 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-export default async function PhysicianWithdrawalsPage({
+export default async function PhysicianPayoutHistoryPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -29,7 +29,7 @@ export default async function PhysicianWithdrawalsPage({
 
   const where = { userId: session.userId, userRole: Role.PHYSICIAN };
 
-  const [physician, [requests, total]] = await Promise.all([
+  const [physician, [requests, total], totalPaid] = await Promise.all([
     prisma.partneringPhysician.findUnique({
       where:  { id: session.userId },
       select: { walletBalance: true, bankName: true },
@@ -38,20 +38,21 @@ export default async function PhysicianWithdrawalsPage({
       prisma.withdrawRequest.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
       prisma.withdrawRequest.count({ where }),
     ]),
+    prisma.withdrawRequest.aggregate({
+      where: { ...where, status: "APPROVED" },
+      _sum: { amount: true },
+    }).then((r) => r._sum.amount ?? 0),
   ]);
 
   const balance    = physician?.walletBalance ?? 0;
   const hasPending = requests.some((r) => r.status === "PENDING");
-  const totalPaid  = await prisma.withdrawRequest.aggregate({
-    where: { ...where, status: "APPROVED" },
-    _sum: { amount: true },
-  }).then(r => r._sum.amount ?? 0);
+  const bankName   = physician?.bankName;
 
   return (
-    <div className=" space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Commission Payout</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Your commission payout history and status ({total} total)</p>
+        <h1 className="text-xl font-bold text-gray-900">Payout History</h1>
+        <p className="text-sm text-gray-400 mt-0.5">Your commission payout history ({total} total)</p>
       </div>
 
       {/* Stats */}
@@ -69,7 +70,7 @@ export default async function PhysicianWithdrawalsPage({
         ))}
       </div>
 
-      {!physician?.bankName && (
+      {!bankName && (
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
           <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.834-2.194-.834-2.964 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -88,9 +89,7 @@ export default async function PhysicianWithdrawalsPage({
       {hasPending && (
         <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3.5">
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
-          <p className="text-sm font-medium text-blue-700">
-            You have a payout in progress.
-          </p>
+          <p className="text-sm font-medium text-blue-700">You have a payout in progress.</p>
         </div>
       )}
 
@@ -108,13 +107,22 @@ export default async function PhysicianWithdrawalsPage({
           </div>
         ) : (
           <>
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                <col className="w-[14%]" />
+                <col className="w-[13%]" />
+                <col className="w-[16%]" />
+                <col className="w-[28%]" />
+                <col className="w-[15%]" />
+                <col className="w-[14%]" />
+              </colgroup>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Reply</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Paid Amount</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payout Method</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payout Comments</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statement</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
@@ -124,20 +132,34 @@ export default async function PhysicianWithdrawalsPage({
                     <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
                       {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
-                    <td className="px-5 py-4 font-bold text-gray-800">{fmt(r.amount)}</td>
-                    <td className="px-5 py-4 text-xs text-gray-500 italic max-w-[200px]">
-                      {r.note ?? <span className="text-gray-300 not-italic">—</span>}
+                    <td className="px-5 py-4">
+                      <span className={`font-bold text-sm ${r.status === "APPROVED" ? "text-emerald-600" : "text-gray-700"}`}>
+                        {fmt(r.amount)}
+                      </span>
                     </td>
-                    <td className="px-5 py-4 max-w-[220px]">
+                    <td className="px-5 py-4 text-xs text-gray-600 truncate">
+                      {bankName ?? <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-5 py-4 max-w-0">
                       {r.adminNote ? (
-                        <div>
-                          <span className="inline-block text-[9px] font-bold uppercase tracking-wide text-[#3DBFA4] bg-gray-900/10 border border-gray-900/30 px-1.5 py-0.5 rounded mb-0.5">
-                            Admin
-                          </span>
-                          <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
-                            {r.adminNote}
-                          </p>
-                        </div>
+                        <p className="text-xs text-gray-700 line-clamp-2 leading-snug" title={r.adminNote}>
+                          {r.adminNote}
+                        </p>
+                      ) : (
+                        <span className="text-gray-300 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      {r.status === "APPROVED" ? (
+                        <a
+                          href={`/api/physician/commission-statement/${r.id}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b3b6f] hover:text-[#3DBFA4] transition-colors group"
+                        >
+                          <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Download
+                        </a>
                       ) : (
                         <span className="text-gray-300 text-xs">—</span>
                       )}

@@ -13,7 +13,7 @@ export async function adjustWallet(data: {
   amount:   number;
   note:     string;
 }): Promise<{ success: boolean; message: string }> {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const { userId, userRole, type, amount, note } = data;
 
@@ -37,7 +37,7 @@ export async function adjustWallet(data: {
   }
 
   await prisma.walletTransaction.create({
-    data: { userId, userRole, amount, type, description: `Admin adjustment: ${note.trim()}`, balance: newBalance },
+    data: { userId, userRole, amount, type, description: `Admin [${session.email}]: ${note.trim()}`, balance: newBalance },
   });
 
   await syncPendingAutoWithdraw(userId, userRole as Role, newBalance);

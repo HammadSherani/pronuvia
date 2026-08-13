@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getSalesRepById, updateSalesRep } from "@/actions/admin/manage-sales-reps";
+import { adminSetPassword, adminSendResetLink } from "@/actions/admin/reset-password";
 import { SalesRepForm } from "@/components/admin/sales-rep-form";
+import { AdminPasswordReset } from "@/components/admin/admin-password-reset";
 
 export const metadata = { title: "Edit Medical Rep – Pronuvia Admin" };
 
@@ -15,7 +17,9 @@ export default async function EditSalesRepPage({ params }: Props) {
   const rep = await getSalesRepById(id);
   if (!rep) notFound();
 
-  const boundUpdate = updateSalesRep.bind(null, id);
+  const boundUpdate    = updateSalesRep.bind(null, id);
+  const boundSetPw     = adminSetPassword.bind(null, id, "SALES_REP");
+  const boundSendReset = adminSendResetLink.bind(null, id, "SALES_REP");
 
   return (
     <div className="max-w-3xl">
@@ -27,6 +31,11 @@ export default async function EditSalesRepPage({ params }: Props) {
         Back to Medical Representatives
       </Link>
       <h1 className="text-xl font-bold text-gray-800 mb-6">Edit Medical Representative</h1>
+
+      <AdminPasswordReset
+        setPasswordAction={boundSetPw}
+        sendResetLinkAction={boundSendReset}
+      />
 
       <SalesRepForm
         action={boundUpdate}
