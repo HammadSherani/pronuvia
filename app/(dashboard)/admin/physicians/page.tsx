@@ -11,7 +11,7 @@ export default async function PhysiciansPage() {
     prisma.partneringPhysician.findMany({
       select: {
         id: true, isApproved: true,
-        firstName: true, lastName: true, email: true,
+        firstName: true, lastName: true, email: true, loginId: true,
         nameOfPractice: true, phone: true, officeContactNumber: true, fax: true,
         addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
         license: true, aictherapy: true, websiteLink: true,

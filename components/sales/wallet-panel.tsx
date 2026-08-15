@@ -34,13 +34,12 @@ export function WalletPanel({
     <>
       <div className="grid grid-cols-4 gap-5 mb-8">
 
-        {/* ── Wallet balance ── hero card */}
+        {/* Balance card */}
         <div className="col-span-1 relative overflow-hidden bg-gradient-to-br from-[#3DBFA4] to-[#2a9f89] rounded-2xl p-6 text-white shadow-md">
-          {/* decorative ring */}
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full border-[16px] border-white/10 pointer-events-none" />
           <div className="absolute -bottom-8 -left-4 w-24 h-24 rounded-full border-[12px] border-white/8 pointer-events-none" />
 
-          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Available Balance</p>
+          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Commission Balance</p>
           <p className="text-3xl font-black tabular-nums leading-none mt-1">{fmt(balance)}</p>
           {hasPending && (
             <p className="text-[10px] text-amber-200 mt-2 flex items-center gap-1">
@@ -61,7 +60,7 @@ export function WalletPanel({
           </button>
         </div>
 
-        {/* ── Total Earned ── */}
+        {/* Paid Commissions */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Earned</p>
@@ -72,20 +71,18 @@ export function WalletPanel({
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPaid)}</p>
-            <p className="text-xs text-gray-400 mt-1">Credited from orders</p>
+            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(balance + totalWithdrawn)}</p>
+            <p className="text-xs text-gray-400 mt-1">Current + paid out</p>
             {totalPending > 0 && (
-              <p className="text-xs text-amber-500 mt-1 font-medium">
-                + {fmt(totalPending)} pending
-              </p>
+              <p className="text-xs text-amber-500 mt-1 font-medium">+ {fmt(totalPending)} pending</p>
             )}
           </div>
         </div>
 
-        {/* ── Total Withdrawn ── */}
+        {/* Withdrawn */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Paid Out</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Paid-out</p>
             <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -98,7 +95,7 @@ export function WalletPanel({
           </div>
         </div>
 
-        {/* ── Commission Orders ── */}
+        {/* Commission orders */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Orders</p>

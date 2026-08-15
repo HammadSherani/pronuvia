@@ -6,6 +6,8 @@ import { verifyPassword } from "@/lib/auth/password";
 import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { LoginSchema } from "@/lib/validations/auth";
+import { findPhysicianByLoginIdentifier } from "@/lib/auth/physician-lookup";
+import { isEmail } from "@/lib/validations/login-id";
 import { Role } from "@/generated/prisma/enums";
 
 // redirect() / notFound() throw objects with a `digest` field — must be re-thrown
@@ -44,26 +46,27 @@ export async function login(
   const { email, password } = validated.data;
 
   try {
-    // Check admin
-    const admin = await prisma.admin.findUnique({ where: { email } });
-    if (admin) {
-      const valid = await verifyPassword(password, admin.password);
-      if (!valid) return { message: "Invalid email or password." };
-      await createSession(admin.id, Role.ADMIN, admin.email);
-      redirect(DASHBOARD_ROUTES[Role.ADMIN]);
+    // Admin and sales rep sign in with email only
+    if (isEmail(email)) {
+      const admin = await prisma.admin.findUnique({ where: { email } });
+      if (admin) {
+        const valid = await verifyPassword(password, admin.password);
+        if (!valid) return { message: "Invalid email or password." };
+        await createSession(admin.id, Role.ADMIN, admin.email);
+        redirect(DASHBOARD_ROUTES[Role.ADMIN]);
+      }
+
+      const salesRep = await prisma.salesRepresentative.findUnique({ where: { email } });
+      if (salesRep) {
+        const valid = await verifyPassword(password, salesRep.password);
+        if (!valid) return { message: "Invalid email or password." };
+        await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
+        redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
+      }
     }
 
-    // Check sales rep
-    const salesRep = await prisma.salesRepresentative.findUnique({ where: { email } });
-    if (salesRep) {
-      const valid = await verifyPassword(password, salesRep.password);
-      if (!valid) return { message: "Invalid email or password." };
-      await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
-      redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
-    }
-
-    // Check physician
-    const physician = await prisma.partneringPhysician.findUnique({ where: { email } });
+    // Physicians can sign in with email or Login ID
+    const physician = await findPhysicianByLoginIdentifier(email);
     if (physician) {
       if (physician.isApproved !== "APPROVED") {
         return {

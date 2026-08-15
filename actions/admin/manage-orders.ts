@@ -8,7 +8,7 @@ import { z } from "zod";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
 import { orderRefundEmail } from "@/lib/email/templates";
-import { syncPendingAutoWithdraw } from "@/lib/withdrawals/sync";
+import { syncPendingPayoutRequest } from "@/lib/withdrawals/sync";
 
 export type OrderActionState = {
   errors?: Record<string, string[]>;
@@ -264,7 +264,7 @@ export async function updateOrderStatus(
           balance:     newBalance,
         },
       });
-      await syncPendingAutoWithdraw(order.salesRepId, "SALES_REP", newBalance);
+      await syncPendingPayoutRequest(order.salesRepId, "SALES_REP", newBalance);
     }
 
     // Credit physician commission
@@ -291,7 +291,7 @@ export async function updateOrderStatus(
           balance:     newBalance,
         },
       });
-      await syncPendingAutoWithdraw(order.physicianId, "PHYSICIAN", newBalance);
+      await syncPendingPayoutRequest(order.physicianId, "PHYSICIAN", newBalance);
     }
   }
 
@@ -466,10 +466,10 @@ export async function bulkCompleteOrders(orderIds: string[]): Promise<OrderActio
   // Sync pending auto-withdraw amounts now that balances have changed
   await Promise.all([
     ...Array.from(repCreditMap.entries()).map(([repId, credit]) =>
-      syncPendingAutoWithdraw(repId, "SALES_REP", parseFloat(((repBalances.get(repId) ?? 0) + credit).toFixed(2)))
+      syncPendingPayoutRequest(repId, "SALES_REP", parseFloat(((repBalances.get(repId) ?? 0) + credit).toFixed(2)))
     ),
     ...Array.from(drCreditMap.entries()).map(([drId, credit]) =>
-      syncPendingAutoWithdraw(drId, "PHYSICIAN", parseFloat(((drBalances.get(drId) ?? 0) + credit).toFixed(2)))
+      syncPendingPayoutRequest(drId, "PHYSICIAN", parseFloat(((drBalances.get(drId) ?? 0) + credit).toFixed(2)))
     ),
   ]);
 
@@ -850,7 +850,7 @@ export async function processReturn(
           balance:     newBalance,
         },
       });
-      await syncPendingAutoWithdraw(order.salesRepId, "SALES_REP", newBalance);
+      await syncPendingPayoutRequest(order.salesRepId, "SALES_REP", newBalance);
     }
 
     if (order.physicianId && physicianClawback > 0) {
@@ -871,7 +871,7 @@ export async function processReturn(
           balance:     newBalance,
         },
       });
-      await syncPendingAutoWithdraw(order.physicianId, "PHYSICIAN", newBalance);
+      await syncPendingPayoutRequest(order.physicianId, "PHYSICIAN", newBalance);
     }
   }
 

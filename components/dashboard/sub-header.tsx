@@ -32,20 +32,17 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Shop",      href: "/sales/shop" },
       { label: "Orders",    href: "/sales/orders" },
       { label: "Commission",    href: "/sales/wallet" },
-      // { label: "Downloads", href: "/sales/downloads" },
-      // { label: "Account",    href: "/sales/account" },
-      { label: "Commission Payout", href: "/sales/withdrawals" },
-      // { label: "Log out",   action: async () => { await logout(); } },
+      { label: "Payout History", href: "/sales/withdrawals" },
     ];
   }
 
   // PHYSICIAN
   return [
-    { label: "Dashboard",   href: "/physician/dashboard" },
-    { label: "Shop",        href: "/physician/shop" },
-    { label: "Orders",      href: "/physician/orders" },
-    { label: "Commission",    href: "/physician/wallet" },
-    { label: "Payout History", href: "/physician/withdrawals" },
+    { label: "Dashboard",        href: "/physician/dashboard" },
+    { label: "Shop",             href: "/physician/shop" },
+    { label: "Orders",           href: "/physician/orders" },
+    { label: "Commission",       href: "/physician/wallet" },
+    { label: "Payout History",   href: "/physician/withdrawals" },
   ];
 }
 

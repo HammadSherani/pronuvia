@@ -169,6 +169,7 @@ export function physicianApprovalEmail(opts: {
   firstName: string;
   lastName:  string;
   email:     string;
+  loginId:   string;
   resetToken: string;
 }) {
   const resetLink = `${getAppUrl()}/reset-password/${opts.resetToken}`;
@@ -202,7 +203,7 @@ export function physicianApprovalEmail(opts: {
     ${infoBox(`
       <table cellpadding="0" cellspacing="0" style="width:100%;">
         ${row("Website:", "www.pronuvia.com")}
-        ${row("Username (Login ID):", opts.email)}
+        ${row("Username (Login ID):", opts.loginId)}
         ${row("Email:", opts.email)}
         ${row("Password:", "Click &ldquo;Forgot Your Password?&rdquo; to set your password")}
       </table>

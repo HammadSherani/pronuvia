@@ -10,7 +10,7 @@ export default async function PhysicianAccountPage() {
   const physician = await prisma.partneringPhysician.findUnique({
     where: { id: session.userId },
     select: {
-      firstName: true, lastName: true, email: true,
+      firstName: true, lastName: true, email: true, loginId: true,
       phone: true, officeContactNumber: true, fax: true,
       nameOfPractice: true, license: true, yearsInPractice: true,
       aictherapy: true, websiteLink: true, fieldsOfSpeciality: true,

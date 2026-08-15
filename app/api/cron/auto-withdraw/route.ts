@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   const repIds = salesReps.map((r) => r.id);
   const docIds = physicians.map((d) => d.id);
 
-  // Find any that already have a PENDING withdrawal — store IDs so we can update amounts
+  // Find any that already have a PENDING withdrawal and collapse duplicate stale requests to the newest one.
   const pendingRequests = await prisma.withdrawRequest.findMany({
     where: {
       status: "PENDING",
@@ -42,11 +42,26 @@ export async function GET(req: NextRequest) {
         { userRole: "PHYSICIAN", userId: { in: docIds } },
       ],
     },
-    select: { id: true, userId: true, userRole: true },
+    select: { id: true, userId: true, userRole: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
   });
 
-  // "ROLE:userId" → existing request id
-  const pendingMap = new Map(pendingRequests.map((r) => [`${r.userRole}:${r.userId}`, r.id]));
+  const pendingByUser = new Map<string, { id: string; userId: string; userRole: "SALES_REP" | "PHYSICIAN"; createdAt: Date }[]>();
+  for (const request of pendingRequests) {
+    const key = `${request.userRole}:${request.userId}`;
+    const bucket = pendingByUser.get(key) ?? [];
+    bucket.push(request as { id: string; userId: string; userRole: "SALES_REP" | "PHYSICIAN"; createdAt: Date });
+    pendingByUser.set(key, bucket);
+  }
+
+  const stalePendingIds = new Set<string>();
+  const pendingMap = new Map<string, string>();
+  for (const [key, items] of pendingByUser.entries()) {
+    const newest = items[0];
+    if (!newest) continue;
+    pendingMap.set(key, newest.id);
+    for (const item of items.slice(1)) stalePendingIds.add(item.id);
+  }
 
   const toCreate: {
     userId:   string;
@@ -56,8 +71,13 @@ export async function GET(req: NextRequest) {
   }[] = [];
   const updateOps: Promise<unknown>[] = [];
 
+  if (stalePendingIds.size > 0) {
+    updateOps.push(prisma.withdrawRequest.deleteMany({ where: { id: { in: [...stalePendingIds] } } }));
+  }
+
   for (const rep of salesReps) {
-    const existingId = pendingMap.get(`SALES_REP:${rep.id}`);
+    const key = `SALES_REP:${rep.id}`;
+    const existingId = pendingMap.get(key);
     if (existingId) {
       console.log(`[auto-withdraw] UPDATE sales rep ${rep.id} – balance $${rep.walletBalance.toFixed(2)}`);
       updateOps.push(
@@ -70,7 +90,8 @@ export async function GET(req: NextRequest) {
   }
 
   for (const doc of physicians) {
-    const existingId = pendingMap.get(`PHYSICIAN:${doc.id}`);
+    const key = `PHYSICIAN:${doc.id}`;
+    const existingId = pendingMap.get(key);
     if (existingId) {
       console.log(`[auto-withdraw] UPDATE physician ${doc.id} – balance $${doc.walletBalance.toFixed(2)}`);
       updateOps.push(

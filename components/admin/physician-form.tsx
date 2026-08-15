@@ -19,7 +19,7 @@ interface PhysicianFormProps {
   requirePracticeFields?: boolean;
   salesReps?: SalesRepOption[];
   defaults?: {
-    firstName?: string; lastName?: string; email?: string; phone?: string;
+    firstName?: string; lastName?: string; email?: string; loginId?: string; phone?: string;
     officeContactNumber?: string; fax?: string;
     aictherapy?: string; license?: string; websiteLink?: string;
     addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string; country?: string;
@@ -173,16 +173,24 @@ export function PhysicianForm({
             <FE msg={e.email?.[0]} />
           </div>
           <div>
+            <label className={lbl}>Login ID / Username<Req /></label>
+            <input name="loginId" type="text" autoComplete="username" className={icls(e.loginId?.[0])} placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId ?? defaults?.loginId} />
+            <FE msg={e.loginId?.[0]} />
+            <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–30 characters, letters, numbers, . _ -)</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
             <label className={lbl}>Phone<Req /></label>
             <input name="phone" className={icls(e.phone?.[0])} placeholder="+1 555 000 0000" defaultValue={state?.values?.phone ?? defaults?.phone} />
             <FE msg={e.phone?.[0]} />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Office Contact Number</label>
             <input name="officeContactNumber" className={icls()} placeholder="+1 555 000 0001" defaultValue={state?.values?.officeContactNumber ?? defaults?.officeContactNumber} />
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Fax <span className="font-normal text-gray-400">(Optional)</span></label>
             <input name="fax" className={icls()} placeholder="+1 555 000 0002" defaultValue={state?.values?.fax ?? defaults?.fax} />

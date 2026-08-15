@@ -22,10 +22,10 @@ const STATUS_DOT: Record<string, string> = {
 export default async function PhysicianDashboardPage() {
   const session = await requirePhysician();
 
-  const [physician, orderAggregate, recentOrders, pendingWithdrawals] = await Promise.all([
+  const [physician, orderAggregate, recentOrders, totalPaidOut] = await Promise.all([
     prisma.partneringPhysician.findUnique({
       where: { id: session.userId },
-      select: { firstName: true, lastName: true, walletBalance: true },
+      select: { firstName: true, lastName: true, email: true, loginId: true, walletBalance: true },
     }),
     prisma.order.aggregate({
       where: { physicianId: session.userId },
@@ -38,25 +38,41 @@ export default async function PhysicianDashboardPage() {
       take: 5,
       select: { id: true, orderNumber: true, total: true, status: true, createdAt: true },
     }),
-    prisma.withdrawRequest.count({
-      where: { userId: session.userId, userRole: "PHYSICIAN", status: "PENDING" },
-    }),
+    prisma.withdrawRequest.aggregate({
+      where: { userId: session.userId, userRole: "PHYSICIAN", status: "APPROVED" },
+      _sum: { amount: true },
+    }).then((r) => r._sum.amount ?? 0),
   ]);
 
-  const totalOrders      = orderAggregate._count;
-  const totalCommission  = orderAggregate._sum.physicianCommissionAmount ?? 0;
   const walletBalance    = physician?.walletBalance ?? 0;
-  const kpiCards = [
+  const totalOrders      = orderAggregate._count;
+  const totalCommission  = walletBalance + totalPaidOut;
+  const loginId          = physician?.loginId ?? "Not set";
+  const emailAddress     = physician?.email ?? session.email ?? "No email";
+  const summaryCards = [
     {
-      label: "My Orders",
-      value: totalOrders.toString(),
-      sub: "Total placed",
-      href: "/physician/orders",
+      label: "Login ID",
+      value: loginId,
+      sub: "Account username",
+      href: "/physician/account",
+      color: "#1f2937",
+      bg: "#f3f4f6",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-8 9a4 4 0 014-4h4a4 4 0 014 4v1H8v-1z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Email Address",
+      value: emailAddress,
+      sub: "Registered email",
+      href: "/physician/account",
       color: "#3DBFA4",
       bg: "#edfaf6",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.5A2.5 2.5 0 015.5 6h13A2.5 2.5 0 0121 8.5v7A2.5 2.5 0 0118.5 18h-13A2.5 2.5 0 013 15.5v-7zm0 0l9 6 9-6" />
         </svg>
       ),
     },
@@ -74,7 +90,62 @@ export default async function PhysicianDashboardPage() {
       ),
     },
     {
-      label: "Wallet Balance",
+      label: "Commission Balance",
+      value: fmtMoney(walletBalance),
+      sub: "Current unpaid",
+      href: "/physician/wallet",
+      color: "#10b981",
+      bg: "#ecfdf5",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Commission Paid-out",
+      value: fmtMoney(totalPaidOut),
+      sub: "Historical payouts",
+      href: "/physician/withdrawals",
+      color: "#8b5cf6",
+      bg: "#f5f3ff",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+  ];
+
+  const kpiCards = [
+    {
+      label: "My Orders",
+      value: totalOrders.toString(),
+      sub: "Total placed",
+      href: "/physician/orders",
+      color: "#3DBFA4",
+      bg: "#edfaf6",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Commission Earned",
+      value: fmtMoney(totalCommission),
+      sub: "Current + paid out",
+      href: "/physician/wallet",
+      color: "#5BB8D4",
+      bg: "#edf6fb",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Commission Balance",
       value: fmtMoney(walletBalance),
       sub: "Available",
       href: "/physician/wallet",
@@ -87,12 +158,12 @@ export default async function PhysicianDashboardPage() {
       ),
     },
     {
-      label: "Pending Withdrawals",
-      value: pendingWithdrawals.toString(),
-      sub: pendingWithdrawals > 0 ? "Under review" : "None pending",
-      href: "/physician/wallet",
-      color: pendingWithdrawals > 0 ? "#d97706" : "#6b7280",
-      bg:    pendingWithdrawals > 0 ? "#fffbeb" : "#f3f4f6",
+      label: "Commission Paid-out",
+      value: fmtMoney(totalPaidOut),
+      sub: "Approved payouts",
+      href: "/physician/withdrawals",
+      color: "#8b5cf6",
+      bg: "#f5f3ff",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -131,6 +202,29 @@ export default async function PhysicianDashboardPage() {
               </svg>
               <span className="text-xs font-medium text-gray-600">{today}</span>
             </div>
+          </div>
+
+          {/* Top summary cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+            {summaryCards.map((card) => (
+              <Link
+                key={card.label}
+                href={card.href}
+                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 flex flex-col gap-3"
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: card.bg }}
+                >
+                  <div style={{ color: card.color }}>{card.icon}</div>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-800 tracking-tight break-words">{card.value}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
+                </div>
+              </Link>
+            ))}
           </div>
 
           {/* KPI cards */}

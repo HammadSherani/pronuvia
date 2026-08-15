@@ -10,6 +10,7 @@ import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail }                                              from "@/lib/email/mailer";
 import { doctorRegistrationEmail, salesRepDoctorSignupEmail }   from "@/lib/email/templates";
+import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
 
 export type AddPhysicianState = {
   errors?:  Record<string, string[]>;
@@ -28,6 +29,7 @@ export async function salesRepAddPhysician(
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
+    loginId: formData.get("loginId") as string,
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -80,6 +82,10 @@ export async function salesRepAddPhysician(
   });
   if (exists) {
     return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
+  }
+
+  if (await isLoginIdTaken(validated.data.loginId)) {
+    return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
   }
 
   if (validated.data.license) {
@@ -158,6 +164,7 @@ export async function listMyPhysicians(filters?: { approvalStatus?: ApprovalStat
       firstName: true,
       lastName: true,
       email: true,
+      loginId: true,
       nameOfPractice: true,
       phone: true,
       commission: true,

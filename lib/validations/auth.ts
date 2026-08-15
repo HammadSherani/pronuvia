@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isEmail, LOGIN_ID_REGEX } from "@/lib/validations/login-id";
 
 export const AdminRegisterSchema = z.object({
   email: z.string().email("Invalid email address").trim().toLowerCase(),
@@ -12,8 +13,26 @@ export const AdminRegisterSchema = z.object({
 });
 
 export const LoginSchema = z.object({
-  email: z.string().email("Invalid email address").trim().toLowerCase(),
+  email: z
+    .string()
+    .min(1, "Email or Login ID is required")
+    .trim()
+    .toLowerCase()
+    .refine((val) => isEmail(val) || LOGIN_ID_REGEX.test(val), {
+      message: "Enter a valid email address or Login ID",
+    }),
   password: z.string().min(1, "Password is required"),
+});
+
+export const ForgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email or Login ID is required")
+    .trim()
+    .toLowerCase()
+    .refine((val) => isEmail(val) || LOGIN_ID_REGEX.test(val), {
+      message: "Enter a valid email address or Login ID",
+    }),
 });
 
 export type AdminRegisterInput = z.infer<typeof AdminRegisterSchema>;

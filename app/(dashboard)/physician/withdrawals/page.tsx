@@ -1,18 +1,12 @@
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role, WithdrawStatus } from "@/generated/prisma/enums";
 import Link from "next/link";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
 export const metadata = { title: "Payout History – Pronuvia" };
-
-const statusStyle: Record<string, string> = {
-  PENDING:  "bg-amber-50 text-amber-700 border-amber-200",
-  APPROVED: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  REJECTED: "bg-red-50 text-red-700 border-red-200",
-};
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -27,9 +21,10 @@ export default async function PhysicianPayoutHistoryPage({
   const sp = await searchParams;
   const { page, pageSize, skip, take } = parsePagination(sp);
 
-  const where = { userId: session.userId, userRole: Role.PHYSICIAN };
+  // Only fetch APPROVED payouts
+  const where = { userId: session.userId, userRole: Role.PHYSICIAN, status: WithdrawStatus.APPROVED };
 
-  const [physician, [requests, total], totalPaid] = await Promise.all([
+  const [physician, [requests, total]] = await Promise.all([
     prisma.partneringPhysician.findUnique({
       where:  { id: session.userId },
       select: { walletBalance: true, bankName: true },
@@ -38,15 +33,11 @@ export default async function PhysicianPayoutHistoryPage({
       prisma.withdrawRequest.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
       prisma.withdrawRequest.count({ where }),
     ]),
-    prisma.withdrawRequest.aggregate({
-      where: { ...where, status: "APPROVED" },
-      _sum: { amount: true },
-    }).then((r) => r._sum.amount ?? 0),
   ]);
 
-  const balance    = physician?.walletBalance ?? 0;
-  const hasPending = requests.some((r) => r.status === "PENDING");
-  const bankName   = physician?.bankName;
+  const balance  = physician?.walletBalance ?? 0;
+  const bankName = physician?.bankName;
+  const totalPaidOut = requests.reduce((sum, r) => sum + r.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -58,9 +49,9 @@ export default async function PhysicianPayoutHistoryPage({
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Commission Balance", value: fmt(balance),   color: "#3DBFA4" },
-          { label: "Total Paid Out",     value: fmt(totalPaid), color: "#5BB8D4" },
-          { label: "Total Payouts",      value: String(total),  color: "#8b5cf6" },
+          { label: "Commission Balance", value: fmt(balance),       color: "#3DBFA4" },
+          { label: "Total Paid Out",     value: fmt(totalPaidOut),  color: "#5BB8D4" },
+          { label: "Total Payouts",      value: String(total),      color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />
@@ -86,13 +77,6 @@ export default async function PhysicianPayoutHistoryPage({
         </div>
       )}
 
-      {hasPending && (
-        <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3.5">
-          <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
-          <p className="text-sm font-medium text-blue-700">You have a payout in progress.</p>
-        </div>
-      )}
-
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {total === 0 ? (
@@ -103,18 +87,17 @@ export default async function PhysicianPayoutHistoryPage({
               </svg>
             </div>
             <p className="text-sm font-medium text-gray-500">No payouts yet</p>
-            <p className="text-xs text-gray-400 mt-1">Your payout history will appear here.</p>
+            <p className="text-xs text-gray-400 mt-1">Your payout history will appear here once approved.</p>
           </div>
         ) : (
           <>
             <table className="w-full text-sm table-fixed">
               <colgroup>
                 <col className="w-[14%]" />
-                <col className="w-[13%]" />
-                <col className="w-[16%]" />
-                <col className="w-[28%]" />
                 <col className="w-[15%]" />
-                <col className="w-[14%]" />
+                <col className="w-[16%]" />
+                <col className="w-[34%]" />
+                <col className="w-[21%]" />
               </colgroup>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -123,7 +106,6 @@ export default async function PhysicianPayoutHistoryPage({
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payout Method</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payout Comments</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statement</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -133,7 +115,7 @@ export default async function PhysicianPayoutHistoryPage({
                       {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`font-bold text-sm ${r.status === "APPROVED" ? "text-emerald-600" : "text-gray-700"}`}>
+                      <span className="font-bold text-sm text-emerald-600">
                         {fmt(r.amount)}
                       </span>
                     </td>
@@ -150,24 +132,15 @@ export default async function PhysicianPayoutHistoryPage({
                       )}
                     </td>
                     <td className="px-5 py-4">
-                      {r.status === "APPROVED" ? (
-                        <a
-                          href={`/api/physician/commission-statement/${r.id}`}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b3b6f] hover:text-[#3DBFA4] transition-colors group"
-                        >
-                          <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          Download
-                        </a>
-                      ) : (
-                        <span className="text-gray-300 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex px-2.5 py-1 border rounded-full text-xs font-semibold ${statusStyle[r.status] ?? statusStyle.PENDING}`}>
-                        {r.status.charAt(0) + r.status.slice(1).toLowerCase()}
-                      </span>
+                      <a
+                        href={`/api/physician/commission-statement/${r.id}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b3b6f] hover:text-[#3DBFA4] transition-colors group"
+                      >
+                        <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download
+                      </a>
                     </td>
                   </tr>
                 ))}

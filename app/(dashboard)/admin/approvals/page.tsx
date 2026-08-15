@@ -21,7 +21,7 @@ export default async function ApprovalsPage({
       where:   { isApproved: "PENDING" },
       select: {
         id: true,
-        firstName: true, lastName: true, email: true,
+        firstName: true, lastName: true, email: true, loginId: true,
         nameOfPractice: true, city: true, state: true,
         salesRepNote: true,
         salesRep: { select: { firstName: true, lastName: true, email: true } },

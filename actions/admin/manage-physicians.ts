@@ -11,6 +11,7 @@ import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
 import { physicianApprovalEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 import { doctorRegistrationEmail } from "@/lib/email/templates";
+import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
 
 export type PhysicianActionState = {
   errors?:  Record<string, string[]>;
@@ -29,6 +30,7 @@ export async function adminCreatePhysician(
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
+    loginId: formData.get("loginId") as string,
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -70,6 +72,10 @@ export async function adminCreatePhysician(
   });
   if (exists) {
     return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
+  }
+
+  if (await isLoginIdTaken(validated.data.loginId)) {
+    return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
   }
 
   if (validated.data.license) {
@@ -130,6 +136,7 @@ export async function adminCreatePhysician(
       firstName:  rest.firstName,
       lastName:   rest.lastName,
       email:      rest.email,
+      loginId:    rest.loginId,
       resetToken: token,
     });
     sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
@@ -177,6 +184,7 @@ export async function updatePhysician(
     firstName: (formData.get("firstName") as string) || undefined,
     lastName: (formData.get("lastName") as string) || undefined,
     email: (formData.get("email") as string) || undefined,
+    loginId: (formData.get("loginId") as string) || undefined,
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -223,6 +231,10 @@ export async function updatePhysician(
     if (licenseExists) {
       return { errors: { license: ["This license number is already registered with another physician."] } };
     }
+  }
+
+  if (validated.data.loginId && await isLoginIdTaken(validated.data.loginId, id)) {
+    return { errors: { loginId: ["This Login ID is already in use."] } };
   }
 
   const salesRepIdToSet = (formData.get("salesRepId") as string)?.trim() || null;
@@ -304,7 +316,7 @@ export async function getPhysicianById(id: string) {
     where: { id },
     select: {
       id: true, isApproved: true,
-      firstName: true, lastName: true, email: true,
+      firstName: true, lastName: true, email: true, loginId: true,
       phone: true, officeContactNumber: true, fax: true,
       aictherapy: true, license: true, websiteLink: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
@@ -333,6 +345,7 @@ export async function listPhysicians(filters?: {
       firstName: true,
       lastName: true,
       email: true,
+      loginId: true,
       nameOfPractice: true,
       phone: true,
       commission: true,

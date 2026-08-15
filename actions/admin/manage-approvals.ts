@@ -42,6 +42,7 @@ export async function listPendingPhysicians() {
       firstName: true,
       lastName: true,
       email: true,
+      loginId: true,
       nameOfPractice: true,
       license: true,
       phone: true,
@@ -84,6 +85,7 @@ export async function approvePhysician(id: string): Promise<ApprovalActionState>
     firstName:  physician.firstName,
     lastName:   physician.lastName,
     email:      physician.email,
+    loginId:    physician.loginId ?? physician.email,
     resetToken: token,
   });
   sendMail({ to: physician.email, subject: setupEmail.subject, html: setupEmail.html, attachments: approvalAttachments }).catch((err) =>

@@ -51,6 +51,7 @@ export default async function EditPhysicianPage({ params }: Props) {
           firstName:           p.firstName,
           lastName:            p.lastName,
           email:               p.email,
+          loginId:             p.loginId            ?? undefined,
           phone:               p.phone               ?? undefined,
           officeContactNumber: p.officeContactNumber  ?? undefined,
           fax:                 p.fax                  ?? undefined,

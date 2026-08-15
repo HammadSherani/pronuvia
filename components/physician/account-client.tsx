@@ -14,7 +14,7 @@ const SPECIALTIES = [
 ];
 
 type Physician = {
-  firstName: string; lastName: string; email: string;
+  firstName: string; lastName: string; email: string; loginId: string | null;
   phone: string | null; officeContactNumber: string | null; fax: string | null;
   nameOfPractice: string | null; license: string | null;
   yearsInPractice: number | null; aictherapy: string | null;
@@ -89,6 +89,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <div className="flex-1 min-w-0">
           <p className="text-lg font-semibold text-gray-900"> {p.firstName} {p.lastName}</p>
           <p className="text-sm text-gray-400">{p.email}</p>
+          {p.loginId && <p className="text-xs text-gray-400 mt-0.5">Login ID: {p.loginId}</p>}
           {p.nameOfPractice && <p className="text-xs text-gray-400 mt-0.5">{p.nameOfPractice}</p>}
           <p className="text-xs text-gray-300 mt-0.5">Member since {memberSince}</p>
         </div>
@@ -124,6 +125,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="First Name"      value={p.firstName} />
         <InfoRow label="Last Name"       value={p.lastName} />
         <InfoRow label="Email"           value={p.email} />
+        <InfoRow label="Login ID"        value={p.loginId} />
         <InfoRow label="Phone"           value={p.phone} />
         <InfoRow label="Office Contact"  value={p.officeContactNumber} />
         <InfoRow label="Fax"             value={p.fax} />

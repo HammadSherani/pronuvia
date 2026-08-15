@@ -7,9 +7,12 @@ import { Role, ApprovalStatus }         from "@/generated/prisma/enums";
 import { z }                            from "zod";
 import { sendMail }                     from "@/lib/email/mailer";
 import { doctorRegistrationEmail }      from "@/lib/email/templates";
+import { LoginIdSchema } from "@/lib/validations/login-id";
+import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
 
 const Schema = z.object({
   email:               z.string().email("Valid email is required"),
+  loginId:             LoginIdSchema,
   firstName:           z.string().min(1, "First name is required"),
   lastName:            z.string().min(1, "Last name is required"),
   aictherapy:          z.string().min(1, "This field is required"),
@@ -54,6 +57,7 @@ export async function registerPhysician(
 ): Promise<RegisterPhysicianState> {
   const raw = {
     email:               (formData.get("email") as string)?.trim().toLowerCase(),
+    loginId:             (formData.get("loginId") as string)?.trim(),
     firstName:           (formData.get("firstName") as string)?.trim(),
     lastName:            (formData.get("lastName") as string)?.trim(),
     aictherapy:          (formData.get("aictherapy") as string)?.trim(),
@@ -93,6 +97,10 @@ export async function registerPhysician(
   });
   if (exists) {
     return { errors: { email: ["An account with this email already exists."] }, values: strValues };
+  }
+
+  if (await isLoginIdTaken(validated.data.loginId)) {
+    return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
   }
 
   const licenseExists = await prisma.partneringPhysician.findFirst({

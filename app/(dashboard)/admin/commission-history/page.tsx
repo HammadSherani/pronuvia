@@ -9,6 +9,27 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
+function parsePeriod(note: string | null, createdAt: Date): string {
+  if (note) {
+    const match = note.match(/Auto withdrawal\s*[–-]\s*(.+)/i);
+    if (match) return match[1].trim();
+  }
+  return createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+function monthKeyFromLabel(period: string, fallback: Date): string {
+  const match = period.match(/([A-Za-z]+)\s+(\d{4})/);
+  if (match) {
+    const month = match[1];
+    const year = match[2];
+    const date = new Date(`${month} 1, ${year}`);
+    if (!Number.isNaN(date.getTime())) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+  }
+  return `${fallback.getFullYear()}-${String(fallback.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export default async function CommissionHistoryPage() {
   await requireAdmin();
 
@@ -40,7 +61,6 @@ export default async function CommissionHistoryPage() {
   const repMap = new Map(reps.map((r) => [r.id, r]));
   const docMap = new Map(physicians.map((p) => [p.id, p]));
 
-  // Fetch all commission-paid orders for all relevant users (for Statement modal)
   const [repOrders, docOrders] = await Promise.all([
     repIds.length
       ? prisma.order.findMany({
@@ -76,23 +96,59 @@ export default async function CommissionHistoryPage() {
     docOrderMap.set(id, arr);
   }
 
-  const rows = approved.flatMap((r) => {
-    const user = r.userRole === "PHYSICIAN" ? docMap.get(r.userId) : repMap.get(r.userId);
-    if (!user) return [];
-    const allOrders = r.userRole === "PHYSICIAN" ? (docOrderMap.get(r.userId) ?? []) : (repOrderMap.get(r.userId) ?? []);
-    return [{
-      id:        r.id,
-      userRole:  r.userRole as "PHYSICIAN" | "SALES_REP",
-      amount:    r.amount,
-      note:      r.note,
-      adminNote: r.adminNote,
-      createdAt: r.createdAt.toISOString(),
-      user:      { firstName: user.firstName, lastName: user.lastName, email: user.email },
-      orders:    allOrders,
-    }];
-  });
+  const grouped = new Map<string, {
+    id: string;
+    userRole: "PHYSICIAN" | "SALES_REP";
+    userId: string;
+    amount: number;
+    note: string | null;
+    adminNote: string | null;
+    createdAt: string;
+    user: { firstName: string; lastName: string; email: string };
+    orders: OrderRow[];
+    period: string;
+  }>();
 
-  // Summary stats
+  for (const request of approved) {
+    const user = request.userRole === "PHYSICIAN" ? docMap.get(request.userId) : repMap.get(request.userId);
+    if (!user) continue;
+
+    const createdAt = new Date(request.createdAt);
+    const period = parsePeriod(request.note, createdAt);
+    const monthKey = monthKeyFromLabel(period, createdAt);
+    const key = `${request.userRole}:${request.userId}:${monthKey}`;
+
+    const current = grouped.get(key) ?? {
+      id: request.id,
+      userRole: request.userRole as "PHYSICIAN" | "SALES_REP",
+      userId: request.userId,
+      amount: 0,
+      note: request.note,
+      adminNote: request.adminNote,
+      createdAt: request.createdAt.toISOString(),
+      user: { firstName: user.firstName, lastName: user.lastName, email: user.email },
+      orders: [],
+      period,
+    };
+
+    current.amount += Number(request.amount || 0);
+    current.createdAt = new Date(request.createdAt).getTime() > new Date(current.createdAt).getTime()
+      ? request.createdAt.toISOString()
+      : current.createdAt;
+
+    const allOrders = request.userRole === "PHYSICIAN" ? (docOrderMap.get(request.userId) ?? []) : (repOrderMap.get(request.userId) ?? []);
+    const filteredOrders = allOrders.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      const periodKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}`;
+      return periodKey === monthKey;
+    });
+
+    current.orders = [...new Map([...current.orders, ...filteredOrders].map((order) => [order.orderNumber, order])).values()];
+    grouped.set(key, current);
+  }
+
+  const rows = [...grouped.values()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   const totalPaid    = rows.reduce((s, r) => s + r.amount, 0);
   const repTotal     = rows.filter((r) => r.userRole === "SALES_REP").reduce((s, r) => s + r.amount, 0);
   const doctorTotal  = rows.filter((r) => r.userRole === "PHYSICIAN").reduce((s, r) => s + r.amount, 0);

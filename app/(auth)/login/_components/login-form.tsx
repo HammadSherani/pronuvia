@@ -30,13 +30,13 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Email */}
+      {/* Email or Login ID */}
       <div className="w-full mb-4">
         <input
           name="email"
-          type="email"
-          placeholder="Email Address"
-          autoComplete="email"
+          type="text"
+          placeholder="Email or Login ID"
+          autoComplete="username"
           className="w-full border border-gray-200 rounded-md bg-white px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5BB8D4] focus:ring-1 focus:ring-[#5BB8D4] transition"
         />
         {state?.errors?.email && (

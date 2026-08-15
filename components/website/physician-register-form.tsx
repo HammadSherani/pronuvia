@@ -94,24 +94,33 @@ export function PhysicianRegisterForm() {
         </div>
       )}
 
-      {/* Email + First Name */}
+      {/* Email + Login ID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Email" error={e.email?.[0]}>
           <input required name="email" type="email" placeholder="doctor@clinic.com" defaultValue={state?.values?.email} className={e.email ? inpErr : inp} />
         </Field>
-        <Field label="First Name" error={e.firstName?.[0]}>
-          <input required name="firstName" placeholder="Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
+        <Field label="Login ID / Username" error={e.loginId?.[0]}>
+          <input required name="loginId" type="text" autoComplete="username" placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId} className={e.loginId ? inpErr : inp} />
+          <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–30 characters, letters, numbers, . _ -)</p>
         </Field>
       </div>
 
-      {/* Last Name + SAC Therapy */}
+      {/* First Name + Last Name */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="First Name" error={e.firstName?.[0]}>
+          <input required name="firstName" placeholder="Jane" defaultValue={state?.values?.firstName} className={e.firstName ? inpErr : inp} />
+        </Field>
         <Field label="Last Name" error={e.lastName?.[0]}>
           <input required name="lastName" placeholder="Doe" defaultValue={state?.values?.lastName} className={e.lastName ? inpErr : inp} />
         </Field>
+      </div>
+
+      {/* SAC Therapy */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="How did you hear about AIC Therapy?" error={e.aictherapy?.[0]}>
           <input required name="aictherapy" placeholder="e.g. Conference, Referral, Online..." defaultValue={state?.values?.aictherapy} className={e.aictherapy ? inpErr : inp} />
         </Field>
+        <div className="hidden sm:block" />
       </div>
 
       {/* License + Website */}

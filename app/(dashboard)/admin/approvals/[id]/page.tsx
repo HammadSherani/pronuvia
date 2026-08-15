@@ -28,7 +28,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
     where: { id, isApproved: "PENDING" },
     select: {
       id: true,
-      firstName: true, lastName: true, email: true,
+      firstName: true, lastName: true, email: true, loginId: true,
       phone: true, officeContactNumber: true, fax: true,
       aictherapy: true, license: true, websiteLink: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
@@ -127,6 +127,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
           <InfoRow label="First Name"   value={p.firstName} />
           <InfoRow label="Last Name"    value={p.lastName} />
           <InfoRow label="Email"        value={p.email} />
+          <InfoRow label="Login ID"     value={p.loginId} />
           <InfoRow label="Phone" value={p.phone} />
           <InfoRow label="Office Phone" value={p.officeContactNumber} />
           <InfoRow label="Fax"          value={p.fax} />

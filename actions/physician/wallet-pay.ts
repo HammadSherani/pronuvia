@@ -9,6 +9,7 @@ import { generateOrderNumber } from "@/lib/orders/order-number";
 import { validateCartItemsAvailability } from "@/lib/orders/validate-items";
 import { sendMail } from "@/lib/email/mailer";
 import { orderConfirmationEmail, newOrderNotificationEmail } from "@/lib/email/templates";
+import { syncPendingPayoutRequest } from "@/lib/withdrawals/sync";
 
 type CartItem = {
   productId:   string;
@@ -151,6 +152,8 @@ export async function payWithPhysicianWallet(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(ops as any);
+
+  await syncPendingPayoutRequest(session.userId, "PHYSICIAN", newBalance);
 
   if (customerEmail) {
     try {

@@ -1,9 +1,11 @@
 import { z } from "zod";
+import { LoginIdSchema } from "@/lib/validations/login-id";
 
 export const CreatePhysicianSchema = z.object({
   firstName:           z.string().min(1, "First name is required").trim(),
   lastName:            z.string().min(1, "Last name is required").trim(),
   email:               z.string().email("Invalid email address").trim().toLowerCase(),
+  loginId:             LoginIdSchema,
   aictherapy:          z.string().optional(),
   license:             z.string().optional(),
   websiteLink:         z.string().optional(),
@@ -46,6 +48,7 @@ export const UpdatePhysicianSchema = z.object({
   firstName:           z.string().min(1).trim().optional(),
   lastName:            z.string().min(1).trim().optional(),
   email:               z.string().email().trim().toLowerCase().optional(),
+  loginId:             LoginIdSchema.optional(),
   aictherapy:          z.string().optional(),
   license:             z.string().optional(),
   websiteLink:         z.string().optional(),

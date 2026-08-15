@@ -10,6 +10,7 @@ type Physician = {
   firstName: string;
   lastName: string;
   email: string;
+  loginId: string | null;
   nameOfPractice: string | null;
   city: string | null;
   state: string | null;
@@ -91,6 +92,7 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
                     <div>
                       <p className="font-semibold text-gray-800 text-xs"> {p.firstName} {p.lastName}</p>
                       <p className="text-xs text-gray-400">{p.email}</p>
+                      {p.loginId && <p className="text-xs text-gray-400">ID: {p.loginId}</p>}
                     </div>
                   </div>
                 </td>

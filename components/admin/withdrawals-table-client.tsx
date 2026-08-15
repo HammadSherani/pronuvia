@@ -218,8 +218,10 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                   }`}>
                     {fmt(r.salesRep.walletBalance ?? 0)}
                   </span>
-                  {(r.salesRep.walletBalance ?? 0) < r.amount && r.status === "PENDING" && (
-                    <p className="text-[10px] text-red-400">Low</p>
+                  {r.status === "PENDING" && (
+                    <p className={`text-[10px] ${((r.salesRep.walletBalance ?? 0) < r.amount) ? "text-red-400" : "text-emerald-500"}`}>
+                      {((r.salesRep.walletBalance ?? 0) < r.amount) ? "Insufficient" : "Available"}
+                    </p>
                   )}
                 </td>
 

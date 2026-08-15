@@ -366,7 +366,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected }: Pr
       </div>
 
       {/* ── Rejected section ────────────────────────────────────────────── */}
-      <div>
+      <div className="border-t border-gray-200 pt-8">
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-base font-bold text-gray-800">Rejected Commissions</h2>
           {rejected.length > 0 && (

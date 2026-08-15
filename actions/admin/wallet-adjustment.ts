@@ -3,7 +3,7 @@
 import { revalidatePath }             from "next/cache";
 import { prisma }                      from "@/lib/db/prisma";
 import { requireAdmin }                from "@/lib/auth/dal";
-import { syncPendingAutoWithdraw }     from "@/lib/withdrawals/sync";
+import { syncPendingPayoutRequest }     from "@/lib/withdrawals/sync";
 import type { Role }                   from "@/generated/prisma/enums";
 
 export async function adjustWallet(data: {
@@ -40,7 +40,7 @@ export async function adjustWallet(data: {
     data: { userId, userRole, amount, type, description: `Admin [${session.email}]: ${note.trim()}`, balance: newBalance },
   });
 
-  await syncPendingAutoWithdraw(userId, userRole as Role, newBalance);
+  await syncPendingPayoutRequest(userId, userRole as Role, newBalance);
 
   revalidatePath("/admin/wallet-adjustment");
   revalidatePath("/admin/payout-requests");

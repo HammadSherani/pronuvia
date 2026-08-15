@@ -3,6 +3,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { sendMail } from "@/lib/email/mailer";
 import { forgotPasswordEmail } from "@/lib/email/templates";
+import { findPhysicianByLoginIdentifier } from "@/lib/auth/physician-lookup";
+import { ForgotPasswordSchema } from "@/lib/validations/auth";
+import { isEmail } from "@/lib/validations/login-id";
+import { z } from "zod";
 import crypto from "crypto";
 
 export type ForgotPasswordState = {
@@ -15,12 +19,14 @@ export async function forgotPassword(
   _state: ForgotPasswordState,
   formData: FormData,
 ): Promise<ForgotPasswordState> {
-  const email = (formData.get("email") as string)?.trim().toLowerCase();
-
-  if (!email) return { errors: { email: ["Email is required"] } };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { errors: { email: ["Enter a valid email address"] } };
+  const validated = ForgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  });
+  if (!validated.success) {
+    return { errors: z.flattenError(validated.error).fieldErrors };
   }
+
+  const identifier = validated.data.email;
 
   const token  = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -28,34 +34,33 @@ export async function forgotPassword(
   const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const resetLink = `${appUrl}/reset-password/${token}`;
 
-  // Check physician
-  const physician = await prisma.partneringPhysician.findUnique({
-    where: { email },
-    select: { id: true, firstName: true },
-  });
+  // Physicians can reset using email or Login ID; link is sent to their registered email
+  const physician = await findPhysicianByLoginIdentifier(identifier);
   if (physician) {
     await prisma.partneringPhysician.update({
       where: { id: physician.id },
       data: { passwordResetToken: token, passwordResetExpiry: expiry },
     });
     const { subject, html } = forgotPasswordEmail({ firstName: physician.firstName, resetLink });
-    await sendMail({ to: email, subject, html });
+    await sendMail({ to: physician.email, subject, html });
     return { success: true };
   }
 
-  // Check sales rep
-  const salesRep = await prisma.salesRepresentative.findUnique({
-    where: { email },
-    select: { id: true, firstName: true },
-  });
-  if (salesRep) {
-    await prisma.salesRepresentative.update({
-      where: { id: salesRep.id },
-      data: { passwordResetToken: token, passwordResetExpiry: expiry },
+  // Sales reps reset with email only
+  if (isEmail(identifier)) {
+    const salesRep = await prisma.salesRepresentative.findUnique({
+      where: { email: identifier },
+      select: { id: true, firstName: true, email: true },
     });
-    const { subject, html } = forgotPasswordEmail({ firstName: salesRep.firstName, resetLink });
-    await sendMail({ to: email, subject, html });
-    return { success: true };
+    if (salesRep) {
+      await prisma.salesRepresentative.update({
+        where: { id: salesRep.id },
+        data: { passwordResetToken: token, passwordResetExpiry: expiry },
+      });
+      const { subject, html } = forgotPasswordEmail({ firstName: salesRep.firstName, resetLink });
+      await sendMail({ to: salesRep.email, subject, html });
+      return { success: true };
+    }
   }
 
   // Always return success — don't reveal if email exists

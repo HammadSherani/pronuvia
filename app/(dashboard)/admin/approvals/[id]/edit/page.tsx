@@ -58,6 +58,7 @@ export default async function EditPendingPhysicianPage({ params }: Props) {
           firstName:           p.firstName,
           lastName:            p.lastName,
           email:               p.email,
+          loginId:             p.loginId            ?? undefined,
           phone:               p.phone               ?? undefined,
           officeContactNumber: p.officeContactNumber  ?? undefined,
           fax:                 p.fax                  ?? undefined,

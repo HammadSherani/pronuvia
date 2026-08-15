@@ -171,8 +171,10 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                   <span className={`text-xs font-semibold ${r.physician.walletBalance >= r.amount ? "text-emerald-600" : "text-red-500"}`}>
                     {fmt(r.physician.walletBalance)}
                   </span>
-                  {r.physician.walletBalance < r.amount && r.status === "PENDING" && (
-                    <p className="text-[10px] text-red-400">Low</p>
+                  {r.status === "PENDING" && (
+                    <p className={`text-[10px] ${r.physician.walletBalance < r.amount ? "text-red-400" : "text-emerald-500"}`}>
+                      {r.physician.walletBalance < r.amount ? "Insufficient" : "Available"}
+                    </p>
                   )}
                 </td>
 

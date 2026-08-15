@@ -13,7 +13,7 @@ import { ClientPagination } from "@/components/shared/pagination";
 
 type Physician = {
   id: string; isApproved: ApprovalStatus;
-  firstName: string; lastName: string; email: string;
+  firstName: string; lastName: string; email: string; loginId: string | null;
   nameOfPractice: string | null; phone: string | null;
   officeContactNumber: string | null; fax: string | null;
   addressOne: string | null; addressTwo: string | null;
@@ -44,6 +44,7 @@ function exportToExcel(physicians: Physician[]) {
     "First Name":               p.firstName,
     "Last Name":                p.lastName,
     "Email":                    p.email,
+    "Login ID":                 p.loginId ?? "",
     "Phone":                    p.phone ?? "",
     "Office Phone":             p.officeContactNumber ?? "",
     "Fax":                      p.fax ?? "",
@@ -90,6 +91,7 @@ function DoctorTableRow({ p }: { p: Physician }) {
           <div className="min-w-0">
             <p className="text-xs font-medium text-gray-800 truncate">{p.firstName} {p.lastName}</p>
             <p className="text-[10px] text-gray-400 truncate">{p.email}</p>
+            {p.loginId && <p className="text-[10px] text-gray-400 truncate">ID: {p.loginId}</p>}
           </div>
         </div>
       </td>

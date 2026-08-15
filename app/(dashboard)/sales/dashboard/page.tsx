@@ -19,7 +19,7 @@ const APPROVAL_STYLE: Record<string, { bg: string; color: string; label: string 
 export default async function SalesDashboardPage() {
   const session = await requireSalesRep();
 
-  const [totalPhysicians, pendingPhysicians, rep, recentPhysicians] = await Promise.all([
+  const [totalPhysicians, pendingPhysicians, rep, recentPhysicians, totalPaidOut] = await Promise.all([
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId } }),
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId, isApproved: ApprovalStatus.PENDING } }),
     prisma.salesRepresentative.findUnique({
@@ -32,7 +32,14 @@ export default async function SalesDashboardPage() {
       take: 5,
       select: { id: true, firstName: true, lastName: true, email: true, isApproved: true, createdAt: true },
     }),
+    prisma.withdrawRequest.aggregate({
+      where: { userId: session.userId, userRole: "SALES_REP", status: "APPROVED" },
+      _sum: { amount: true },
+    }).then((r) => r._sum.amount ?? 0),
   ]);
+
+  const walletBalance   = rep?.walletBalance ?? 0;
+  const totalCommission = walletBalance + totalPaidOut;
 
   const kpiCards = [
     {
@@ -62,34 +69,21 @@ export default async function SalesDashboardPage() {
       ),
     },
     {
-      label: "Self Commission Rate",
-      value: `${rep?.commission ?? 0}%`,
-      sub: "Per order",
-      href: "/sales/account",
+      label: "Commission Earned",
+      value: fmtMoney(totalCommission),
+      sub: "Current + paid out",
+      href: "/sales/wallet",
       color: "#5BB8D4",
       bg: "#edf6fb",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },
     {
-      label: "Total Orders",
-      value: (rep?.ordersCount ?? 0).toString(),
-      sub: "All time",
-      href: "/sales/orders",
-      color: "#8b5cf6",
-      bg: "#f5f3ff",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
-    },
-    {
-      label: "Wallet Balance",
-      value: fmtMoney(rep?.walletBalance ?? 0),
+      label: "Commission Balance",
+      value: fmtMoney(walletBalance),
       sub: "Available",
       href: "/sales/wallet",
       color: "#10b981",
@@ -97,6 +91,19 @@ export default async function SalesDashboardPage() {
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Commission Paid-out",
+      value: fmtMoney(totalPaidOut),
+      sub: "Approved payouts",
+      href: "/sales/withdrawals",
+      color: "#8b5cf6",
+      bg: "#f5f3ff",
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },

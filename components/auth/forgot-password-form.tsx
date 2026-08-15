@@ -17,7 +17,7 @@ export function ForgotPasswordForm() {
         </div>
         <h2 className="text-lg font-semibold text-gray-800 mb-2">Check your inbox</h2>
         <p className="text-sm text-gray-500 leading-relaxed">
-          If an account with that email exists, we&apos;ve sent a password reset link. It expires in <strong>1 hour</strong>.
+          If an account with that email or Login ID exists, we&apos;ve sent a password reset link to the registered email. It expires in <strong>1 hour</strong>.
         </p>
         <Link href="/login" className="mt-5 inline-block text-sm text-[#3DBFA4] hover:underline font-medium">
           ← Back to Login
@@ -34,9 +34,9 @@ export function ForgotPasswordForm() {
       <div>
         <input
           name="email"
-          type="email"
-          placeholder="Enter your email address"
-          autoComplete="email"
+          type="text"
+          placeholder="Email or Login ID"
+          autoComplete="username"
           autoFocus
           className={state?.errors?.email ? inpErr : inp}
         />
