@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { updateWithdrawRequest, deleteWithdrawRequest, bulkUpdateWithdrawals } from "@/actions/admin/manage-withdrawals";
+import { notifyUserAddBank } from "@/actions/admin/notify-bank";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -298,6 +299,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
   const [confirmDel,   setConfirmDel]  = useState<PendingRow | null>(null);
   const [deleting,     startDelete]    = useTransition();
   const [bulkBusy,     startBulk]     = useTransition();
+  const [,             startNotify]   = useTransition();
 
   const removeRow  = (id: string)      => { setPending((p) => p.filter((r) => r.id !== id)); setSelected((s) => { const n = new Set(s); n.delete(id); return n; }); };
   const removeRows = (ids: string[])   => { const set = new Set(ids); setPending((p) => p.filter((r) => !set.has(r.id))); setSelected(new Set()); };
@@ -484,6 +486,13 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                               <button
                                 type="button"
                                 title="Notify user to add bank account"
+                                onClick={() =>
+                                  startNotify(async () => {
+                                    const res = await notifyUserAddBank(row.userId, row.userRole);
+                                    if (res.success) toast.success("User notified to add bank account");
+                                    else toast.error(res.message);
+                                  })
+                                }
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
                               >
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

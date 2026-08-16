@@ -72,6 +72,8 @@ export async function updateSalesRepProfile(
         lastName,
         name: `${firstName} ${lastName}`,
         ...rest,
+        // Clear notify flag once bank details are provided
+        ...(rest.bankName ? { bankNotifyRequested: false } : {}),
       },
     });
 

@@ -85,7 +85,12 @@ export async function updatePhysicianProfile(
 
   await prisma.partneringPhysician.update({
     where: { id: session.userId },
-    data: { ...validated.data, fieldsOfSpeciality },
+    data: {
+      ...validated.data,
+      fieldsOfSpeciality,
+      // Clear notify flag once bank details are provided
+      ...(validated.data.bankName ? { bankNotifyRequested: false } : {}),
+    },
   });
 
   return { success: true, message: "Profile updated successfully." };
