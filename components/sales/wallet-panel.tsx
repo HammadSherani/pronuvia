@@ -1,8 +1,5 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { WithdrawModal } from "./withdraw-modal";
-
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
@@ -28,8 +25,6 @@ export function WalletPanel({
   bankAccountNumber?:   string | null;
   bankAccountName?:     string | null;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
     <>
       <div className="grid grid-cols-4 gap-5 mb-8">
@@ -47,17 +42,6 @@ export function WalletPanel({
               Pending request
             </p>
           )}
-
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="mt-5 flex items-center gap-1.5 text-xs font-bold bg-white/20 hover:bg-white/30 active:bg-white/40 text-white px-3.5 py-2 rounded-xl transition-colors w-full justify-center"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            Request Payout
-          </button>
         </div>
 
         {/* Paid Commissions */}
@@ -112,16 +96,6 @@ export function WalletPanel({
         </div>
       </div>
 
-      {open && (
-        <WithdrawModal
-          balance={balance}
-          hasPending={hasPending}
-          bankName={bankName}
-          bankAccountNumber={bankAccountNumber}
-          bankAccountName={bankAccountName}
-          onClose={() => setOpen(false)}
-        />
-      )}
     </>
   );
 }
