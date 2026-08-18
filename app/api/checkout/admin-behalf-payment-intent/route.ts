@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount:   amountInCents,
     currency: "usd",
-    payment_method_types: ["card"],
+    automatic_payment_methods: { enabled: true },
     metadata: { physicianId, adminId: session.userId, onBehalf: "true" },
   });
 
