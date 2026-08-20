@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // PDFKit loads its built-in font files from its package directory at runtime.
+  // Keep it external so those files resolve from the installed package instead
+  // of the Next.js server bundle.
+  serverExternalPackages: ["pdfkit", "@prisma/client", "prisma"],
   outputFileTracingIncludes: {
     "/**": ["./generated/prisma/**"],
   },

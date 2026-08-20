@@ -71,6 +71,7 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Physician</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Login ID</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Practice</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Medical Rep</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
@@ -92,10 +93,12 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
                     <div>
                       <p className="font-semibold text-gray-800 text-xs"> {p.firstName} {p.lastName}</p>
                       <p className="text-xs text-gray-400">{p.email}</p>
-                      {p.loginId && <p className="text-xs text-gray-400">ID: {p.loginId}</p>}
                     </div>
                   </div>
                 </td>
+
+                {/* Login ID */}
+                <td className="px-5 py-4 text-xs text-gray-500">{p.loginId || "Not set"}</td>
 
                 {/* Practice */}
                 <td className="px-5 py-4">

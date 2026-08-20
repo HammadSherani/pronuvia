@@ -24,13 +24,13 @@ export async function createPhysicianWithdrawRequest(
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: session.userId },
-    select: { walletBalance: true, bankName: true },
+    select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
   });
 
   if (!physician) return { success: false, message: "Account not found." };
 
-  if (!physician.bankName) {
-    return { success: false, message: "No bank account linked. Add your bank details in Account Settings first." };
+  if (!physician.bankName || !physician.bankAccountNumber || !physician.bankAccountName) {
+    return { success: false, message: "Complete your bank details in Account Settings first." };
   }
 
   if (amount > physician.walletBalance) {

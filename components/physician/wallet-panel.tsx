@@ -5,8 +5,6 @@ function fmt(n: number) {
 }
 
 export function PhysicianWalletPanel({
-  balance,
-  totalPaid,
   totalPending,
   totalWithdrawn,
   commissionOrderCount,
@@ -15,8 +13,6 @@ export function PhysicianWalletPanel({
   bankAccountNumber,
   bankAccountName,
 }: {
-  balance:              number;
-  totalPaid:            number;
   totalPending:         number;
   totalWithdrawn:       number;
   commissionOrderCount: number;
@@ -29,13 +25,13 @@ export function PhysicianWalletPanel({
     <>
       <div className="grid grid-cols-4 gap-5 mb-8">
 
-        {/* Balance card */}
+        {/* Commission earned */}
         <div className="col-span-1 relative overflow-hidden bg-gradient-to-br from-[#3DBFA4] to-[#2a9f89] rounded-2xl p-6 text-white shadow-md">
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full border-[16px] border-white/10 pointer-events-none" />
           <div className="absolute -bottom-8 -left-4 w-24 h-24 rounded-full border-[12px] border-white/8 pointer-events-none" />
 
-          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Commission Balance</p>
-          <p className="text-3xl font-black tabular-nums leading-none mt-1">{fmt(balance)}</p>
+          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Commission Earned</p>
+          <p className="text-3xl font-black tabular-nums leading-none mt-1">{fmt(totalPending + totalWithdrawn)}</p>
           {hasPending && (
             <p className="text-[10px] text-amber-200 mt-2 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-300 inline-block" />
@@ -44,22 +40,19 @@ export function PhysicianWalletPanel({
           )}
         </div>
 
-        {/* Paid Commissions */}
+        {/* Pending Commission */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Earned</p>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
-              <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pending Commission</p>
+            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(balance + totalWithdrawn)}</p>
-            <p className="text-xs text-gray-400 mt-1">Current + paid out</p>
-            {totalPending > 0 && (
-              <p className="text-xs text-amber-500 mt-1 font-medium">+ {fmt(totalPending)} pending</p>
-            )}
+            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPending)}</p>
+            <p className="text-xs text-gray-400 mt-1">Awaiting payout</p>
           </div>
         </div>
 

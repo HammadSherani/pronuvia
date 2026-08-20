@@ -1497,6 +1497,7 @@ export function commissionPayoutEmail(opts: {
   orderCount: number;
 }) {
   const subject = `Commission Payout Approved – ${opts.period}`;
+  const formattedAmount = opts.amount.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const html = base(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Commission Payout Approved</h1>
     <p style="margin:0 0 24px;font-size:15px;color:${C.muted};line-height:1.6;">
@@ -1515,7 +1516,7 @@ export function commissionPayoutEmail(opts: {
         </tr>
         <tr>
           <td style="padding:5px 0;font-size:13px;color:${C.muted};">Payout Amount</td>
-          <td style="padding:5px 0;font-size:16px;font-weight:700;color:#047857;">$${opts.amount.toFixed(2)}</td>
+          <td style="padding:5px 0;font-size:16px;font-weight:700;color:#047857;">${formattedAmount}</td>
         </tr>
       </table>
     `)}

@@ -165,6 +165,7 @@ export async function adminCreatePhysician(
   }
 
   revalidatePath("/admin/physicians");
+  revalidatePath("/admin/approvals");
   return {
     success: true,
     message: isApproved === ApprovalStatus.APPROVED
@@ -248,6 +249,11 @@ export async function updatePhysician(
   });
 
   revalidatePath("/admin/physicians");
+  revalidatePath(`/admin/physicians/${id}`);
+  revalidatePath(`/admin/physicians/${id}/edit`);
+  revalidatePath("/admin/approvals");
+  revalidatePath(`/admin/approvals/${id}`);
+  revalidatePath(`/admin/approvals/${id}/edit`);
   return { success: true, message: "Physician updated successfully." };
 }
 

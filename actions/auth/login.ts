@@ -6,7 +6,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { z } from "zod";
 import { createSession } from "@/lib/auth/session";
 import { LoginSchema } from "@/lib/validations/auth";
-import { findPhysicianByLoginIdentifier } from "@/lib/auth/physician-lookup";
+import { findPhysicianByLoginIdentifier, findSalesRepByLoginIdentifier } from "@/lib/auth/physician-lookup";
 import { isEmail } from "@/lib/validations/login-id";
 import { Role } from "@/generated/prisma/enums";
 
@@ -46,7 +46,7 @@ export async function login(
   const { email, password } = validated.data;
 
   try {
-    // Admin and sales rep sign in with email only
+    // Admin signs in with email only.
     if (isEmail(email)) {
       const admin = await prisma.admin.findUnique({ where: { email } });
       if (admin) {
@@ -56,16 +56,17 @@ export async function login(
         redirect(DASHBOARD_ROUTES[Role.ADMIN]);
       }
 
-      const salesRep = await prisma.salesRepresentative.findUnique({ where: { email } });
-      if (salesRep) {
-        const valid = await verifyPassword(password, salesRep.password);
-        if (!valid) return { message: "Invalid email or password." };
-        await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
-        redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
-      }
     }
 
-    // Physicians can sign in with email or Login ID
+    // Medical reps and physicians can sign in with email or Login ID.
+    const salesRep = await findSalesRepByLoginIdentifier(email);
+    if (salesRep) {
+      const valid = await verifyPassword(password, salesRep.password);
+      if (!valid) return { message: "Invalid email or password." };
+      await createSession(salesRep.id, Role.SALES_REP, salesRep.email);
+      redirect(DASHBOARD_ROUTES[Role.SALES_REP]);
+    }
+
     const physician = await findPhysicianByLoginIdentifier(email);
     if (physician) {
       if (physician.isApproved !== "APPROVED") {
@@ -93,4 +94,3 @@ export async function login(
     return { message: "Unable to connect to the server. Please try again." };
   }
 }
-

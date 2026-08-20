@@ -91,10 +91,10 @@ function DoctorTableRow({ p }: { p: Physician }) {
           <div className="min-w-0">
             <p className="text-xs font-medium text-gray-800 truncate">{p.firstName} {p.lastName}</p>
             <p className="text-[10px] text-gray-400 truncate">{p.email}</p>
-            {p.loginId && <p className="text-[10px] text-gray-400 truncate">ID: {p.loginId}</p>}
           </div>
         </div>
       </td>
+      <td className="px-3 py-3 text-xs text-gray-500 truncate">{p.loginId || "Not set"}</td>
       <td className="px-3 py-3 text-gray-500 text-xs truncate max-w-[120px]">{p.nameOfPractice ?? "—"}</td>
       <td className="px-3 py-3">
         <span className="text-xs font-medium text-gray-700">{p.state ?? "—"}</span>
@@ -191,6 +191,7 @@ export function PhysiciansPageClient({
         (p) =>
           match(`${p.firstName} ${p.lastName}`, q) ||
           match(p.email, q) ||
+          (p.loginId && match(p.loginId, q)) ||
           match(p.id, q) ||
           (p.nameOfPractice && match(p.nameOfPractice, q)) ||
           (p.salesRep && match(p.salesRep.name, q)) ||
@@ -330,12 +331,13 @@ export function PhysiciansPageClient({
               <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[26%]">Doctor</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">Practice</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">State</th>
-                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">Medical Rep</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">Doctor</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[14%]">Login ID</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[16%]">Practice</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[8%]">State</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">Medical Rep</th>
                     <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">Status</th>
-                    <th className="px-3 py-3 w-[16%]" />
+                    <th className="px-3 py-3 w-[12%]" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">

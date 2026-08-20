@@ -19,12 +19,12 @@ const APPROVAL_STYLE: Record<string, { bg: string; color: string; label: string 
 export default async function SalesDashboardPage() {
   const session = await requireSalesRep();
 
-  const [totalPhysicians, pendingPhysicians, rep, recentPhysicians, totalPaidOut] = await Promise.all([
+  const [totalPhysicians, pendingPhysicians, rep, recentPhysicians, pendingCommissionOrders, totalPaidOut] = await Promise.all([
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId } }),
     prisma.partneringPhysician.count({ where: { salesRepId: session.userId, isApproved: ApprovalStatus.PENDING } }),
     prisma.salesRepresentative.findUnique({
       where: { id: session.userId },
-      select: { firstName: true, lastName: true, commission: true, ordersCount: true, walletBalance: true },
+      select: { firstName: true, lastName: true, commission: true, ordersCount: true },
     }),
     prisma.partneringPhysician.findMany({
       where: { salesRepId: session.userId },
@@ -32,14 +32,30 @@ export default async function SalesDashboardPage() {
       take: 5,
       select: { id: true, firstName: true, lastName: true, email: true, isApproved: true, createdAt: true },
     }),
+    prisma.order.findMany({
+      where: {
+        salesRepId: session.userId,
+        commissionPaid: false,
+        status: { notIn: ["REFUNDED", "CANCELLED"] },
+      },
+      select: { id: true, salesRepCommissionAmount: true },
+    }),
     prisma.withdrawRequest.aggregate({
       where: { userId: session.userId, userRole: "SALES_REP", status: "APPROVED" },
       _sum: { amount: true },
     }).then((r) => r._sum.amount ?? 0),
   ]);
 
-  const walletBalance   = rep?.walletBalance ?? 0;
-  const totalCommission = walletBalance + totalPaidOut;
+  const pendingRefundIds = new Set(
+    (await prisma.orderRefund.findMany({
+      where: { orderId: { in: pendingCommissionOrders.map((o) => o.id) } },
+      select: { orderId: true },
+    })).map((r) => r.orderId)
+  );
+  const totalPending = pendingCommissionOrders
+    .filter((o) => !pendingRefundIds.has(o.id))
+    .reduce((sum, o) => sum + (o.salesRepCommissionAmount ?? 0), 0);
+  const totalCommission = totalPending + totalPaidOut;
 
   const kpiCards = [
     {
@@ -82,9 +98,9 @@ export default async function SalesDashboardPage() {
       ),
     },
     {
-      label: "Commission Balance",
-      value: fmtMoney(walletBalance),
-      sub: "Available",
+      label: "Pending Commission",
+      value: fmtMoney(totalPending),
+      sub: "Awaiting payout",
       href: "/sales/wallet",
       color: "#10b981",
       bg: "#ecfdf5",

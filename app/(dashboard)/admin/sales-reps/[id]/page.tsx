@@ -111,6 +111,7 @@ export default async function SalesRepViewPage({ params }: Props) {
         <InfoRow label="First Name" value={rep.firstName} />
         <InfoRow label="Last Name" value={rep.lastName} />
         <InfoRow label="Email" value={rep.email} />
+        <InfoRow label="Login ID" value={rep.loginId || "Not set"} />
         <InfoRow label="Phone" value={rep.phone} />
         <InfoRow label="Website" value={rep.website} />
         <InfoRow label="Commission" value={`${rep.commission}%`} />

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import type { Role } from "@/generated/prisma/enums";
+import { isMonthlyAutoPayoutNote } from "@/lib/withdrawals/monthly";
 
 export type PendingWithdrawSnapshot = {
   id:        string;
@@ -53,6 +54,13 @@ export async function syncPendingPayoutRequest(
     select: { id: true, amount: true, createdAt: true, note: true },
     orderBy: { createdAt: "desc" },
   });
+
+  // Monthly requests are immutable snapshots. New commissions, purchases, or
+  // clawbacks after the first-of-month snapshot must not change the amount an
+  // administrator is reviewing for that month.
+  if (pending.some((request) => isMonthlyAutoPayoutNote(request.note))) {
+    return { updated: false, removed: 0, kept: pending[0]?.id ?? null, amount: pending[0]?.amount ?? 0 };
+  }
 
   const normalizedBalance = Number(Math.max(0, newBalance).toFixed(2));
 

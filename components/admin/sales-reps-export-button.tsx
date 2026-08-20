@@ -15,6 +15,7 @@ export function SalesRepsExportButton() {
         "First Name":          r.firstName,
         "Last Name":           r.lastName,
         "Email":               r.email,
+        "Login ID":            r.loginId ?? "",
         "Phone":               r.phone ?? "",
         "Commission (%)":      r.commission,
         "Total Orders":        r.ordersCount,

@@ -5,6 +5,7 @@ export interface CommissionOrder {
   createdAt:   string;
   amount:      number;
   rate:        number;
+  description?: string | null;
 }
 
 export async function generateCommissionStatementPdf(opts: {
@@ -18,49 +19,57 @@ export async function generateCommissionStatementPdf(opts: {
 }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    const doc = new PDFDocument({ margin: 50, size: "LETTER" });
 
-    doc.on("data",  (c) => chunks.push(c));
-    doc.on("end",   ()  => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
+    try {
+      const doc = new PDFDocument({ margin: 50, size: "LETTER" });
 
-    const W    = doc.page.width - 100; // usable width (margins = 50 each side)
-    const navy = "#1b3b6f";
-    const teal = "#3DBFA4";
-    const gray = "#6b7280";
-    const lt   = "#f3f4f6";
+      doc.on("data",  (c) => chunks.push(c));
+      doc.on("end",   ()  => {
+        resolve(Buffer.concat(chunks));
+      });
+      doc.on("error", reject);
 
-    // ── Header bar ───────────────────────────────────────────────────────
-    doc.rect(0, 0, doc.page.width, 70).fill(navy);
-    doc
-      .fillColor("#ffffff")
-      .fontSize(22).font("Helvetica-Bold")
-      .text("PRONUVIA", 50, 18, { lineBreak: false });
-    doc
-      .fontSize(9).font("Helvetica")
-      .fillColor("rgba(255,255,255,0.6)")
-      .text("Commission Payout Statement", 50, 46, { lineBreak: false });
+      const W    = doc.page.width - 100; // usable width (margins = 50 each side)
+      const navy = "#1b3b6f";
+      const teal = "#3DBFA4";
+      const gray = "#6b7280";
+      const lt   = "#f3f4f6";
+      const formatMoney = (amount: number) => amount.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
 
-    // right-align period
-    doc
-      .fontSize(9).font("Helvetica-Bold")
-      .fillColor("#ffffff")
-      .text(opts.period, 0, 46, { align: "right", lineBreak: false });
+      // ── Header bar ───────────────────────────────────────────────────────
+      doc.rect(0, 0, doc.page.width, 70).fill(navy);
+      doc
+        .fillColor("#ffffff")
+        .fontSize(22).font("Helvetica-Bold")
+        .text("PRONUVIA", 50, 18, { lineBreak: false });
+      doc
+        .fontSize(9).font("Helvetica")
+        .fillColor("rgba(255,255,255,0.6)")
+        .text("Commission Payout Statement", 50, 46, { lineBreak: false });
 
-    let y = 90;
+      // right-align period
+      doc
+        .fontSize(9).font("Helvetica-Bold")
+        .fillColor("#ffffff")
+        .text(opts.period, 50, 46, { align: "right", width: W, lineBreak: false });
 
-    // ── Recipient block ───────────────────────────────────────────────────
-    doc.fillColor(navy).fontSize(13).font("Helvetica-Bold")
-       .text(opts.recipientName, 50, y);
-    y += 18;
-    doc.fillColor(gray).fontSize(9).font("Helvetica")
-       .text(opts.role, 50, y);
-    y += 13;
-    if (opts.bankAccountName || opts.bankName) {
-      doc.text([opts.bankAccountName, opts.bankName].filter(Boolean).join(" · "), 50, y);
+      let y = 90;
+
+      // ── Recipient block ───────────────────────────────────────────────────
+      doc.fillColor(navy).fontSize(13).font("Helvetica-Bold")
+         .text(opts.recipientName, 50, y);
+      y += 18;
+      doc.fillColor(gray).fontSize(9).font("Helvetica")
+         .text(opts.role, 50, y);
       y += 13;
-    }
-    y += 8;
+      if (opts.bankAccountName || opts.bankName) {
+        doc.text([opts.bankAccountName, opts.bankName].filter(Boolean).join(" · "), 50, y);
+        y += 13;
+      }
+      y += 8;
 
     // thin teal divider
     doc.moveTo(50, y).lineTo(50 + W, y).lineWidth(1).strokeColor(teal).stroke();
@@ -71,12 +80,12 @@ export async function generateCommissionStatementPdf(opts: {
     doc.fillColor(teal).fontSize(9).font("Helvetica-Bold")
        .text("TOTAL COMMISSION PAYOUT", 62, y + 8, { lineBreak: false });
     doc.fillColor(navy).fontSize(16).font("Helvetica-Bold")
-       .text(`$${opts.totalAmount.toFixed(2)}`, 0, y + 6, { align: "right", lineBreak: false });
+       .text(formatMoney(opts.totalAmount), 50, y + 6, { align: "right", width: W, lineBreak: false });
     y += 52;
 
     // ── Orders table header ───────────────────────────────────────────────
     doc.fillColor(navy).fontSize(8).font("Helvetica-Bold");
-    const col = { num: 50, date: 140, rate: 310, amt: 420 };
+    const col = { num: 62, date: 235, rate: 380, amt: 465 };
 
     doc.rect(50, y, W, 20).fillColor(navy).fill();
     doc.fillColor("#ffffff");
@@ -101,7 +110,14 @@ export async function generateCommissionStatementPdf(opts: {
 
       doc.rect(50, y, W, rowH).fillColor(rowBg).fill();
       doc.fillColor("#111827");
-      doc.text(`#${o.orderNumber}`, col.num,  y + 4, { lineBreak: false });
+      const orderLabel = o.orderNumber === "Wallet adjustment"
+        ? (o.description || o.orderNumber)
+        : `#${o.orderNumber}`;
+      doc.text(orderLabel, col.num, y + 4, {
+        lineBreak: false,
+        width: 160,
+        ellipsis: true,
+      });
       doc.text(
         new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
         col.date, y + 4, { lineBreak: false }
@@ -109,7 +125,7 @@ export async function generateCommissionStatementPdf(opts: {
       doc.fillColor(teal);
       doc.text(`${o.rate}%`, col.rate, y + 4, { lineBreak: false });
       doc.fillColor("#047857");
-      doc.text(`$${o.amount.toFixed(2)}`, col.amt, y + 4, { lineBreak: false });
+      doc.text(formatMoney(o.amount), col.amt, y + 4, { lineBreak: false });
       y += rowH;
     }
 
@@ -118,7 +134,7 @@ export async function generateCommissionStatementPdf(opts: {
     doc.rect(50, y, W, 24).fillColor(teal).fill();
     doc.fillColor("#ffffff").fontSize(10).font("Helvetica-Bold");
     doc.text("Total Commission Payout", col.num, y + 7, { lineBreak: false });
-    doc.text(`$${opts.totalAmount.toFixed(2)}`, col.amt, y + 7, { lineBreak: false });
+    doc.text(formatMoney(opts.totalAmount), col.amt, y + 7, { lineBreak: false });
     y += 24;
 
     // ── Footer ────────────────────────────────────────────────────────────
@@ -137,6 +153,9 @@ export async function generateCommissionStatementPdf(opts: {
          50, y, { align: "center", width: W }
        );
 
-    doc.end();
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
   });
 }

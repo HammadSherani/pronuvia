@@ -3,28 +3,100 @@
 import { revalidatePath }                          from "next/cache";
 import { prisma }                                  from "@/lib/db/prisma";
 import { requireAdmin }                            from "@/lib/auth/dal";
-import { Role }                                    from "@/generated/prisma/enums";
-import { sendMail }                                from "@/lib/email/mailer";
-import { commissionPayoutEmail }                   from "@/lib/email/templates";
-import { generateCommissionStatementPdf }          from "@/lib/pdf/commission-statement";
+import { sendPayoutApprovalEmail, type ApprovedPayoutRequest } from "@/lib/withdrawals/notifications";
 
 export type WithdrawalActionState = {
   success?: boolean;
   message?: string;
 } | undefined;
 
-async function deductWallet(userId: string, userRole: Role, amount: number, description: string) {
-  if (userRole === "SALES_REP") {
-    const rep = await prisma.salesRepresentative.findUnique({ where: { id: userId }, select: { walletBalance: true } });
-    const newBalance = Math.max(0, (rep?.walletBalance ?? 0) - amount);
-    await prisma.salesRepresentative.update({ where: { id: userId }, data: { walletBalance: newBalance } });
-    await prisma.walletTransaction.create({ data: { userId, userRole, amount, type: "DEBIT", description, balance: newBalance } });
-  } else {
-    const physician = await prisma.partneringPhysician.findUnique({ where: { id: userId }, select: { walletBalance: true } });
-    const newBalance = Math.max(0, (physician?.walletBalance ?? 0) - amount);
-    await prisma.partneringPhysician.update({ where: { id: userId }, data: { walletBalance: newBalance } });
-    await prisma.walletTransaction.create({ data: { userId, userRole, amount, type: "DEBIT", description, balance: newBalance } });
-  }
+async function applyWithdrawDecision(
+  requestId: string,
+  action: "APPROVED" | "REJECTED",
+  adminNote: string | undefined,
+  description: string,
+): Promise<ApprovedPayoutRequest | null> {
+  return prisma.$transaction(async (tx) => {
+    const request = await tx.withdrawRequest.findUnique({
+      where: { id: requestId },
+      select: {
+        id: true, status: true, amount: true, userId: true, userRole: true,
+        note: true, createdAt: true, snapshotAt: true,
+      },
+    });
+
+    if (!request || request.status !== "PENDING") return null;
+    if (action === "APPROVED" && request.amount <= 0) {
+      throw new Error("Payout amount must be greater than zero.");
+    }
+
+    // Claim the request first. A second admin click can no longer deduct the
+    // wallet or send a second email once this conditional update succeeds.
+    const claimed = await tx.withdrawRequest.updateMany({
+      where: { id: requestId, status: "PENDING" },
+      data: {
+        status: action,
+        adminNote: adminNote?.trim() || null,
+        ...(action === "APPROVED"
+          ? {
+              notificationStatus: "PENDING",
+              notificationAttempts: 0,
+              notificationLastAttemptAt: null,
+              notificationLastError: null,
+            }
+          : {}),
+      },
+    });
+    if (claimed.count !== 1) return null;
+
+    if (action === "APPROVED") {
+      if (request.userRole === "SALES_REP") {
+        const rep = await tx.salesRepresentative.findUnique({
+          where: { id: request.userId },
+          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
+        });
+        if (!rep?.bankName || !rep.bankAccountNumber || !rep.bankAccountName) {
+          throw new Error("User has incomplete bank account details.");
+        }
+        const updated = await tx.salesRepresentative.updateMany({
+          where: { id: request.userId, walletBalance: { gte: request.amount } },
+          data: { walletBalance: { decrement: request.amount } },
+        });
+        if (updated.count !== 1) throw new Error("Wallet balance is lower than the payout amount.");
+        const after = await tx.salesRepresentative.findUnique({ where: { id: request.userId }, select: { walletBalance: true } });
+        await tx.walletTransaction.create({
+          data: { userId: request.userId, userRole: request.userRole, amount: request.amount, type: "DEBIT", description, balance: after?.walletBalance ?? 0 },
+        });
+      } else {
+        const physician = await tx.partneringPhysician.findUnique({
+          where: { id: request.userId },
+          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
+        });
+        if (!physician?.bankName || !physician.bankAccountNumber || !physician.bankAccountName) {
+          throw new Error("User has incomplete bank account details.");
+        }
+        const updated = await tx.partneringPhysician.updateMany({
+          where: { id: request.userId, walletBalance: { gte: request.amount } },
+          data: { walletBalance: { decrement: request.amount } },
+        });
+        if (updated.count !== 1) throw new Error("Wallet balance is lower than the payout amount.");
+        const after = await tx.partneringPhysician.findUnique({ where: { id: request.userId }, select: { walletBalance: true } });
+        await tx.walletTransaction.create({
+          data: { userId: request.userId, userRole: request.userRole, amount: request.amount, type: "DEBIT", description, balance: after?.walletBalance ?? 0 },
+        });
+      }
+    }
+
+    return {
+      id: request.id,
+      amount: request.amount,
+      userId: request.userId,
+      userRole: request.userRole,
+      note: request.note,
+      createdAt: request.createdAt,
+      snapshotAt: request.snapshotAt,
+    };
+  });
 }
 
 export async function updateWithdrawRequest(
@@ -34,110 +106,33 @@ export async function updateWithdrawRequest(
 ): Promise<WithdrawalActionState> {
   await requireAdmin();
 
-  const request = await prisma.withdrawRequest.findUnique({
-    where:  { id: requestId },
-    select: { id: true, status: true, amount: true, userId: true, userRole: true, note: true },
-  });
-
-  if (!request) return { success: false, message: "Request not found." };
-  if (request.status !== "PENDING") return { success: false, message: "Only pending requests can be updated." };
-
-  await prisma.withdrawRequest.update({
-    where: { id: requestId },
-    data:  { status: action, adminNote: adminNote?.trim() || null },
-  });
-
-  if (action === "APPROVED") {
-    await deductWallet(request.userId, request.userRole as Role, request.amount, "Withdrawal approved by admin");
-    // Fire-and-forget — don't let email failure block the approval
-    sendPayoutApprovalEmail(request.userId, request.userRole as Role, request.amount, request.note).catch(
-      (err) => console.error("[payout-email] failed:", err),
-    );
+  let request: ApprovedPayoutRequest | null;
+  try {
+    request = await applyWithdrawDecision(requestId, action, adminNote, "Withdrawal approved by admin");
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "Failed to update payout request." };
   }
+
+  if (!request) return { success: false, message: "Request not found or already processed." };
 
   revalidatePath("/admin/withdrawals");
   revalidatePath("/admin/payout-requests");
   revalidatePath("/sales/wallet");
   revalidatePath("/physician/wallet");
+
+  if (action === "APPROVED") {
+    try {
+      await sendPayoutApprovalEmail(request);
+    } catch (error) {
+      console.error("[payout-email] failed:", error);
+      return {
+        success: true,
+        message: "Request approved, but the notification email failed. Check email configuration and retry the notification.",
+      };
+    }
+  }
+
   return { success: true, message: `Request ${action.toLowerCase()} successfully.` };
-}
-
-async function sendPayoutApprovalEmail(
-  userId:   string,
-  userRole: Role,
-  amount:   number,
-  note:     string | null,
-) {
-  const isPhysician = userRole === "PHYSICIAN";
-
-  const [user, orders] = await Promise.all([
-    isPhysician
-      ? prisma.partneringPhysician.findUnique({
-          where:  { id: userId },
-          select: { firstName: true, lastName: true, email: true, bankName: true, bankAccountName: true },
-        })
-      : prisma.salesRepresentative.findUnique({
-          where:  { id: userId },
-          select: { firstName: true, lastName: true, email: true, bankName: true, bankAccountName: true },
-        }),
-    isPhysician
-      ? prisma.order.findMany({
-          where:   { physicianId: userId, commissionPaid: true },
-          select:  { orderNumber: true, createdAt: true, physicianCommissionAmount: true, physicianCommissionRate: true },
-          orderBy: { createdAt: "asc" },
-        })
-      : prisma.order.findMany({
-          where:   { salesRepId: userId, commissionPaid: true },
-          select:  { orderNumber: true, createdAt: true, salesRepCommissionAmount: true, salesRepCommissionRate: true },
-          orderBy: { createdAt: "asc" },
-        }),
-  ]);
-
-  if (!user) return;
-
-  const period = note?.replace(/^Auto withdrawal\s*[–-]\s*/i, "").trim()
-    || new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
-
-  const pdfOrders = orders.map((o) => ({
-    orderNumber: o.orderNumber,
-    createdAt:   o.createdAt.toISOString(),
-    amount:      isPhysician
-      ? ((o as { physicianCommissionAmount: number | null }).physicianCommissionAmount ?? 0)
-      : ((o as { salesRepCommissionAmount:  number | null }).salesRepCommissionAmount  ?? 0),
-    rate: isPhysician
-      ? ((o as { physicianCommissionRate: number | null }).physicianCommissionRate ?? 0)
-      : ((o as { salesRepCommissionRate:  number | null }).salesRepCommissionRate  ?? 0),
-  }));
-
-  const [pdfBuffer, { subject, html }] = await Promise.all([
-    generateCommissionStatementPdf({
-      recipientName:    `${user.firstName} ${user.lastName}`,
-      role:             isPhysician ? "Partnering Physician" : "Medical Representative",
-      period,
-      orders:           pdfOrders,
-      totalAmount:      amount,
-      bankName:         user.bankName,
-      bankAccountName:  user.bankAccountName ?? null,
-    }),
-    Promise.resolve(commissionPayoutEmail({
-      firstName:  user.firstName,
-      amount,
-      period,
-      orderCount: orders.length,
-    })),
-  ]);
-
-  const safePeriod = period.replace(/[^a-zA-Z0-9]+/g, "-");
-  await sendMail({
-    to:          user.email,
-    subject,
-    html,
-    attachments: [{
-      filename: `commission-statement-${safePeriod}.pdf`,
-      content:  pdfBuffer,
-      type:     "application/pdf",
-    }],
-  });
 }
 
 export async function deleteWithdrawRequest(
@@ -162,22 +157,26 @@ export async function bulkUpdateWithdrawals(
 
   let processed = 0;
   let failed    = 0;
+  let notificationFailures = 0;
 
   for (const id of ids) {
-    const request = await prisma.withdrawRequest.findUnique({
-      where:  { id },
-      select: { id: true, status: true, amount: true, userId: true, userRole: true },
-    });
+    try {
+      const request = await applyWithdrawDecision(id, action, undefined, "Withdrawal approved by admin (bulk)");
+      if (!request) { failed++; continue; }
 
-    if (!request || request.status !== "PENDING") { failed++; continue; }
-
-    await prisma.withdrawRequest.update({ where: { id }, data: { status: action } });
-
-    if (action === "APPROVED") {
-      await deductWallet(request.userId, request.userRole as Role, request.amount, "Withdrawal approved by admin (bulk)");
+      if (action === "APPROVED") {
+        try {
+          await sendPayoutApprovalEmail(request);
+        } catch (error) {
+          notificationFailures++;
+          console.error(`[payout-email] bulk notification failed for ${id}:`, error);
+        }
+      }
+      processed++;
+    } catch (error) {
+      failed++;
+      console.error(`[payout] bulk request ${id} failed:`, error);
     }
-
-    processed++;
   }
 
   revalidatePath("/admin/withdrawals");
@@ -185,12 +184,15 @@ export async function bulkUpdateWithdrawals(
   revalidatePath("/physician/wallet");
 
   const verb = action === "APPROVED" ? "approved" : "rejected";
+  const notificationMessage = notificationFailures > 0
+    ? ` ${notificationFailures} notification${notificationFailures !== 1 ? "s" : ""} failed.`
+    : "";
   return {
     success:   processed > 0,
     processed,
     failed,
     message:   failed > 0
-      ? `${processed} ${verb}, ${failed} skipped (already processed).`
-      : `${processed} request${processed !== 1 ? "s" : ""} ${verb} successfully.`,
+      ? `${processed} ${verb}, ${failed} skipped (already processed).${notificationMessage}`
+      : `${processed} request${processed !== 1 ? "s" : ""} ${verb} successfully.${notificationMessage}`,
   };
 }

@@ -13,7 +13,7 @@ interface SalesRepFormProps {
   successRedirect?: string;
   isEdit?: boolean;
   defaults?: {
-    firstName?: string; lastName?: string; email?: string; phone?: string;
+    firstName?: string; lastName?: string; email?: string; loginId?: string; phone?: string;
     commission?: number; billingAddress?: string; shippingAddress?: string;
     bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string; routingNumber?: string;
   };
@@ -117,6 +117,14 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
             <input name="email" type="email" className={icls(e.email?.[0])} placeholder="john@example.com" defaultValue={defaults?.email} />
             <FE msg={e.email?.[0]} />
           </div>
+          <div>
+            <label className={lbl}>Login ID</label>
+            <input name="loginId" type="text" autoComplete="username" className={icls(e.loginId?.[0])} placeholder="e.g. john.smith" defaultValue={defaults?.loginId} />
+            <FE msg={e.loginId?.[0]} />
+            <p className="text-[11px] text-gray-400 mt-1">Optional. Used to sign in (3–30 characters, letters, numbers, . _ -)</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <label className={lbl}>Phone</label>
             <input name="phone" className={icls()} placeholder="+1 555 000 0000" defaultValue={defaults?.phone} />

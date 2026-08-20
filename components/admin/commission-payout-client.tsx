@@ -8,7 +8,14 @@ import { notifyUserAddBank } from "@/actions/admin/notify-bank";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type OrderRow = { orderNumber: string; createdAt: string; amount: number; rate: number };
+type OrderRow = {
+  orderNumber: string;
+  createdAt: string;
+  amount: number;
+  rate: number;
+  refundedAt?: string;
+  reason?: string | null;
+};
 
 type UserInfo = {
   firstName:         string;
@@ -51,10 +58,21 @@ export type CurrentMonthEntry = {
   orders:          OrderRow[];
 };
 
+export type RejectedCommissionEntry = {
+  userId:                 string;
+  userRole:               "PHYSICIAN" | "SALES_REP";
+  userName:               string;
+  userEmail:              string;
+  orderCount:             number;
+  totalRejectedCommission: number;
+  orders:                 OrderRow[];
+};
+
 interface Props {
   pending:      PendingRow[];
   rejected:     RejectedRow[];
   currentMonth: CurrentMonthEntry[];
+  rejectedCommission: RejectedCommissionEntry[];
   monthLabel:   string;
 }
 
@@ -92,17 +110,19 @@ function Avatar({ name, role }: { name: string; role: "PHYSICIAN" | "SALES_REP" 
 // ── Current-month orders modal ────────────────────────────────────────────────
 
 function OrdersModal({
-  name, period, orders, onClose,
+  name, period, orders, rejected = false, onClose,
 }: {
-  name: string; period: string; orders: OrderRow[]; onClose: () => void;
+  name: string; period: string; orders: OrderRow[]; rejected?: boolean; onClose: () => void;
 }) {
   const total = orders.reduce((s, o) => s + o.amount, 0);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] flex flex-col">
+      <div className={`bg-white rounded-2xl shadow-2xl w-full ${rejected ? "max-w-3xl" : "max-w-xl"} max-h-[80vh] flex flex-col`}>
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Commission Orders</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+              {rejected ? "Refunded Commission Orders" : "Commission Orders"}
+            </p>
             <h3 className="text-base font-bold text-gray-800 mt-0.5">{name} — {period}</h3>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -121,9 +141,13 @@ function OrdersModal({
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 sticky top-0">
                   <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Date</th>
+                  {rejected && <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Refunded</th>}
                   <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rate</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
+                  {rejected && <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Reason</th>}
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {rejected ? "Rejected Commission" : "Commission"}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -135,10 +159,22 @@ function OrdersModal({
                     <td className="px-5 py-3 text-xs text-gray-500">
                       {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
+                    {rejected && (
+                      <td className="px-5 py-3 text-xs text-gray-500">
+                        {o.refundedAt
+                          ? new Date(o.refundedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                          : "—"}
+                      </td>
+                    )}
                     <td className="px-5 py-3">
                       <span className="inline-flex px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-semibold">{o.rate}%</span>
                     </td>
-                    <td className="px-5 py-3 text-right font-bold text-emerald-600 text-sm">{fmt(o.amount)}</td>
+                    {rejected && (
+                      <td className="px-5 py-3 text-xs text-gray-500 max-w-40 truncate" title={o.reason ?? ""}>
+                        {o.reason || "Refunded order"}
+                      </td>
+                    )}
+                    <td className={`px-5 py-3 text-right font-bold text-sm ${rejected ? "text-red-600" : "text-emerald-600"}`}>{fmt(o.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -290,11 +326,11 @@ function SectionHeader({ title, count, countColor }: { title: string; count: num
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function CommissionPayoutClient({ pending: initialPending, rejected, currentMonth, monthLabel }: Props) {
+export function CommissionPayoutClient({ pending: initialPending, rejected, currentMonth, rejectedCommission, monthLabel }: Props) {
   const [pending,      setPending]     = useState(initialPending);
   const [selected,     setSelected]    = useState<Set<string>>(new Set());
   const [bulkModal,    setBulkModal]   = useState(false);
-  const [ordersModal,  setOrdersModal] = useState<{ name: string; period: string; orders: OrderRow[] } | null>(null);
+  const [ordersModal,  setOrdersModal] = useState<{ name: string; period: string; orders: OrderRow[]; rejected?: boolean } | null>(null);
   const [actionModal,  setActionModal] = useState<{ row: PendingRow; action: "APPROVED" | "REJECTED" } | null>(null);
   const [confirmDel,   setConfirmDel]  = useState<PendingRow | null>(null);
   const [deleting,     startDelete]    = useTransition();
@@ -304,13 +340,20 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
   const removeRow  = (id: string)      => { setPending((p) => p.filter((r) => r.id !== id)); setSelected((s) => { const n = new Set(s); n.delete(id); return n; }); };
   const removeRows = (ids: string[])   => { const set = new Set(ids); setPending((p) => p.filter((r) => !set.has(r.id))); setSelected(new Set()); };
 
-  const hasBank       = (r: PendingRow) => Boolean(r.user.bankName);
+  const hasBank       = (r: PendingRow) => Boolean(
+    r.user.bankName && r.user.bankAccountNumber && r.user.bankAccountName,
+  );
   const bankRows      = pending.filter(hasBank);
   const allBankSel    = bankRows.length > 0 && bankRows.every((r) => selected.has(r.id));
   const someSel       = selected.size > 0 && !allBankSel;
   const toggleSelect  = (id: string, hasBankAcc: boolean) => {
     if (!hasBankAcc) return;
-    setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
   };
   const toggleAll     = () => setSelected(allBankSel ? new Set() : new Set(bankRows.map((r) => r.id)));
 
@@ -342,6 +385,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
 
   const pendingTotal = pending.reduce((s, r) => s + r.amount, 0);
   const currentTotal = currentMonth.reduce((s, e) => s + e.totalCommission, 0);
+  const rejectedCommissionTotal = rejectedCommission.reduce((s, e) => s + e.totalRejectedCommission, 0);
 
   return (
     <>
@@ -634,11 +678,85 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
         </div>
       </div>
 
-      {/* ══ 3. Rejected (compact) ════════════════════════════════════════════ */}
+      {/* ══ 3. Rejected Commission (refund clawbacks) ═════════════════════════ */}
+      <div className="mb-8">
+        <SectionHeader
+          title={`Rejected Commission — ${monthLabel}`}
+          count={rejectedCommission.length}
+          countColor="bg-red-100 text-red-600 border-red-200"
+        />
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          {rejectedCommission.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                <svg className="w-5 h-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 8A6 6 0 006 8c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-400">No refunded commission this month</p>
+            </div>
+          ) : (
+            <>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="text-center px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orders</th>
+                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rejected Commission</th>
+                    <th className="px-5 py-3.5" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {rejectedCommission.map((entry) => (
+                    <tr key={`${entry.userRole}-${entry.userId}`} className="hover:bg-gray-50/40 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar name={entry.userName} role={entry.userRole} />
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800 leading-none">{entry.userName}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{entry.userEmail}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5"><RoleBadge role={entry.userRole} /></td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-50 text-xs font-bold text-red-600">{entry.orderCount}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right"><span className="text-base font-black text-red-600">{fmt(entry.totalRejectedCommission)}</span></td>
+                      <td className="px-5 py-3.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setOrdersModal({ name: entry.userName, period: monthLabel, orders: entry.orders, rejected: true })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                          View Refunds
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between">
+                <span className="text-xs text-gray-400">{rejectedCommission.length} user{rejectedCommission.length !== 1 ? "s" : ""}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">Total rejected</span>
+                  <span className="text-sm font-black text-red-600">{fmt(rejectedCommissionTotal)}</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ══ 4. Rejected payout requests (compact) ════════════════════════════ */}
       {rejected.length > 0 && (
         <div className="border-t border-gray-100 pt-6">
           <SectionHeader
-            title="Rejected"
+            title="Rejected Payout Requests"
             count={rejected.length}
             countColor="bg-red-100 text-red-600 border-red-200"
           />
@@ -698,6 +816,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
           name={ordersModal.name}
           period={ordersModal.period}
           orders={ordersModal.orders}
+          rejected={ordersModal.rejected}
           onClose={() => setOrdersModal(null)}
         />
       )}

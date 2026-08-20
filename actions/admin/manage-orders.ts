@@ -923,6 +923,7 @@ export async function processReturn(
 
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/admin/withdrawals");
   revalidatePath("/sales/wallet");
   revalidatePath("/physician/wallet");
 

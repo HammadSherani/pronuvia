@@ -59,6 +59,7 @@ export default async function SalesRepsPage({
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Login ID</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Self Commission</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orders</th>
@@ -80,6 +81,7 @@ export default async function SalesRepsPage({
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-gray-500">{r.email}</td>
+                    <td className="px-5 py-3.5 text-gray-500">{r.loginId || "Not set"}</td>
                     <td className="px-5 py-3.5 text-gray-500">{r.phone ?? "—"}</td>
                     <td className="px-5 py-3.5">
                       <span className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">

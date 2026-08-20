@@ -93,7 +93,6 @@ export default async function PhysicianCommissionPage() {
     prisma.partneringPhysician.findUnique({
       where:  { id: session.userId },
       select: {
-        walletBalance:     true,
         firstName:         true,
         lastName:          true,
         bankName:          true,
@@ -124,13 +123,19 @@ export default async function PhysicianCommissionPage() {
     }),
   ]);
 
-  const balance    = physician?.walletBalance ?? 0;
   const hasPending = withdrawRequests.some((r) => r.status === "PENDING");
 
+  const refundedOrderIds = new Set(
+    (await prisma.orderRefund.findMany({
+      where: { orderId: { in: earningOrders.map((o) => o.id) } },
+      select: { orderId: true },
+    })).map((r) => r.orderId)
+  );
+
   const CLOSED = new Set(["REFUNDED", "CANCELLED"]);
-  const paidOrders     = earningOrders.filter((o) =>  o.commissionPaid);
-  const reversedOrders = earningOrders.filter((o) => !o.commissionPaid && CLOSED.has(o.status));
-  const pendingOrders  = earningOrders.filter((o) => !o.commissionPaid && !CLOSED.has(o.status));
+  const paidOrders     = earningOrders.filter((o) => !refundedOrderIds.has(o.id) && o.commissionPaid);
+  const reversedOrders = earningOrders.filter((o) => refundedOrderIds.has(o.id) || (!o.commissionPaid && CLOSED.has(o.status)));
+  const pendingOrders  = earningOrders.filter((o) => !refundedOrderIds.has(o.id) && !o.commissionPaid && !CLOSED.has(o.status));
 
   const totalPaid     = paidOrders.reduce((s, o)     => s + (o.physicianCommissionAmount ?? 0), 0);
   const totalPending  = pendingOrders.reduce((s, o)  => s + (o.physicianCommissionAmount ?? 0), 0);
@@ -147,8 +152,6 @@ export default async function PhysicianCommissionPage() {
       </div>
 
       <PhysicianWalletPanel
-        balance={balance}
-        totalPaid={totalPaid}
         totalPending={totalPending}
         totalWithdrawn={totalWithdrawn}
         commissionOrderCount={earningOrders.length}

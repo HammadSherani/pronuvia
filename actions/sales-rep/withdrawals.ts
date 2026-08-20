@@ -42,12 +42,12 @@ export async function createWithdrawRequest(
   try {
     const rep = await prisma.salesRepresentative.findUnique({
       where:  { id: session.userId },
-      select: { walletBalance: true, bankName: true },
+      select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
     });
 
     if (!rep) return { message: "Account not found." };
-    if (!rep.bankName) {
-      return { message: "Please add your bank details in Account Settings before requesting a withdrawal." };
+    if (!rep.bankName || !rep.bankAccountNumber || !rep.bankAccountName) {
+      return { message: "Please complete your bank details in Account Settings before requesting a withdrawal." };
     }
     if (amount > rep.walletBalance) {
       return {

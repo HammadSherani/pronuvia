@@ -9,6 +9,7 @@ import { CreateSalesRepSchema, UpdateSalesRepSchema } from "@/lib/validations/sa
 import { sendMail } from "@/lib/email/mailer";
 import { passwordSetupEmail } from "@/lib/email/templates";
 import { z } from "zod";
+import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
 
 export type SalesRepActionState = {
   errors?: Record<string, string[]>;
@@ -21,6 +22,7 @@ function parseCreate(formData: FormData) {
     firstName:         (formData.get("firstName")         as string)?.trim() || "",
     lastName:          (formData.get("lastName")          as string)?.trim() || "",
     email:             (formData.get("email")             as string)?.trim() || "",
+    loginId:           (formData.get("loginId")             as string)?.trim() || undefined,
     phone:             (formData.get("phone")             as string) || undefined,
     commission:        Number(formData.get("commission") ?? 0),
     billingAddress:    (formData.get("billingAddress")    as string) || undefined,
@@ -39,6 +41,7 @@ function parseUpdate(formData: FormData) {
     firstName:         (formData.get("firstName")         as string)?.trim() || undefined,
     lastName:          (formData.get("lastName")          as string)?.trim() || undefined,
     email:             (formData.get("email")             as string)?.trim() || undefined,
+    loginId:           (formData.get("loginId")             as string)?.trim() || undefined,
     phone:             (formData.get("phone")             as string) || undefined,
     commission:        num("commission"),
     billingAddress:    (formData.get("billingAddress")    as string) || undefined,
@@ -64,6 +67,10 @@ export async function createSalesRep(
 
   const exists = await prisma.salesRepresentative.findUnique({ where: { email: data.email } });
   if (exists) return { errors: { email: ["A sales rep with this email already exists."] } };
+
+  if (data.loginId && await isLoginIdTaken(data.loginId, undefined, "SALES_REP")) {
+    return { errors: { loginId: ["This Login ID is already in use."] } };
+  }
 
   const placeholder = randomPlaceholderPassword();
   const hashed      = await hashPassword(placeholder);
@@ -113,6 +120,10 @@ export async function updateSalesRep(
   if (data.email && data.email !== existing.email) {
     const taken = await prisma.salesRepresentative.findUnique({ where: { email: data.email } });
     if (taken) return { errors: { email: ["This email is already in use."] } };
+  }
+
+  if (data.loginId && await isLoginIdTaken(data.loginId, id, "SALES_REP")) {
+    return { errors: { loginId: ["This Login ID is already in use."] } };
   }
 
   const firstName = data.firstName ?? existing.firstName;
@@ -188,7 +199,7 @@ export async function listSalesReps(opts?: { skip?: number; take?: number }) {
     prisma.salesRepresentative.findMany({
       select: {
         id: true, name: true, firstName: true, lastName: true,
-        email: true, phone: true, commission: true, ordersCount: true, createdAt: true,
+        email: true, loginId: true, phone: true, commission: true, ordersCount: true, createdAt: true,
       },
       orderBy: { createdAt: "desc" },
       skip: opts?.skip,
@@ -204,7 +215,7 @@ export async function getAllSalesRepsForExport() {
   return prisma.salesRepresentative.findMany({
     select: {
       id: true, name: true, firstName: true, lastName: true,
-      email: true, phone: true, commission: true, ordersCount: true, walletBalance: true,
+      email: true, loginId: true, phone: true, commission: true, ordersCount: true, walletBalance: true,
       billingAddress: true, shippingAddress: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true,
       swiftCode: true, routingNumber: true,
@@ -223,6 +234,7 @@ export async function getSalesRepById(id: string) {
     where: { id },
     select: {
       id: true, name: true, firstName: true, lastName: true, email: true,
+      loginId: true,
       phone: true, website: true, commission: true, ordersCount: true, walletBalance: true,
       billingAddress: true, shippingAddress: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true, swiftCode: true, routingNumber: true,

@@ -47,6 +47,7 @@ export default async function EditSalesRepPage({ params }: Props) {
           firstName:         rep.firstName,
           lastName:          rep.lastName,
           email:             rep.email,
+          loginId:           rep.loginId          ?? undefined,
           phone:             rep.phone        ?? undefined,
           commission:        rep.commission,
           billingAddress:    rep.billingAddress  ?? undefined,

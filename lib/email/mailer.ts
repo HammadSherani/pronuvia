@@ -25,6 +25,7 @@ export async function sendMail(opts: {
   attachments?: MailAttachment[];
 }) {
   const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "sales1.pronuvia@gmail.com";
+  const replyTo = "sales1.pronuvia@gmail.com";
 
   // Normalise CC: remove blanks and duplicates of `to`
   const ccList = (Array.isArray(opts.cc) ? opts.cc : opts.cc ? [opts.cc] : [])
@@ -63,6 +64,7 @@ export async function sendMail(opts: {
       const [res] = await sgMail.send({
         to:      opts.to,
         from,
+        replyTo,
         subject: opts.subject,
         html,
         ...(ccUnique.length       ? { cc:          ccUnique       } : {}),
@@ -111,6 +113,7 @@ export async function sendMail(opts: {
 
   const info = await transporter.sendMail({
     from:        rawFrom,
+    replyTo,
     to:          opts.to,
     cc:          ccUnique.length  ? ccUnique.join(", ")  : undefined,
     bcc:         bccUnique.length ? bccUnique.join(", ") : undefined,

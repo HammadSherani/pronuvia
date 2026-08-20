@@ -22,15 +22,14 @@ const STATUS_DOT: Record<string, string> = {
 export default async function PhysicianDashboardPage() {
   const session = await requirePhysician();
 
-  const [physician, orderAggregate, recentOrders, totalPaidOut] = await Promise.all([
+  const [physician, orderAggregate, recentOrders, pendingCommissionOrders, totalPaidOut] = await Promise.all([
     prisma.partneringPhysician.findUnique({
       where: { id: session.userId },
-      select: { firstName: true, lastName: true, email: true, loginId: true, walletBalance: true },
+      select: { firstName: true, lastName: true, email: true, loginId: true },
     }),
     prisma.order.aggregate({
       where: { physicianId: session.userId },
       _count: true,
-      _sum: { physicianCommissionAmount: true },
     }),
     prisma.order.findMany({
       where: { physicianId: session.userId },
@@ -38,15 +37,31 @@ export default async function PhysicianDashboardPage() {
       take: 5,
       select: { id: true, orderNumber: true, total: true, status: true, createdAt: true },
     }),
+    prisma.order.findMany({
+      where: {
+        physicianId: session.userId,
+        commissionPaid: false,
+        status: { notIn: ["REFUNDED", "CANCELLED"] },
+      },
+      select: { id: true, physicianCommissionAmount: true },
+    }),
     prisma.withdrawRequest.aggregate({
       where: { userId: session.userId, userRole: "PHYSICIAN", status: "APPROVED" },
       _sum: { amount: true },
     }).then((r) => r._sum.amount ?? 0),
   ]);
 
-  const walletBalance    = physician?.walletBalance ?? 0;
   const totalOrders      = orderAggregate._count;
-  const totalCommission  = walletBalance + totalPaidOut;
+  const pendingRefundIds = new Set(
+    (await prisma.orderRefund.findMany({
+      where: { orderId: { in: pendingCommissionOrders.map((o) => o.id) } },
+      select: { orderId: true },
+    })).map((r) => r.orderId)
+  );
+  const totalPending = pendingCommissionOrders
+    .filter((o) => !pendingRefundIds.has(o.id))
+    .reduce((sum, o) => sum + (o.physicianCommissionAmount ?? 0), 0);
+  const totalCommission  = totalPending + totalPaidOut;
   const loginId          = physician?.loginId ?? "Not set";
   const emailAddress     = physician?.email ?? session.email ?? "No email";
   const summaryCards = [
@@ -90,9 +105,9 @@ export default async function PhysicianDashboardPage() {
       ),
     },
     {
-      label: "Commission Balance",
-      value: fmtMoney(walletBalance),
-      sub: "Current unpaid",
+      label: "Pending Commission",
+      value: fmtMoney(totalPending),
+      sub: "Awaiting payout",
       href: "/physician/wallet",
       color: "#10b981",
       bg: "#ecfdf5",
@@ -145,9 +160,9 @@ export default async function PhysicianDashboardPage() {
       ),
     },
     {
-      label: "Commission Balance",
-      value: fmtMoney(walletBalance),
-      sub: "Available",
+      label: "Pending Commission",
+      value: fmtMoney(totalPending),
+      sub: "Awaiting payout",
       href: "/physician/wallet",
       color: "#10b981",
       bg: "#ecfdf5",
@@ -228,7 +243,7 @@ export default async function PhysicianDashboardPage() {
           </div>
 
           {/* KPI cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {kpiCards.map((card) => (
               <Link
                 key={card.label}
@@ -248,7 +263,7 @@ export default async function PhysicianDashboardPage() {
                 </div>
               </Link>
             ))}
-          </div>
+          </div> */}
 
           {/* Recent Orders table */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

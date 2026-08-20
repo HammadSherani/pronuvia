@@ -133,7 +133,7 @@ export default async function SalesWithdrawalsPage({
                     </td>
                     <td className="px-5 py-4">
                       <a
-                        href={`/api/sales-rep/commission-statement/${r.id}`}
+                        href={`/api/sales/commission-statement/${r.id}`}
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b3b6f] hover:text-[#3DBFA4] transition-colors group"
                       >
                         <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#3DBFA4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
