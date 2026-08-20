@@ -3,11 +3,11 @@
   "crons": [
     {
       "path": "/api/cron/auto-withdraw",
-      "schedule": "1 * * * *"
+      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/cron/payout-notifications",
-      "schedule": "*/15 * * * *"
+      "schedule": "15 1 * * *"
     }
   ]
 }
