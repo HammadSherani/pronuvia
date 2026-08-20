@@ -13,6 +13,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
