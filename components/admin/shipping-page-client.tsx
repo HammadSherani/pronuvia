@@ -437,11 +437,12 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
   const [shipDate, setShipDate] = useState(today);
 
   // Rates
-  const [selectedCarriers,     setSelectedCarriers]     = useState<CarrierCode[]>(["fedex"]);
+  const [selectedCarriers,     setSelectedCarriers]     = useState<CarrierCode[]>(["fedex", "ups", "usps"]);
   const [selectedSignatureCode, setSelectedSignatureCode] = useState<number | null>(null);
   const [rates,        setRates]        = useState<RateResult[] | null>(null);
   const [selectedRate, setSelectedRate] = useState<RateResult | null>(null);
   const [rateError,    setRateError]    = useState<string | null>(null);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [purchased,    setPurchased]    = useState<{ trackingNumber: string; labelBase64: string; labelFormat: string; cost: number } | null>(null);
 
   const [isGettingRates, startGetRates] = useTransition();
@@ -532,6 +533,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     if (!selectedRate) { toast.error("Select a rate first."); return; }
     const pkg = buildPkg();
     if (!pkg) { toast.error("Invalid package weight."); return; }
+    setPurchaseError(null);
     startPurchase(async () => {
       try {
         const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, selectedSignatureCode ?? 0);
@@ -540,10 +542,20 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
           toast.success(res.message);
           router.refresh();
         } else {
-          toast.error(res.message || "Label purchase failed. Check server logs for details.");
+          const message = res.message || "Label purchase failed. Check server logs for details.";
+          const visibleMessage = selectedRate.carrier === "usps"
+            ? `USPS label purchase failed: ${message}`
+            : message;
+          setPurchaseError(visibleMessage);
+          toast.error(visibleMessage);
         }
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "An unexpected error occurred purchasing the label.");
+        const message = e instanceof Error ? e.message : "An unexpected error occurred purchasing the label.";
+        const visibleMessage = selectedRate.carrier === "usps"
+          ? `USPS label purchase failed: ${message}`
+          : message;
+        setPurchaseError(visibleMessage);
+        toast.error(visibleMessage);
       }
     });
   }
@@ -961,6 +973,12 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-sm text-red-600">{rateError}</p>
+          </div>
+        )}
+
+        {purchaseError && (
+          <div role="alert" className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
+            {purchaseError}
           </div>
         )}
 

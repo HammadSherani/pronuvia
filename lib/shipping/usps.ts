@@ -1,5 +1,58 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
 
+const MAX_LOGGED_ERROR_LENGTH = 4_000;
+const MAX_USER_ERROR_LENGTH = 600;
+
+function formatUSPSApiError(body: string): string {
+  const trimmed = body.trim();
+  if (!trimmed) return "The USPS API returned an empty error response.";
+
+  try {
+    const data = JSON.parse(trimmed) as Record<string, unknown>;
+    const root = data.error && typeof data.error === "object"
+      ? data.error as Record<string, unknown>
+      : data;
+    const messages: string[] = [];
+
+    if (typeof root.code === "string" && root.code) messages.push(root.code);
+    if (typeof root.message === "string" && root.message) messages.push(root.message);
+
+    const errors = root.errors;
+    if (Array.isArray(errors)) {
+      for (const item of errors) {
+        if (typeof item === "string") messages.push(item);
+        else if (item && typeof item === "object") {
+          const error = item as Record<string, unknown>;
+          const detail = [error.code, error.message, error.description]
+            .filter((value): value is string => typeof value === "string" && value.length > 0)
+            .join(": ");
+          if (detail) messages.push(detail);
+        }
+      }
+    }
+
+    if (messages.length) return [...new Set(messages)].join("; ");
+  } catch {
+    // USPS occasionally returns plain text. Keep that response as the detail.
+  }
+
+  return trimmed.replace(/\s+/g, " ").slice(0, MAX_LOGGED_ERROR_LENGTH);
+}
+
+async function throwUSPSApiError(res: Response, operation: string): Promise<never> {
+  const body = await res.text();
+  const detail = formatUSPSApiError(body);
+  console.error(`[USPS ${operation}] API error`, {
+    status: res.status,
+    statusText: res.statusText,
+    body: body.slice(0, MAX_LOGGED_ERROR_LENGTH),
+  });
+  const userDetail = detail.length > MAX_USER_ERROR_LENGTH
+    ? `${detail.slice(0, MAX_USER_ERROR_LENGTH)}…`
+    : detail;
+  throw new Error(`USPS ${operation} failed (HTTP ${res.status}): ${userDetail}`);
+}
+
 async function parseUSPSLabelResponse(res: Response): Promise<{ labelBase64: string; trackingNumber: string; cost: number }> {
   const contentType = res.headers.get("content-type") ?? "";
   console.log("[USPS label] response content-type:", contentType);
@@ -38,7 +91,7 @@ async function parseUSPSLabelResponse(res: Response): Promise<{ labelBase64: str
       }
     }
 
-    const trackingNumber = String(jsonData.trackingNumber ?? "");
+    const trackingNumber = String(jsonData.trackingNumber ?? "").trim();
     const cost = parseFloat(String(jsonData.postage ?? (jsonData.fees as Array<{ price: number }>)?.[0]?.price ?? 0));
     let labelBase64 = String(jsonData.labelImage ?? jsonData.PDFImage ?? "");
     console.log("[USPS multipart] json keys:", Object.keys(jsonData).join(", "));
@@ -55,8 +108,8 @@ async function parseUSPSLabelResponse(res: Response): Promise<{ labelBase64: str
   // JSON response
   const data = await res.json() as Record<string, unknown>;
   return {
-    labelBase64:    String(data?.labelImage ?? data?.PDFImage ?? ""),
-    trackingNumber: String(data?.trackingNumber ?? ""),
+    labelBase64:    String(data?.labelImage ?? data?.PDFImage ?? "").trim(),
+    trackingNumber: String(data?.trackingNumber ?? "").trim(),
     cost:           parseFloat(String(data?.postage ?? (data?.fees as Array<{ price: number }>)?.[0]?.price ?? 0)),
   };
 }
@@ -75,8 +128,7 @@ async function getToken(): Promise<string> {
     cache: "no-store",
   });
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`USPS auth failed ${res.status}: ${body}`);
+    return throwUSPSApiError(res, "authentication");
   }
   const data = await res.json() as { access_token: string; scope?: string; api_products?: string };
   console.log("[USPS auth] scope:", data.scope, "| products:", data.api_products);
@@ -215,7 +267,11 @@ async function getPaymentToken(oauthToken: string): Promise<string> {
       },
     ],
   };
-  console.log("[USPS payment] request:", JSON.stringify(reqBody));
+  console.log("[USPS payment] requesting payment authorization", {
+    hasCrid: Boolean(crid),
+    hasMid: Boolean(mid),
+    hasAccountNumber: Boolean(accNum),
+  });
 
   const res = await fetch(`${BASE}/payments/v3/payment-authorization`, {
     method:  "POST",
@@ -225,8 +281,7 @@ async function getPaymentToken(oauthToken: string): Promise<string> {
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`USPS payment auth failed ${res.status}: ${err}`);
+    return throwUSPSApiError(res, "payment authorization");
   }
 
   const data = await res.json() as { paymentAuthorizationToken?: string };
@@ -244,10 +299,21 @@ export async function purchaseUSPSLabel(
   service:       string,
   signatureCode = 0,
 ): Promise<LabelResult> {
+  const missingPaymentFields = [
+    ["USPS_CRID", process.env.USPS_CRID],
+    ["USPS_MID", process.env.USPS_MID],
+    ["USPS_ACCOUNT_NUMBER", process.env.USPS_ACCOUNT_NUMBER],
+  ].filter(([, value]) => !value?.trim()).map(([name]) => name);
+  if (missingPaymentFields.length) {
+    throw new Error(`USPS label purchase is not configured. Missing: ${missingPaymentFields.join(", ")}.`);
+  }
+
   const token        = await getToken();
   const paymentToken = await getPaymentToken(token);
 
-  const weightLbs = Math.max(1, Math.ceil(pkg.weightLbs));
+  // The rates endpoint accepts whole pounds, but the labels endpoint requires
+  // the unit fields and accepts the actual package weight (for example 0.5 lb).
+  const weightLbs = Math.max(0.1, Number(pkg.weightLbs.toFixed(2)));
 
   const toNameParts   = to.name.trim().split(/\s+/);
   const fromNameParts = from.name.trim().split(/\s+/);
@@ -279,16 +345,24 @@ export async function purchaseUSPSLabel(
       processingCategory:           pkgProcessingCategory(pkg),
       rateIndicator:                "SP",
       destinationEntryFacilityType: "NONE",
+      weightUOM:                    "lb",
       weight:                       weightLbs,
+      dimensionsUOM:                "in",
       length:                       Math.ceil(pkg.lengthIn ?? 6),
       width:                        Math.ceil(pkg.widthIn  ?? 4),
       height:                       Math.ceil(pkg.heightIn ?? 2),
       mailingDate:                  new Date().toISOString().split("T")[0],
-      extraServices:                signatureCode === 1 ? [910] : signatureCode === 2 ? [911] : [],
+      // 921 = Signature Confirmation, 922 = Adult Signature Required.
+      // 910/911 are Certified Mail services and do not match these UI options.
+      extraServices:                signatureCode === 1 ? [921] : signatureCode === 2 ? [922] : [],
     },
     imageInfo: {
-      imageType: "PDF",
-      labelType: "4X6LABEL",
+      imageType:       "PDF",
+      labelType:       "4X6LABEL",
+      receiptOption:   "NONE",
+      suppressPostage: false,
+      suppressMailDate:false,
+      returnLabel:     false,
     },
   };
 
@@ -300,18 +374,25 @@ export async function purchaseUSPSLabel(
       Authorization:               `Bearer ${token}`,
       "X-Payment-Authorization-Token": paymentToken,
       "Content-Type":              "application/json",
-      Accept:                      "application/json",
     },
     body: JSON.stringify(body),
     cache: "no-store",
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`USPS label error: ${err}`);
+    return throwUSPSApiError(res, "label purchase");
   }
 
   const { labelBase64: label64, trackingNumber: tracking, cost } = await parseUSPSLabelResponse(res);
+
+  if (!tracking || !label64) {
+    console.error("[USPS label purchase] USPS returned an incomplete label response", {
+      trackingNumberPresent: Boolean(tracking),
+      labelPresent: Boolean(label64),
+      cost,
+    });
+    throw new Error("USPS label purchase failed: USPS did not return a tracking number and label PDF.");
+  }
 
   return {
     carrier:        "usps",

@@ -26,6 +26,7 @@ import { validateCoupon }            from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
+import { StripeLoadingOverlay } from "@/components/shared/stripe-loading-overlay";
 
 type ShippingOption = { id: string; method: string; label: string; cost: number };
 
@@ -333,6 +334,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
 
   return (
     <div className="">
+      <StripeLoadingOverlay visible={stripeReady && payMethod === "CARD" && !paymentReady} />
 
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Checkout</h1>
       <div className="h-0.5 bg-gray-900 mb-6" />
@@ -495,6 +497,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                         mode:       "payment",
                         amount:     Math.max(50, Math.round(total * 100)),
                         currency:   "usd",
+                        paymentMethodTypes: ["card"],
                         appearance: { theme: "stripe", variables: { colorPrimary: "#3DBFA4", borderRadius: "4px", fontFamily: "inherit" } },
                       }}
                     >

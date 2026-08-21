@@ -12,11 +12,11 @@ function getFromAddress(): ShipAddress {
   return {
     name:    process.env.SHIP_FROM_NAME    ?? "Pronuvia",
     company: process.env.SHIP_FROM_COMPANY ?? "Pronuvia LLC",
-    street1: process.env.SHIP_FROM_STREET  ?? "123 Warehouse Blvd",
-    city:    process.env.SHIP_FROM_CITY    ?? "New York",
-    state:   process.env.SHIP_FROM_STATE   ?? "NY",
-    zip:     process.env.SHIP_FROM_ZIP     ?? "10001",
-    country: "US",
+    street1: process.env.SHIP_FROM_STREET  ?? process.env.FEDEX_SHIPPER_ADDRESS ?? "123 Warehouse Blvd",
+    city:    process.env.SHIP_FROM_CITY    ?? process.env.FEDEX_SHIPPER_CITY    ?? "New York",
+    state:   process.env.SHIP_FROM_STATE   ?? process.env.FEDEX_SHIPPER_STATE   ?? "NY",
+    zip:     process.env.SHIP_FROM_ZIP     ?? process.env.FEDEX_SHIPPER_ZIP     ?? "10001",
+    country: process.env.SHIP_FROM_COUNTRY ?? process.env.FEDEX_SHIPPER_COUNTRY ?? "US",
     phone:   process.env.SHIP_FROM_PHONE   ?? "2125550100",
   };
 }
@@ -228,7 +228,14 @@ export async function purchaseLabel(
         result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service, signatureCode);
       }
     } catch (e) {
-      return { success: false, message: (e as Error).message };
+      const error = e instanceof Error ? e : new Error(String(e));
+      console.error(`[purchaseLabel] ${carrier.toUpperCase()} label purchase failed`, {
+        orderId,
+        serviceCode,
+        error: error.message,
+        stack: error.stack,
+      });
+      return { success: false, message: error.message || `${carrier.toUpperCase()} label purchase failed.` };
     }
 
     // Truncate label data if it is excessively large (MongoDB 16 MB doc limit)
