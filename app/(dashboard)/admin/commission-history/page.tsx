@@ -3,7 +3,7 @@ import { prisma }               from "@/lib/db/prisma";
 import { PageHeader }           from "@/components/admin/page-header";
 import { CommissionHistoryClient } from "@/components/admin/commission-history-client";
 
-export const metadata = { title: "Commission History – Pronuvia Admin" };
+export const metadata = { title: "Payout History – Pronuvia Admin" };
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -133,7 +133,7 @@ export default async function CommissionHistoryPage() {
   return (
     <div>
       <PageHeader
-        title="Commission History"
+          title="Payout History"
         description="Record of all approved commission payouts"
       />
 

@@ -27,7 +27,7 @@ export default async function SalesWithdrawalsPage({
   const [rep, [requests, total]] = await Promise.all([
     prisma.salesRepresentative.findUnique({
       where:  { id: session.userId },
-      select: { walletBalance: true, bankName: true },
+      select: { bankName: true },
     }),
     Promise.all([
       prisma.withdrawRequest.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
@@ -35,7 +35,6 @@ export default async function SalesWithdrawalsPage({
     ]),
   ]);
 
-  const balance  = rep?.walletBalance ?? 0;
   const bankName = rep?.bankName;
   const totalPaidOut = requests.reduce((sum, r) => sum + r.amount, 0);
 
@@ -47,11 +46,10 @@ export default async function SalesWithdrawalsPage({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {[
-          { label: "Commission Balance", value: fmt(balance),       color: "#3DBFA4" },
-          { label: "Total Paid Out",     value: fmt(totalPaidOut),  color: "#5BB8D4" },
-          { label: "Total Payouts",      value: String(total),      color: "#8b5cf6" },
+          { label: "Total Paid Out", value: fmt(totalPaidOut), color: "#5BB8D4" },
+          { label: "Total Payouts",  value: String(total),     color: "#8b5cf6" },
         ].map((c) => (
           <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="w-8 h-1 rounded-full mb-3" style={{ background: c.color }} />

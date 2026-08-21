@@ -324,6 +324,45 @@ function SectionHeader({ title, count, countColor }: { title: string; count: num
   );
 }
 
+const COMMISSION_PAGE_SIZE = 10;
+
+function TablePagination({
+  page,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pageCount = Math.ceil(total / COMMISSION_PAGE_SIZE);
+  if (pageCount <= 1) return null;
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="px-2.5 py-1 text-xs font-semibold text-gray-500 border border-gray-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        Previous
+      </button>
+      <span className="text-xs text-gray-500 whitespace-nowrap">
+        Page {page} of {pageCount}
+      </span>
+      <button
+        type="button"
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === pageCount}
+        className="px-2.5 py-1 text-xs font-semibold text-gray-500 border border-gray-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function CommissionPayoutClient({ pending: initialPending, rejected, currentMonth, rejectedCommission, monthLabel }: Props) {
@@ -333,6 +372,9 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
   const [ordersModal,  setOrdersModal] = useState<{ name: string; period: string; orders: OrderRow[]; rejected?: boolean } | null>(null);
   const [actionModal,  setActionModal] = useState<{ row: PendingRow; action: "APPROVED" | "REJECTED" } | null>(null);
   const [confirmDel,   setConfirmDel]  = useState<PendingRow | null>(null);
+  const [pendingPage,  setPendingPage] = useState(1);
+  const [currentPage,  setCurrentPage] = useState(1);
+  const [rejectedPage, setRejectedPage] = useState(1);
   const [deleting,     startDelete]    = useTransition();
   const [bulkBusy,     startBulk]     = useTransition();
   const [,             startNotify]   = useTransition();
@@ -386,6 +428,16 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
   const pendingTotal = pending.reduce((s, r) => s + r.amount, 0);
   const currentTotal = currentMonth.reduce((s, e) => s + e.totalCommission, 0);
   const rejectedCommissionTotal = rejectedCommission.reduce((s, e) => s + e.totalRejectedCommission, 0);
+
+  const pendingPageCount = Math.max(1, Math.ceil(pending.length / COMMISSION_PAGE_SIZE));
+  const currentPageCount = Math.max(1, Math.ceil(currentMonth.length / COMMISSION_PAGE_SIZE));
+  const rejectedPageCount = Math.max(1, Math.ceil(rejectedCommission.length / COMMISSION_PAGE_SIZE));
+  const visiblePendingPage = Math.min(pendingPage, pendingPageCount);
+  const visibleCurrentPage = Math.min(currentPage, currentPageCount);
+  const visibleRejectedPage = Math.min(rejectedPage, rejectedPageCount);
+  const pagedPending = pending.slice((visiblePendingPage - 1) * COMMISSION_PAGE_SIZE, visiblePendingPage * COMMISSION_PAGE_SIZE);
+  const pagedCurrentMonth = currentMonth.slice((visibleCurrentPage - 1) * COMMISSION_PAGE_SIZE, visibleCurrentPage * COMMISSION_PAGE_SIZE);
+  const pagedRejectedCommission = rejectedCommission.slice((visibleRejectedPage - 1) * COMMISSION_PAGE_SIZE, visibleRejectedPage * COMMISSION_PAGE_SIZE);
 
   return (
     <>
@@ -463,7 +515,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {pending.map((row) => {
+                  {pagedPending.map((row) => {
                     const period    = parsePeriod(row.note, row.createdAt);
                     const rowHasBank = hasBank(row);
                     const isChecked  = selected.has(row.id);
@@ -585,8 +637,9 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   })}
                 </tbody>
               </table>
-              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between">
+              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between gap-4">
                 <span className="text-xs text-gray-400">{pending.length} request{pending.length !== 1 ? "s" : ""} pending</span>
+                <TablePagination page={visiblePendingPage} total={pending.length} onPageChange={setPendingPage} />
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">Total pending</span>
                   <span className="text-sm font-black text-emerald-600">{fmt(pendingTotal)}</span>
@@ -628,7 +681,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {currentMonth.map((entry) => (
+                  {pagedCurrentMonth.map((entry) => (
                     <tr key={`${entry.userRole}-${entry.userId}`} className="hover:bg-gray-50/40 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
@@ -666,8 +719,9 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   ))}
                 </tbody>
               </table>
-              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between">
+              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between gap-4">
                 <span className="text-xs text-gray-400">{currentMonth.length} user{currentMonth.length !== 1 ? "s" : ""}</span>
+                <TablePagination page={visibleCurrentPage} total={currentMonth.length} onPageChange={setCurrentPage} />
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">Total this month</span>
                   <span className="text-sm font-black text-amber-600">{fmt(currentTotal)}</span>
@@ -708,7 +762,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {rejectedCommission.map((entry) => (
+                  {pagedRejectedCommission.map((entry) => (
                     <tr key={`${entry.userRole}-${entry.userId}`} className="hover:bg-gray-50/40 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
@@ -740,8 +794,9 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                   ))}
                 </tbody>
               </table>
-              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between">
+              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between gap-4">
                 <span className="text-xs text-gray-400">{rejectedCommission.length} user{rejectedCommission.length !== 1 ? "s" : ""}</span>
+                <TablePagination page={visibleRejectedPage} total={rejectedCommission.length} onPageChange={setRejectedPage} />
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">Total rejected</span>
                   <span className="text-sm font-black text-red-600">{fmt(rejectedCommissionTotal)}</span>

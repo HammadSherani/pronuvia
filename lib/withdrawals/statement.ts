@@ -30,6 +30,10 @@ export async function getPayoutStatementOrders({
       userRole,
       status: "APPROVED",
       createdAt: { lt: requestCreatedAt },
+      // A monthly request can be created at the snapshot time but approved
+      // later. Such a payout must not become the lower bound for this
+      // statement because its debit did not exist at the snapshot yet.
+      updatedAt: { lte: requestCreatedAt },
     },
     select: { updatedAt: true },
     orderBy: { updatedAt: "desc" },

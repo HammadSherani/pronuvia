@@ -20,6 +20,8 @@ interface Props {
   rows: HistoryRow[];
 }
 
+const PAGE_SIZE = 10;
+
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
@@ -28,6 +30,43 @@ function RoleBadge({ role }: { role: "PHYSICIAN" | "SALES_REP" }) {
   return role === "PHYSICIAN"
     ? <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">Doctor</span>
     : <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-[#3DBFA4] border border-teal-200">Medical Rep</span>;
+}
+
+function TablePagination({
+  page,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pageCount = Math.ceil(total / PAGE_SIZE);
+  if (pageCount <= 1) return null;
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="px-2.5 py-1 text-xs font-semibold text-gray-500 border border-gray-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        Previous
+      </button>
+      <span className="text-xs text-gray-500 whitespace-nowrap">
+        Page {page} of {pageCount}
+      </span>
+      <button
+        type="button"
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === pageCount}
+        className="px-2.5 py-1 text-xs font-semibold text-gray-500 border border-gray-200 rounded-lg hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        Next
+      </button>
+    </div>
+  );
 }
 
 // ── Statement Modal ───────────────────────────────────────────────────────────
@@ -151,8 +190,12 @@ function StatementModal({ row, onClose }: { row: HistoryRow; onClose: () => void
 export function CommissionHistoryClient({ rows }: Props) {
   const [filter,       setFilter]       = useState<"all" | "PHYSICIAN" | "SALES_REP">("all");
   const [statementFor, setStatementFor] = useState<HistoryRow | null>(null);
+  const [page,         setPage]         = useState(1);
 
   const filtered = filter === "all" ? rows : rows.filter((r) => r.userRole === filter);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visiblePage = Math.min(page, pageCount);
+  const pagedRows = filtered.slice((visiblePage - 1) * PAGE_SIZE, visiblePage * PAGE_SIZE);
 
   return (
     <>
@@ -164,7 +207,7 @@ export function CommissionHistoryClient({ rows }: Props) {
             <button
               key={f}
               type="button"
-              onClick={() => setFilter(f)}
+              onClick={() => { setFilter(f); setPage(1); }}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
                 filter === f
                   ? "bg-gray-900 text-white"
@@ -210,7 +253,7 @@ export function CommissionHistoryClient({ rows }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map((r) => (
+               {pagedRows.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
 
                     <td className="px-4 py-3.5">
@@ -254,6 +297,10 @@ export function CommissionHistoryClient({ rows }: Props) {
               ))}
             </tbody>
           </table>
+          <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 flex items-center justify-between gap-4">
+            <span className="text-xs text-gray-400">{filtered.length} record{filtered.length !== 1 ? "s" : ""}</span>
+            <TablePagination page={visiblePage} total={filtered.length} onPageChange={setPage} />
+          </div>
         </div>
       )}
 

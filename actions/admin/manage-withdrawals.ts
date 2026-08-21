@@ -108,7 +108,7 @@ export async function updateWithdrawRequest(
 
   let request: ApprovedPayoutRequest | null;
   try {
-    request = await applyWithdrawDecision(requestId, action, adminNote, "Withdrawal approved by admin");
+    request = await applyWithdrawDecision(requestId, action, adminNote, "Paid Commission");
   } catch (error) {
     return { success: false, message: error instanceof Error ? error.message : "Failed to update payout request." };
   }
@@ -161,7 +161,7 @@ export async function bulkUpdateWithdrawals(
 
   for (const id of ids) {
     try {
-      const request = await applyWithdrawDecision(id, action, undefined, "Withdrawal approved by admin (bulk)");
+      const request = await applyWithdrawDecision(id, action, undefined, "Paid Commission");
       if (!request) { failed++; continue; }
 
       if (action === "APPROVED") {

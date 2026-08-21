@@ -111,7 +111,9 @@ export async function generateCommissionStatementPdf(opts: {
       doc.rect(50, y, W, rowH).fillColor(rowBg).fill();
       doc.fillColor("#111827");
       const orderLabel = o.orderNumber === "Wallet adjustment"
-        ? (o.description || o.orderNumber)
+        ? (o.description?.toLowerCase().startsWith("withdrawal approved by admin")
+          ? "Paid Commission"
+          : o.description || o.orderNumber)
         : `#${o.orderNumber}`;
       doc.text(orderLabel, col.num, y + 4, {
         lineBreak: false,
