@@ -6,7 +6,7 @@ export function HideStripeBadge() {
   useEffect(() => {
     function removeBadge() {
       document.querySelectorAll<HTMLElement>(
-        'iframe[name*="privateStripe"], iframe[name*="stripeLink"], iframe[title*="Stripe Link"], [data-js-forms-banner]'
+        'iframe[name*="privateStripeController"], iframe[name*="stripeLink"], iframe[title*="Stripe Link"], [data-js-forms-banner]'
       ).forEach(el => {
         const parent = el.parentElement;
         if (parent && parent !== document.body) {
