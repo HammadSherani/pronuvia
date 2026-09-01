@@ -30,7 +30,7 @@ export function WalletPanel({
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full border-[16px] border-white/10 pointer-events-none" />
           <div className="absolute -bottom-8 -left-4 w-24 h-24 rounded-full border-[12px] border-white/8 pointer-events-none" />
 
-          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Commission Earned</p>
+          <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Total Commission Earned</p>
           <p className="text-3xl font-black tabular-nums leading-none mt-1">{fmt(totalPending + totalWithdrawn)}</p>
           {hasPending && (
             <p className="text-[10px] text-amber-200 mt-2 flex items-center gap-1">
@@ -59,7 +59,7 @@ export function WalletPanel({
         {/* Withdrawn */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Paid-out</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Commission Paid-out</p>
             <div className="w-8 h-8 rounded-full bg-gray-900/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[#5BB8D4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -75,7 +75,7 @@ export function WalletPanel({
         {/* Commission orders */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Commission Orders</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Commission Orders</p>
             <div className="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center">
               <svg className="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
