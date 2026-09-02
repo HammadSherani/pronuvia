@@ -54,7 +54,7 @@ function toCountryCode(s: string): string {
   return s.trim().toUpperCase().slice(0, 2) || "US";
 }
 
-function parseAddressString(raw: string): { street: string; street2?: string; city: string; state: string; zip: string; country: string } | null {
+function parseAddressString(raw: string): { street: string; street2?: string; city: string; state: string; zip: string; country: string; phone?: string } | null {
   // Try JSON format first (new format from serializeAddress)
   try {
     const j = JSON.parse(raw);
@@ -69,6 +69,7 @@ function parseAddressString(raw: string): { street: string; street2?: string; ci
         state:   toStateCode(j.state ?? ""),
         zip:     (j.zip as string).trim(),
         country: j.country ? toCountryCode(j.country) : "US",
+        phone:   j.phone ? String(j.phone).trim() : undefined,
       };
     }
   } catch { /* fall through to plain-text parsing */ }
@@ -123,7 +124,12 @@ async function buildToAddress(orderId: string): Promise<[ShipAddress, null] | [n
       const name = ph
         ? ` ${ph.firstName} ${ph.lastName}`
         : rep ? `${rep.firstName ?? ""} ${rep.lastName ?? ""}`.trim() : "Recipient";
-      const phone = ph?.phone ?? rep?.phone ?? undefined;
+      // Prefer the phone entered for this shipment (stored on the shipping
+      // address itself) over the account's on-file phone — the account phone
+      // can be missing, stale, or in a format the carrier rejects (e.g. one
+      // digit short), while the shipment's own phone is what the customer
+      // actually gave for this delivery.
+      const phone = parsed.phone || ph?.phone || rep?.phone || undefined;
 
       return [{
         name,
