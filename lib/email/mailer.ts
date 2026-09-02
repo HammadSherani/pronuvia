@@ -77,9 +77,10 @@ export async function sendMail(opts: {
       const sgErr = err as { code?: number; response?: { body?: unknown } };
       console.error("[mailer/sendgrid] FAILED — code:", sgErr.code, "| body:", JSON.stringify(sgErr.response?.body));
 
-      // Fall through to SMTP for: 403 (unverified sender), DNS failures, network errors.
+      // Fall through to SMTP for: 401 (credits exceeded / key revoked), 403 (unverified
+      // sender), DNS failures, network errors.
       const isNetworkError = typeof sgErr.code === "string" && ["EAI_AGAIN", "ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"].includes(sgErr.code);
-      if (!isNetworkError && sgErr.code !== 403) throw err;
+      if (!isNetworkError && sgErr.code !== 403 && sgErr.code !== 401) throw err;
       console.warn(`[mailer/sendgrid] falling back to SMTP (reason: ${sgErr.code ?? "unknown"})`);
     }
   }

@@ -312,6 +312,10 @@ model WalletTransaction {
   type        String
   description String?
   orderId     String?  @db.ObjectId
+  // Commission period ("YYYY-MM", in PAYOUT_TIMEZONE) this transaction is
+  // attributed to. Set on period-close commission credits and on any
+  // reversal (the period the reversal happened in, not the order's period).
+  periodKey   String?
   balance     Float
   createdAt   DateTime @default(now())
 }

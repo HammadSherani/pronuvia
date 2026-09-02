@@ -86,15 +86,63 @@ function CommissionTable({ orders }: { orders: OrderRow[] }) {
   );
 }
 
+type AdjustmentRow = {
+  id:          string;
+  amount:      number;
+  type:        string;
+  description: string | null;
+  createdAt:   Date;
+};
+
+function AdjustmentTable({ adjustments }: { adjustments: AdjustmentRow[] }) {
+  if (adjustments.length === 0) return null;
+  return (
+    <table className="w-full text-sm table-fixed">
+      <colgroup>
+        <col className="w-[20%]" />
+        <col className="w-[50%]" />
+        <col className="w-[30%]" />
+      </colgroup>
+      <thead>
+        <tr className="border-b border-gray-100 bg-gray-50/60">
+          <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+          <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
+          <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-50">
+        {adjustments.map((a) => {
+          const note = a.description?.replace(/^Admin \[[^\]]*\]:\s*/, "") || "—";
+          const isCredit = a.type === "CREDIT";
+          return (
+            <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
+              <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                {a.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </td>
+              <td className="px-5 py-4 text-sm text-gray-700">{note}</td>
+              <td className="px-5 py-4 text-right">
+                <span className={`text-sm font-bold ${isCredit ? "text-emerald-600" : "text-red-500"}`}>
+                  {isCredit ? "+" : "-"}{fmt(a.amount)}
+                </span>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
 export default async function SalesCommissionPage() {
   const session = await requireSalesRep();
 
-  const [rep, earningOrders, withdrawRequests] = await Promise.all([
+  const [rep, earningOrders, withdrawRequests, adjustments] = await Promise.all([
     prisma.salesRepresentative.findUnique({
       where:  { id: session.userId },
       select: {
         firstName:         true,
         lastName:          true,
+        walletBalance:     true,
         bankName:          true,
         bankAccountNumber: true,
         bankAccountName:   true,
@@ -121,6 +169,12 @@ export default async function SalesCommissionPage() {
       take:    1,
       select:  { status: true },
     }),
+
+    prisma.walletTransaction.findMany({
+      where:   { userId: session.userId, userRole: "SALES_REP", description: { startsWith: "Admin " } },
+      orderBy: { createdAt: "desc" },
+      select:  { id: true, amount: true, type: true, description: true, createdAt: true },
+    }),
   ]);
 
   const hasPending = withdrawRequests.some((r) => r.status === "PENDING");
@@ -144,6 +198,13 @@ export default async function SalesCommissionPage() {
     _sum: { amount: true },
   }).then((r) => r._sum.amount ?? 0);
 
+  // Prior refund clawbacks eat into upcoming pending commission before it's
+  // actually withdrawable — net it out (unclamped, can go negative) so the
+  // summary card shows what the rep will really end up with, not the raw
+  // future order total.
+  const deficit    = Math.max(0, -(rep?.walletBalance ?? 0));
+  const netPending = totalPending - deficit;
+
   return (
     <div className="max-w-6xl">
       <div className="mb-7">
@@ -152,10 +213,11 @@ export default async function SalesCommissionPage() {
       </div>
 
       <WalletPanel
-        totalPending={totalPending}
+        totalPending={netPending}
         totalWithdrawn={totalWithdrawn}
         commissionOrderCount={earningOrders.length}
         hasPending={hasPending}
+        deficitApplied={Math.min(deficit, totalPending)}
         bankName={rep?.bankName}
         bankAccountNumber={rep?.bankAccountNumber}
         bankAccountName={rep?.bankAccountName}
@@ -256,6 +318,22 @@ export default async function SalesCommissionPage() {
                 </tbody>
               </table>
             )
+          }
+        </div>
+      </div>
+
+      {/* Admin Wallet Adjustments */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-3">
+          <h2 className="text-sm font-bold text-gray-700">Admin Wallet Adjustments</h2>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+            {adjustments.length}
+          </span>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {adjustments.length === 0
+            ? <EmptySection message="No admin adjustments" />
+            : <AdjustmentTable adjustments={adjustments} />
           }
         </div>
       </div>

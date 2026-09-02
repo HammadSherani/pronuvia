@@ -303,8 +303,8 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           </Field>
         </div>
 
-        <Field label="Website *" error={e.websiteLink?.[0]}>
-          <input name="websiteLink" type="url" required defaultValue={p.websiteLink ?? ""} className={e.websiteLink ? inpErr : inp} />
+        <Field label="Website" error={e.websiteLink?.[0]}>
+          <input name="websiteLink" type="url" defaultValue={p.websiteLink ?? ""} className={e.websiteLink ? inpErr : inp} />
         </Field>
 
         {/* Specialties */}

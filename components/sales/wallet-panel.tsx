@@ -9,6 +9,7 @@ export function WalletPanel({
   totalWithdrawn,
   commissionOrderCount,
   hasPending,
+  deficitApplied,
   bankName,
   bankAccountNumber,
   bankAccountName,
@@ -17,10 +18,12 @@ export function WalletPanel({
   totalWithdrawn:       number;
   commissionOrderCount: number;
   hasPending:           boolean;
+  deficitApplied?:      number;
   bankName?:            string | null;
   bankAccountNumber?:   string | null;
   bankAccountName?:     string | null;
 }) {
+  const isDeficit = totalPending < 0;
   return (
     <>
       <div className="grid grid-cols-4 gap-5 mb-8">
@@ -51,8 +54,17 @@ export function WalletPanel({
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-gray-800 tabular-nums">{fmt(totalPending)}</p>
-            <p className="text-xs text-gray-400 mt-1">Awaiting payout</p>
+            <p className={`text-2xl font-black tabular-nums ${isDeficit ? "text-red-500" : "text-gray-800"}`}>
+              {isDeficit ? `-${fmt(Math.abs(totalPending))}` : fmt(totalPending)}
+            </p>
+            <p className={`text-xs mt-1 ${isDeficit ? "text-red-400" : "text-gray-400"}`}>
+              {/* {isDeficit ? "Refund deficit" : "Awaiting payout"} */}
+            </p>
+            {!isDeficit && !!deficitApplied && (
+              <p className="text-[11px] text-amber-600 mt-1.5 leading-snug">
+                Net of {fmt(deficitApplied)} refund deficit already deducted.
+              </p>
+            )}
           </div>
         </div>
 

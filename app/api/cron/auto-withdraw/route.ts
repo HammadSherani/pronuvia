@@ -8,6 +8,7 @@ import {
   type MonthlyPayoutRequest,
   type MonthlyPayoutUser,
 } from "@/lib/withdrawals/monthly";
+import { sweepCommissionPeriod } from "@/lib/withdrawals/commission-sweep";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +35,13 @@ export async function GET(req: NextRequest) {
   const period = getPreviousMonthPayoutPeriod(now, payoutTimeZone);
 
   console.log(`[auto-withdraw] cron started – ${now.toISOString()}`);
+
+  // Credit every order placed in the closing period to its owner's wallet
+  // first — commission belongs to the order's month, not to whenever an
+  // admin happened to mark it COMPLETED. Must run before the eligibility
+  // query below so a just-swept balance is immediately payout-eligible.
+  const sweep = await sweepCommissionPeriod(period);
+  console.log("[auto-withdraw] commission sweep", sweep);
 
   const [salesReps, physicians] = await Promise.all([
     prisma.salesRepresentative.findMany({
@@ -73,7 +81,7 @@ export async function GET(req: NextRequest) {
   ];
 
   if (!users.length) {
-    return NextResponse.json({ success: true, period: period.label, created: 0, updated: 0, removed: 0 });
+    return NextResponse.json({ success: true, period: period.label, sweep, created: 0, updated: 0, removed: 0 });
   }
 
   const requests = await prisma.withdrawRequest.findMany({
@@ -115,6 +123,7 @@ export async function GET(req: NextRequest) {
   const result = {
     success: true,
     period: period.label,
+    sweep,
     created,
     updated: plan.update.length,
     removed: plan.remove.length,

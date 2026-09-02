@@ -2,17 +2,20 @@ import { requireAdmin }     from "@/lib/auth/dal";
 import { prisma }           from "@/lib/db/prisma";
 import { PageHeader }       from "@/components/admin/page-header";
 import { CommissionPayoutClient } from "@/components/admin/commission-payout-client";
+import { getCurrentPeriod } from "@/lib/withdrawals/monthly";
 
 export const metadata = { title: "Commission Payout – Pronuvia Admin" };
 
 export default async function CommissionPayoutPage() {
   await requireAdmin();
 
-  // ── Current month bounds ──────────────────────────────────────────────────
-  const now        = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const monthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  // ── Current (still-open) commission period bounds ──────────────────────────
+  // Same PAYOUT_TIMEZONE-aware boundary the monthly sweep/cron use, so this
+  // preview always matches exactly what will be swept once the period closes.
+  const currentPeriod = getCurrentPeriod(new Date(), process.env.PAYOUT_TIMEZONE ?? "UTC");
+  const monthStart    = currentPeriod.start;
+  const monthEnd      = currentPeriod.end;
+  const monthLabel    = currentPeriod.label;
 
   // ── Fetch everything in parallel ──────────────────────────────────────────
   const [
@@ -34,13 +37,14 @@ export default async function CommissionPayoutPage() {
       orderBy: { createdAt: "desc" },
       select:  { id: true, userId: true, userRole: true, amount: true, note: true, adminNote: true, createdAt: true },
     }),
-    // Current month orders for sales reps with commission
+    // Current month orders for sales reps with commission not yet credited to their wallet
     prisma.order.findMany({
       where: {
-        createdAt:               { gte: monthStart, lte: monthEnd },
+        createdAt:               { gte: monthStart, lt: monthEnd },
         salesRepId:              { not: null },
         salesRepCommissionAmount: { gt: 0 },
         status:                  { not: "CANCELLED" },
+        commissionPaid:          false,
       },
       select: {
         id: true,
@@ -48,13 +52,14 @@ export default async function CommissionPayoutPage() {
         salesRepCommissionAmount: true, salesRepClawback: true, salesRepCommissionRate: true,
       },
     }),
-    // Current month orders for physicians with commission
+    // Current month orders for physicians with commission not yet credited to their wallet
     prisma.order.findMany({
       where: {
-        createdAt:                 { gte: monthStart, lte: monthEnd },
+        createdAt:                 { gte: monthStart, lt: monthEnd },
         physicianId:               { not: null },
         physicianCommissionAmount: { gt: 0 },
         status:                    { not: "CANCELLED" },
+        commissionPaid:            false,
       },
       select: {
         id: true,
@@ -65,7 +70,7 @@ export default async function CommissionPayoutPage() {
     // Refunds processed this month, including refunds for older orders.
     prisma.orderRefund.findMany({
       where: {
-        processedAt: { gte: monthStart, lte: monthEnd },
+        processedAt: { gte: monthStart, lt: monthEnd },
         OR: [
           { salesRepClawback: { gt: 0 } },
           { physicianClawback: { gt: 0 } },

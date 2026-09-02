@@ -48,6 +48,27 @@ export function getPreviousMonthPayoutPeriod(now = new Date(), timeZone = "UTC")
   return { key, label, note: `Auto withdrawal - ${label}`, start, end, snapshotAt: now };
 }
 
+/**
+ * The still-open commission period "now" falls in. Orders placed in this
+ * window are Pending Commission until this period closes (see
+ * getPreviousMonthPayoutPeriod, evaluated from next month) and are swept
+ * into the wallet. Also used to tag which period a reversal (refund/
+ * cancellation) lands in, for net-period accounting.
+ */
+export function getCurrentPeriod(now = new Date(), timeZone = "UTC"): MonthlyPayoutPeriod {
+  const local = getPayoutLocalDateParts(now, timeZone);
+  const start = new Date(Date.UTC(local.year, local.month - 1, 1));
+  const end = new Date(Date.UTC(local.year, local.month, 1));
+  const label = start.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const key = `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(2, "0")}`;
+
+  return { key, label, note: `Commission - ${label}`, start, end, snapshotAt: now };
+}
+
 export function isMonthlyAutoPayoutNote(note: string | null | undefined): boolean {
   return /^Auto withdrawal\s*(?:-|\u2013|\u2014)\s*.+$/i.test(note ?? "");
 }

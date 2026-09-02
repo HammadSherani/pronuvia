@@ -14,7 +14,7 @@ const Schema = z.object({
   license:             z.string().min(1, "License number is required"),
   yearsInPractice:     z.coerce.number().min(0, "Must be 0 or more"),
   aictherapy:          z.string().min(1, "This field is required"),
-  websiteLink:         z.string().url("Enter a valid URL (https://...)"),
+  websiteLink:         z.string().url("Enter a valid URL (https://...)").optional().or(z.literal("")),
   addressOne:          z.string().min(1, "Address is required"),
   addressTwo:          z.string().optional(),
   city:                z.string().min(1, "City is required"),
