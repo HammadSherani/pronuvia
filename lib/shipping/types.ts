@@ -1,5 +1,16 @@
 export type CarrierCode = "fedex" | "ups" | "usps";
 
+// Physical label page size: "4X6" for a thermal label printer, "LETTER" for
+// a normal 8.5x11 paper printer.
+export type LabelSize = "4X6" | "LETTER";
+
+export interface LabelOptions {
+  labelSize?: LabelSize;
+  // A return label (customer -> warehouse) instead of a normal outbound
+  // label (warehouse -> customer). Only UPS and USPS support this.
+  isReturn?:  boolean;
+}
+
 export interface ShipAddress {
   name:     string;
   company?: string;

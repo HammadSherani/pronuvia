@@ -283,6 +283,12 @@ model Shipment {
   trackingNumber String
   labelBase64    String?
   labelFormat    String   @default("PNG")
+  // Physical label page size requested from the carrier: "4X6" (thermal
+  // printer) or "LETTER" (8.5x11, normal paper printer).
+  labelSize      String   @default("4X6")
+  // True for a return shipping label (customer -> warehouse), false for a
+  // normal outbound label (warehouse -> customer).
+  isReturn       Boolean  @default(false)
   fromAddress    Json
   toAddress      Json
   weightLbs      Float

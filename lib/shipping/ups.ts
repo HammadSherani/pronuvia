@@ -1,4 +1,4 @@
-import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
+import type { ShipAddress, PackageInfo, RateResult, LabelResult, LabelOptions } from "./types";
 
 // Use UPS_API_URL=https://wwwcie.ups.com for sandbox, or https://onlinetools.ups.com for production
 const BASE = process.env.UPS_API_URL ?? "https://wwwcie.ups.com";
@@ -127,6 +127,12 @@ export async function getUPSRates(
   });
 }
 
+// UPS Print Return Label — the label is issued synchronously in the ship
+// response, same as an outbound label, matching this app's purchase-and-
+// display-immediately flow (as opposed to "9" Electronic Return Label,
+// which emails a QR code to the customer to generate the label later).
+const UPS_RETURN_SERVICE_CODE = "2";
+
 export async function purchaseUPSLabel(
   from:          ShipAddress,
   to:            ShipAddress,
@@ -134,8 +140,16 @@ export async function purchaseUPSLabel(
   serviceCode:   string,
   service:       string,
   signatureCode = 0,
+  opts:          LabelOptions = {},
 ): Promise<LabelResult> {
   const token = await getToken();
+  const isReturn = opts.isReturn ?? false;
+  // Billing account (`from`, our warehouse) always pays and is always
+  // Shipper. For a return, the package instead travels customer -> us, so
+  // ShipTo/ShipFrom swap relative to a normal outbound label.
+  const shipTo   = isReturn ? from : to;
+  const shipFrom = isReturn ? to   : from;
+  const stockSize = opts.labelSize === "LETTER" ? { Height: "11", Width: "8.5" } : { Height: "6", Width: "4" };
 
   const body = {
     ShipmentRequest: {
@@ -143,8 +157,9 @@ export async function purchaseUPSLabel(
       Shipment: {
         Description: "Pronuvia Order",
         Shipper:     { ...toUPSAddress(from), ShipperNumber: process.env.UPS_ACCOUNT_NUMBER ?? "" },
-        ShipTo:      toUPSAddress(to),
-        ShipFrom:    toUPSAddress(from),
+        ShipTo:      toUPSAddress(shipTo),
+        ShipFrom:    toUPSAddress(shipFrom),
+        ...(isReturn ? { ReturnService: { Code: UPS_RETURN_SERVICE_CODE } } : {}),
         PaymentInformation: {
           ShipmentCharge: {
             Type: "01",
@@ -153,6 +168,10 @@ export async function purchaseUPSLabel(
         },
         Service:  { Code: serviceCode, Description: "UPS Service" },
         Package: [{
+          // UPS requires a package-level Description for return shipments
+          // (ReturnService present) — confirmed via sandbox: omitting it
+          // fails with "9120201: Missing package description."
+          ...(isReturn ? { Description: "Returned merchandise" } : {}),
           Packaging: { Code: "02", Description: "Customer Supplied Package" },
           Dimensions: pkg.lengthIn ? {
             UnitOfMeasurement: { Code: "IN", Description: "Inches" },
@@ -172,9 +191,9 @@ export async function purchaseUPSLabel(
         }],
       },
       LabelSpecification: {
-        LabelImageFormat:  { Code: "PNG" },
+        LabelImageFormat:  { Code: "PDF" },
         HTTPUserAgent:     "Mozilla/5.0",
-        LabelStockSize:    { Height: "6", Width: "4" },
+        LabelStockSize:    stockSize,
       },
     },
   };
@@ -216,7 +235,7 @@ export async function purchaseUPSLabel(
     serviceCode,
     trackingNumber: tracking,
     labelBase64:    label64,
-    labelFormat:    "PNG",
+    labelFormat:    "PDF",
     cost,
     currency:       "USD",
   };

@@ -5,11 +5,13 @@ import { getOrderShipments }    from "@/actions/admin/shipping";
 import { ShippingPageClient }   from "@/components/admin/shipping-page-client";
 import type { OrderItem }       from "@/actions/admin/manage-orders";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ mode?: string }> };
 
-export default async function OrderShipmentPage({ params }: Props) {
+export default async function OrderShipmentPage({ params, searchParams }: Props) {
   await requireAdmin();
   const { id } = await params;
+  const { mode } = await searchParams;
+  const shipmentMode: "outbound" | "return" = mode === "return" ? "return" : "outbound";
 
   const [order, shipments] = await Promise.all([
     getOrderById(id),
@@ -53,6 +55,7 @@ export default async function OrderShipmentPage({ params }: Props) {
         fedex: (process.env.FEDEX_API_URL ?? "").includes("sandbox"),
         usps:  (process.env.USPS_BASE_URL ?? "").includes("tem"),
       }}
+      mode={shipmentMode}
     />
   );
 }

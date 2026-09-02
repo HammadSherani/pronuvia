@@ -284,7 +284,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 </div>
 
                 <div className="no-print flex items-center gap-2 shrink-0">
-                  {!isReturned && (
+                  {!isReturned ? (
                     <Link
                       href={`/admin/orders/${order.id}/shipment`}
                       className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3DBFA4] hover:bg-[#35a993] rounded-lg shadow-sm transition-colors"
@@ -294,6 +294,16 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 001 1v10l2-1m7 1V7.5M16 7.5L13 6" />
                       </svg>
                       View / Add Shipment
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/admin/orders/${order.id}/shipment?mode=return`}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg shadow-sm transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                      </svg>
+                      Create Return Label
                     </Link>
                   )}
                 </div>

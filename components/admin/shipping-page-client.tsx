@@ -5,7 +5,8 @@ import { useRouter }  from "next/navigation";
 import Link           from "next/link";
 import toast          from "react-hot-toast";
 import { getShippingRates, purchaseLabel } from "@/actions/admin/shipping";
-import type { CarrierCode, PackageInfo, RateResult } from "@/lib/shipping/types";
+import type { ShipmentDirection } from "@/actions/admin/shipping";
+import type { CarrierCode, PackageInfo, RateResult, LabelSize } from "@/lib/shipping/types";
 import type { OrderItem } from "@/actions/admin/manage-orders";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ type PkgType    = "Box" | "Envelope" | "Tube" | "Pak" | "Other";
 type Shipment = {
   id: string; carrier: string; carrierLabel: string; service: string;
   trackingNumber: string; labelBase64: string | null; labelFormat: string;
+  labelSize?: string; isReturn?: boolean;
   cost: number; shipDate: Date;
 };
 
@@ -36,6 +38,10 @@ interface Props {
   shippingRate:   number;
   shippingCarrier: string | null;
   testModeCarriers?: { ups: boolean; fedex: boolean; usps: boolean };
+  // "return" pre-configures the form for a return label: warehouse/customer
+  // addresses swap, FedEx is excluded, and a successful purchase does not
+  // mark the order SHIPPED or touch inventory.
+  mode?: ShipmentDirection;
 }
 
 // ── Static carrier package data ───────────────────────────────────────────────
@@ -296,8 +302,15 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <div>
-          <p className="text-sm font-bold text-emerald-800">Shipment {index + 1} — label ready</p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-emerald-800">Shipment {index + 1} — label ready</p>
+            {s.isReturn && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-orange-100 text-orange-700">
+                RETURN
+              </span>
+            )}
+          </div>
           <p className="text-xs text-emerald-600">
             {new Date(s.shipDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
@@ -307,6 +320,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
         {[
           { label: "Carrier",       content: <div className="flex items-center gap-2"><CarrierBadge carrier={s.carrier} /><span className="text-sm text-gray-700">{s.service}</span></div> },
           { label: "Shipping Cost", content: <span className="text-sm font-bold text-gray-900">{fmt(s.cost)}</span> },
+          { label: "Label Size",    content: <span className="text-sm text-gray-700">{s.labelSize === "LETTER" ? "8.5 × 11" : "4 × 6"}</span> },
           { label: "Tracking",      content: (
             <a href={trackUrl(s.carrier, s.trackingNumber)} target="_blank" rel="noopener noreferrer"
               className="text-sm font-mono font-semibold text-[#3DBFA4] hover:underline inline-flex items-center gap-1">
@@ -386,16 +400,18 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
 
 type PkgTab = "custom" | "carrier" | "saved";
 
-function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier, testModeCarriers }: {
+function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier, testModeCarriers, mode = "outbound" }: {
   orderId: string; orderNumber: string; items: OrderItem[]; orderValue: number; subtotal: number;
   shippingRate: number; shippingCarrier: string | null;
   shipTo: Props["shipTo"]; shipFrom: Props["shipFrom"];
   testModeCarriers?: Props["testModeCarriers"];
+  mode?: ShipmentDirection;
 }) {
   const router = useRouter();
-
-  console.log("ship to", shipTo);
-  
+  const isReturn = mode === "return";
+  // FedEx return labels aren't supported — keep it out of the carrier picker
+  // entirely in return mode so it can't even be selected.
+  const CARRIER_OPTIONS: CarrierCode[] = isReturn ? ["ups", "usps"] : ["fedex", "ups", "usps"];
 
   // Items selection
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set(items.map((_, i) => i)));
@@ -437,8 +453,10 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
   const [shipDate, setShipDate] = useState(today);
 
   // Rates
-  const [selectedCarriers,     setSelectedCarriers]     = useState<CarrierCode[]>(["fedex", "ups", "usps"]);
+  const [selectedCarriers,     setSelectedCarriers]     = useState<CarrierCode[]>(isReturn ? ["ups", "usps"] : ["fedex", "ups", "usps"]);
   const [selectedSignatureCode, setSelectedSignatureCode] = useState<number | null>(null);
+  // Label format — 4x6 for a thermal printer, Letter for a normal paper printer
+  const [labelSize, setLabelSize] = useState<LabelSize>("4X6");
   const [rates,        setRates]        = useState<RateResult[] | null>(null);
   const [selectedRate, setSelectedRate] = useState<RateResult | null>(null);
   const [rateError,    setRateError]    = useState<string | null>(null);
@@ -519,7 +537,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
     setRates(null); setSelectedRate(null); setRateError(null); setSelectedSignatureCode(null);
     startGetRates(async () => {
       try {
-        const res = await getShippingRates(orderId, pkg, selectedCarriers);
+        const res = await getShippingRates(orderId, pkg, selectedCarriers, undefined, mode);
         if (res.error) setRateError(res.error);
         if (res.rates.length > 0) { setRates(res.rates); setSelectedRate(res.rates[0]); }
         else if (!res.error) setRateError("No rates returned. Check credentials and package details.");
@@ -531,12 +549,16 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
 
   function handlePurchase() {
     if (!selectedRate) { toast.error("Select a rate first."); return; }
+    if (selectedRate.carrier === "usps" && labelSize === "LETTER") {
+      toast.error("USPS doesn't support 8.5×11 labels — switch to 4×6, or pick a UPS rate for Letter size.");
+      return;
+    }
     const pkg = buildPkg();
     if (!pkg) { toast.error("Invalid package weight."); return; }
     setPurchaseError(null);
     startPurchase(async () => {
       try {
-        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, selectedSignatureCode ?? 0);
+        const res = await purchaseLabel(orderId, pkg, selectedRate.carrier, selectedRate.serviceCode, selectedRate.service, undefined, selectedSignatureCode ?? 0, mode, labelSize);
         if (res.success && res.shipment) {
           setPurchased(res.shipment);
           toast.success(res.message);
@@ -580,7 +602,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="text-base font-bold text-emerald-800">Shipment purchased!</p>
+          <p className="text-base font-bold text-emerald-800">{isReturn ? "Return label purchased!" : "Shipment purchased!"}</p>
           <p className="text-sm font-mono text-emerald-600 mt-1">{purchased.trackingNumber}</p>
           <p className="text-xs text-emerald-500 mt-0.5">Cost: {fmt(purchased.cost)}</p>
         </div>
@@ -827,7 +849,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 <div className="space-y-4">
                   {/* Carrier tabs */}
                   <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
-                    {(["fedex", "ups", "usps"] as CarrierCode[]).map(c => {
+                    {CARRIER_OPTIONS.map(c => {
                       const colors: Record<string, string> = { fedex: "#4D148C", ups: "#351C15", usps: "#333366" };
                       const inCarrier = selectedCarriers.includes(c);
                       return (
@@ -932,7 +954,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">Carrier</label>
                   <div className="flex gap-2">
-                    {(["fedex", "ups", "usps"] as CarrierCode[]).map(c => {
+                    {CARRIER_OPTIONS.map(c => {
                       const colors: Record<string, string> = { fedex: "#4D148C", ups: "#351C15", usps: "#333366" };
                       const active = selectedCarriers.includes(c);
                       return (
@@ -948,6 +970,32 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                   </div>
                 </div>
               )}
+
+              {/* Label format */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">
+                  Label format
+                  {selectedRate?.carrier === "usps" && labelSize === "LETTER" && (
+                    <span className="text-amber-600 font-medium"> — USPS only supports 4×6, this rate needs UPS</span>
+                  )}
+                </label>
+                <div className="flex gap-2">
+                  {([
+                    { value: "4X6" as LabelSize,   title: "4 × 6",     subtitle: "Thermal printer — UPS & USPS" },
+                    { value: "LETTER" as LabelSize, title: "8.5 × 11", subtitle: "Normal paper printer — UPS only" },
+                  ]).map(opt => {
+                    const active = labelSize === opt.value;
+                    return (
+                      <button key={opt.value} type="button" onClick={() => setLabelSize(opt.value)}
+                        className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-lg border-2 transition-all ${
+                          active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 hover:border-gray-200"}`}>
+                        <span className="text-sm font-bold text-gray-800">{opt.title}</span>
+                        <span className="text-[10px] text-gray-400">{opt.subtitle}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* Get rates button */}
               <button type="button" onClick={handleGetRates}
@@ -1060,7 +1108,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
-                        Purchase Shipment ({fmt(selectedRate.totalCost + sigPrice)})
+                        {isReturn ? "Purchase Return Label" : "Purchase Shipment"} ({fmt(selectedRate.totalCost + sigPrice)})
                       </>}
                 </button>
               );
@@ -1076,13 +1124,30 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Details</p>
           <div className="space-y-2.5">
-            <Row label="Ship from" value={`${shipFrom.name}, ${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}`} />
-            <Row label="Ship to" value={(() => {
-              const name = parseAddressName(shipTo.address ?? null, shipTo.name ?? null);
-              const lines = parseAddressLines(shipTo.address ?? null);
-              if (!lines.length && !name) return "No address on file";
-              return [name, ...lines].filter(Boolean).join(", ");
-            })()} />
+            {isReturn && (
+              <div className="flex items-center gap-1.5 -mt-1 mb-1">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-orange-100 text-orange-700">
+                  RETURN LABEL
+                </span>
+                <span className="text-[10px] text-gray-400">customer → warehouse</span>
+              </div>
+            )}
+            <Row label="Ship from" value={isReturn
+              ? (() => {
+                  const name = parseAddressName(shipTo.address ?? null, shipTo.name ?? null);
+                  const lines = parseAddressLines(shipTo.address ?? null);
+                  if (!lines.length && !name) return "No address on file";
+                  return [name, ...lines].filter(Boolean).join(", ");
+                })()
+              : `${shipFrom.name}, ${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}`} />
+            <Row label="Ship to" value={isReturn
+              ? `${shipFrom.name}, ${shipFrom.city}, ${shipFrom.state} ${shipFrom.zip}`
+              : (() => {
+                  const name = parseAddressName(shipTo.address ?? null, shipTo.name ?? null);
+                  const lines = parseAddressLines(shipTo.address ?? null);
+                  if (!lines.length && !name) return "No address on file";
+                  return [name, ...lines].filter(Boolean).join(", ");
+                })()} />
             <div className="border-t border-gray-200 pt-2.5 space-y-2">
               <Row label="Number of items" value={String(items.length)} />
               <Row label="Order value"     value={fmt(orderValue)} bold />
@@ -1148,8 +1213,12 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export function ShippingPageClient(props: Props) {
+  const isReturn = props.mode === "return";
+  const existingReturnIndex = props.shipments.findIndex((s) => s.isReturn);
   const [activeTab, setActiveTab] = useState<number | "add">(
-    props.shipments.length > 0 ? 0 : "add"
+    isReturn
+      ? (existingReturnIndex !== -1 ? existingReturnIndex : "add")
+      : (props.shipments.length > 0 ? 0 : "add")
   );
 
   return (
@@ -1165,7 +1234,7 @@ export function ShippingPageClient(props: Props) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Create shipping label</h1>
+          <h1 className="text-xl font-bold text-gray-900">{isReturn ? "Create return label" : "Create shipping label"}</h1>
           <p className="text-sm text-gray-400 mt-0.5">Order {props.orderNumber}</p>
         </div>
         {props.shipments.length > 0 && (
@@ -1192,14 +1261,16 @@ export function ShippingPageClient(props: Props) {
                 Shipment {i + 1}
               </button>
             ))}
-            <button type="button" onClick={() => setActiveTab("add")}
-              className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
-                activeTab === "add" ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Add shipment
-            </button>
+            {!(isReturn && existingReturnIndex !== -1) && (
+              <button type="button" onClick={() => setActiveTab("add")}
+                className={`shrink-0 flex items-center gap-1.5 px-4 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === "add" ? "border-gray-900 text-[#3DBFA4]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                {isReturn ? "Add return label" : "Add shipment"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -1217,6 +1288,7 @@ export function ShippingPageClient(props: Props) {
                 shippingRate={props.shippingRate}
                 shippingCarrier={props.shippingCarrier}
                 testModeCarriers={props.testModeCarriers}
+                mode={props.mode}
               />}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { ShipAddress, PackageInfo, RateResult, LabelResult } from "./types";
+import type { ShipAddress, PackageInfo, RateResult, LabelResult, LabelOptions } from "./types";
 
 const MAX_LOGGED_ERROR_LENGTH = 4_000;
 const MAX_USER_ERROR_LENGTH = 600;
@@ -291,6 +291,14 @@ async function getPaymentToken(oauthToken: string): Promise<string> {
   return data.paymentAuthorizationToken;
 }
 
+// USPS Labels API v3 `imageInfo.labelType` — confirmed via a live sandbox
+// call that the full enum is exactly: 4X4LABEL, 4X5LABEL, 4X6LABEL,
+// 6X4LABEL, 2X7LABEL. There is no 8.5x11/Letter option — USPS labels are
+// thermal-size only through this API.
+const USPS_LABEL_TYPE: Record<"4X6", string> = {
+  "4X6": "4X6LABEL",
+};
+
 export async function purchaseUSPSLabel(
   from:          ShipAddress,
   to:            ShipAddress,
@@ -298,7 +306,12 @@ export async function purchaseUSPSLabel(
   serviceCode:   string,
   service:       string,
   signatureCode = 0,
+  opts:          LabelOptions = {},
 ): Promise<LabelResult> {
+  if (opts.labelSize === "LETTER") {
+    throw new Error("USPS does not support 8.5×11 (Letter) labels — only 4×6 thermal labels. Choose UPS for a Letter-size label, or switch this to 4×6.");
+  }
+
   const missingPaymentFields = [
     ["USPS_CRID", process.env.USPS_CRID],
     ["USPS_MID", process.env.USPS_MID],
@@ -315,30 +328,36 @@ export async function purchaseUSPSLabel(
   // the unit fields and accepts the actual package weight (for example 0.5 lb).
   const weightLbs = Math.max(0.1, Number(pkg.weightLbs.toFixed(2)));
 
-  const toNameParts   = to.name.trim().split(/\s+/);
-  const fromNameParts = from.name.trim().split(/\s+/);
+  const isReturn = opts.isReturn ?? false;
+  // For a return, the package travels customer -> us: `to` (destination)
+  // becomes our warehouse (`from`), `from` (origin) becomes the customer (`to`).
+  const dest   = isReturn ? from : to;
+  const origin = isReturn ? to   : from;
+
+  const destNameParts   = dest.name.trim().split(/\s+/);
+  const originNameParts = origin.name.trim().split(/\s+/);
 
   const body = {
     toAddress: {
-      firstName:        toNameParts[0] || "Customer",
-      lastName:         toNameParts.slice(1).join(" ") || "-",
-      firm:             to.company ?? undefined,
-      streetAddress:    to.street1,
-      secondaryAddress: to.street2 ?? undefined,
-      city:             to.city,
-      state:            to.state,
-      ZIPCode:          to.zip.slice(0, 5),
+      firstName:        destNameParts[0] || "Customer",
+      lastName:         destNameParts.slice(1).join(" ") || "-",
+      firm:             dest.company ?? undefined,
+      streetAddress:    dest.street1,
+      secondaryAddress: dest.street2 ?? undefined,
+      city:             dest.city,
+      state:            dest.state,
+      ZIPCode:          dest.zip.slice(0, 5),
       ignoreBadAddress: true,
     },
     fromAddress: {
-      firstName:     fromNameParts[0] || "Sender",
-      lastName:      fromNameParts.slice(1).join(" ") || "-",
-      firm:          from.company ?? undefined,
-      streetAddress: from.street1,
-      city:          from.city,
-      state:         from.state,
-      ZIPCode:       from.zip.slice(0, 5),
-      phone:         from.phone ?? undefined,
+      firstName:     originNameParts[0] || "Sender",
+      lastName:      originNameParts.slice(1).join(" ") || "-",
+      firm:          origin.company ?? undefined,
+      streetAddress: origin.street1,
+      city:          origin.city,
+      state:         origin.state,
+      ZIPCode:       origin.zip.slice(0, 5),
+      phone:         origin.phone ?? undefined,
     },
     packageDescription: {
       mailClass:                    serviceCode,
@@ -358,11 +377,11 @@ export async function purchaseUSPSLabel(
     },
     imageInfo: {
       imageType:       "PDF",
-      labelType:       "4X6LABEL",
+      labelType:       USPS_LABEL_TYPE["4X6"],
       receiptOption:   "NONE",
       suppressPostage: false,
       suppressMailDate:false,
-      returnLabel:     false,
+      returnLabel:     isReturn,
     },
   };
 

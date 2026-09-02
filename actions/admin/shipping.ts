@@ -6,7 +6,9 @@ import { revalidatePath }        from "next/cache";
 import { getFedExRates, purchaseFedExLabel }   from "@/lib/shipping/fedex";
 import { getUPSRates,   purchaseUPSLabel }     from "@/lib/shipping/ups";
 import { getUSPSRates,  purchaseUSPSLabel }    from "@/lib/shipping/usps";
-import type { CarrierCode, ShipAddress, PackageInfo, RateResult, LabelResult } from "@/lib/shipping/types";
+import type { CarrierCode, ShipAddress, PackageInfo, RateResult, LabelResult, LabelSize } from "@/lib/shipping/types";
+
+export type ShipmentDirection = "outbound" | "return";
 
 function getFromAddress(): ShipAddress {
   return {
@@ -154,32 +156,40 @@ export async function getShippingRates(
   pkg:              PackageInfo,
   carriers:         CarrierCode[],
   overrideAddress?: ShipAddress,
+  direction:        ShipmentDirection = "outbound",
 ): Promise<{ rates: RateResult[]; error?: string }> {
   await requireAdmin();
 
-  const from = getFromAddress();
-  let to: ShipAddress;
+  const warehouse = getFromAddress();
+  let customer: ShipAddress;
   if (overrideAddress) {
-    to = overrideAddress;
+    customer = overrideAddress;
   } else {
     const [toOrNull, toErr] = await buildToAddress(orderId);
     if (toErr || !toOrNull) return { rates: [], error: toErr ?? "Address unavailable." };
-    to = toOrNull;
+    customer = toOrNull;
   }
+  // Rating is symmetric point-to-point pricing — for a return, the package
+  // simply originates at the customer and lands at our warehouse.
+  const from = direction === "return" ? customer : warehouse;
+  const to   = direction === "return" ? warehouse : customer;
+  // FedEx return labels aren't implemented — silently skip it for a return
+  // rather than erroring, since the UI won't offer it as an option either.
+  const effectiveCarriers = direction === "return" ? carriers.filter((c) => c !== "fedex") : carriers;
 
   const tasks: Promise<RateResult[]>[] = [];
 
-  if (carriers.includes("fedex") && process.env.FEDEX_CLIENT_ID) {
+  if (effectiveCarriers.includes("fedex") && process.env.FEDEX_CLIENT_ID) {
     tasks.push(getFedExRates(from, to, pkg).catch((e: Error) => {
       console.error("FedEx rates error:", e.message); return [];
     }));
   }
-  if (carriers.includes("ups") && process.env.UPS_CLIENT_ID) {
+  if (effectiveCarriers.includes("ups") && process.env.UPS_CLIENT_ID) {
     tasks.push(getUPSRates(from, to, pkg).catch((e: Error) => {
       console.error("UPS rates error:", e.message); return [];
     }));
   }
-  if (carriers.includes("usps") && process.env.USPS_CLIENT_ID) {
+  if (effectiveCarriers.includes("usps") && process.env.USPS_CLIENT_ID) {
     tasks.push(getUSPSRates(from, to, pkg).catch((e: Error) => {
       console.error("USPS rates error:", e.message, e.stack); return [];
     }));
@@ -203,10 +213,27 @@ export async function purchaseLabel(
   service:          string,
   overrideAddress?: ShipAddress,
   signatureCode     = 0,
+  direction:        ShipmentDirection = "outbound",
+  labelSize:        LabelSize = "4X6",
 ): Promise<{ success: boolean; message: string; shipment?: { trackingNumber: string; labelBase64: string; labelFormat: string; cost: number } }> {
   await requireAdmin();
+  const isReturn = direction === "return";
+
+  if (isReturn && carrier === "fedex") {
+    return { success: false, message: "Return labels are only supported for UPS and USPS." };
+  }
+
+  if (isReturn) {
+    const existingReturn = await prisma.shipment.findFirst({ where: { orderId, isReturn: true } });
+    if (existingReturn) {
+      return { success: false, message: `A return label already exists for this order (tracking ${existingReturn.trackingNumber}). Only one return label is supported per order.` };
+    }
+  }
 
   try {
+    // `from`/`to` always stay warehouse/customer — purchaseUPSLabel and
+    // purchaseUSPSLabel handle the shipper/recipient swap internally when
+    // isReturn is set, since the billing account (Shipper) must always be us.
     const from = getFromAddress();
     let to: ShipAddress;
     if (overrideAddress) {
@@ -223,9 +250,9 @@ export async function purchaseLabel(
       if (carrier === "fedex") {
         result = await purchaseFedExLabel(from, to, pkg, serviceCode, service, signatureCode);
       } else if (carrier === "ups") {
-        result = await purchaseUPSLabel(from, to, pkg, serviceCode, service, signatureCode);
+        result = await purchaseUPSLabel(from, to, pkg, serviceCode, service, signatureCode, { labelSize, isReturn });
       } else {
-        result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service, signatureCode);
+        result = await purchaseUSPSLabel(from, to, pkg, serviceCode, service, signatureCode, { labelSize, isReturn });
       }
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
@@ -253,6 +280,8 @@ export async function purchaseLabel(
       trackingNumber: result.trackingNumber,
       labelBase64:    safeLabel,
       labelFormat:    result.labelFormat,
+      labelSize,
+      isReturn,
       fromAddress:    from as object,
       toAddress:      to as object,
       weightLbs:      pkg.weightLbs,
@@ -264,6 +293,10 @@ export async function purchaseLabel(
     },
   });
 
+  // A return label doesn't mean the order itself shipped — it's a reverse
+  // shipment for goods already refunded/cancelled. Don't touch order status,
+  // tracking, or inventory for it; those only apply to outbound labels.
+  if (!isReturn) {
   // Get current order to check status and items before updating
   const currentOrder = await prisma.order.findUnique({
     where:  { id: orderId },
@@ -327,9 +360,6 @@ export async function purchaseLabel(
     console.log(`[Inventory] Stock updated for ${orderItems.length} item(s) on order ${orderId}`);
   }
 
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath("/admin/orders");
-
   // Send tracking email to patient, CC physician + sales rep
   try {
     const fullOrder = await prisma.order.findUnique({
@@ -383,10 +413,14 @@ export async function purchaseLabel(
   } catch (err) {
     console.error("[purchaseLabel] tracking email failed:", err);
   }
+  }
+
+  revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/admin/orders");
 
     return {
       success: true,
-      message: `Label purchased! Tracking: ${result.trackingNumber}`,
+      message: isReturn ? `Return label purchased! Tracking: ${result.trackingNumber}` : `Label purchased! Tracking: ${result.trackingNumber}`,
       shipment: {
         trackingNumber: result.trackingNumber,
         labelBase64:    safeLabel,
