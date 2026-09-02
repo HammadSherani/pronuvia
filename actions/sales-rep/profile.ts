@@ -85,6 +85,45 @@ export async function updateSalesRepProfile(
   }
 }
 
+const BankOnlySchema = z.object({
+  bankName:          z.string().min(1, "Bank name is required"),
+  bankAccountName:   z.string().min(1, "Account holder name is required"),
+  bankAccountNumber: z.string().min(1, "Account number is required"),
+  swiftCode:         z.string().optional(),
+  routingNumber:     z.string().optional(),
+});
+
+export async function updateSalesRepBankDetails(
+  _state: ProfileState,
+  formData: FormData
+): Promise<ProfileState> {
+  const session = await requireSalesRep();
+
+  const raw = {
+    bankName:          (formData.get("bankName") as string)?.trim(),
+    bankAccountName:   (formData.get("bankAccountName") as string)?.trim(),
+    bankAccountNumber: (formData.get("bankAccountNumber") as string)?.trim(),
+    swiftCode:         (formData.get("swiftCode") as string)?.trim() || undefined,
+    routingNumber:     (formData.get("routingNumber") as string)?.trim() || undefined,
+  };
+
+  const validated = BankOnlySchema.safeParse(raw);
+  if (!validated.success) {
+    return { errors: z.flattenError(validated.error).fieldErrors };
+  }
+
+  try {
+    await prisma.salesRepresentative.update({
+      where: { id: session.userId },
+      data: { ...validated.data, bankNotifyRequested: false },
+    });
+    return { success: true, message: "Bank details saved." };
+  } catch (err) {
+    console.error("[updateSalesRepBankDetails]", err);
+    return { message: "Failed to save changes. Please try again." };
+  }
+}
+
 export async function changeSalesRepPassword(
   _state: ProfileState,
   formData: FormData

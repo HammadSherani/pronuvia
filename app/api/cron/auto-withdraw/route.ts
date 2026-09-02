@@ -43,23 +43,19 @@ export async function GET(req: NextRequest) {
   const sweep = await sweepCommissionPeriod(period);
   console.log("[auto-withdraw] commission sweep", sweep);
 
+  // Note: no bank-details filter here — an account without bank details on
+  // file still needs a payout request created so it's visible to the admin
+  // (with a "bank details missing" warning in the UI). Approval itself
+  // still hard-blocks paying out without bank details (manage-withdrawals.ts).
   const [salesReps, physicians] = await Promise.all([
     prisma.salesRepresentative.findMany({
-      where: {
-        walletBalance: { gt: 0 },
-        bankName: { not: null },
-        bankAccountNumber: { not: null },
-        bankAccountName: { not: null },
-      },
+      where: { walletBalance: { gt: 0 } },
       select: { id: true, walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
     }),
     prisma.partneringPhysician.findMany({
       where: {
         isApproved: "APPROVED",
         walletBalance: { gt: 0 },
-        bankName: { not: null },
-        bankAccountNumber: { not: null },
-        bankAccountName: { not: null },
       },
       select: { id: true, walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
     }),

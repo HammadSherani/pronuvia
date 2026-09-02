@@ -137,7 +137,11 @@ export function buildMonthlyPayoutPlan({
   const plan: MonthlyPayoutPlan = { update: [], remove: [], create: [], skipApproved: [] };
 
   for (const user of users) {
-    if (!user.hasBankAccount || user.walletBalance <= 0) continue;
+    // Still create the request even without bank details on file — it must
+    // stay visible to the admin so nothing owed goes unnoticed. The actual
+    // payout stays blocked (approval enforces bank details separately) so
+    // nothing is ever paid to an account with nowhere to send it.
+    if (user.walletBalance <= 0) continue;
 
     const mine = requests
       .filter((request) => request.userId === user.id && request.userRole === user.userRole)

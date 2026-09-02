@@ -18,7 +18,6 @@ export default async function DashboardLayout({
 
   // Check if this physician/sales-rep has been asked to add bank details
   let showBankGate = false;
-  let accountHref  = "";
 
   if (session.role === "PHYSICIAN") {
     const doc = await prisma.partneringPhysician.findUnique({
@@ -27,7 +26,6 @@ export default async function DashboardLayout({
     });
     if (doc?.bankNotifyRequested && !doc.bankName) {
       showBankGate = true;
-      accountHref  = "/physician/account";
     }
   } else if (session.role === "SALES_REP") {
     const rep = await prisma.salesRepresentative.findUnique({
@@ -36,7 +34,6 @@ export default async function DashboardLayout({
     });
     if (rep?.bankNotifyRequested && !rep.bankName) {
       showBankGate = true;
-      accountHref  = "/sales/account";
     }
   }
 
@@ -50,7 +47,7 @@ export default async function DashboardLayout({
         <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
           {children}
         </main>
-        {showBankGate && <BankNotifyGate accountHref={accountHref} />}
+        {showBankGate && <BankNotifyGate role={session.role as "PHYSICIAN" | "SALES_REP"} />}
       </div>
     </CartProviderWrapper>
   );
