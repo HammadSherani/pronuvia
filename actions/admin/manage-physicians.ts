@@ -12,6 +12,7 @@ import { sendMail } from "@/lib/email/mailer";
 import { physicianApprovalEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 import { doctorRegistrationEmail } from "@/lib/email/templates";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
+import { duplicateKeyField } from "@/lib/db/prisma-errors";
 
 export type PhysicianActionState = {
   errors?:  Record<string, string[]>;
@@ -103,19 +104,26 @@ export async function adminCreatePhysician(
     ? generateResetToken()
     : { token: null, expiry: null };
 
-  await prisma.partneringPhysician.create({
-    data: {
-      ...rest,
-      salesRepId:          salesRepId ?? null,
-      password:            hashed,
-      isApproved,
-      addedByRole:         Role.ADMIN,
-      addedByAdminId:      session.userId,
-      websiteLink:         rest.websiteLink || null,
-      passwordResetToken:  token,
-      passwordResetExpiry: expiry,
-    },
-  });
+  try {
+    await prisma.partneringPhysician.create({
+      data: {
+        ...rest,
+        salesRepId:          salesRepId ?? null,
+        password:            hashed,
+        isApproved,
+        addedByRole:         Role.ADMIN,
+        addedByAdminId:      session.userId,
+        websiteLink:         rest.websiteLink || null,
+        passwordResetToken:  token,
+        passwordResetExpiry: expiry,
+      },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
+    if (field === "email")   return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
+    throw err;
+  }
 
   // Registration confirmation for PENDING accounts (approval email covers the APPROVED path)
   if (isApproved === ApprovalStatus.PENDING) {
@@ -139,9 +147,11 @@ export async function adminCreatePhysician(
       loginId:    rest.loginId,
       resetToken: token,
     });
-    sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html }).catch((err) =>
-      console.error("[email] physicianApprovalEmail failed:", err)
-    );
+    try {
+      await sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html });
+    } catch (err) {
+      console.error("[email] physicianApprovalEmail failed:", err);
+    }
   }
 
   // 2) If assigned to a sales rep, notify them
@@ -158,9 +168,11 @@ export async function adminCreatePhysician(
         physicianEmail:      rest.email,
         nameOfPractice:      rest.nameOfPractice,
       });
-      sendMail({ to: salesRep.email, subject: repEmail.subject, html: repEmail.html }).catch((err) =>
-        console.error("[email] salesRepPhysicianAssigned failed:", err)
-      );
+      try {
+        await sendMail({ to: salesRep.email, subject: repEmail.subject, html: repEmail.html });
+      } catch (err) {
+        console.error("[email] salesRepPhysicianAssigned failed:", err);
+      }
     }
   }
 
@@ -225,6 +237,11 @@ export async function updatePhysician(
     return { message: "Physician not found." };
   }
 
+  if (validated.data.email && validated.data.email !== physician.email) {
+    const emailTaken = await prisma.partneringPhysician.findUnique({ where: { email: validated.data.email } });
+    if (emailTaken) return { errors: { email: ["This email is already in use."] } };
+  }
+
   if (validated.data.license) {
     const licenseExists = await prisma.partneringPhysician.findFirst({
       where: { license: validated.data.license, NOT: { id } },
@@ -240,13 +257,20 @@ export async function updatePhysician(
 
   const salesRepIdToSet = (formData.get("salesRepId") as string)?.trim() || null;
 
-  await prisma.partneringPhysician.update({
-    where: { id },
-    data: {
-      ...validated.data,
-      salesRepId: salesRepIdToSet,
-    },
-  });
+  try {
+    await prisma.partneringPhysician.update({
+      where: { id },
+      data: {
+        ...validated.data,
+        salesRepId: salesRepIdToSet,
+      },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] } };
+    if (field === "email")   return { errors: { email: ["This email is already in use."] } };
+    throw err;
+  }
 
   revalidatePath("/admin/physicians");
   revalidatePath(`/admin/physicians/${id}`);

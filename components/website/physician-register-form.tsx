@@ -101,7 +101,7 @@ export function PhysicianRegisterForm() {
         </Field>
         <Field label="Login ID / Username" error={e.loginId?.[0]}>
           <input required name="loginId" type="text" autoComplete="username" placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId} className={e.loginId ? inpErr : inp} />
-          <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–30 characters, letters, numbers, . _ -)</p>
+          <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–64 characters — letters, numbers, . _ - @ +; email addresses allowed)</p>
         </Field>
       </div>
 

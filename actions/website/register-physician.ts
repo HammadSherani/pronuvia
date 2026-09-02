@@ -9,6 +9,7 @@ import { sendMail }                     from "@/lib/email/mailer";
 import { doctorRegistrationEmail }      from "@/lib/email/templates";
 import { LoginIdSchema } from "@/lib/validations/login-id";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
+import { duplicateKeyField } from "@/lib/db/prisma-errors";
 
 const Schema = z.object({
   email:               z.string().email("Valid email is required"),
@@ -113,17 +114,24 @@ export async function registerPhysician(
   const placeholder = randomPlaceholderPassword();
   const hashed      = await hashPassword(placeholder);
 
-  await prisma.partneringPhysician.create({
-    data: {
-      ...validated.data,
-      password:          hashed,
-      fieldsOfSpeciality,
-      isApproved:        ApprovalStatus.PENDING,
-      addedByRole:       Role.PHYSICIAN,
-      commission:        0,
-      uplineCommission:  0,
-    },
-  });
+  try {
+    await prisma.partneringPhysician.create({
+      data: {
+        ...validated.data,
+        password:          hashed,
+        fieldsOfSpeciality,
+        isApproved:        ApprovalStatus.PENDING,
+        addedByRole:       Role.PHYSICIAN,
+        commission:        0,
+        uplineCommission:  0,
+      },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
+    if (field === "email")   return { errors: { email: ["An account with this email already exists."] }, values: strValues };
+    throw err;
+  }
 
   try {
     const { subject, html } = doctorRegistrationEmail({

@@ -81,6 +81,13 @@ export async function approvePhysician(id: string): Promise<ApprovalActionState>
   });
 
   // Email 1: Account approval with password setup link
+  //
+  // These sends are deliberately awaited (not fire-and-forget): on Vercel,
+  // a serverless function's execution can be frozen the moment the action
+  // returns its response, which kills any still-in-flight un-awaited
+  // promise (the SendGrid HTTP call included). Locally, next dev's
+  // long-running process happens to let the same fire-and-forget call
+  // finish anyway, which is why this previously only failed in production.
   const setupEmail = physicianApprovalEmail({
     firstName:  physician.firstName,
     lastName:   physician.lastName,
@@ -88,18 +95,22 @@ export async function approvePhysician(id: string): Promise<ApprovalActionState>
     loginId:    physician.loginId ?? physician.email,
     resetToken: token,
   });
-  sendMail({ to: physician.email, subject: setupEmail.subject, html: setupEmail.html, attachments: approvalAttachments }).catch((err) =>
-    console.error("[email] physicianApprovalEmail failed:", err)
-  );
+  try {
+    await sendMail({ to: physician.email, subject: setupEmail.subject, html: setupEmail.html, attachments: approvalAttachments });
+  } catch (err) {
+    console.error("[email] physicianApprovalEmail failed:", err);
+  }
 
   // Email 2: Welcome Aboard with AIC resources + PDF attachments
   const boardEmail = welcomeAboardEmail({
     firstName: physician.firstName,
     lastName:  physician.lastName,
   });
-  sendMail({ to: physician.email, subject: boardEmail.subject, html: boardEmail.html, attachments: welcomeAttachments }).catch((err) =>
-    console.error("[email] welcomeAboardEmail failed:", err)
-  );
+  try {
+    await sendMail({ to: physician.email, subject: boardEmail.subject, html: boardEmail.html, attachments: welcomeAttachments });
+  } catch (err) {
+    console.error("[email] welcomeAboardEmail failed:", err);
+  }
 
   // Email 3: Notify sales rep if this doctor was added by one
   if (physician.salesRep?.email) {
@@ -107,9 +118,11 @@ export async function approvePhysician(id: string): Promise<ApprovalActionState>
       doctorFirstName: physician.firstName,
       doctorLastName:  physician.lastName,
     });
-    sendMail({ to: physician.salesRep.email, subject: srEmail.subject, html: srEmail.html }).catch((err) =>
-      console.error("[email] salesRepDoctorApprovedEmail failed:", err)
-    );
+    try {
+      await sendMail({ to: physician.salesRep.email, subject: srEmail.subject, html: srEmail.html });
+    } catch (err) {
+      console.error("[email] salesRepDoctorApprovedEmail failed:", err);
+    }
   }
 
   revalidatePath("/admin/approvals");

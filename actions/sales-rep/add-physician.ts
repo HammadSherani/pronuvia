@@ -11,6 +11,7 @@ import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail }                                              from "@/lib/email/mailer";
 import { doctorRegistrationEmail, salesRepDoctorSignupEmail }   from "@/lib/email/templates";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
+import { duplicateKeyField } from "@/lib/db/prisma-errors";
 
 export type AddPhysicianState = {
   errors?:  Record<string, string[]>;
@@ -105,17 +106,24 @@ export async function salesRepAddPhysician(
   const { ...rest } = validated.data;
 
   // Sales rep-added physicians are PENDING until admin approves (no setup email until approval)
-  await prisma.partneringPhysician.create({
-    data: {
-      ...rest,
-      password:    hashed,
-      salesRepNote,
-      isApproved:  ApprovalStatus.PENDING,
-      addedByRole: Role.SALES_REP,
-      salesRepId:  session.userId,
-      websiteLink: rest.websiteLink || null,
-    },
-  });
+  try {
+    await prisma.partneringPhysician.create({
+      data: {
+        ...rest,
+        password:    hashed,
+        salesRepNote,
+        isApproved:  ApprovalStatus.PENDING,
+        addedByRole: Role.SALES_REP,
+        salesRepId:  session.userId,
+        websiteLink: rest.websiteLink || null,
+      },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
+    if (field === "email")   return { errors: { email: ["A physician with this email already exists."] }, values: strValues };
+    throw err;
+  }
 
   try {
     const salesRep = await prisma.salesRepresentative.findUnique({

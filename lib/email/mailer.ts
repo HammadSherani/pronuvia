@@ -39,6 +39,40 @@ export async function sendMail(opts: {
     .filter(e => e && e !== opts.to && !ccUnique.includes(e));
   const bccUnique = [...new Set(bccList)];
 
+  // Resolve path-based attachments (e.g. static PDFs shipped in the repo)
+  // into in-memory content up front. SendGrid's API has no concept of "read
+  // this file off disk" — it only accepts base64 content — so a path-only
+  // attachment was previously silently dropped on the SendGrid send path
+  // (nodemailer/SMTP does support `path` directly, which is why this only
+  // showed up once SendGrid became the primary provider). A read failure
+  // logs and skips that one attachment rather than failing the whole email.
+  const resolvedAttachments: MailAttachment[] = (opts.attachments ?? []).flatMap((a) => {
+    if (a.content !== undefined || !a.path) return [a];
+    try {
+      return [{ ...a, content: fs.readFileSync(a.path) }];
+    } catch (err) {
+      console.error(`[mailer] could not read attachment "${a.filename}" at ${a.path}:`, err);
+      return [];
+    }
+  });
+
+  // SendGrid rejects the whole request over ~30MB (base64 attachments +
+  // headers + HTML body included). Rather than risk the entire email
+  // silently failing to send over one oversized PDF, drop the largest
+  // attachments first until the set comfortably fits — the email still
+  // goes out with whatever attachments remain.
+  const MAX_ATTACHMENTS_BYTES = 20 * 1024 * 1024; // ~20MB raw ≈ ~27MB base64, leaves headroom under the 30MB cap
+  let attachmentBytes = resolvedAttachments.reduce((sum, a) => sum + (a.content?.length ?? 0), 0);
+  if (attachmentBytes > MAX_ATTACHMENTS_BYTES) {
+    resolvedAttachments.sort((a, b) => (b.content?.length ?? 0) - (a.content?.length ?? 0));
+    while (attachmentBytes > MAX_ATTACHMENTS_BYTES && resolvedAttachments.length) {
+      const dropped = resolvedAttachments.shift()!;
+      const droppedBytes = dropped.content?.length ?? 0;
+      attachmentBytes -= droppedBytes;
+      console.warn(`[mailer] dropping oversized attachment "${dropped.filename}" (${(droppedBytes / 1024 / 1024).toFixed(1)}MB) to stay under the email size limit`);
+    }
+  }
+
   // ── SendGrid (preferred — works on Vercel / serverless) ───────────────────
   if (process.env.SENDGRID_API_KEY) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -52,7 +86,7 @@ export async function sendMail(opts: {
 
     try {
       // Convert Buffer attachments to base64 for SendGrid
-      const sgAttachments = (opts.attachments ?? [])
+      const sgAttachments = resolvedAttachments
         .filter((a) => a.content !== undefined)
         .map((a) => ({
           filename:    a.filename,
@@ -120,7 +154,7 @@ export async function sendMail(opts: {
     bcc:         bccUnique.length ? bccUnique.join(", ") : undefined,
     subject:     opts.subject,
     html:        opts.html,
-    attachments: [...logoAttachments, ...(opts.attachments ?? [])],
+    attachments: [...logoAttachments, ...resolvedAttachments],
   });
   console.log("[mailer/smtp] sent to", opts.to, ccUnique.length ? `| cc: ${ccUnique.join(", ")}` : "", bccUnique.length ? `| bcc: ${bccUnique.join(", ")}` : "", "| subject:", opts.subject, "| msgId:", info.messageId);
   return info;

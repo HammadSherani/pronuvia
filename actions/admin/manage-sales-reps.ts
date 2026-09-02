@@ -10,6 +10,7 @@ import { sendMail } from "@/lib/email/mailer";
 import { passwordSetupEmail } from "@/lib/email/templates";
 import { z } from "zod";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
+import { duplicateKeyField } from "@/lib/db/prisma-errors";
 
 export type SalesRepActionState = {
   errors?: Record<string, string[]>;
@@ -76,16 +77,23 @@ export async function createSalesRep(
   const hashed      = await hashPassword(placeholder);
   const { token, expiry } = generateResetToken();
 
-  await prisma.salesRepresentative.create({
-    data: {
-      ...data,
-      name:               `${data.firstName} ${data.lastName}`,
-      password:           hashed,
-      commission:         data.commission ?? 0,
-      passwordResetToken: token,
-      passwordResetExpiry: expiry,
-    },
-  });
+  try {
+    await prisma.salesRepresentative.create({
+      data: {
+        ...data,
+        name:               `${data.firstName} ${data.lastName}`,
+        password:           hashed,
+        commission:         data.commission ?? 0,
+        passwordResetToken: token,
+        passwordResetExpiry: expiry,
+      },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] } };
+    if (field === "email")   return { errors: { email: ["A sales rep with this email already exists."] } };
+    throw err;
+  }
 
   // Send password setup email
   const { subject, html } = passwordSetupEmail({
@@ -94,9 +102,14 @@ export async function createSalesRep(
     resetToken: token,
     role:      "salesRep",
   });
-  sendMail({ to: data.email, subject, html }).catch((err) =>
-    console.error("[email] salesRepSetupPassword failed:", err)
-  );
+  // Awaited — an un-awaited send can get cut off when the serverless
+  // function freezes right after this action returns (Vercel), even though
+  // it always finishes fine on a long-running local dev server.
+  try {
+    await sendMail({ to: data.email, subject, html });
+  } catch (err) {
+    console.error("[email] salesRepSetupPassword failed:", err);
+  }
 
   revalidatePath("/admin/sales-reps");
   return { success: true, message: "Sales representative created successfully." };
@@ -129,10 +142,17 @@ export async function updateSalesRep(
   const firstName = data.firstName ?? existing.firstName;
   const lastName  = data.lastName  ?? existing.lastName;
 
-  await prisma.salesRepresentative.update({
-    where: { id },
-    data: { ...data, name: `${firstName} ${lastName}` },
-  });
+  try {
+    await prisma.salesRepresentative.update({
+      where: { id },
+      data: { ...data, name: `${firstName} ${lastName}` },
+    });
+  } catch (err) {
+    const field = duplicateKeyField(err);
+    if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] } };
+    if (field === "email")   return { errors: { email: ["This email is already in use."] } };
+    throw err;
+  }
 
   revalidatePath("/admin/sales-reps");
   revalidatePath(`/admin/sales-reps/${id}`);

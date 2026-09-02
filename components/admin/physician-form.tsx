@@ -176,7 +176,7 @@ export function PhysicianForm({
             <label className={lbl}>Login ID / Username<Req /></label>
             <input name="loginId" type="text" autoComplete="username" className={icls(e.loginId?.[0])} placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId ?? defaults?.loginId} />
             <FE msg={e.loginId?.[0]} />
-            <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–30 characters, letters, numbers, . _ -)</p>
+            <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–64 characters — letters, numbers, . _ - @ +; email addresses allowed)</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
