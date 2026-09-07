@@ -194,9 +194,11 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
                   {/* Order # */}
                   <td className="px-4 py-4">
                     <p className="font-mono text-xs font-semibold text-gray-700">{o.orderNumber}</p>
-                    {o.physician && (
+                    {o.physician ? (
                       <p className="text-[11px] text-gray-400 mt-0.5">{o.physician.firstName} {o.physician.lastName}</p>
-                    )}
+                    ) : o.salesRep ? (
+                      <p className="text-[11px] text-gray-400 mt-0.5">{o.salesRep.name}</p>
+                    ) : null}
                     {isReturned && (
                       <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-semibold rounded-full border border-orange-200">
                         Returned
