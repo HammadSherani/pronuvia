@@ -131,6 +131,7 @@ export type ReversibleOrder = {
   salesRepClawback: number | null;
   physicianClawback: number | null;
   commissionPaid: boolean;
+  importedAt?: Date | null;
 };
 
 export type ReversalResult = {
@@ -160,6 +161,11 @@ export async function reverseOrderCommissionIfPaid(
     reversed: false, salesRepReversed: 0, physicianReversed: 0,
     newSalesRepClawback: order.salesRepClawback, newPhysicianClawback: order.physicianClawback,
   };
+  // Bulk-imported historical orders are marked commissionPaid so the sweep
+  // never touches them, but no commission was ever actually credited into
+  // this system's wallet ledger for them — reversing here would debit real
+  // money that was never paid out in the first place.
+  if (order.importedAt) return noop;
   if (!order.commissionPaid || order.status === targetStatus) return noop;
 
   const remainingSalesRepCommission  = Math.max(0, order.salesRepCommissionAmount  - (order.salesRepClawback  ?? 0));

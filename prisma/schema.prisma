@@ -238,6 +238,12 @@ model Order {
   salesRepClawback          Float?               // deducted from sales rep wallet
   physicianClawback         Float?               // informational — physician has no wallet
 
+  // Set on rows created by the bulk-import tool (historical/migrated orders).
+  // Marks the order as already accounted for outside this system's wallet
+  // ledger, so a later cancellation/refund never claws back commission that
+  // was never actually credited here (see reverseOrderCommissionIfPaid).
+  importedAt                DateTime?
+
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime             @updatedAt
 }

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { toSlug } from "@/lib/utils/slug";
 import { ProductStatus } from "@/generated/prisma/enums";
+import { deriveProductFields } from "@/lib/products/derive";
 
 const SizeSchema = z.object({
   size:      z.string().min(1),
@@ -85,22 +86,6 @@ function parseProductFormData(formData: FormData) {
     status:       (formData.get("status") as string) || "ACTIVE",
     categoryId:   (formData.get("categoryId") as string)    || "",
     subCategoryId:(formData.get("subCategoryId") as string) || undefined,
-  };
-}
-
-function deriveProductFields(variants: { sku?: string; salePrice?: number; costPrice?: number; stock?: number }[]) {
-  const salePrices = variants.map((v) => v.salePrice ?? 0).filter((p) => p > 0);
-  const costPrices = variants.map((v) => v.costPrice ?? 0).filter((p) => p > 0);
-  return {
-    sku:       variants[0]?.sku?.trim() || `PRN-${Date.now().toString(36).toUpperCase()}`,
-    salePrice: salePrices.length ? Math.min(...salePrices) : 0,
-    costPrice: costPrices.length ? Math.min(...costPrices) : 0,
-    quantity:  variants.reduce((s, v) => s + (v.stock ?? 0), 0),
-    discount:  0,
-    compareAtPrice: null,
-    gtin:      null,
-    weight:    null,
-    weightUnit: "kg",
   };
 }
 

@@ -19,6 +19,7 @@ function buildSubNav(role: Role): SubNavItem[] {
       { label: "Coupons",         href: "/admin/coupons" },
       { label: "Shipping Rates",   href: "/admin/shipping-rates" },
       { label: "Reports",          href: "/admin/reports" },
+      { label: "Bulk Import",      href: "/admin/bulk-import" },
       // { label: "Downloads",       href: "/admin/downloads" },
       // { label: "Account",         href: "/admin/account" },
       // { label: "Log out",         action: async () => { await logout(); } },

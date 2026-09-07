@@ -26,6 +26,9 @@ const nextConfig: NextConfig = {
         "localhost:3001",
         "pronuvia.vercel.app",
       ],
+      // Default 1MB is too small for a chunked bulk-import payload (rows are
+      // sent as plain JS args, not file uploads) — headroom, not a target.
+      bodySizeLimit: "4mb",
     },
   },
 };

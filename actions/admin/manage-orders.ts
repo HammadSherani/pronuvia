@@ -233,6 +233,7 @@ export async function updateOrderStatus(
       salesRepCommissionAmount: true, physicianCommissionAmount: true,
       salesRepClawback: true, physicianClawback: true,
       commissionPaid: true, returnedAt: true, returnReason: true,
+      importedAt: true,
     },
   });
   if (!order) return { message: "Order not found." };
@@ -561,7 +562,7 @@ export async function processReturn(
       id: true, orderNumber: true, status: true, total: true, subtotal: true, items: true,
       salesRepId: true, physicianId: true,
       salesRepCommissionAmount: true, physicianCommissionAmount: true,
-      commissionPaid: true,
+      commissionPaid: true, importedAt: true,
       returnedAt: true, returnedTotal: true, returnReason: true,
       salesRepClawback: true, physicianClawback: true,
       stripePaymentIntentId: true,
@@ -713,8 +714,11 @@ export async function processReturn(
 
   // ── Commission clawback (negative balance allowed) ───────────────────────
   // Dated to the CURRENT period (not the order's original period) so it
-  // nets against whatever new commission is earned this period.
-  if (order.commissionPaid) {
+  // nets against whatever new commission is earned this period. Skipped for
+  // bulk-imported historical orders — commissionPaid is forced true on those
+  // to keep them out of the sweep, but no commission was ever actually
+  // credited into the wallet ledger for them, so there's nothing to claw back.
+  if (order.commissionPaid && !order.importedAt) {
     const payoutTimeZone = process.env.PAYOUT_TIMEZONE ?? "UTC";
     const currentPeriod  = getCurrentPeriod(new Date(), payoutTimeZone);
 
@@ -805,7 +809,7 @@ export async function processReturn(
       returnedTotal:     newReturnedTotal,
       salesRepClawback:  newSalesRepClawback,
       physicianClawback: newPhysicianClawback,
-      ...(isFullThisRefund && { commissionPaid: false }),
+      ...(isFullThisRefund && !order.importedAt && { commissionPaid: false }),
     },
   });
 
@@ -868,7 +872,9 @@ export async function processReturn(
 
   return {
     success: true,
-    message: order.commissionPaid
+    message: order.importedAt
+      ? `Refund #${refundNumber} processed.${customerNote} This is a historical imported order — no wallet clawback applied.`
+      : order.commissionPaid
       ? `Refund #${refundNumber} processed.${customerNote} Rep clawback: $${salesRepClawback.toFixed(2)}, Doctor clawback: $${physicianClawback.toFixed(2)}.`
       : `Refund #${refundNumber} processed.${customerNote} Commission not yet paid — no clawback applied.`,
   };
