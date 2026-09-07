@@ -12,6 +12,7 @@ type Doctor = {
   lastName: string;
   email: string;
   nameOfPractice: string | null;
+  credential: string | null;
   uplineCommission: number;
   commission: number;
   ordersCount: number;
@@ -145,6 +146,7 @@ export function DownlineTable({ doctors }: { doctors: Doctor[] }) {
               {/* Practice */}
               <td className="py-3.5 pr-4 text-gray-600">
                 {doc.nameOfPractice || <span className="text-gray-300">—</span>}
+                {doc.credential && <span className="text-gray-400"> · {doc.credential}</span>}
               </td>
 
               {/* Doctor commission — editable */}

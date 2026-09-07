@@ -213,6 +213,16 @@ export function PhysicianRegisterForm() {
         </Field>
       </div>
 
+      {/* Credential + Patients Seen Per Month */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Credential" req={false} error={e.credential?.[0]}>
+          <input name="credential" placeholder="e.g. MD, DO, DC, ND, RN" defaultValue={state?.values?.credential} className={e.credential ? inpErr : inp} />
+        </Field>
+        <Field label="Patients Seen Per Month" req={false} error={e.patientsPerMonth?.[0]}>
+          <input name="patientsPerMonth" type="number" min="0" placeholder="40" defaultValue={state?.values?.patientsPerMonth} className={e.patientsPerMonth ? inpErr : inp} />
+        </Field>
+      </div>
+
       {/* Specialties */}
       <div>
         <label className={lbl}>Fields of Specialties<R /></label>

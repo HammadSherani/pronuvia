@@ -46,6 +46,8 @@ export async function adminCreatePhysician(
     fax: (formData.get("fax") as string) || undefined,
     nameOfPractice: (formData.get("nameOfPractice") as string) || undefined,
     yearsInPractice: (formData.get("yearsInPractice") as string) ?? "",
+    credential: (formData.get("credential") as string) || undefined,
+    patientsPerMonth: (formData.get("patientsPerMonth") as string) || undefined,
     fieldsOfSpeciality: formData.get("fieldsOfSpeciality")
       ? JSON.parse(formData.get("fieldsOfSpeciality") as string)
       : [],
@@ -214,6 +216,10 @@ export async function updatePhysician(
     yearsInPractice: formData.get("yearsInPractice")
       ? Number(formData.get("yearsInPractice"))
       : undefined,
+    credential: (formData.get("credential") as string) || undefined,
+    patientsPerMonth: formData.get("patientsPerMonth")
+      ? Number(formData.get("patientsPerMonth"))
+      : undefined,
     fieldsOfSpeciality: formData.get("fieldsOfSpeciality")
       ? JSON.parse(formData.get("fieldsOfSpeciality") as string)
       : undefined,
@@ -350,7 +356,7 @@ export async function getPhysicianById(id: string) {
       phone: true, officeContactNumber: true, fax: true,
       aictherapy: true, license: true, websiteLink: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
-      nameOfPractice: true, yearsInPractice: true, fieldsOfSpeciality: true,
+      nameOfPractice: true, yearsInPractice: true, credential: true, patientsPerMonth: true, fieldsOfSpeciality: true,
       commission: true, uplineCommission: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true, swiftCode: true, routingNumber: true,
       addedByRole: true, salesRepId: true,

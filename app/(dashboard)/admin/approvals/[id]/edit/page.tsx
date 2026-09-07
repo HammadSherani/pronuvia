@@ -73,6 +73,8 @@ export default async function EditPendingPhysicianPage({ params }: Props) {
           country:             p.country              ?? undefined,
           nameOfPractice:      p.nameOfPractice       ?? undefined,
           yearsInPractice:     p.yearsInPractice      ?? undefined,
+          credential:          p.credential           ?? undefined,
+          patientsPerMonth:    p.patientsPerMonth     ?? undefined,
           fieldsOfSpeciality:  p.fieldsOfSpeciality,
           commission:          p.commission,
           uplineCommission:    p.uplineCommission,

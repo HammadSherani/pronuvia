@@ -33,6 +33,21 @@ export const CreatePhysicianSchema = z.object({
       }
       return n;
     }),
+  credential:          z.string().optional(),
+  patientsPerMonth:    z.string().optional()
+    .transform((val, ctx) => {
+      if (!val) return undefined;
+      const n = Number(val);
+      if (isNaN(n) || !Number.isInteger(n)) {
+        ctx.addIssue({ code: "custom", message: "Must be a valid whole number" });
+        return z.NEVER;
+      }
+      if (n < 0) {
+        ctx.addIssue({ code: "custom", message: "Must be 0 or more" });
+        return z.NEVER;
+      }
+      return n;
+    }),
   fieldsOfSpeciality:  z.array(z.string()).optional().default([]),
   commission:          z.number().min(0).max(100).optional().default(0),
   uplineCommission:    z.number().min(0).max(100).optional().default(0),
@@ -63,6 +78,8 @@ export const UpdatePhysicianSchema = z.object({
   fax:                 z.string().optional(),
   nameOfPractice:      z.string().optional(),
   yearsInPractice:     z.number().int().min(0).optional(),
+  credential:          z.string().optional(),
+  patientsPerMonth:    z.number().int().min(0).optional(),
   fieldsOfSpeciality:  z.array(z.string()).optional(),
   commission:          z.number().min(0).max(100).optional(),
   uplineCommission:    z.number().min(0).max(100).optional(),

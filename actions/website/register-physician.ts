@@ -43,6 +43,21 @@ const Schema = z.object({
       }
       return n;
     }),
+  credential:          z.string().optional(),
+  patientsPerMonth:    z.string().optional()
+    .transform((val, ctx) => {
+      if (!val) return undefined;
+      const n = Number(val);
+      if (isNaN(n) || !Number.isInteger(n)) {
+        ctx.addIssue({ code: "custom", message: "Must be a valid whole number" });
+        return z.NEVER;
+      }
+      if (n < 0) {
+        ctx.addIssue({ code: "custom", message: "Must be 0 or more" });
+        return z.NEVER;
+      }
+      return n;
+    }),
 });
 
 export type RegisterPhysicianState = {
@@ -75,6 +90,8 @@ export async function registerPhysician(
     fax:                 (formData.get("fax") as string)?.trim(),
     nameOfPractice:      (formData.get("nameOfPractice") as string)?.trim(),
     yearsInPractice:     (formData.get("yearsInPractice") as string) ?? "",
+    credential:          (formData.get("credential") as string)?.trim() || undefined,
+    patientsPerMonth:    (formData.get("patientsPerMonth") as string) || undefined,
   };
 
   const strValues: Record<string, string> = Object.fromEntries(

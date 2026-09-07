@@ -141,6 +141,8 @@ model PartneringPhysician {
   fax                 String?
   nameOfPractice      String?
   yearsInPractice     Int?
+  credential          String?
+  patientsPerMonth    Int?
   fieldsOfSpeciality  String[]
   commission          Float          @default(0)
   uplineCommission    Float          @default(0)

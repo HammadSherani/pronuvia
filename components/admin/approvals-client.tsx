@@ -12,6 +12,7 @@ type Physician = {
   email: string;
   loginId: string | null;
   nameOfPractice: string | null;
+  credential: string | null;
   city: string | null;
   state: string | null;
   salesRepNote: string | null;
@@ -102,7 +103,9 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
 
                 {/* Practice */}
                 <td className="px-5 py-4">
-                  <p className="text-xs font-medium text-gray-700">{p.nameOfPractice ?? "—"}</p>
+                  <p className="text-xs font-medium text-gray-700">
+                    {p.nameOfPractice ?? "—"}{p.credential && <span className="text-gray-400"> · {p.credential}</span>}
+                  </p>
                   {p.city && (
                     <p className="text-xs text-gray-400">{p.city}{p.state ? `, ${p.state}` : ""}</p>
                   )}

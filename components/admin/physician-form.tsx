@@ -24,6 +24,7 @@ interface PhysicianFormProps {
     aictherapy?: string; license?: string; websiteLink?: string;
     addressOne?: string; addressTwo?: string; city?: string; state?: string; zipCode?: string; country?: string;
     nameOfPractice?: string; yearsInPractice?: number;
+    credential?: string; patientsPerMonth?: number;
     fieldsOfSpeciality?: string[]; commission?: number; uplineCommission?: number;
     salesRepId?: string; salesRepName?: string;
     bankName?: string; bankAccountNumber?: string; bankAccountName?: string; swiftCode?: string; routingNumber?: string;
@@ -336,6 +337,18 @@ export function PhysicianForm({
             <label className={lbl}>Years in Practice <span className="text-red-500">*</span></label>
             <input name="yearsInPractice" type="number" min="0" required className={icls(e.yearsInPractice?.[0])} placeholder="10" defaultValue={state?.values?.yearsInPractice ?? defaults?.yearsInPractice} />
             <FE msg={e.yearsInPractice?.[0]} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className={lbl}>Credential <span className="font-normal text-gray-400">(Optional)</span></label>
+            <input name="credential" className={icls(e.credential?.[0])} placeholder="e.g. MD, DO, DC, ND, RN" defaultValue={state?.values?.credential ?? defaults?.credential} />
+            <FE msg={e.credential?.[0]} />
+          </div>
+          <div>
+            <label className={lbl}>Patients Seen Per Month <span className="font-normal text-gray-400">(Optional)</span></label>
+            <input name="patientsPerMonth" type="number" min="0" className={icls(e.patientsPerMonth?.[0])} placeholder="40" defaultValue={state?.values?.patientsPerMonth ?? defaults?.patientsPerMonth} />
+            <FE msg={e.patientsPerMonth?.[0]} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">

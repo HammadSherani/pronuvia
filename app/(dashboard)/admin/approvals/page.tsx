@@ -22,7 +22,7 @@ export default async function ApprovalsPage({
       select: {
         id: true,
         firstName: true, lastName: true, email: true, loginId: true,
-        nameOfPractice: true, city: true, state: true,
+        nameOfPractice: true, credential: true, city: true, state: true,
         salesRepNote: true,
         salesRep: { select: { firstName: true, lastName: true, email: true } },
         createdAt: true,

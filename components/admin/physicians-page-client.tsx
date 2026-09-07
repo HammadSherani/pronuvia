@@ -20,6 +20,7 @@ type Physician = {
   city: string | null; state: string | null; zipCode: string | null; country: string | null;
   license: string | null; aictherapy: string | null; websiteLink: string | null;
   fieldsOfSpeciality: string[]; yearsInPractice: number | null;
+  credential: string | null; patientsPerMonth: number | null;
   commission: number; uplineCommission: number;
   walletBalance: number; ordersCount: number;
   addedByRole: string; salesRepId: string | null;
@@ -54,6 +55,8 @@ function exportToExcel(physicians: Physician[]) {
     "AIC Therapy":              p.aictherapy ?? "",
     "Fields of Specialty":      p.fieldsOfSpeciality.join(", "),
     "Years in Practice":        p.yearsInPractice ?? "",
+    "Credential":               p.credential ?? "",
+    "Patients Seen Per Month":  p.patientsPerMonth ?? "",
     "Address 1":                p.addressOne ?? "",
     "Address 2":                p.addressTwo ?? "",
     "City":                     p.city ?? "",
