@@ -52,6 +52,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[340px]">
           <LoginForm />
         </div>
+        
         <Link
           href="/account"
           className="mt-3 inline-flex items-center gap-1.5 text-sm text-gray-400 text-ink transition-colors"
