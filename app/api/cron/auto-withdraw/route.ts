@@ -21,26 +21,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // vercel.json fires this every hour (not once daily) because PAYOUT_TIMEZONE
-  // is a DST-observing zone (America/New_York) — its UTC offset changes twice
-  // a year, so no single fixed daily UTC cron time stays aligned with local
-  // 00:01 year-round. Firing hourly and gating on the timezone-aware local
-  // clock below (correct across EST/EDT) still runs the sweep exactly once
-  // per month, whichever UTC hour that local midnight falls on.
+  // Vercel's Hobby plan only allows a cron to fire once per day, and doesn't
+  // guarantee the exact minute (or even hour) it lands in — so this can't
+  // gate on an exact time-of-day the way it used to. Instead it gates only
+  // on LOCAL DAY-OF-MONTH (in PAYOUT_TIMEZONE, a DST-observing zone like
+  // America/New_York — Intl.DateTimeFormat resolves the correct EST/EDT
+  // offset for any date automatically). vercel.json fires this once daily at
+  // a fixed UTC time chosen to land comfortably after local midnight in both
+  // DST regimes, so by the time it runs the local calendar has already
+  // rolled over to the target day. Running more than once on that day is
+  // harmless — sweepCommissionPeriod and the WithdrawRequest creation below
+  // are both idempotent (commissionPaid flag / deterministic id), so a
+  // second same-day invocation just finds nothing left to do.
   const now = new Date();
   const payoutTimeZone = process.env.PAYOUT_TIMEZONE ?? "UTC";
   const clock = getPayoutLocalDateParts(now, payoutTimeZone);
   // PAYOUT_TEST_DAY lets the monthly gate be pointed at a specific day-of-month
-  // temporarily (e.g. "8") to confirm the cron actually fires unattended at
-  // the configured local time, without touching the permanent rule below.
-  // Unset (the normal/permanent state) → always day 1.
+  // temporarily (e.g. "8") to confirm the cron actually fires unattended,
+  // without touching the permanent rule below. Unset → always day 1.
   const testDay = Number(process.env.PAYOUT_TEST_DAY);
   const targetDay = Number.isInteger(testDay) && testDay >= 1 && testDay <= 31 ? testDay : 1;
-  if (clock.day !== targetDay || clock.hour !== 0 || clock.minute !== 1) {
+  if (clock.day !== targetDay) {
     return NextResponse.json({
       success: true,
       skipped: true,
-      reason: "Outside configured monthly payout time",
+      reason: "Outside configured monthly payout day",
       timeZone: payoutTimeZone,
     });
   }
