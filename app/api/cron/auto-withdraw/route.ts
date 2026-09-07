@@ -21,10 +21,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // vercel.json fires this every hour (not once daily) because PAYOUT_TIMEZONE
+  // is a DST-observing zone (America/New_York) — its UTC offset changes twice
+  // a year, so no single fixed daily UTC cron time stays aligned with local
+  // 00:01 year-round. Firing hourly and gating on the timezone-aware local
+  // clock below (correct across EST/EDT) still runs the sweep exactly once
+  // per month, whichever UTC hour that local midnight falls on.
   const now = new Date();
   const payoutTimeZone = process.env.PAYOUT_TIMEZONE ?? "UTC";
   const clock = getPayoutLocalDateParts(now, payoutTimeZone);
-  if (clock.day !== 1 || clock.hour !== 0 || clock.minute !== 1) {
+  // PAYOUT_TEST_DAY lets the monthly gate be pointed at a specific day-of-month
+  // temporarily (e.g. "8") to confirm the cron actually fires unattended at
+  // the configured local time, without touching the permanent rule below.
+  // Unset (the normal/permanent state) → always day 1.
+  const testDay = Number(process.env.PAYOUT_TEST_DAY);
+  const targetDay = Number.isInteger(testDay) && testDay >= 1 && testDay <= 31 ? testDay : 1;
+  if (clock.day !== targetDay || clock.hour !== 0 || clock.minute !== 1) {
     return NextResponse.json({
       success: true,
       skipped: true,

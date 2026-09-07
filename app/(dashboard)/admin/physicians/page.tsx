@@ -16,6 +16,7 @@ export default async function PhysiciansPage() {
         addressOne: true, addressTwo: true, city: true, state: true, zipCode: true, country: true,
         license: true, aictherapy: true, websiteLink: true,
         fieldsOfSpeciality: true, yearsInPractice: true,
+        credential: true, patientsPerMonth: true,
         commission: true, uplineCommission: true,
         walletBalance: true, ordersCount: true,
         addedByRole: true, salesRepId: true,

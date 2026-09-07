@@ -262,7 +262,7 @@ export async function getSalesRepById(id: string) {
       physicians: {
         select: {
           id: true, firstName: true, lastName: true, email: true,
-          nameOfPractice: true, uplineCommission: true, commission: true,
+          nameOfPractice: true, credential: true, uplineCommission: true, commission: true,
           ordersCount: true, createdAt: true,
         },
         orderBy: { createdAt: "desc" },

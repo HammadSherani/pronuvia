@@ -32,7 +32,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
       phone: true, officeContactNumber: true, fax: true,
       aictherapy: true, license: true, websiteLink: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
-      nameOfPractice: true, yearsInPractice: true, fieldsOfSpeciality: true,
+      nameOfPractice: true, yearsInPractice: true, credential: true, patientsPerMonth: true, fieldsOfSpeciality: true,
       bankName: true, bankAccountNumber: true, bankAccountName: true,
       salesRepNote: true,
       salesRep: { select: { firstName: true, lastName: true, email: true, phone: true } },
@@ -140,6 +140,8 @@ export default async function ApprovalDetailPage({ params }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           <InfoRow label="Name of Practice"  value={p.nameOfPractice} />
           <InfoRow label="Years in Practice" value={p.yearsInPractice} />
+          <InfoRow label="Credential" value={p.credential} />
+          <InfoRow label="Patients Seen Per Month" value={p.patientsPerMonth} />
           <InfoRow label="License Number"    value={p.license} />
           <InfoRow label="How did you hear about AIC Therapy? "    value={p.aictherapy} />
           <div className="col-span-2">

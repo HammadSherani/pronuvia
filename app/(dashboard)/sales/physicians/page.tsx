@@ -29,7 +29,7 @@ export default async function SalesPhysiciansPage({
       where,
       select: {
         id: true, firstName: true, lastName: true, email: true,
-        phone: true, nameOfPractice: true, city: true, state: true,
+        phone: true, nameOfPractice: true, credential: true, city: true, state: true,
         commission: true, isApproved: true, createdAt: true,
         fieldsOfSpeciality: true,
       },
@@ -143,6 +143,7 @@ export default async function SalesPhysiciansPage({
                       </td>
                       <td className="px-5 py-4 text-gray-600">
                         {p.nameOfPractice ?? <span className="text-gray-300">—</span>}
+                        {p.credential && <span className="text-gray-400"> · {p.credential}</span>}
                       </td>
                       <td className="px-5 py-4 text-gray-500 text-xs">
                         {p.city && p.state

@@ -13,6 +13,7 @@ export default async function PhysicianAccountPage() {
       firstName: true, lastName: true, email: true, loginId: true,
       phone: true, officeContactNumber: true, fax: true,
       nameOfPractice: true, license: true, yearsInPractice: true,
+      credential: true, patientsPerMonth: true,
       aictherapy: true, websiteLink: true, fieldsOfSpeciality: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
       bankName: true, bankAccountName: true, bankAccountNumber: true, swiftCode: true, routingNumber: true,

@@ -18,6 +18,7 @@ type Physician = {
   phone: string | null; officeContactNumber: string | null; fax: string | null;
   nameOfPractice: string | null; license: string | null;
   yearsInPractice: number | null; aictherapy: string | null;
+  credential: string | null; patientsPerMonth: number | null;
   websiteLink: string | null; fieldsOfSpeciality: string[];
   addressOne: string | null; addressTwo: string | null;
   city: string | null; state: string | null; zipCode: string | null;
@@ -135,6 +136,8 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="Practice Name"     value={p.nameOfPractice} />
         <InfoRow label="License Number"    value={p.license} />
         <InfoRow label="Years in Practice" value={p.yearsInPractice} />
+        <InfoRow label="Credential"        value={p.credential} />
+        <InfoRow label="Patients Seen Per Month" value={p.patientsPerMonth} />
         <InfoRow label="SAC Therapy"       value={p.aictherapy} />
         <InfoRow label="Website"           value={p.websiteLink} />
         <InfoRow label="Specialties"       value={p.fieldsOfSpeciality?.join(", ")} />
@@ -300,6 +303,15 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           </Field>
           <Field label="How did you hear about AIC Therapy? *" error={e.aictherapy?.[0]}>
             <input name="aictherapy" required defaultValue={p.aictherapy ?? ""} className={e.aictherapy ? inpErr : inp} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Credential (Optional)" error={e.credential?.[0]}>
+            <input name="credential" placeholder="e.g. MD, DO, DC, ND, RN" defaultValue={p.credential ?? ""} className={e.credential ? inpErr : inp} />
+          </Field>
+          <Field label="Patients Seen Per Month (Optional)" error={e.patientsPerMonth?.[0]}>
+            <input name="patientsPerMonth" type="number" min="0" defaultValue={p.patientsPerMonth ?? ""} className={e.patientsPerMonth ? inpErr : inp} />
           </Field>
         </div>
 

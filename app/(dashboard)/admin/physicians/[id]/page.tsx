@@ -108,6 +108,8 @@ export default async function PhysicianViewPage({ params }: Props) {
       <Card title="Practice Information">
         <InfoRow label="Name of Practice" value={p.nameOfPractice} />
         <InfoRow label="Years in Practice" value={p.yearsInPractice != null ? String(p.yearsInPractice) : null} />
+        <InfoRow label="Credential" value={p.credential} />
+        <InfoRow label="Patients Seen Per Month" value={p.patientsPerMonth != null ? String(p.patientsPerMonth) : null} />
         <InfoRow label="License Number" value={p.license} />
         <InfoRow label="How did you hear about AIC Therapy? " value={p.aictherapy} />
         <div className="col-span-2">
