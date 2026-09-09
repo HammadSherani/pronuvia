@@ -32,6 +32,9 @@ export function PhysicianRegisterForm() {
   const [terms, setTerms] = useState(false);
   const [countryIso, setCountryIso] = useState("US");
   const [selectedState, setSelectedState] = useState<string>("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const states = useMemo(() => State.getStatesOfCountry(countryIso), [countryIso]);
   const countryName = useMemo(
@@ -46,9 +49,26 @@ export function PhysicianRegisterForm() {
   }
 
   function addCustomSpecialty() {
-    const v = customSpecialty.trim();
-    if (v && !specialties.includes(v)) setSpecialties((p) => [...p, v]);
+    // Supports pasting/typing several specialties at once, comma-separated —
+    // each becomes its own tag instead of one long combined entry.
+    const parts = customSpecialty.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) {
+      setSpecialties((prev) => {
+        const next = [...prev];
+        for (const p of parts) if (!next.includes(p)) next.push(p);
+        return next;
+      });
+    }
     setCustomSpecialty("");
+  }
+
+  function onPasswordChange(val: string) {
+    setPassword(val);
+    if (confirmPassword) setPasswordError(val !== confirmPassword ? "Passwords do not match" : "");
+  }
+  function onConfirmPasswordChange(val: string) {
+    setConfirmPassword(val);
+    setPasswordError(val !== password ? "Passwords do not match" : "");
   }
 
   useEffect(() => {
@@ -84,8 +104,15 @@ export function PhysicianRegisterForm() {
     );
   }
 
+  function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
+    if (password !== confirmPassword) {
+      ev.preventDefault();
+      setPasswordError("Passwords do not match");
+    }
+  }
+
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form action={action} onSubmit={handleSubmit} className="space-y-5" noValidate>
       <input type="hidden" name="fieldsOfSpeciality" value={JSON.stringify(specialties)} />
 
       {state?.message && !state.success && (
@@ -102,6 +129,18 @@ export function PhysicianRegisterForm() {
         <Field label="Login ID / Username" error={e.loginId?.[0]}>
           <input required name="loginId" type="text" autoComplete="username" placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId} className={e.loginId ? inpErr : inp} />
           <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–64 characters — letters, numbers, . _ - @ +; email addresses allowed)</p>
+        </Field>
+      </div>
+
+      {/* Password + Confirm Password */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Password" error={e.password?.[0] || passwordError}>
+          <input required name="password" type="password" autoComplete="new-password" placeholder="At least 8 characters"
+            value={password} onChange={(ev) => onPasswordChange(ev.target.value)} className={e.password || passwordError ? inpErr : inp} />
+        </Field>
+        <Field label="Confirm Password" error={e.confirmPassword?.[0] || passwordError}>
+          <input required type="password" autoComplete="new-password" placeholder="Re-enter password"
+            value={confirmPassword} onChange={(ev) => onConfirmPasswordChange(ev.target.value)} className={e.confirmPassword || passwordError ? inpErr : inp} />
         </Field>
       </div>
 
@@ -233,17 +272,20 @@ export function PhysicianRegisterForm() {
             value={customSpecialty}
             onChange={(ev) => setCustomSpecialty(ev.target.value)}
             onKeyDown={(ev) => { if (ev.key === "Enter") { ev.preventDefault(); addCustomSpecialty(); } }}
-            placeholder="Add custom specialty and press Enter"
+            placeholder="e.g. Cardiology, Neurology"
             className={`${inp} flex-1`}
           />
           <button
             type="button"
             onClick={addCustomSpecialty}
-            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
+            className="px-5 py-2.5 bg-[#1b3b6f] hover:bg-[#162f5c] text-white text-xs font-bold rounded-lg transition-colors whitespace-nowrap shadow-sm"
           >
             Add
           </button>
         </div>
+        <p className="text-[11px] text-gray-400 mt-1.5">
+          Type specialty and click Add — separate multiple specialties with commas (e.g. &ldquo;Cardiology, Neurology&rdquo;)
+        </p>
 
         {(e as Record<string, string[]>).fieldsOfSpeciality?.[0] && (
           <p className="text-xs text-red-500 mt-1">{(e as Record<string, string[]>).fieldsOfSpeciality[0]}</p>

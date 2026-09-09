@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
-import { generateResetToken, randomPlaceholderPassword } from "@/lib/auth/reset-token";
+import { generateResetToken } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail } from "@/lib/email/mailer";
@@ -32,6 +32,8 @@ export async function adminCreatePhysician(
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
     loginId: formData.get("loginId") as string,
+    password: (formData.get("password") as string) ?? "",
+    confirmPassword: (formData.get("confirmPassword") as string) ?? "",
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -61,13 +63,21 @@ export async function adminCreatePhysician(
     routingNumber:     (formData.get("routingNumber") as string) || undefined,
   };
 
+  const { password: _rawPassword, confirmPassword: _rawConfirmPassword, ...rawForValues } = raw;
   const strValues: Record<string, string> = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+    Object.entries(rawForValues).map(([k, v]) => [k, String(v ?? "")])
   );
 
   const validated = CreatePhysicianSchema.safeParse(raw);
   if (!validated.success) {
     return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
+  }
+
+  if (validated.data.fieldsOfSpeciality.length === 0) {
+    return {
+      errors: { fieldsOfSpeciality: ["Please enter at least one specialty and click the Add button"] },
+      values: strValues,
+    };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -90,7 +100,7 @@ export async function adminCreatePhysician(
     }
   }
 
-  const { salesRepId, ...rest } = validated.data;
+  const { salesRepId, password, confirmPassword: _confirmPassword, ...rest } = validated.data;
 
   // Determine approval status from which submit button was clicked
   const approvalAction = formData.get("approvalAction") as string;
@@ -98,8 +108,9 @@ export async function adminCreatePhysician(
     ? ApprovalStatus.PENDING
     : ApprovalStatus.APPROVED;
 
-  const placeholder = randomPlaceholderPassword();
-  const hashed      = await hashPassword(placeholder);
+  // Password is set directly from the form so the physician can log in with
+  // it immediately — no separate "set your password" step required.
+  const hashed = await hashPassword(password);
 
   // Only generate a reset token if approving immediately
   const { token, expiry } = isApproved === ApprovalStatus.APPROVED

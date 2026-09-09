@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { LoginIdSchema } from "@/lib/validations/login-id";
 
-export const CreatePhysicianSchema = z.object({
+const CreatePhysicianBaseSchema = z.object({
   firstName:           z.string().min(1, "First name is required").trim(),
   lastName:            z.string().min(1, "Last name is required").trim(),
   email:               z.string().email("Invalid email address").trim().toLowerCase(),
   loginId:             LoginIdSchema,
+  password:            z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword:     z.string().min(1, "Please confirm the password"),
   aictherapy:          z.string().optional(),
   license:             z.string().optional(),
   websiteLink:         z.string().optional(),
@@ -58,6 +60,11 @@ export const CreatePhysicianSchema = z.object({
   swiftCode:           z.string().optional(),
   routingNumber:       z.string().optional(),
 });
+
+export const CreatePhysicianSchema = CreatePhysicianBaseSchema.refine(
+  (data) => data.password === data.confirmPassword,
+  { message: "Passwords do not match", path: ["confirmPassword"] },
+);
 
 export const UpdatePhysicianSchema = z.object({
   firstName:           z.string().min(1).trim().optional(),

@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db/prisma";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
-import { randomPlaceholderPassword } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
 import { sendMail }                                              from "@/lib/email/mailer";
@@ -31,6 +30,8 @@ export async function salesRepAddPhysician(
     lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
     loginId: formData.get("loginId") as string,
+    password: (formData.get("password") as string) ?? "",
+    confirmPassword: (formData.get("confirmPassword") as string) ?? "",
     aictherapy: (formData.get("aictherapy") as string) || undefined,
     license: (formData.get("license") as string) || undefined,
     websiteLink: (formData.get("websiteLink") as string) || undefined,
@@ -58,8 +59,9 @@ export async function salesRepAddPhysician(
     commission: 0, // only admin can set commission
   };
 
+  const { password: _rawPassword, confirmPassword: _rawConfirmPassword, ...rawForValues } = raw;
   const strValues: Record<string, string> = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+    Object.entries(rawForValues).map(([k, v]) => [k, String(v ?? "")])
   );
 
   const validated = CreatePhysicianSchema.safeParse(raw);
@@ -75,6 +77,9 @@ export async function salesRepAddPhysician(
   if (!raw.country?.trim())        allErrors.country        ??= ["Country is required."];
   if (!raw.state?.trim())          allErrors.state          ??= ["State is required."];
   if (!raw.zipCode?.trim())        allErrors.zipCode        ??= ["ZIP code is required."];
+  if (validated.success && validated.data.fieldsOfSpeciality.length === 0) {
+    allErrors.fieldsOfSpeciality ??= ["Please enter at least one specialty and click the Add button"];
+  }
 
   if (Object.keys(allErrors).length > 0 || !validated.success) {
     return { errors: allErrors, values: strValues };
@@ -102,10 +107,10 @@ export async function salesRepAddPhysician(
 
   const salesRepNote = (formData.get("salesRepNote") as string)?.trim() || null;
 
-  const placeholder = randomPlaceholderPassword();
-  const hashed      = await hashPassword(placeholder);
-
-  const { ...rest } = validated.data;
+  // Password is set directly from the form so the physician can log in with
+  // it immediately — no separate "set your password" step required.
+  const { password, confirmPassword: _confirmPassword, ...rest } = validated.data;
+  const hashed = await hashPassword(password);
 
   // Sales rep-added physicians are PENDING until admin approves (no setup email until approval)
   try {

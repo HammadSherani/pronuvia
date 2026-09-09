@@ -2,7 +2,6 @@
 
 import { prisma }                       from "@/lib/db/prisma";
 import { hashPassword }                 from "@/lib/auth/password";
-import { randomPlaceholderPassword }    from "@/lib/auth/reset-token";
 import { Role, ApprovalStatus }         from "@/generated/prisma/enums";
 import { z }                            from "zod";
 import { sendMail }                     from "@/lib/email/mailer";
@@ -11,9 +10,11 @@ import { LoginIdSchema } from "@/lib/validations/login-id";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
 import { duplicateKeyField } from "@/lib/db/prisma-errors";
 
-const Schema = z.object({
+const BaseSchema = z.object({
   email:               z.string().email("Valid email is required"),
   loginId:             LoginIdSchema,
+  password:            z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword:     z.string().min(1, "Please confirm your password"),
   firstName:           z.string().min(1, "First name is required"),
   lastName:            z.string().min(1, "Last name is required"),
   aictherapy:          z.string().min(1, "This field is required"),
@@ -60,6 +61,11 @@ const Schema = z.object({
     }),
 });
 
+const Schema = BaseSchema.refine(
+  (data) => data.password === data.confirmPassword,
+  { message: "Passwords do not match", path: ["confirmPassword"] },
+);
+
 export type RegisterPhysicianState = {
   errors?:  Record<string, string[]>;
   message?: string;
@@ -74,6 +80,8 @@ export async function registerPhysician(
   const raw = {
     email:               (formData.get("email") as string)?.trim().toLowerCase(),
     loginId:             (formData.get("loginId") as string)?.trim(),
+    password:            (formData.get("password") as string) ?? "",
+    confirmPassword:     (formData.get("confirmPassword") as string) ?? "",
     firstName:           (formData.get("firstName") as string)?.trim(),
     lastName:            (formData.get("lastName") as string)?.trim(),
     aictherapy:          (formData.get("aictherapy") as string)?.trim(),
@@ -94,8 +102,9 @@ export async function registerPhysician(
     patientsPerMonth:    (formData.get("patientsPerMonth") as string) || undefined,
   };
 
+  const { password: _rawPassword, confirmPassword: _rawConfirmPassword, ...rawForValues } = raw;
   const strValues: Record<string, string> = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, String(v ?? "")])
+    Object.entries(rawForValues).map(([k, v]) => [k, String(v ?? "")])
   );
 
   const validated = Schema.safeParse(raw);
@@ -107,7 +116,7 @@ export async function registerPhysician(
   const fieldsOfSpeciality: string[] = specialtiesRaw ? JSON.parse(specialtiesRaw) : [];
 
   if (fieldsOfSpeciality.length === 0) {
-    return { errors: { fieldsOfSpeciality: ["Please select at least one specialty"] }, values: strValues };
+    return { errors: { fieldsOfSpeciality: ["Please enter at least one specialty and click the Add button"] }, values: strValues };
   }
 
   const exists = await prisma.partneringPhysician.findUnique({
@@ -128,13 +137,15 @@ export async function registerPhysician(
     return { errors: { license: ["This license number is already registered with another physician."] }, values: strValues };
   }
 
-  const placeholder = randomPlaceholderPassword();
-  const hashed      = await hashPassword(placeholder);
+  // Password is set directly from the form so the physician can log in with
+  // it immediately once approved — no separate "set your password" step required.
+  const { password, confirmPassword: _confirmPassword, ...rest } = validated.data;
+  const hashed = await hashPassword(password);
 
   try {
     await prisma.partneringPhysician.create({
       data: {
-        ...validated.data,
+        ...rest,
         password:          hashed,
         fieldsOfSpeciality,
         isApproved:        ApprovalStatus.PENDING,
@@ -162,6 +173,6 @@ export async function registerPhysician(
 
   return {
     success: true,
-    message: "Your application has been submitted! We will review it and send you an email with login details once approved.",
+    message: "Your application has been submitted! We will review it and notify you by email once approved — you can then log in with the password you just created.",
   };
 }

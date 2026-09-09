@@ -52,8 +52,15 @@ export function PhysicianForm({
   const [state, formAction, pending] = useActionState(action, undefined);
   const router = useRouter();
 
+  // Password fields only make sense when creating a new account — editing an
+  // existing physician has its own dedicated password-reset UI (see the edit page).
+  const isCreate = !defaults;
+
   const [specialties, setSpecialties] = useState<string[]>(defaults?.fieldsOfSpeciality ?? []);
   const [customSpecialty, setCustom] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [accNum, setAccNum] = useState(defaults?.bankAccountNumber ?? "");
   const [confirmAccNum, setConfirmAccNum] = useState(defaults?.bankAccountNumber ?? "");
   const [accNumError, setAccNumError] = useState("");
@@ -124,12 +131,36 @@ export function PhysicianForm({
     setSpecialties((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
   function addCustom() {
-    const v = customSpecialty.trim();
-    if (v && !specialties.includes(v)) setSpecialties((p) => [...p, v]);
+    // Supports pasting/typing several specialties at once, comma-separated —
+    // each becomes its own tag instead of one long combined entry.
+    const parts = customSpecialty.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) {
+      setSpecialties((prev) => {
+        const next = [...prev];
+        for (const p of parts) if (!next.includes(p)) next.push(p);
+        return next;
+      });
+    }
     setCustom("");
   }
 
+  function onPasswordChange(val: string) {
+    setPassword(val);
+    if (confirmPassword) setPasswordError(val !== confirmPassword ? "Passwords do not match" : "");
+  }
+  function onConfirmPasswordChange(val: string) {
+    setConfirmPassword(val);
+    setPasswordError(val !== password ? "Passwords do not match" : "");
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (isCreate && password !== confirmPassword) {
+      e.preventDefault();
+      setPasswordError("Passwords do not match");
+      return;
+    }
+    setPasswordError("");
+
     if (accNum && accNum !== confirmAccNum) {
       e.preventDefault();
       setAccNumError("Account numbers do not match");
@@ -180,6 +211,22 @@ export function PhysicianForm({
             <p className="text-[11px] text-gray-400 mt-1">Used to sign in (3–64 characters — letters, numbers, . _ - @ +; email addresses allowed)</p>
           </div>
         </div>
+        {isCreate && (
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className={lbl}>Password<Req /></label>
+              <input name="password" type="password" autoComplete="new-password" className={icls(e.password?.[0] || passwordError)}
+                placeholder="At least 8 characters" value={password} onChange={(ev) => onPasswordChange(ev.target.value)} />
+              <FE msg={e.password?.[0]} />
+            </div>
+            <div>
+              <label className={lbl}>Confirm Password<Req /></label>
+              <input type="password" autoComplete="new-password" className={icls(e.confirmPassword?.[0] || passwordError)}
+                placeholder="Re-enter password" value={confirmPassword} onChange={(ev) => onConfirmPasswordChange(ev.target.value)} />
+              {passwordError ? <p className="text-xs text-red-500 mt-1">{passwordError}</p> : <FE msg={e.confirmPassword?.[0]} />}
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={lbl}>Phone<Req /></label>
@@ -483,16 +530,22 @@ export function PhysicianForm({
 
       {/* ── Specialties ───────────────────────────────────── */}
       <div className={sec}>
-        <p className={head}>Fields of Speciality</p>
+        <p className={head}>Fields of Speciality<Req /></p>
         <div className="flex gap-2">
           <input value={customSpecialty} onChange={(e) => setCustom(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }}
-            className={`${base} ${ok} flex-1`} placeholder="Add custom specialty and press Enter" />
+            className={`${base} ${ok} flex-1`} placeholder="e.g. Cardiology, Neurology" />
           <button type="button" onClick={addCustom}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors cursor-pointer">
+            className="px-5 py-2.5 bg-[#3DBFA4] hover:bg-[#2ea88f] text-white text-sm font-bold rounded-lg transition-colors cursor-pointer shadow-sm">
             Add
           </button>
         </div>
+        <p className="text-[11px] text-gray-400 mt-1.5">
+          Type specialty and click Add — separate multiple specialties with commas (e.g. &ldquo;Cardiology, Neurology&rdquo;)
+        </p>
+        {(e as Record<string, string[]>).fieldsOfSpeciality?.[0] && (
+          <p className="text-xs text-red-500 mt-1">{(e as Record<string, string[]>).fieldsOfSpeciality[0]}</p>
+        )}
         {specialties.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {specialties.map((s) => (
