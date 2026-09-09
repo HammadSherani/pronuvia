@@ -58,6 +58,24 @@ export function isMonthlyAutoPayoutNote(note: string | null | undefined): boolea
 }
 
 /**
+ * Builds a payout period directly from an explicit "YYYY-MM" key, rather than
+ * computing "the month before now" \u2014 used by one-off manual sweeps (e.g. an
+ * early/out-of-cycle close of a still-open month) where the target period
+ * isn't necessarily the previous calendar month.
+ */
+export function periodFromKey(key: string): MonthlyPayoutPeriod {
+  const match = /^(\d{4})-(\d{2})$/.exec(key);
+  if (!match) throw new Error(`Invalid period key "${key}" \u2014 expected "YYYY-MM".`);
+  const year  = Number(match[1]);
+  const month = Number(match[2]); // 1-12
+  const start = new Date(Date.UTC(year, month - 1, 1));
+  const end   = new Date(Date.UTC(year, month, 1));
+  const label = start.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+
+  return { key, label, note: `Auto withdrawal - ${label}`, start, end, snapshotAt: new Date() };
+}
+
+/**
  * Gives automatically-created monthly requests a deterministic Mongo ObjectId.
  * This prevents two concurrent cron invocations from creating two requests for
  * the same user and payout period.
