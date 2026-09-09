@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
+import { formatCurrency } from "@/lib/utils/currency";
 
 export function BehalfCartClient({
   physicianId,
@@ -69,7 +70,7 @@ export function BehalfCartClient({
                 <p className="text-sm font-semibold text-gray-800 truncate">{item.productTitle}</p>
                 {item.variantSize && <p className="text-xs text-gray-500 mt-0.5">Size: {item.variantSize}</p>}
                 {item.variantSku  && <p className="text-xs text-gray-400">SKU: {item.variantSku}</p>}
-                <p className="text-sm font-bold text-gray-900 mt-1">${item.unitPrice.toFixed(2)}</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{formatCurrency(item.unitPrice)}</p>
               </div>
 
               <div className="flex flex-col items-end justify-between shrink-0 gap-3">
@@ -88,7 +89,7 @@ export function BehalfCartClient({
                     <button type="button" onClick={() => updateQty(item.cartId, item.quantity + 1)}
                       className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">+</button>
                   </div>
-                  <p className="text-sm font-bold text-gray-900 w-16 text-right">${(item.unitPrice * item.quantity).toFixed(2)}</p>
+                  <p className="text-sm font-bold text-gray-900 w-16 text-right">{formatCurrency(item.unitPrice * item.quantity)}</p>
                 </div>
               </div>
             </div>
@@ -104,13 +105,13 @@ export function BehalfCartClient({
                   <span className="truncate pr-2 max-w-[160px]">
                     {item.productTitle}{item.variantSize ? ` (${item.variantSize})` : ""} × {item.quantity}
                   </span>
-                  <span className="shrink-0 font-medium text-gray-700">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                  <span className="shrink-0 font-medium text-gray-700">{formatCurrency(item.unitPrice * item.quantity)}</span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between items-center pt-3 border-t border-gray-100 mb-5">
               <span className="text-sm font-semibold text-gray-700">Total</span>
-              <span className="text-lg font-bold text-gray-900">${totalPrice.toFixed(2)}</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(totalPrice)}</span>
             </div>
             <Link href={`/admin/order-behalf/${physicianId}/checkout`}
               className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 transition-colors shadow-sm">

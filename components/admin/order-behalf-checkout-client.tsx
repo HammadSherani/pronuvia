@@ -16,6 +16,7 @@ import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 import { StripeLoadingOverlay } from "@/components/shared/stripe-loading-overlay";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type ShippingOption = { id: string; method: string; label: string; cost: number };
 
@@ -372,7 +373,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                         <p className="text-sm font-medium text-gray-800">{opt.label}</p>
                       </div>
                       <span className="text-sm font-semibold text-gray-800">
-                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : `$${opt.cost.toFixed(2)}`}
+                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : formatCurrency(opt.cost)}
                       </span>
                     </label>
                   ))}
@@ -445,7 +446,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
               <div className="flex items-center justify-between border border-emerald-200 bg-emerald-50 rounded px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-emerald-700">{appliedCoupon.code}</p>
-                  <p className="text-xs text-emerald-600">−${appliedCoupon.discountAmount.toFixed(2)} discount applied</p>
+                  <p className="text-xs text-emerald-600">−{formatCurrency(appliedCoupon.discountAmount)} discount applied</p>
                 </div>
                 <button type="button" onClick={() => setAppliedCoupon(null)} className="text-xs text-red-500 hover:underline">Remove</button>
               </div>
@@ -517,17 +518,17 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                       {item.variantSize && <p className="text-xs text-gray-500 mt-0.5">{item.variantSize}</p>}
                       <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-gray-800 shrink-0">{formatCurrency(item.unitPrice * item.quantity)}</p>
                   </div>
                 ))}
               </div>
               <div className="px-4 py-3 space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
-                  <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
+                  <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600">
-                    <span>Discount ({appliedCoupon?.code})</span><span>−${discountAmount.toFixed(2)}</span>
+                    <span>Discount ({appliedCoupon?.code})</span><span>−{formatCurrency(discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -536,7 +537,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                     <span className="text-gray-400 italic text-xs">Calculating…</span>
                   ) : selectedShipping ? (
                     <span className={selectedShipping.cost === 0 ? "text-emerald-600 font-medium" : ""}>
-                      {selectedShipping.cost === 0 ? "Free" : `$${selectedShipping.cost.toFixed(2)}`}
+                      {selectedShipping.cost === 0 ? "Free" : formatCurrency(selectedShipping.cost)}
                     </span>
                   ) : !shipping.country ? (
                     <span className="italic text-xs text-gray-400">Enter address first</span>
@@ -545,7 +546,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                   )}
                 </div>
                 <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
-                  <span>Total</span><span>${total.toFixed(2)}</span>
+                  <span>Total</span><span>{formatCurrency(total)}</span>
                 </div>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { createOrderBySalesRep } from "@/actions/sales-rep/create-order";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type Variant = {
   size: string;
@@ -11,6 +12,7 @@ type Variant = {
   salePrice?: number;
   stock?: number;
   image?: string;
+  isDefault?: boolean;
 };
 
 type Physician = {
@@ -35,7 +37,10 @@ export function PlaceOrderForm({ product, physicians }: Props) {
   const router    = useRouter();
 
   const [physicianId, setPhysicianId] = useState("");
-  const [variantIdx,  setVariantIdx]  = useState(0);
+  const [variantIdx,  setVariantIdx]  = useState(() => {
+    const defaultIdx = variants.findIndex((v) => v.isDefault);
+    return defaultIdx >= 0 ? defaultIdx : 0;
+  });
   const [quantity,    setQuantity]    = useState(1);
 
   const selectedVariant = variants[variantIdx];
@@ -114,7 +119,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
                 {v.size}
                 {v.salePrice !== undefined && (
                   <span className={`ml-1.5 text-xs ${i === variantIdx ? "text-white/80" : "text-gray-400"}`}>
-                    ${v.salePrice.toFixed(2)}
+                    {formatCurrency(v.salePrice)}
                   </span>
                 )}
               </button>
@@ -153,7 +158,7 @@ export function PlaceOrderForm({ product, physicians }: Props) {
             >+</button>
           </div>
           <span className="text-sm text-gray-500">
-            Total: <span className="font-bold text-gray-800">${(unitPrice * quantity).toFixed(2)}</span>
+            Total: <span className="font-bold text-gray-800">{formatCurrency(unitPrice * quantity)}</span>
           </span>
         </div>
       </div>

@@ -11,7 +11,7 @@ type SubCategory = { id: string; name: string; categoryId: string };
 type SizeRow = {
   size: string; sku: string; gtin: string; image: string;
   costPrice: string; salePrice: string; stock: string; weight: string;
-  status: string;
+  status: string; isDefault: boolean;
 };
 
 type ActionState = { errors?: Record<string, string[]>; message?: string; success?: boolean } | undefined;
@@ -30,7 +30,7 @@ interface ProductFormProps {
     variants?: {
       size: string; sku?: string; gtin?: string; image?: string;
       costPrice?: number; salePrice?: number; stock?: number; weight?: number;
-      status?: string;
+      status?: string; isDefault?: boolean;
     }[];
   };
 }
@@ -49,7 +49,7 @@ function FE({ msg }: { msg?: string }) {
 }
 function Req() { return <span className="text-red-400"> *</span>; }
 
-const blankSize = (): SizeRow => ({ size: "", sku: "", gtin: "", image: "", costPrice: "", salePrice: "", stock: "", weight: "", status: "in_stock" });
+const blankSize = (): SizeRow => ({ size: "", sku: "", gtin: "", image: "", costPrice: "", salePrice: "", stock: "", weight: "", status: "in_stock", isDefault: false });
 
 export function ProductForm({ action, submitLabel, backHref, successRedirect, categories, subCategories, defaults }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -69,8 +69,8 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
   const [mainImage, setMainImage]      = useState(defaults?.image ?? "");
   const [gallery, setGallery]          = useState<string[]>(defaults?.imageGallery ?? []);
   const [selectedCategoryId, setCatId] = useState(defaults?.categoryId ?? "");
-  const [sizes, setSizes] = useState<SizeRow[]>(
-    defaults?.variants?.length
+  const [sizes, setSizes] = useState<SizeRow[]>(() => {
+    const rows: SizeRow[] = defaults?.variants?.length
       ? defaults.variants.map((v) => ({
           size:      v.size,
           sku:       v.sku       ?? "",
@@ -81,15 +81,42 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
           stock:     v.stock     != null ? String(v.stock)     : "",
           weight:    v.weight    != null ? String(v.weight)    : "",
           status:    v.status    ?? "in_stock",
+          isDefault: v.isDefault ?? false,
         }))
-      : [blankSize()]
-  );
+      : [blankSize()];
+    if (rows.length && !rows.some((r) => r.isDefault)) rows[0] = { ...rows[0], isDefault: true };
+    return rows;
+  });
+
+  function setDefaultIdx(i: number) {
+    setSizes((prev) => prev.map((x, idx) => ({ ...x, isDefault: idx === i })));
+  }
+
+  function removeSizeRow(i: number) {
+    setSizes((prev) => {
+      const next = prev.filter((_, idx) => idx !== i);
+      if (next.length && !next.some((r) => r.isDefault)) next[0] = { ...next[0], isDefault: true };
+      return next;
+    });
+  }
 
   const filteredSubs = subCategories.filter((s) => s.categoryId === selectedCategoryId);
   const e = state?.errors ?? {};
 
+  // Pressing Enter inside a text/number input should submit the form, same as
+  // clicking Save — but not while a <textarea> is focused (Enter there means
+  // "new line"), and never for a radio (that's handled by its own onChange).
+  function handleFormKeyDown(ev: React.KeyboardEvent<HTMLFormElement>) {
+    if (ev.key !== "Enter") return;
+    const target = ev.target as HTMLElement;
+    if (target.tagName === "TEXTAREA") return;
+    if (target instanceof HTMLInputElement && (target.type === "radio" || target.type === "checkbox")) return;
+    ev.preventDefault();
+    ev.currentTarget.requestSubmit();
+  }
+
   return (
-    <form action={formAction} noValidate>
+    <form action={formAction} noValidate onKeyDown={handleFormKeyDown}>
 
       {/* ── Basic Info ── */}
       <div className={sectionCls}>
@@ -184,7 +211,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <div>
             <p className="text-sm font-semibold text-gray-700">Sizes / Variants<Req /></p>
-            <p className="text-xs text-gray-400 mt-0.5">At least one size is required. Each size has its own price, stock and SKU.</p>
+            <p className="text-xs text-gray-400 mt-0.5">At least one size is required. Each size has its own price, stock and SKU. Pick which one the storefront selects by default.</p>
           </div>
         </div>
 
@@ -224,6 +251,20 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
                       value={row.size} onChange={upd("size")} />
                   </div>
 
+                  <div className="shrink-0">
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Default</label>
+                    <label className="flex items-center justify-center h-[38px] w-[46px] border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 transition-colors">
+                      <input
+                        type="radio"
+                        name="defaultVariantRadio"
+                        checked={row.isDefault}
+                        onChange={() => setDefaultIdx(i)}
+                        className="w-4 h-4 accent-[#3DBFA4] cursor-pointer"
+                      />
+                    </label>
+                    <input type="hidden" name="sizeIsDefault[]" value={row.isDefault ? "1" : "0"} />
+                  </div>
+
                   <div className="shrink-0 min-w-[140px]">
                     <label className="block text-xs font-medium text-gray-500 mb-1.5">Variant Status</label>
                     <select
@@ -240,7 +281,7 @@ export function ProductForm({ action, submitLabel, backHref, successRedirect, ca
                   </div>
 
                   <button type="button" disabled={!canRemove}
-                    onClick={() => setSizes((prev) => prev.filter((_, idx) => idx !== i))}
+                    onClick={() => removeSizeRow(i)}
                     className={`mt-6 shrink-0 transition-colors ${canRemove ? "text-gray-400 hover:text-red-500 cursor-pointer" : "text-gray-200 cursor-not-allowed"}`}>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

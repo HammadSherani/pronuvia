@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getProductById } from "@/actions/admin/products";
 import { formatDateLong } from "@/lib/utils/timezone";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type SizeVariant = {
   size: string; sku?: string; gtin?: string; image?: string;
@@ -29,7 +30,7 @@ const STATUS_STYLES = {
   ARCHIVED: "bg-gray-100 text-gray-500 border border-gray-200",
 };
 
-function fmt(n?: number | null) { return n != null ? `$${n.toFixed(2)}` : "—"; }
+function fmt(n?: number | null) { return n != null ? formatCurrency(n) : "—"; }
 function fmtN(n?: number | null) { return n != null ? String(n) : "—"; }
 
 type Props = { params: Promise<{ id: string }> };

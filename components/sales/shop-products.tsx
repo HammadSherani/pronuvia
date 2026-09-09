@@ -4,9 +4,10 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useCart } from "@/lib/cart/cart-context";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type VariantStatus = "in_stock" | "out_of_stock" | "discontinued" | "inactive";
-type Variant  = { size?: string; salePrice?: number; stock?: number; sku?: string; status?: VariantStatus };
+type Variant  = { size?: string; salePrice?: number; stock?: number; sku?: string; status?: VariantStatus; isDefault?: boolean };
 
 function variantStatus(v: Variant): VariantStatus { return v.status ?? "in_stock"; }
 function isAvailable(v: Variant) { return variantStatus(v) === "in_stock"; }
@@ -19,8 +20,12 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(b.size ?? "0") - parseFloat(a.size ?? "0"));
   const { addItem, items, updateQty, removeItem } = useCart();
 
+  const defaultIdx        = variants.findIndex((v) => v.isDefault);
   const firstAvailableIdx = variants.findIndex(isAvailable);
-  const [selectedIdx, setSelectedIdx] = useState(firstAvailableIdx >= 0 ? firstAvailableIdx : 0);
+  const initialIdx = defaultIdx >= 0 && isAvailable(variants[defaultIdx])
+    ? defaultIdx
+    : firstAvailableIdx >= 0 ? firstAvailableIdx : 0;
+  const [selectedIdx, setSelectedIdx] = useState(initialIdx);
   const [pulse,       setPulse]       = useState(false);
   const [qty,         setQty]         = useState(1);
 
@@ -39,8 +44,8 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
   const minPrice   = Math.min(...prices);
   const maxPrice   = Math.max(...prices);
   const priceLabel = variants.length > 1 && minPrice !== maxPrice
-    ? `$${maxPrice.toFixed(2)} – $${minPrice.toFixed(2)}`
-    : `$${unitPrice.toFixed(2)}`;
+    ? `${formatCurrency(maxPrice)} – ${formatCurrency(minPrice)}`
+    : formatCurrency(unitPrice);
 
   function handleAddToCart() {
     if (!selectedAvailable) {
@@ -112,37 +117,44 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
           </p>
         </Link>
 
-        {/* Size chips — shown when product has multiple variants */}
-        {variants.length > 1 && (
+        {/* Size chips — a single-size product renders one static (non-interactive) badge
+            instead of a clickable chip, but the size is always shown. */}
+        {variants.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {variants.map((v, idx) => {
-              const available = isAvailable(v);
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  disabled={!available}
-                  onClick={() => { if (available) { setSelectedIdx(idx); setQty(1); } }}
-                  title={!available ? (variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued") : undefined}
-                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
-                    !available
-                      ? "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed line-through"
-                      : selectedIdx === idx
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-[#3DBFA4]"
-                  }`}
-                >
-                  {v.size ?? `Option ${idx + 1}`}
-                </button>
-              );
-            })}
+            {variants.length === 1 ? (
+              <span className="px-2.5 py-1 text-xs font-medium rounded-lg border bg-white text-gray-600 border-gray-200">
+                {variants[0].size ?? "Option 1"}
+              </span>
+            ) : (
+              variants.map((v, idx) => {
+                const available = isAvailable(v);
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    disabled={!available}
+                    onClick={() => { if (available) { setSelectedIdx(idx); setQty(1); } }}
+                    title={!available ? (variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued") : undefined}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
+                      !available
+                        ? "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed line-through"
+                        : selectedIdx === idx
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-[#3DBFA4]"
+                    }`}
+                  >
+                    {v.size ?? `Option ${idx + 1}`}
+                  </button>
+                );
+              })
+            )}
           </div>
         )}
 
         {/* Price + Qty + Cart */}
         <div className="mt-auto pt-2 border-t border-gray-50 space-y-2">
           <p className="text-sm font-bold text-gray-800">
-            {variants.length > 1 ? `$${unitPrice.toFixed(2)}` : priceLabel}
+            {variants.length > 1 ? formatCurrency(unitPrice) : priceLabel}
           </p>
           <div className="flex items-center gap-2">
             {/* Quantity stepper */}

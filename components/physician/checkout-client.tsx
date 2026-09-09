@@ -27,6 +27,7 @@ import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
 import type { AddressData } from "@/components/shared/address-fields";
 import { StripeLoadingOverlay } from "@/components/shared/stripe-loading-overlay";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type ShippingOption = { id: string; method: string; label: string; cost: number };
 
@@ -425,7 +426,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                         <p className="text-sm font-medium text-gray-800">{opt.label}</p>
                       </div>
                       <span className="text-sm font-semibold text-gray-800">
-                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : `$${opt.cost.toFixed(2)}`}
+                        {opt.cost === 0 ? <span className="text-emerald-600">Free</span> : formatCurrency(opt.cost)}
                       </span>
                     </label>
                   ))}
@@ -461,7 +462,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-800">Wallet Credit</p>
-                    <p className="text-xs text-gray-500">Balance: ${walletBalance.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">Balance: {formatCurrency(walletBalance)}</p>
                   </div>
                 </label>
               </div>
@@ -533,9 +534,9 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
               <div className="border border-gray-300 rounded p-4 space-y-3">
                 <p className="text-sm text-gray-700">
                   Your wallet balance of{" "}
-                  <span className="font-semibold">${walletBalance.toFixed(2)}</span>{" "}
+                  <span className="font-semibold">{formatCurrency(walletBalance)}</span>{" "}
                   will be used to pay the order total of{" "}
-                  <span className="font-semibold">${total.toFixed(2)}</span>.
+                  <span className="font-semibold">{formatCurrency(total)}</span>.
                 </p>
                 {walletState && !walletState.success && walletState.message && (
                   <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
@@ -624,7 +625,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                       {item.variantSize && <p className="text-xs text-gray-400">Size: {item.variantSize}</p>}
                     </div>
                     <p className="text-sm font-semibold text-gray-800 shrink-0">
-                      ${(item.unitPrice * item.quantity).toFixed(2)}
+                      {formatCurrency(item.unitPrice * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -639,7 +640,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                       </svg>
                       <div>
                         <span className="text-xs font-bold text-emerald-700 font-mono">{appliedCoupon.code}</span>
-                        <span className="text-xs text-emerald-600 ml-1">— −${appliedCoupon.discountAmount.toFixed(2)}</span>
+                        <span className="text-xs text-emerald-600 ml-1">— −{formatCurrency(appliedCoupon.discountAmount)}</span>
                       </div>
                     </div>
                     <button type="button" onClick={() => setAppliedCoupon(null)}
@@ -670,12 +671,12 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
               <div className="px-4 py-4 space-y-2 border-b border-gray-200 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
                 {appliedCoupon && (
                   <div className="flex justify-between text-emerald-600 font-medium">
                     <span>Coupon ({appliedCoupon.code})</span>
-                    <span>−${appliedCoupon.discountAmount.toFixed(2)}</span>
+                    <span>−{formatCurrency(appliedCoupon.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -684,7 +685,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
                     <span className="text-gray-400 italic text-xs">Calculating…</span>
                   ) : selectedShipping ? (
                     <span className={selectedShipping.cost === 0 ? "text-emerald-600 font-medium" : ""}>
-                      {selectedShipping.cost === 0 ? "Free" : `$${selectedShipping.cost.toFixed(2)}`}
+                      {selectedShipping.cost === 0 ? "Free" : formatCurrency(selectedShipping.cost)}
                     </span>
                   ) : !shipping.country ? (
                     <span className="italic text-xs text-gray-400">Enter address first</span>
@@ -696,7 +697,7 @@ export function PhysicianCheckoutClient({ physicianEmail, initialAddress, wallet
               <div className="px-4 py-4">
                 <div className="flex justify-between text-base font-bold text-gray-900">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatCurrency(total)}</span>
                 </div>
               </div>
             </div>

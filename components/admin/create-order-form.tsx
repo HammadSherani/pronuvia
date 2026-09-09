@@ -11,7 +11,7 @@ type Physician = {
   salesRep: { id: string; name: string; commission: number } | null;
 };
 
-type Variant = { size?: string; sku?: string; salePrice?: number | string; status?: string; [k: string]: unknown };
+type Variant = { size?: string; sku?: string; salePrice?: number | string; status?: string; isDefault?: boolean; [k: string]: unknown };
 
 function variantStatusSuffix(v: Variant): string {
   const s = v.status ?? "in_stock";
@@ -79,10 +79,10 @@ export function CreateOrderForm({ physicians, products }: Props) {
     const prod = products.find((p) => p.id === productId);
     if (!prod) return;
     const variants = (prod.variants ?? []) as Variant[];
-    const firstVariant = variants[0];
-    const unitPrice = firstVariant?.salePrice ? Number(firstVariant.salePrice) : prod.salePrice;
-    const sku       = firstVariant?.sku ?? prod.sku;
-    const size      = firstVariant?.size ?? "";
+    const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0];
+    const unitPrice = defaultVariant?.salePrice ? Number(defaultVariant.salePrice) : prod.salePrice;
+    const sku       = defaultVariant?.sku ?? prod.sku;
+    const size      = defaultVariant?.size ?? "";
     updateLine(idx, { productId, title: prod.title, variantSize: size, sku, unitPrice, lineTotal: 1 * unitPrice });
   }
 

@@ -5,9 +5,16 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { QuickOrderModal } from "@/components/sales/quick-order-modal";
 import { useCart } from "@/lib/cart/cart-context";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type VariantStatus = "in_stock" | "out_of_stock" | "discontinued" | "inactive";
-type Variant = { size?: string; salePrice?: number; stock?: number; sku?: string; image?: string; status?: VariantStatus };
+type Variant = { size?: string; salePrice?: number; stock?: number; sku?: string; image?: string; status?: VariantStatus; isDefault?: boolean };
+
+function defaultSelectableIdx(variants: Variant[]): number {
+  const defaultIdx = variants.findIndex((v) => v.isDefault);
+  if (defaultIdx >= 0 && isAvailable(variants[defaultIdx])) return defaultIdx;
+  return variants.length === 1 && isAvailable(variants[0]) ? 0 : -1;
+}
 
 function variantStatus(v: Variant): VariantStatus { return v.status ?? "in_stock"; }
 function isAvailable(v: Variant) { return variantStatus(v) === "in_stock"; }
@@ -34,7 +41,7 @@ type Props = {
 function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
   const allVariants = p.variants as Variant[];
   const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(b.size ?? "0") - parseFloat(a.size ?? "0"));
-  const [selIdx,  setSelIdx]  = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);
+  const [selIdx,  setSelIdx]  = useState(() => defaultSelectableIdx(variants));
   const [qty,     setQty]     = useState(1);
   const [modal,   setModal]   = useState(false);
 
@@ -73,7 +80,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
                 const suffix = !available ? ` (${variantStatus(v) === "out_of_stock" ? "Out of Stock" : "Discontinued"})` : "";
                 return (
                   <option key={i} value={i} disabled={!available}>
-                    {v.size}{v.salePrice !== undefined ? ` — $${v.salePrice.toFixed(2)}` : ""}{suffix}
+                    {v.size}{v.salePrice !== undefined ? ` — ${formatCurrency(v.salePrice)}` : ""}{suffix}
                   </option>
                 );
               })}
@@ -86,7 +93,7 @@ function RelatedCard({ p, basePath }: { p: RelatedProduct; basePath: string }) {
             <p className="text-sm font-bold text-gray-900 hover:text-[#3DBFA4] transition-colors leading-snug">{p.title}</p>
           </Link>
           <p className="text-sm font-bold text-[#1a6b58] mt-0.5">
-            {displayPrice !== null ? `$${displayPrice.toFixed(2)}` : `$${min.toFixed(2)}${min !== max ? ` – $${max.toFixed(2)}` : ""}`}
+            {displayPrice !== null ? formatCurrency(displayPrice) : `${formatCurrency(min)}${min !== max ? ` – ${formatCurrency(max)}` : ""}`}
           </p>
         </div>
         <div className="px-3 pt-2 flex items-center gap-2">
@@ -130,7 +137,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
   const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(b.size ?? "0") - parseFloat(a.size ?? "0"));
 
   const [activeImage, setActiveImage]   = useState(product.image ?? "");
-  const [selectedIdx, setSelectedIdx]   = useState(() => variants.length === 1 && isAvailable(variants[0]) ? 0 : -1);
+  const [selectedIdx, setSelectedIdx]   = useState(() => defaultSelectableIdx(variants));
   const [qty,         setQty]           = useState(1);
   const [activeTab,   setActiveTab]     = useState<"info" | "reviews">("info");
   const [showModal,   setShowModal]     = useState(false);
@@ -232,7 +239,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
 
           {/* Base price */}
           <p className="text-xl font-bold text-gray-900 mb-3">
-            {minPrice === maxPrice ? `$${minPrice.toFixed(2)}` : `$${maxPrice.toFixed(2)} – $${minPrice.toFixed(2)}`}
+            {minPrice === maxPrice ? formatCurrency(minPrice) : `${formatCurrency(maxPrice)} – ${formatCurrency(minPrice)}`}
           </p>
 
           {/* Notice */}
@@ -283,7 +290,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
           )}
 
           {/* Selected price */}
-          <p className="text-xl font-bold text-gray-900 mb-4">${displayPrice.toFixed(2)}</p>
+          <p className="text-xl font-bold text-gray-900 mb-4">{formatCurrency(displayPrice)}</p>
 
           {/* Qty + Add to cart */}
           <div className="flex items-center gap-3 mb-4">

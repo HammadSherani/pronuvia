@@ -17,6 +17,11 @@ const SizeSchema = z.object({
   stock:     z.number().int().min(0).optional(),
   weight:    z.number().min(0).optional(),
   status:    z.enum(["in_stock", "out_of_stock", "discontinued", "inactive"]).default("in_stock"),
+  // Which variant the storefront pre-selects on the product card / detail
+  // page. Kept on the variant object itself (rather than a top-level index)
+  // so it stays attached to the right variant even after the storefront
+  // re-sorts the array by size.
+  isDefault: z.boolean().optional().default(false),
 });
 
 const ProductSchema = z.object({
@@ -58,6 +63,7 @@ function parseProductFormData(formData: FormData) {
   const sizeStocks     = formData.getAll("sizeStock[]").map(String);
   const sizeWeights    = formData.getAll("sizeWeight[]").map(String);
   const sizeStatuses   = formData.getAll("sizeStatus[]").map(String);
+  const sizeIsDefaults = formData.getAll("sizeIsDefault[]").map(String);
 
   const toNum = (s: string) => { const n = Number(s.trim()); return isNaN(n) || s.trim() === "" ? undefined : n; };
 
@@ -72,8 +78,15 @@ function parseProductFormData(formData: FormData) {
       stock:     toNum(sizeStocks[i]    ?? ""),
       weight:    toNum(sizeWeights[i]   ?? ""),
       status:    (sizeStatuses[i]?.trim() || "in_stock") as "in_stock" | "out_of_stock" | "discontinued" | "inactive",
+      isDefault: sizeIsDefaults[i] === "1",
     }))
     .filter((v) => v.size);
+
+  // Guarantee exactly one default variant — fall back to the first row if
+  // none was explicitly flagged (legacy data, or a stripped hidden field).
+  if (variants.length && !variants.some((v) => v.isDefault)) {
+    variants[0].isDefault = true;
+  }
 
   return {
     title:        (formData.get("title") as string)?.trim() || "",
@@ -88,11 +101,12 @@ function parseProductFormData(formData: FormData) {
   };
 }
 
-function deriveProductFields(variants: { sku?: string; salePrice?: number; costPrice?: number; stock?: number }[]) {
+function deriveProductFields(variants: { sku?: string; salePrice?: number; costPrice?: number; stock?: number; isDefault?: boolean }[]) {
   const salePrices = variants.map((v) => v.salePrice ?? 0).filter((p) => p > 0);
   const costPrices = variants.map((v) => v.costPrice ?? 0).filter((p) => p > 0);
+  const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0];
   return {
-    sku:       variants[0]?.sku?.trim() || `PRN-${Date.now().toString(36).toUpperCase()}`,
+    sku:       defaultVariant?.sku?.trim() || `PRN-${Date.now().toString(36).toUpperCase()}`,
     salePrice: salePrices.length ? Math.min(...salePrices) : 0,
     costPrice: costPrices.length ? Math.min(...costPrices) : 0,
     quantity:  variants.reduce((s, v) => s + (v.stock ?? 0), 0),
@@ -213,7 +227,7 @@ export async function getProducts(opts?: { skip?: number; take?: number }) {
     prisma.product.findMany({
       select: {
         id: true, title: true, image: true, salePrice: true,
-        quantity: true, sku: true, status: true,
+        quantity: true, sku: true, status: true, variants: true,
         category: { select: { name: true } },
         subCategory: { select: { name: true } },
         createdAt: true,

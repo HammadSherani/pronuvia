@@ -4,7 +4,15 @@ import { PageHeader } from "@/components/admin/page-header";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
+import { formatCurrency } from "@/lib/utils/currency";
 import { Suspense } from "react";
+
+type Variant = { sku?: string };
+
+function variantSkus(variants: unknown): string {
+  const list = (variants as Variant[] | undefined)?.map((v) => v.sku).filter(Boolean) as string[] | undefined;
+  return list?.length ? list.join(", ") : "—";
+}
 
 export const metadata = { title: "Products – Pronuvia Admin" };
 
@@ -77,7 +85,7 @@ export default async function ProductsPage({
                         <span className="font-medium text-gray-800 line-clamp-1">{p.title}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-gray-400 font-mono text-xs">{p.sku}</td>
+                    <td className="px-5 py-3.5 text-gray-400 font-mono text-xs">{variantSkus(p.variants)}</td>
                     <td className="px-5 py-3.5 text-gray-500">
                       {p.category ? (
                         <span>
@@ -86,7 +94,7 @@ export default async function ProductsPage({
                         </span>
                       ) : <span className="text-gray-300">—</span>}
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">${p.salePrice.toFixed(2)}</td>
+                    <td className="px-5 py-3.5 font-medium text-gray-800">{formatCurrency(p.salePrice)}</td>
                     <td className="px-5 py-3.5 text-gray-600">{p.quantity}</td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[p.status]}`}>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
+import { formatCurrency } from "@/lib/utils/currency";
 
 export function OrderBehalfBar({
   physicianId,
@@ -45,7 +46,7 @@ export function OrderBehalfBar({
         )}
         {totalItems > 0 && (
           <span className="hidden sm:inline text-amber-200 font-normal">
-            · ${totalPrice.toFixed(2)}
+            · {formatCurrency(totalPrice)}
           </span>
         )}
       </Link>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
+import { formatCurrency } from "@/lib/utils/currency";
 
 export default function CartPage() {
   const { items, removeItem, updateQty, totalPrice } = useCart();
@@ -71,7 +72,7 @@ export default function CartPage() {
                 </Link>
                 {item.variantSize && <p className="text-xs text-gray-500 mt-0.5">Size: {item.variantSize}</p>}
                 {item.variantSku  && <p className="text-xs text-gray-400">SKU: {item.variantSku}</p>}
-                <p className="text-sm font-bold text-gray-900 mt-1">${item.unitPrice.toFixed(2)}</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{formatCurrency(item.unitPrice)}</p>
               </div>
 
               <div className="flex flex-col items-end justify-between shrink-0 gap-3">
@@ -90,7 +91,7 @@ export default function CartPage() {
                     <button type="button" onClick={() => updateQty(item.cartId, item.quantity + 1)}
                       className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors text-base leading-none">+</button>
                   </div>
-                  <p className="text-sm font-bold text-gray-900 w-16 text-right">${(item.unitPrice * item.quantity).toFixed(2)}</p>
+                  <p className="text-sm font-bold text-gray-900 w-16 text-right">{formatCurrency(item.unitPrice * item.quantity)}</p>
                 </div>
               </div>
             </div>
@@ -109,7 +110,7 @@ export default function CartPage() {
                     {item.productTitle}{item.variantSize ? ` (${item.variantSize})` : ""} × {item.quantity}
                   </span>
                   <span className="shrink-0 font-medium text-gray-700">
-                    ${(item.unitPrice * item.quantity).toFixed(2)}
+                    {formatCurrency(item.unitPrice * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -117,7 +118,7 @@ export default function CartPage() {
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-100 mb-5">
               <span className="text-sm font-semibold text-gray-700">Total</span>
-              <span className="text-lg font-bold text-gray-900">${totalPrice.toFixed(2)}</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(totalPrice)}</span>
             </div>
 
             <Link href="/sales/checkout"

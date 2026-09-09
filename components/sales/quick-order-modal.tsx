@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { createOrderBySalesRep } from "@/actions/sales-rep/create-order";
+import { formatCurrency } from "@/lib/utils/currency";
 
 type Props = {
   product:     { id: string; title: string; salePrice: number };
@@ -47,7 +48,7 @@ export function QuickOrderModal({ product, variantSize, variantSku, unitPrice, q
           {product.title}
           {variantSize ? <span className="text-gray-400"> · {variantSize}</span> : null}
           {" "}× {qty}
-          <span className="font-bold text-gray-800 ml-2">${(unitPrice * qty).toFixed(2)}</span>
+          <span className="font-bold text-gray-800 ml-2">{formatCurrency(unitPrice * qty)}</span>
         </p>
 
         <form action={action} className="space-y-4">
