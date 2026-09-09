@@ -22,6 +22,10 @@ type CartContextValue = {
   clearCart:  () => void;
   totalItems: number;
   totalPrice: number;
+  // False until the cart has finished reading its persisted state from
+  // localStorage — "Add to Cart" buttons should stay disabled until then,
+  // since an add before this point can be silently clobbered by the load.
+  isReady:    boolean;
 };
 
 const CartCtx = createContext<CartContextValue | null>(null);
@@ -89,7 +93,7 @@ export function CartProvider({ userId, cartKey, children }: { userId?: string; c
   const totalPrice = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
   return (
-    <CartCtx.Provider value={{ items, addItem, removeItem, updateQty, clearCart, totalItems, totalPrice }}>
+    <CartCtx.Provider value={{ items, addItem, removeItem, updateQty, clearCart, totalItems, totalPrice, isReady: hydrated }}>
       {children}
     </CartCtx.Provider>
   );

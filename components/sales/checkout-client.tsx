@@ -22,6 +22,7 @@ import { stripePromise } from "@/lib/stripe/client";
 import { useCart } from "@/lib/cart/cart-context";
 import { confirmCardOrder } from "@/actions/sales-rep/confirm-card-order";
 import { payWithWallet } from "@/actions/sales-rep/wallet-pay";
+import { saveCheckoutAddress } from "@/actions/sales-rep/save-address";
 import { validateCoupon }      from "@/actions/checkout/validate-coupon";
 import { getShippingOptionsForCountry } from "@/lib/shipping/calculate";
 import { AddressFields, EMPTY_ADDRESS, migrateAddressData, serializeAddress } from "@/components/shared/address-fields";
@@ -283,21 +284,31 @@ export function CheckoutClient({
   const billStr = addrToString(sameAsBilling ? shipping : billing);
 
 
+  // Remember the address used for this order so the next checkout starts
+  // from it instead of always falling back to the (possibly stale) profile
+  // address. Best-effort — never blocks the order-success flow.
+  const rememberAddress = () => {
+    saveCheckoutAddress({ shipping, billing: sameAsBilling ? shipping : billing }).catch(() => {});
+  };
+
   // wallet action
   const [walletState, walletAction, walletPending] = useActionState(payWithWallet, undefined);
   useEffect(() => {
     if (!walletState) return;
     if (walletState.success && walletState.orderNumber) {
       toast.success("Order placed successfully!");
+      rememberAddress();
       clearCart();
       router.push(`/sales/invoice/${walletState.orderNumber}`);
     } else if (walletState.message) {
       toast.error(walletState.message);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletState, clearCart, router]);
 
   const handleCardSuccess = (orderNumber: string) => {
     toast.success("Order placed successfully!");
+    rememberAddress();
     clearCart();
     router.push(`/sales/invoice/${orderNumber}`);
   };

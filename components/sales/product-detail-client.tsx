@@ -141,7 +141,8 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
   const [qty,         setQty]           = useState(1);
   const [activeTab,   setActiveTab]     = useState<"info" | "reviews">("info");
   const [showModal,   setShowModal]     = useState(false);
-  const { addItem } = useCart();
+  const [justAdded,   setJustAdded]     = useState(false);
+  const { addItem, isReady } = useCart();
 
   const allImages = [product.image, ...product.imageGallery].filter(Boolean) as string[];
   const selectedVariant = selectedIdx >= 0 ? variants[selectedIdx] : null;
@@ -151,6 +152,7 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
   const minPrice = Math.min(...prices), maxPrice = Math.max(...prices);
 
   function handleAddToCart() {
+    if (!isReady) return;
     if (variants.length > 0 && selectedIdx < 0) {
       toast.error("Please select a size first.");
       return;
@@ -169,7 +171,9 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
       unitPrice:    displayPrice,
       quantity:     qty,
     });
+    setJustAdded(true);
     toast.success("Added to cart!");
+    setTimeout(() => setJustAdded(false), 2000);
   }
 
   const breadcrumb = [
@@ -300,9 +304,10 @@ export function ProductDetailClient({ product, related, basePath = "/sales/shop"
                 className="w-14 h-10 text-center text-sm font-semibold text-gray-800 border-0 focus:outline-none" />
               <button type="button" onClick={() => setQty((q) => q + 1)} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none transition-colors">+</button>
             </div>
-            <button type="button" onClick={handleAddToCart}
-              className="flex-1 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-gray-700 transition-colors">
-              Add to cart
+            <button type="button" onClick={handleAddToCart} disabled={!isReady}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-white text-sm font-bold rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors ${justAdded ? "bg-[#3DBFA4]" : "bg-gray-900 hover:bg-gray-700"}`}>
+              {!isReady && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {!isReady ? "Loading…" : justAdded ? "Added ✓" : "Add to cart"}
             </button>
           </div>
 

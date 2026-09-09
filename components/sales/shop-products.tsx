@@ -18,7 +18,7 @@ type Category = { id: string; name: string };
 function ProductCard({ product, basePath }: { product: Product; basePath: string }) {
   const allVariants = product.variants as Variant[];
   const variants    = allVariants.filter(isVisible).sort((a, b) => parseFloat(b.size ?? "0") - parseFloat(a.size ?? "0"));
-  const { addItem, items, updateQty, removeItem } = useCart();
+  const { addItem, items, updateQty, removeItem, isReady } = useCart();
 
   const defaultIdx        = variants.findIndex((v) => v.isDefault);
   const firstAvailableIdx = variants.findIndex(isAvailable);
@@ -48,6 +48,7 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
     : formatCurrency(unitPrice);
 
   function handleAddToCart() {
+    if (!isReady) return;
     if (!selectedAvailable) {
       toast.error("This variant is out of stock.");
       return;
@@ -180,19 +181,23 @@ function ProductCard({ product, basePath }: { product: Product; basePath: string
             <button
               type="button"
               onClick={!inCart ? handleAddToCart : undefined}
-              disabled={!selectedAvailable}
+              disabled={!isReady || !selectedAvailable}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                !selectedAvailable
+                !isReady || !selectedAvailable
                   ? "bg-gray-100 text-gray-300 cursor-not-allowed"
                   : inCart || pulse
                     ? "bg-gray-900 text-white cursor-default"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white"
               }`}
             >
-              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              {!selectedAvailable ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
+              {!isReady ? (
+                <span className="w-3.5 h-3.5 shrink-0 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
+              ) : (
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              )}
+              {!isReady ? "Loading…" : !selectedAvailable ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
             </button>
           </div>
         </div>

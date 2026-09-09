@@ -15,7 +15,7 @@ export default async function BehalfCheckoutPage({ params }: Props) {
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: physicianId, isApproved: ApprovalStatus.APPROVED },
     select: {
-      id: true, firstName: true, lastName: true, email: true,
+      id: true, firstName: true, lastName: true, email: true, phone: true,
       addressOne: true, addressTwo: true, city: true, state: true, zipCode: true,
     },
   });
@@ -24,6 +24,7 @@ export default async function BehalfCheckoutPage({ params }: Props) {
   const initialAddress = {
     firstName: physician.firstName,
     lastName:  physician.lastName,
+    phone:     physician.phone      ?? "",
     address1:  physician.addressOne ?? "",
     address2:  physician.addressTwo ?? "",
     city:      physician.city       ?? "",
