@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/delete-button";
 import { PhysicianApprovalActions } from "@/components/admin/physician-approval-actions";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { ClientPagination } from "@/components/shared/pagination";
+import { formatDate, toDateInputValue } from "@/lib/utils/timezone";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,13 +71,13 @@ function exportToExcel(physicians: Physician[]) {
     "Medical Rep Email":        p.salesRep?.email ?? "",
     "Wallet Balance ($)":       p.walletBalance,
     "Total Orders":             p.ordersCount,
-    "Sign-up Date":             new Date(p.createdAt).toLocaleDateString("en-US"),
+    "Sign-up Date":             formatDate(p.createdAt),
     "Added By":                 p.addedByRole,
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Physicians");
-  XLSX.writeFile(wb, `physicians-${new Date().toISOString().split("T")[0]}.xlsx`);
+  XLSX.writeFile(wb, `physicians-${toDateInputValue(new Date())}.xlsx`);
 }
 
 // ─── Doctor table row ─────────────────────────────────────────────────────────

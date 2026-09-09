@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getOrderById } from "@/actions/admin/manage-orders";
 import { PrintButton } from "@/components/sales/print-button";
+import { formatDateLong } from "@/lib/utils/timezone";
 import type { OrderItem } from "@/actions/admin/manage-orders";
 
 type Props = { params: Promise<{ id: string }> };
@@ -29,9 +30,7 @@ function fmtAddress(raw: string | null | undefined): string {
 
 function fmtDate(d: Date | string | null) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-US", {
-    year: "numeric", month: "long", day: "numeric",
-  });
+  return formatDateLong(d);
 }
 
 export default async function AdminPackingListPage({ params }: Props) {

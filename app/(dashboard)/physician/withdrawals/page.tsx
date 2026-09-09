@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Payout History – Pronuvia" };
 
@@ -110,7 +111,7 @@ export default async function PhysicianPayoutHistoryPage({
                 {requests.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                      {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(r.createdAt)}
                     </td>
                     <td className="px-5 py-4">
                       <span className="font-bold text-sm text-emerald-600">

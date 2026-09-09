@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { getLocalDateParts } from "@/lib/utils/timezone";
 
 export type PayoutRole = "SALES_REP" | "PHYSICIAN";
 export type PayoutStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -12,26 +13,9 @@ export type MonthlyPayoutPeriod = {
   snapshotAt: Date;
 };
 
+/** @deprecated thin wrapper kept for existing callers — use getLocalDateParts from lib/utils/timezone directly in new code. */
 export function getPayoutLocalDateParts(now: Date, timeZone = "UTC") {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  }).formatToParts(now);
-  const values = Object.fromEntries(parts
-    .filter((part) => part.type !== "literal")
-    .map((part) => [part.type, Number(part.value)]));
-  return {
-    year: values.year,
-    month: values.month,
-    day: values.day,
-    hour: values.hour,
-    minute: values.minute,
-  };
+  return getLocalDateParts(now, timeZone);
 }
 
 export function getPreviousMonthPayoutPeriod(now = new Date(), timeZone = "UTC"): MonthlyPayoutPeriod {

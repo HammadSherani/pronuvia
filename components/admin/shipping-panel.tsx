@@ -5,6 +5,7 @@ import { useRouter }               from "next/navigation";
 import toast                       from "react-hot-toast";
 import { getShippingRates, purchaseLabel } from "@/actions/admin/shipping";
 import type { CarrierCode, PackageInfo, RateResult } from "@/lib/shipping/types";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 type Shipment = {
   id:             string;
@@ -72,7 +73,7 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
         </div>
         <div>
           <p className="text-sm font-bold text-emerald-800">Shipment {index + 1} label is ready</p>
-          <p className="text-xs text-emerald-600">Purchased on {new Date(s.shipDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+          <p className="text-xs text-emerald-600">Purchased on {formatDateLong(s.shipDate)}</p>
         </div>
       </div>
 

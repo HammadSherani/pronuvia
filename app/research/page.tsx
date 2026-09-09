@@ -2,6 +2,7 @@ import Link   from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 import { SiteFooter } from "@/components/website/site-footer";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Research – Pronuvia" };
 
@@ -62,7 +63,7 @@ export default async function ResearchPage() {
 
                   {/* Date */}
                   <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-1.5">
-                    {new Date(date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    {formatDateLong(date)}
                   </p>
 
                   {/* Title */}

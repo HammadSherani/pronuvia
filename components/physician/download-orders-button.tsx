@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { getPhysicianOrdersForExport } from "@/actions/physician/export-orders";
+import { toDateInputValue } from "@/lib/utils/timezone";
 
 export function DownloadOrdersButton() {
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,7 @@ export function DownloadOrdersButton() {
 
       XLSX.utils.book_append_sheet(wb, ws, "Orders");
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = toDateInputValue(new Date());
       XLSX.writeFile(wb, `pronuvia-orders-${today}.xlsx`);
     } catch (err) {
       console.error("Export failed:", err);

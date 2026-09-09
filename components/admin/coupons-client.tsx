@@ -11,6 +11,7 @@ import {
   type CouponInput,
   type CouponRecord,
 } from "@/actions/admin/coupons";
+import { formatDate, toDateInputValue } from "@/lib/utils/timezone";
 
 type Coupon = {
   id:             string;
@@ -47,7 +48,7 @@ function inp(extra = "") {
 
 function fmtDate(d: Date | null) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return formatDate(d);
 }
 
 function CouponFormModal({
@@ -282,7 +283,7 @@ export function CouponsClient({ coupons: initial }: Props) {
                 minOrderAmount: editCoupon.minOrderAmount,
                 maxUses:        editCoupon.maxUses,
                 expiresAt:      editCoupon.expiresAt
-                  ? new Date(editCoupon.expiresAt).toISOString().split("T")[0]
+                  ? toDateInputValue(editCoupon.expiresAt)
                   : null,
                 isActive:      editCoupon.isActive,
                 applicableTo:  editCoupon.applicableTo as CouponInput["applicableTo"],

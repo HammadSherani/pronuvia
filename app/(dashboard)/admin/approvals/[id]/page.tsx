@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { ApprovalDetailActions } from "@/components/admin/approval-detail-actions";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Review Physician – Pronuvia Admin" };
 
@@ -71,7 +72,7 @@ export default async function ApprovalDetailPage({ params }: Props) {
               Pending Approval
             </span>
             <span className="text-xs text-gray-400">
-              Submitted {new Date(p.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              Submitted {formatDateLong(p.createdAt)}
             </span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDate, formatDateLong, formatMonthYear, getLocalDateParts } from "@/lib/utils/timezone";
 
 type OrderRow = { orderNumber: string; createdAt: string; amount: number; rate: number };
 
@@ -75,9 +76,9 @@ function StatementModal({ row, onClose }: { row: HistoryRow; onClose: () => void
   // Group orders by month, newest first
   const monthMap = new Map<string, { label: string; orders: typeof row.orders }>();
   for (const o of row.orders) {
-    const d     = new Date(o.createdAt);
-    const key   = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const p     = getLocalDateParts(new Date(o.createdAt));
+    const key   = `${p.year}-${String(p.month).padStart(2, "0")}`;
+    const label = formatMonthYear(o.createdAt);
     const entry = monthMap.get(key) ?? { label, orders: [] };
     entry.orders.push(o);
     monthMap.set(key, entry);
@@ -105,7 +106,7 @@ function StatementModal({ row, onClose }: { row: HistoryRow; onClose: () => void
               {row.payoutCount} payout{row.payoutCount !== 1 ? "s" : ""}
               &nbsp;·&nbsp;
               Last approved: <strong className="text-gray-700">
-                {new Date(row.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                {formatDateLong(row.createdAt)}
               </strong>
             </p>
           </div>
@@ -159,7 +160,7 @@ function StatementModal({ row, onClose }: { row: HistoryRow; onClose: () => void
                           </span>
                         </td>
                         <td className="px-4 py-2.5 text-xs text-gray-400">
-                          {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          {formatDate(o.createdAt)}
                         </td>
                         <td className="px-4 py-2.5 text-right font-bold text-emerald-600 text-sm">{fmt(o.amount)}</td>
                       </tr>
@@ -272,7 +273,7 @@ export function CommissionHistoryClient({ rows }: Props) {
                     </td>
 
                     <td className="px-4 py-3.5 text-xs text-gray-400">
-                      {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(r.createdAt)}
                     </td>
 
                     <td className="px-4 py-3.5">

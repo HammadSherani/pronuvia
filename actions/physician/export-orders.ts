@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { requirePhysician } from "@/lib/auth/dal";
+import { formatDate } from "@/lib/utils/timezone";
 
 export type PhysicianOrderExportRow = {
   orderNumber:     string;
@@ -70,7 +71,7 @@ export async function getPhysicianOrdersForExport(): Promise<PhysicianOrderExpor
 
     return {
       orderNumber:     o.orderNumber,
-      date:            new Date(o.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+      date:            formatDate(o.createdAt),
       status:          o.status,
       paymentStatus:   o.paymentStatus ?? "",
       paymentMethod:   o.paymentMethod ?? "",

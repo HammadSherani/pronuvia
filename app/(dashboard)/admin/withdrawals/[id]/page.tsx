@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { prisma }      from "@/lib/db/prisma";
 import { WithdrawalDetailActions } from "@/components/admin/withdrawal-detail-actions";
 import { OrderStatus } from "@/generated/prisma/enums";
+import { formatDate, formatMonthYear } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Withdrawal Orders – Pronuvia Admin" };
 
@@ -18,7 +19,7 @@ function parsePeriod(note: string | null, createdAt: Date): string {
     const m = note.match(/Auto withdrawal\s*[–-]\s*(.+)/i);
     if (m) return m[1].trim();
   }
-  return createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return formatMonthYear(createdAt);
 }
 
 function extractProducts(items: unknown[]): string {
@@ -239,7 +240,7 @@ export default async function WithdrawalOrdersPage({ params }: Props) {
                       )}
                     </td>
                     <td className="px-5 py-4 text-xs text-gray-500">
-                      {order.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(order.createdAt)}
                     </td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex px-2 py-0.5 border rounded-full text-[10px] font-medium ${badge.cls}`}>

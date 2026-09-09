@@ -5,6 +5,7 @@ import { ApprovalStatus } from "@/generated/prisma/enums";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "My Physicians – Pronuvia" };
 
@@ -183,9 +184,7 @@ export default async function SalesPhysiciansPage({
                         </span>
                       </td>
                       <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {new Date(p.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
+                        {formatDate(p.createdAt)}
                       </td>
                     </tr>
                   );

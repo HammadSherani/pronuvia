@@ -10,6 +10,7 @@ import {
   getCustomerOrderHistoryReport, type CustomerHistoryRow,
   type ReportFilters,
 } from "@/actions/admin/reports";
+import { toDateInputValue } from "@/lib/utils/timezone";
 
 type FilterOption = { id: string; name: string };
 
@@ -146,7 +147,7 @@ function exportExcel(
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Report");
-  XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `${filename}_${toDateInputValue(new Date())}.xlsx`);
 }
 
 // ── Column definitions ────────────────────────────────────────

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ClientPagination } from "@/components/shared/pagination";
+import { formatDate } from "@/lib/utils/timezone";
 
 export type CommissionEntry = {
   kind:        "rep" | "physician";
@@ -136,7 +137,7 @@ export function AllWithdrawalsTable({ entries, repMap, drMap }: Props) {
                 </td>
 
                 <td className="px-3 py-3 text-[11px] text-gray-400 whitespace-nowrap">
-                  {new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })}
+                  {formatDate(e.createdAt, { year: "2-digit" })}
                 </td>
               </tr>
             );

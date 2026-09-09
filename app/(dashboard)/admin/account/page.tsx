@@ -1,6 +1,7 @@
 ﻿import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { AdminPasswordForm } from "./_components/admin-password-form";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Account Details – Pronuvia Admin" };
 
@@ -31,9 +32,7 @@ export default async function AdminAccountPage() {
   });
 
   const memberSince = admin?.createdAt
-    ? new Date(admin.createdAt).toLocaleDateString("en-US", {
-        year: "numeric", month: "long", day: "numeric",
-      })
+    ? formatDateLong(admin.createdAt)
     : "—";
 
   return (

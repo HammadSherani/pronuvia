@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getProductById } from "@/actions/admin/products";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 type SizeVariant = {
   size: string; sku?: string; gtin?: string; image?: string;
@@ -109,11 +110,11 @@ export default async function ProductViewPage({ params }: Props) {
             </div>
             <div>
               <dt className="text-xs text-gray-400 font-medium mb-0.5">Created</dt>
-              <dd className="text-sm text-gray-700">{new Date(product.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</dd>
+              <dd className="text-sm text-gray-700">{formatDateLong(product.createdAt)}</dd>
             </div>
             <div>
               <dt className="text-xs text-gray-400 font-medium mb-0.5">Last Updated</dt>
-              <dd className="text-sm text-gray-700">{new Date(product.updatedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</dd>
+              <dd className="text-sm text-gray-700">{formatDateLong(product.updatedAt)}</dd>
             </div>
           </dl>
         </div>

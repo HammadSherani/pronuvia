@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
+import { formatDate, formatDateLong } from "@/lib/utils/timezone";
 
 
 export const metadata = { title: "Dashboard – Pronuvia" };
@@ -187,9 +188,7 @@ export default async function PhysicianDashboardPage() {
     },
   ];
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
+  const today = formatDateLong(new Date(), { weekday: "long" });
 
   return (
     <div className="space-y-6">
@@ -322,7 +321,7 @@ export default async function PhysicianDashboardPage() {
                         </span>
                       </td>
                       <td className="px-6 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {formatDate(o.createdAt)}
                       </td>
                     </tr>
                   ))}

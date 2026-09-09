@@ -5,6 +5,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { updateWithdrawRequest, deleteWithdrawRequest, bulkUpdateWithdrawals } from "@/actions/admin/manage-withdrawals";
 import { notifyUserAddBank } from "@/actions/admin/notify-bank";
+import { formatDate, formatMonthYear } from "@/lib/utils/timezone";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -87,7 +88,7 @@ function parsePeriod(note: string | null, createdAt: string): string {
     const m = note.match(/Auto withdrawal\s*[–-]\s*(.+)/i);
     if (m) return m[1].trim();
   }
-  return new Date(createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return formatMonthYear(createdAt);
 }
 
 function RoleBadge({ role }: { role: "PHYSICIAN" | "SALES_REP" }) {
@@ -157,12 +158,12 @@ function OrdersModal({
                       <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">#{o.orderNumber}</span>
                     </td>
                     <td className="px-5 py-3 text-xs text-gray-500">
-                      {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(o.createdAt)}
                     </td>
                     {rejected && (
                       <td className="px-5 py-3 text-xs text-gray-500">
                         {o.refundedAt
-                          ? new Date(o.refundedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                          ? formatDate(o.refundedAt)
                           : "—"}
                       </td>
                     )}
@@ -842,7 +843,7 @@ export function CommissionPayoutClient({ pending: initialPending, rejected, curr
                     <td className="px-4 py-3 text-xs text-gray-600 font-medium">{parsePeriod(r.note, r.createdAt)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-gray-700">{fmt(r.amount)}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">
-                      {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })}
+                      {formatDate(r.createdAt, { year: "2-digit" })}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 italic truncate" title={r.adminNote ?? ""}>
                       {r.adminNote ?? <span className="text-gray-300 not-italic">—</span>}

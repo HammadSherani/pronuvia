@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { getSalesRepById } from "@/actions/admin/manage-sales-reps";
 import { DownlineTable } from "@/components/admin/downline-table";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -117,7 +118,7 @@ export default async function SalesRepViewPage({ params }: Props) {
         <InfoRow label="Commission" value={`${rep.commission}%`} />
         <InfoRow label="Wallet Balance" value={`$${rep.walletBalance.toFixed(2)}`} />
         <InfoRow label="Total Orders" value={String(rep.ordersCount)} />
-        <InfoRow label="Member Since" value={new Date(rep.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
+        <InfoRow label="Member Since" value={formatDateLong(rep.createdAt)} />
       </Card>
 
       <Card title="Addresses">

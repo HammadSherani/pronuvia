@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { OrderStatus } from "@/generated/prisma/enums";
+import { formatDate } from "@/lib/utils/timezone";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -130,9 +131,7 @@ export default async function PhysicianOrdersPage({ params }: Props) {
                       <span className="font-semibold text-gray-800">#{order.orderNumber}</span>
                     </td>
                     <td className="px-5 py-4 text-gray-500 text-xs">
-                      {new Date(order.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric", month: "short", day: "numeric",
-                      })}
+                      {formatDate(order.createdAt)}
                     </td>
                     <td className="px-5 py-4 text-gray-500">
                       {itemCount} item{itemCount !== 1 ? "s" : ""}

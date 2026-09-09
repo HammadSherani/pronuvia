@@ -8,6 +8,7 @@ import { getShippingRates, purchaseLabel } from "@/actions/admin/shipping";
 import type { ShipmentDirection } from "@/actions/admin/shipping";
 import type { CarrierCode, PackageInfo, RateResult, LabelSize } from "@/lib/shipping/types";
 import type { OrderItem } from "@/actions/admin/manage-orders";
+import { formatDateLong, toDateInputValue } from "@/lib/utils/timezone";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -191,7 +192,7 @@ function generatePackingSlip(params: {
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
       <h1>Pronuvia <span class="badge">Packing Slip</span></h1>
-      <p style="margin-top:6px;color:#6b7280">Order #${orderNumber} &nbsp;·&nbsp; ${new Date(shipDate).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</p>
+      <p style="margin-top:6px;color:#6b7280">Order #${orderNumber} &nbsp;·&nbsp; ${formatDateLong(shipDate)}</p>
     </div>
     <button class="print-btn no-print" onclick="window.print()">&#128438; Print / Save PDF</button>
   </div>
@@ -312,7 +313,7 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
             )}
           </div>
           <p className="text-xs text-emerald-600">
-            {new Date(s.shipDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            {formatDateLong(s.shipDate)}
           </p>
         </div>
       </div>
@@ -449,7 +450,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
   const [weightUnit, setWeightUnit] = useState<WeightUnit>("lbs");
 
   // Ship date
-  const today = new Date().toISOString().split("T")[0];
+  const today = toDateInputValue(new Date());
   const [shipDate, setShipDate] = useState(today);
 
   // Rates

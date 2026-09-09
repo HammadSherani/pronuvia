@@ -3,13 +3,7 @@
 import { useState, useTransition, useOptimistic } from "react";
 import toast from "react-hot-toast";
 import { addOrderNote, deleteOrderNote, type NoteType, type OrderNoteRow } from "@/actions/admin/order-notes";
-
-function formatDate(d: Date | string) {
-  return new Date(d).toLocaleString("en-US", {
-    month: "short", day: "numeric", year: "numeric",
-    hour: "numeric", minute: "2-digit", hour12: true,
-  });
-}
+import { formatDateTime as formatDate } from "@/lib/utils/timezone";
 
 type NoteRow = OrderNoteRow & { pending?: boolean };
 

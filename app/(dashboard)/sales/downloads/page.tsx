@@ -1,6 +1,7 @@
 ﻿import { requireSalesRep } from "@/lib/auth/dal";
 import { listDocuments } from "@/actions/admin/manage-catalog";
 import { fmtSize } from "@/lib/utils/format";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Downloads – Pronuvia" };
 
@@ -43,7 +44,7 @@ export default async function SalesDownloadsPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">{doc.fileName}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {fmtSize(doc.fileSize)} · {new Date(doc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    {fmtSize(doc.fileSize)} · {formatDate(doc.createdAt)}
                   </p>
                 </div>
                 <a href={`/api/download?url=${encodeURIComponent(doc.fileUrl)}&filename=${encodeURIComponent(doc.fileName)}`}

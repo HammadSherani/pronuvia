@@ -1,4 +1,5 @@
 import type { ShipAddress, PackageInfo, RateResult, LabelResult, LabelOptions } from "./types";
+import { toDateInputValue } from "@/lib/utils/timezone";
 
 const MAX_LOGGED_ERROR_LENGTH = 4_000;
 const MAX_USER_ERROR_LENGTH = 600;
@@ -370,7 +371,7 @@ export async function purchaseUSPSLabel(
       length:                       Math.ceil(pkg.lengthIn ?? 6),
       width:                        Math.ceil(pkg.widthIn  ?? 4),
       height:                       Math.ceil(pkg.heightIn ?? 2),
-      mailingDate:                  new Date().toISOString().split("T")[0],
+      mailingDate:                  toDateInputValue(new Date()),
       // 921 = Signature Confirmation, 922 = Adult Signature Required.
       // 910/911 are Certified Mail services and do not match these UI options.
       extraServices:                signatureCode === 1 ? [921] : signatureCode === 2 ? [922] : [],

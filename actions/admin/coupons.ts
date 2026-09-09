@@ -3,6 +3,7 @@
 import { requireAdmin } from "@/lib/auth/dal";
 import { prisma }       from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
+import { parseDateOnlyEndOfDayInTZ } from "@/lib/utils/timezone";
 
 export type CouponInput = {
   code:           string;
@@ -53,7 +54,7 @@ export async function createCoupon(input: CouponInput): Promise<CouponActionResu
       discountValue:  input.discountValue,
       minOrderAmount: input.minOrderAmount ?? undefined,
       maxUses:        input.maxUses        ?? undefined,
-      expiresAt:      input.expiresAt ? new Date(input.expiresAt) : undefined,
+      expiresAt:      input.expiresAt ? parseDateOnlyEndOfDayInTZ(input.expiresAt) : undefined,
       isActive:       input.isActive,
       applicableTo:   input.applicableTo,
     },
@@ -74,7 +75,7 @@ export async function updateCoupon(id: string, input: Partial<CouponInput>): Pro
       discountValue:  input.discountValue,
       minOrderAmount: input.minOrderAmount ?? null,
       maxUses:        input.maxUses        ?? null,
-      expiresAt:      input.expiresAt ? new Date(input.expiresAt) : null,
+      expiresAt:      input.expiresAt ? parseDateOnlyEndOfDayInTZ(input.expiresAt) : null,
       isActive:       input.isActive,
       applicableTo:   input.applicableTo,
     },

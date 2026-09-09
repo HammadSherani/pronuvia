@@ -4,6 +4,7 @@ import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-heade
 import { SiteFooter }              from "@/components/website/site-footer";
 import { PhysicianRegisterForm }   from "@/components/website/physician-register-form";
 import { logout }                  from "@/actions/auth/logout";
+import { formatDateLong }          from "@/lib/utils/timezone";
 
 export const metadata = { title: "Account – Pronuvia" };
 
@@ -56,9 +57,7 @@ export default async function AccountPage() {
         physician.city, physician.state, physician.zipCode,
       ].filter(Boolean).join(", ");
 
-      const memberSince = new Date(physician.createdAt).toLocaleDateString("en-US", {
-        year: "numeric", month: "long", day: "numeric",
-      });
+      const memberSince = formatDateLong(physician.createdAt);
 
       return (
         <>

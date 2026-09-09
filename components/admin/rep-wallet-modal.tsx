@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getRepWalletDetails } from "@/actions/admin/get-rep-wallet";
+import { formatDate } from "@/lib/utils/timezone";
 
 type WalletData = Awaited<ReturnType<typeof getRepWalletDetails>>;
 
@@ -167,9 +168,7 @@ export function RepWalletModal({
                                   {tx.description ?? (tx.type === "CREDIT" ? "Credit" : "Debit")}
                                 </p>
                                 <p className="text-[10px] text-gray-400">
-                                  {new Date(tx.createdAt).toLocaleDateString("en-US", {
-                                    month: "short", day: "numeric", year: "numeric",
-                                  })}
+                                  {formatDate(tx.createdAt)}
                                 </p>
                               </div>
                             </div>
@@ -197,9 +196,7 @@ export function RepWalletModal({
                             <div>
                               <p className="text-sm font-bold text-gray-800">{fmt(r.amount)}</p>
                               <p className="text-[10px] text-gray-400">
-                                {new Date(r.createdAt).toLocaleDateString("en-US", {
-                                  month: "short", day: "numeric", year: "numeric",
-                                })}
+                                {formatDate(r.createdAt)}
                               </p>
                               {r.note && (
                                 <p className="text-xs text-gray-500 italic mt-0.5">"{r.note}"</p>

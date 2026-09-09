@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getPhysicianWalletDetails } from "@/actions/admin/get-physician-wallet";
+import { formatDate } from "@/lib/utils/timezone";
 
 type WalletData = Awaited<ReturnType<typeof getPhysicianWalletDetails>>;
 
@@ -130,7 +131,7 @@ export function PhysicianWalletModal({
                               <div>
                                 <p className="text-xs font-medium text-gray-700">{tx.description ?? (tx.type === "CREDIT" ? "Credit" : "Debit")}</p>
                                 <p className="text-[10px] text-gray-400">
-                                  {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                  {formatDate(tx.createdAt)}
                                 </p>
                               </div>
                             </div>
@@ -155,7 +156,7 @@ export function PhysicianWalletModal({
                             <div>
                               <p className="text-sm font-bold text-gray-800">{fmt(r.amount)}</p>
                               <p className="text-[10px] text-gray-400">
-                                {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                {formatDate(r.createdAt)}
                               </p>
                               {r.note      && <p className="text-xs text-gray-500 italic mt-0.5">"{r.note}"</p>}
                               {r.adminNote && <p className="text-xs text-[#3DBFA4] mt-0.5">↳ {r.adminNote}</p>}

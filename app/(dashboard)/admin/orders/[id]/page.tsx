@@ -13,6 +13,7 @@ import type { OrderItem, StoredRefundItem } from "@/actions/admin/manage-orders"
 import { getOrderNotes } from "@/actions/admin/order-notes";
 import { OrderNotesPanel } from "@/components/admin/order-notes-panel";
 import { EditOrderAddress, EditOrderEmail, EditOrderPhone } from "@/components/admin/edit-order-address";
+import { APP_TIMEZONE } from "@/lib/utils/timezone";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -76,13 +77,15 @@ function fmtMoney(n: number) {
 }
 function fmtDate(d: Date | string | null | undefined, opts?: Intl.DateTimeFormatOptions) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-US", opts ?? {
-    year: "numeric", month: "long", day: "numeric",
+  return new Date(d).toLocaleDateString("en-US", {
+    timeZone: APP_TIMEZONE,
+    ...(opts ?? { year: "numeric", month: "long", day: "numeric" }),
   });
 }
 function fmtDateTime(d: Date | string | null | undefined) {
   if (!d) return "—";
   return new Date(d).toLocaleString("en-US", {
+    timeZone: APP_TIMEZONE,
     year: "numeric", month: "short", day: "numeric",
     hour: "numeric", minute: "2-digit",
   });

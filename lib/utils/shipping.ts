@@ -1,3 +1,5 @@
+import { getLocalDateParts, startOfDay } from "@/lib/utils/timezone";
+
 export type ShippingTier = {
   rate:          number;
   label:         string;
@@ -10,12 +12,18 @@ export function calculateShipping(subtotal: number): ShippingTier {
   return                      { rate: 9.99, label: "Standard Shipping",      estimatedDays: 7 };
 }
 
+/** Adds `days` business days (skipping Sat/Sun) to today, using the app's
+ * timezone to decide what "today" and each weekday transition is — a plain
+ * server-local Date.getDay() would compute the wrong weekday whenever the
+ * server process isn't running in that timezone. */
 export function estimatedDeliveryDate(days: number): Date {
-  const d = new Date();
+  const p = getLocalDateParts(new Date());
+  let cursor = Date.UTC(p.year, p.month - 1, p.day, 12, 0, 0); // noon anchor, DST-agnostic day arithmetic
   let remaining = days;
   while (remaining > 0) {
-    d.setDate(d.getDate() + 1);
-    if (d.getDay() !== 0 && d.getDay() !== 6) remaining--;
+    cursor += 86_400_000;
+    const dow = new Date(cursor).getUTCDay();
+    if (dow !== 0 && dow !== 6) remaining--;
   }
-  return d;
+  return startOfDay(new Date(cursor));
 }

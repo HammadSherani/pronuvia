@@ -1,4 +1,5 @@
 import PDFDocument from "pdfkit";
+import { formatDate, formatDateLong } from "@/lib/utils/timezone";
 
 export interface CommissionOrder {
   orderNumber: string;
@@ -121,7 +122,7 @@ export async function generateCommissionStatementPdf(opts: {
         ellipsis: true,
       });
       doc.text(
-        new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        formatDate(o.createdAt),
         col.date, y + 4, { lineBreak: false }
       );
       doc.fillColor(teal);
@@ -151,7 +152,7 @@ export async function generateCommissionStatementPdf(opts: {
     y += 10;
     doc.fillColor(gray).fontSize(8).font("Helvetica")
        .text(
-         `Generated on ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}  ·  Pronuvia, Inc.  ·  This is an auto-generated statement.`,
+         `Generated on ${formatDateLong(new Date())}  ·  Pronuvia, Inc.  ·  This is an auto-generated statement.`,
          50, y, { align: "center", width: W }
        );
 

@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/dal";
 import { getPhysicianById } from "@/actions/admin/manage-physicians";
 import { ApprovalStatus } from "@/generated/prisma/enums";
 import { PhysicianApprovalActions } from "@/components/admin/physician-approval-actions";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -186,8 +187,8 @@ export default async function PhysicianViewPage({ params }: Props) {
         <h2 className="text-sm font-semibold text-gray-700 mb-4 pb-3 border-b border-gray-100">Account Details</h2>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
           <InfoRow label="Added By"    value={p.addedByRole} />
-          <InfoRow label="Member Since" value={new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
-          <InfoRow label="Last Updated" value={new Date(p.updatedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
+          <InfoRow label="Member Since" value={formatDateLong(p.createdAt)} />
+          <InfoRow label="Last Updated" value={formatDateLong(p.updatedAt)} />
         </dl>
       </div>
     </div>

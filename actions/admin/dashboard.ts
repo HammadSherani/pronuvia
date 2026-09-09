@@ -1,46 +1,61 @@
 "use server";
 
 import { prisma } from "@/lib/db/prisma";
+import { getLocalDateParts, startOfDay, startOfMonth, endOfDay, formatDate } from "@/lib/utils/timezone";
+
+// Noon-UTC anchors below are deliberately timezone/DST-agnostic — they only
+// carry a calendar (year, month, day) forward, never a wall-clock time, so
+// shifting by N days/months can't be thrown off by a DST transition or by
+// which timezone the shift math itself runs in. The actual NY-local
+// boundary is only derived afterward, via startOfDay/startOfMonth.
+function shiftByDays(from: Date, days: number): Date {
+  const p = getLocalDateParts(from);
+  return new Date(Date.UTC(p.year, p.month - 1, p.day, 12, 0, 0) + days * 86_400_000);
+}
+function shiftByMonths(from: Date, months: number): Date {
+  const p = getLocalDateParts(from);
+  return new Date(Date.UTC(p.year, p.month - 1 + months, 15, 12, 0, 0));
+}
 
 function buildBuckets(period: "daily" | "weekly" | "monthly", count: number) {
   const now = new Date();
   return Array.from({ length: count }, (_, i) => {
     const offset = count - 1 - i;
     if (period === "daily") {
-      const d = new Date(now);
-      d.setDate(d.getDate() - offset);
-      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const end = new Date(start.getTime() + 86_400_000);
-      return { start, end, label: start.toLocaleDateString("en-US", { month: "short", day: "numeric" }) };
+      const anchor = shiftByDays(now, -offset);
+      const start = startOfDay(anchor);
+      const end = startOfDay(shiftByDays(anchor, 1));
+      return { start, end, label: formatDate(start, { month: "short", day: "numeric" }) };
     } else if (period === "weekly") {
-      const d = new Date(now);
-      d.setDate(d.getDate() - offset * 7);
-      const start = new Date(d);
-      start.setDate(d.getDate() - d.getDay());
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(start.getTime() + 7 * 86_400_000);
-      return { start, end, label: `Wk ${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}` };
+      const anchor = shiftByDays(now, -offset * 7);
+      const p = getLocalDateParts(anchor);
+      const anchorNoon = Date.UTC(p.year, p.month - 1, p.day, 12, 0, 0);
+      const dow = new Date(anchorNoon).getUTCDay(); // 0=Sun, week starts Sunday to match prior behavior
+      const weekStart = startOfDay(new Date(anchorNoon - dow * 86_400_000));
+      const end = startOfDay(shiftByDays(weekStart, 7));
+      return { start: weekStart, end, label: `Wk ${formatDate(weekStart, { month: "short", day: "numeric" })}` };
     } else {
-      const start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-      const end = new Date(now.getFullYear(), now.getMonth() - offset + 1, 1);
-      return { start, end, label: start.toLocaleDateString("en-US", { month: "short", year: "2-digit" }) };
+      const anchor = shiftByMonths(now, -offset);
+      const start = startOfMonth(anchor);
+      const end = startOfMonth(shiftByMonths(anchor, 1));
+      return { start, end, label: formatDate(start, { month: "short", year: "2-digit" }) };
     }
   });
 }
 
 export async function getDashboardStats(opts?: { from?: Date; to?: Date }) {
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  const twelveMonthsAgo = startOfMonth(shiftByMonths(new Date(), -12));
 
-  // When a date range is selected, use it; otherwise fall back to 12-month window for charts
+  // When a date range is selected, use it; otherwise fall back to 12-month window for charts.
+  // opts.from/opts.to are expected to already be NY-anchored instants (see
+  // parseDateOnlyInTZ at the call site) — endOfDay here makes "to" inclusive
+  // of that whole NY calendar day without relying on a fixed +24h offset.
   const rangeFrom = opts?.from;
-  const rangeTo   = opts?.to
-    ? new Date(opts.to.getFullYear(), opts.to.getMonth(), opts.to.getDate() + 1) // inclusive end
-    : undefined;
+  const rangeTo   = opts?.to ? endOfDay(opts.to) : undefined;
 
   const chartFrom  = rangeFrom ?? twelveMonthsAgo;
   const orderWhere = rangeFrom || rangeTo
-    ? { createdAt: { gte: rangeFrom, ...(rangeTo ? { lt: rangeTo } : {}) } }
+    ? { createdAt: { gte: rangeFrom, ...(rangeTo ? { lte: rangeTo } : {}) } }
     : undefined;
 
   const [
@@ -57,7 +72,7 @@ export async function getDashboardStats(opts?: { from?: Date; to?: Date }) {
     prisma.withdrawRequest.count({ where: { status: "PENDING" } }),
     prisma.order.aggregate({ where: orderWhere, _sum: { total: true }, _count: true }),
     prisma.order.findMany({
-      where: { createdAt: { gte: chartFrom, ...(rangeTo ? { lt: rangeTo } : {}) } },
+      where: { createdAt: { gte: chartFrom, ...(rangeTo ? { lte: rangeTo } : {}) } },
       select: {
         total: true,
         status: true,

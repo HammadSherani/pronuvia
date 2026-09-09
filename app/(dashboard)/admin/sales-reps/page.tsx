@@ -6,6 +6,7 @@ import { SalesRepsExportButton } from "@/components/admin/sales-reps-export-butt
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Medical Representatives – Pronuvia Admin" };
 
@@ -90,7 +91,7 @@ export default async function SalesRepsPage({
                     </td>
                     <td className="px-5 py-3.5 text-gray-600">{r.ordersCount}</td>
                     <td className="px-5 py-3.5 text-gray-400 text-xs">
-                      {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(r.createdAt)}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3 justify-end">

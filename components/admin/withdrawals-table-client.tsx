@@ -6,6 +6,7 @@ import { WithdrawalActions } from "@/components/admin/withdrawal-actions";
 import { RepWalletModal }    from "@/components/admin/rep-wallet-modal";
 import { bulkUpdateWithdrawals } from "@/actions/admin/manage-withdrawals";
 import { WithdrawStatus }    from "@/generated/prisma/enums";
+import { formatDate } from "@/lib/utils/timezone";
 
 type Request = {
   id:         string;
@@ -246,9 +247,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
 
                 {/* Date */}
                 <td className="px-3 py-3 text-[11px] text-gray-400">
-                  {new Date(r.createdAt).toLocaleDateString("en-US", {
-                    month: "short", day: "numeric", year: "2-digit",
-                  })}
+                  {formatDate(r.createdAt, { year: "2-digit" })}
                 </td>
 
                 {/* Status */}

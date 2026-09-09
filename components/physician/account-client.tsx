@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
 import { AddressFields, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
 import { State, Country } from "country-state-city";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 const SPECIALTIES = [
   "Cardiology","Dermatology","Endocrinology","Family Medicine","Gastroenterology",
@@ -78,7 +79,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
   const status = statusStyle[p.isApproved];
   const fullAddress = [p.addressOne, p.addressTwo, p.city, p.state, p.zipCode].filter(Boolean).join(", ");
-  const memberSince = new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const memberSince = formatDateLong(p.createdAt);
 
   return (
     <div className="space-y-6">

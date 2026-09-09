@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateSalesRepProfile, type ProfileState } from "@/actions/sales-rep/profile";
 import { AddressFields, migrateAddressData, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 type Rep = {
   firstName: string; lastName: string; name: string; email: string;
@@ -85,9 +86,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 // ─── View mode ────────────────────────────────────────────────────────────────
 
 function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
-  const memberSince = new Date(r.createdAt).toLocaleDateString("en-US", {
-    year: "numeric", month: "long", day: "numeric",
-  });
+  const memberSince = formatDateLong(r.createdAt);
 
   return (
     <div className="space-y-6">

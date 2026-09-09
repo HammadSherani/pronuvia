@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { approvePhysician, rejectPhysician } from "@/actions/admin/manage-approvals";
+import { formatDate } from "@/lib/utils/timezone";
 
 type Physician = {
   id: string;
@@ -134,9 +135,7 @@ export function ApprovalsClient({ physicians }: { physicians: Physician[] }) {
 
                 {/* Date */}
                 <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                  {new Date(p.createdAt).toLocaleDateString("en-US", {
-                    month: "short", day: "numeric", year: "numeric",
-                  })}
+                  {formatDate(p.createdAt)}
                 </td>
 
                 {/* Actions */}

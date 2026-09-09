@@ -6,6 +6,7 @@ import { DownloadOrdersButton } from "@/components/physician/download-orders-but
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "My Orders – Pronuvia" };
 
@@ -147,9 +148,7 @@ export default async function PhysicianOrdersPage({
                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs font-semibold text-gray-700">{o.orderNumber}</td>
                       <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
+                        {formatDate(o.createdAt)}
                       </td>
                       <td className="px-5 py-4 text-gray-600">{itemCount} item{itemCount !== 1 ? "s" : ""}</td>
                       <td className="px-5 py-4 text-xs font-semibold text-gray-700">{fmt(o.subtotal)}</td>

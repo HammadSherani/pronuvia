@@ -6,6 +6,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 import { SalesDownloadOrdersButton } from "@/components/sales/download-orders-button";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Order – Pronuvia" };
 
@@ -158,9 +159,7 @@ export default async function SalesOrdersPage({
                         {o.orderNumber}
                       </td>
                       <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
+                        {formatDate(o.createdAt)}
                       </td>
                       <td className="px-5 py-4 text-gray-600">
                         {itemCount} item{itemCount !== 1 ? "s" : ""}

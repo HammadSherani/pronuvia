@@ -5,6 +5,7 @@ import { getSalesRepById, getSalesRepOrders } from "@/actions/admin/manage-sales
 import { Pagination }            from "@/components/shared/pagination";
 import { parsePagination }       from "@/lib/pagination";
 import { Suspense }              from "react";
+import { formatDate }            from "@/lib/utils/timezone";
 
 export const metadata = { title: "Medical Rep Orders – Pronuvia Admin" };
 
@@ -141,9 +142,7 @@ export default async function SalesRepOrdersPage({ params, searchParams }: Props
                         )}
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-400">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
+                        {formatDate(o.createdAt)}
                       </td>
                       <td className="px-4 py-3">
                         {o.physician ? (

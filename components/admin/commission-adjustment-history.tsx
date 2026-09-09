@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ClientPagination } from "@/components/shared/pagination";
+import { formatDate } from "@/lib/utils/timezone";
 
 export type AdjustmentEntry = {
   id:         string;
@@ -21,10 +22,7 @@ function fmt(n: number) {
 }
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric", month: "short", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
+  return formatDate(iso, { hour: "2-digit", minute: "2-digit" });
 }
 
 interface Props {

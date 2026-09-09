@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { bulkCompleteOrders } from "@/actions/admin/manage-orders";
+import { formatDate } from "@/lib/utils/timezone";
 
 type Order = {
   id:               string;
@@ -208,9 +209,7 @@ export function OrdersTableClient({ orders }: { orders: Order[] }) {
 
                   {/* Date */}
                   <td className="px-4 py-4 text-xs text-gray-400 whitespace-nowrap">
-                    {new Date(o.createdAt).toLocaleDateString("en-US", {
-                      month: "short", day: "numeric", year: "numeric",
-                    })}
+                    {formatDate(o.createdAt)}
                   </td>
 
                   {/* Items */}

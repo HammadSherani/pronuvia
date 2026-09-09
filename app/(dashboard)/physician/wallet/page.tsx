@@ -1,6 +1,7 @@
 import { requirePhysician } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PhysicianWalletPanel } from "@/components/physician/wallet-panel";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Commission – Pronuvia" };
 
@@ -52,7 +53,7 @@ function CommissionTable({ orders }: { orders: OrderRow[] }) {
         {orders.map((o) => (
           <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
             <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-              {o.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              {formatDate(o.createdAt)}
             </td>
             <td className="px-5 py-4">
               <span className="font-mono text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
@@ -117,7 +118,7 @@ function AdjustmentTable({ adjustments }: { adjustments: AdjustmentRow[] }) {
           return (
             <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
               <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                {a.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {formatDate(a.createdAt)}
               </td>
               <td className="px-5 py-4 text-sm text-gray-700">{note}</td>
               <td className="px-5 py-4 text-right">
@@ -296,7 +297,7 @@ export default async function PhysicianCommissionPage() {
                   {reversedOrders.map((o) => (
                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
-                        {o.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {formatDate(o.createdAt)}
                       </td>
                       <td className="px-5 py-4">
                         <span className="font-mono text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg line-through">

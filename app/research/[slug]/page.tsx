@@ -3,6 +3,7 @@ import Link         from "next/link";
 import { prisma }   from "@/lib/db/prisma";
 import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
 import { SiteFooter } from "@/components/website/site-footer";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -50,7 +51,7 @@ export default async function ResearchDetailPage({ params }: { params: Promise<{
 
         {/* Date */}
         <p className="text-xs text-gray-400 uppercase tracking-widest mb-8">
-          {new Date(date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+          {formatDateLong(date)}
         </p>
 
         {/* Image inside content area */}

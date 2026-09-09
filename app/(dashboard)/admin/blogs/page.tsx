@@ -6,6 +6,7 @@ import { DeleteButton }       from "@/components/admin/delete-button";
 import { deleteBlog }         from "@/actions/admin/blogs";
 import { BlogPublishToggle }  from "./_components/publish-toggle";
 import { Pagination } from "@/components/shared/pagination";
+import { formatDate } from "@/lib/utils/timezone";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
 
@@ -90,7 +91,7 @@ export default async function BlogsPage({
                       <BlogPublishToggle id={post.id} isPublished={post.isPublished} />
                     </td>
                     <td className="px-5 py-3.5 text-xs text-gray-400">
-                      {new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(post.createdAt)}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-4 justify-end">

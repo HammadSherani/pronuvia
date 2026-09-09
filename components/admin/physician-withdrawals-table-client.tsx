@@ -6,6 +6,7 @@ import { PhysicianWithdrawalActions } from "@/components/admin/physician-withdra
 import { PhysicianWalletModal }       from "@/components/admin/physician-wallet-modal";
 import { bulkUpdatePhysicianWithdrawals } from "@/actions/admin/manage-physician-withdrawals";
 import { WithdrawStatus } from "@/generated/prisma/enums";
+import { formatDate } from "@/lib/utils/timezone";
 
 type Request = {
   id:          string;
@@ -195,7 +196,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                 </td>
 
                 <td className="px-3 py-3 text-[11px] text-gray-400">
-                  {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })}
+                  {formatDate(r.createdAt, { year: "2-digit" })}
                 </td>
 
                 <td className="px-3 py-3">

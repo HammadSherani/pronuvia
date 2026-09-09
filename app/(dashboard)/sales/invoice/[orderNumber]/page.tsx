@@ -4,6 +4,7 @@ import { Country } from "country-state-city";
 import { requireSalesRep } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
 import { PrintButton } from "@/components/sales/print-button";
+import { formatDate, formatDateLong } from "@/lib/utils/timezone";
 
 type Props = { params: Promise<{ orderNumber: string }> };
 
@@ -57,9 +58,7 @@ function fmtAddress(raw: string | null | undefined): string {
 
 function fmtDate(d: Date | string | null) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
+  return formatDateLong(d, { weekday: "long" });
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -232,9 +231,7 @@ export default async function InvoicePage({ params }: Props) {
               />
               <InfoBox
                 label="Order Date"
-                value={new Date(order.createdAt).toLocaleDateString("en-US", {
-                  month: "short", day: "numeric", year: "numeric",
-                })}
+                value={formatDate(order.createdAt)}
                 icon={
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

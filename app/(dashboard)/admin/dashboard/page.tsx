@@ -2,6 +2,7 @@
 import { getDashboardStats } from "@/actions/admin/dashboard";
 import { DashboardChartsPanel } from "@/components/admin/dashboard-charts";
 import { DashboardDateFilter } from "@/components/admin/dashboard-date-filter";
+import { parseDateOnlyInTZ, formatDate, formatDateTime } from "@/lib/utils/timezone";
 import Link from "next/link";
 
 export const metadata = { title: "Admin Dashboard – Pronuvia" };
@@ -35,8 +36,8 @@ export default async function AdminDashboardPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp   = await searchParams;
-  const from = typeof sp.from === "string" && sp.from ? new Date(sp.from) : undefined;
-  const to   = typeof sp.to   === "string" && sp.to   ? new Date(sp.to)   : undefined;
+  const from = typeof sp.from === "string" && sp.from ? parseDateOnlyInTZ(sp.from) : undefined;
+  const to   = typeof sp.to   === "string" && sp.to   ? parseDateOnlyInTZ(sp.to)   : undefined;
 
   const [, stats] = await Promise.all([
     requireAdmin(),
@@ -217,7 +218,7 @@ export default async function AdminDashboardPage({
                         </span>
                       </td>
                       <td className="px-6 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {formatDate(o.createdAt)}
                       </td>
                     </tr>
                   ))}
@@ -273,9 +274,7 @@ export default async function AdminDashboardPage({
                       {o.drName ?? o.repName ?? "—"} · {fmtMoney(o.total)}
                     </p>
                     <p className="text-[10px] text-gray-300 mt-0.5">
-                      {new Date(o.createdAt).toLocaleString("en-US", {
-                        month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-                      })}
+                      {formatDateTime(o.createdAt, { year: undefined })}
                     </p>
                   </div>
                   <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${STATUS_DOT[o.status] ?? "bg-gray-400"}`} />
@@ -295,9 +294,7 @@ export default async function AdminDashboardPage({
                       <p className="text-xs font-semibold text-gray-700 truncate">{p.name}</p>
                       <p className="text-[11px] text-gray-400">New physician sign-up</p>
                       <p className="text-[10px] text-gray-300 mt-0.5">
-                        {new Date(p.createdAt).toLocaleString("en-US", {
-                          month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-                        })}
+                        {formatDateTime(p.createdAt, { year: undefined })}
                       </p>
                     </div>
                     <span

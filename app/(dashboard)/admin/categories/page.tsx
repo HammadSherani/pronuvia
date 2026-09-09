@@ -6,6 +6,7 @@ import { DeleteButton } from "@/components/admin/delete-button";
 import { Pagination } from "@/components/shared/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { Suspense } from "react";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Categories – Pronuvia Admin" };
 
@@ -67,7 +68,7 @@ export default async function CategoriesPage({
                       <StatusBadge active={cat.isActive} />
                     </td>
                     <td className="px-5 py-4 text-gray-400 text-xs">
-                      {cat.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {formatDate(cat.createdAt)}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-4 justify-end">

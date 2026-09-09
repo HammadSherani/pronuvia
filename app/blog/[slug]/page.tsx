@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link         from "next/link";
 import { prisma }   from "@/lib/db/prisma";
 import { SiteHeaderWrapper as SiteHeader } from "@/components/website/site-header-wrapper";
+import { formatDateLong } from "@/lib/utils/timezone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -46,7 +47,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         {/* Date */}
         {post.publishedAt && (
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">
-            {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            {formatDateLong(post.publishedAt)}
           </p>
         )}
 

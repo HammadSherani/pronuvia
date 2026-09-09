@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/dal";
+import { parseDateOnlyInTZ, parseDateOnlyEndOfDayInTZ, toDateInputValue } from "@/lib/utils/timezone";
 
 export type ReportFilters = {
   from?:        string; // YYYY-MM-DD
@@ -25,8 +26,8 @@ type ItemJson = {
 function dateWhere(f: ReportFilters) {
   if (!f.from && !f.to) return {};
   const range: Record<string, Date> = {};
-  if (f.from) range.gte = new Date(f.from);
-  if (f.to)   range.lte = new Date(f.to + "T23:59:59.999Z");
+  if (f.from) range.gte = parseDateOnlyInTZ(f.from);
+  if (f.to)   range.lte = parseDateOnlyEndOfDayInTZ(f.to);
   return { createdAt: range };
 }
 
@@ -104,7 +105,7 @@ export async function getOverallSalesReport(f: ReportFilters): Promise<SalesRow[
   return rows.map(o => ({
     id:            o.id,
     orderNumber:   o.orderNumber,
-    date:          o.createdAt.toISOString().slice(0, 10),
+    date:          toDateInputValue(o.createdAt),
     doctor:        o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:      o.salesRep?.name ?? "–",
     status:        o.status,
@@ -189,8 +190,8 @@ export async function getReturnOrdersReport(f: ReportFilters): Promise<ReturnRow
   return rows.map(o => ({
     id:                o.id,
     orderNumber:       o.orderNumber,
-    orderDate:         o.createdAt.toISOString().slice(0, 10),
-    returnDate:        o.returnedAt!.toISOString().slice(0, 10),
+    orderDate:         toDateInputValue(o.createdAt),
+    returnDate:        toDateInputValue(o.returnedAt!),
     doctor:            o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:          o.salesRep?.name ?? "–",
     originalTotal:     o.total,
@@ -290,7 +291,7 @@ export async function getOverallCommissionReport(f: ReportFilters): Promise<Over
   return rows.map(o => ({
     id:              o.id,
     orderNumber:     o.orderNumber,
-    date:            o.createdAt.toISOString().slice(0, 10),
+    date:            toDateInputValue(o.createdAt),
     doctor:          o.physician ? ` ${o.physician.firstName} ${o.physician.lastName}` : "–",
     salesRep:        o.salesRep?.name ?? "–",
     orderTotal:      o.total,
@@ -405,7 +406,7 @@ export async function getCustomerOrderHistoryReport(f: ReportFilters): Promise<C
     return {
       id:              o.id,
       orderNumber:     o.orderNumber,
-      date:            o.createdAt.toISOString().slice(0, 10),
+      date:            toDateInputValue(o.createdAt),
       doctor:          o.physician ? `${o.physician.firstName} ${o.physician.lastName}` : "–",
       doctorEmail:     o.physician?.email ?? "",
       salesRep:        o.salesRep?.name ?? "–",

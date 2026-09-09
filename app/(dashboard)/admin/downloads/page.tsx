@@ -2,6 +2,7 @@ import { listDocuments, deleteDocument } from "@/actions/admin/manage-catalog";
 import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { fmtSize } from "@/lib/utils/format";
+import { formatDate } from "@/lib/utils/timezone";
 
 export const metadata = { title: "Catalog – Pronuvia Admin" };
 
@@ -56,9 +57,7 @@ export default async function AdminDownloadsPage() {
                   <p className="text-sm font-medium text-gray-800 truncate">{doc.fileName}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {fmtSize(doc.fileSize)} · Uploaded{" "}
-                    {new Date(doc.createdAt).toLocaleDateString("en-US", {
-                      month: "short", day: "numeric", year: "numeric",
-                    })}
+                    {formatDate(doc.createdAt)}
                   </p>
                 </div>
 

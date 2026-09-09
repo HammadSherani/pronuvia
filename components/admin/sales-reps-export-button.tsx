@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { getAllSalesRepsForExport } from "@/actions/admin/manage-sales-reps";
+import { formatDate, toDateInputValue } from "@/lib/utils/timezone";
 
 export function SalesRepsExportButton() {
   const [loading, setLoading] = useState(false);
@@ -35,12 +36,12 @@ export function SalesRepsExportButton() {
             p.state ?? "",
           ].filter(Boolean).join(" | "))
           .join("; "),
-        "Sign-up Date":        new Date(r.createdAt).toLocaleDateString("en-US"),
+        "Sign-up Date":        formatDate(r.createdAt),
       }));
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Medical Reps");
-      XLSX.writeFile(wb, `medical-reps-${new Date().toISOString().split("T")[0]}.xlsx`);
+      XLSX.writeFile(wb, `medical-reps-${toDateInputValue(new Date())}.xlsx`);
     } catch (e) {
       console.error("Export failed:", e);
     } finally {

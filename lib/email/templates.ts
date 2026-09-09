@@ -1,3 +1,5 @@
+import { formatDateLong } from "@/lib/utils/timezone";
+
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
@@ -566,7 +568,7 @@ export function orderConfirmationEmail(d: OrderEmailData) {
   const greeting = d.isPatientEmail
     ? (name ? `Hello ${name},` : "Hello,")
     : `Hi ${d.firstName},`;
-  const dateStr  = (d.orderDate ?? new Date()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const dateStr  = formatDateLong(d.orderDate ?? new Date());
   const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping  = d.shippingCost ?? 0;
   const discount  = d.discountAmount ?? 0;
@@ -684,7 +686,7 @@ export function newOrderNotificationEmail(opts: {
   contactEmail?:    string | null;
   contactPhone?:    string | null;
 }) {
-  const dateStr = opts.orderDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const dateStr = formatDateLong(opts.orderDate);
 
   const payLabel = (() => {
     const pm = opts.paymentMethod;
@@ -917,7 +919,7 @@ export function orderDetailsEmail(d: OrderEmailData) {
           ${d.estimatedDelivery ? `
           <tr>
             <td style="padding:4px 0;font-size:13px;color:${C.muted};">Est. Delivery</td>
-            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${new Date(d.estimatedDelivery).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}</td>
+            <td style="padding:4px 0;font-size:13px;font-weight:600;color:${C.text};">${formatDateLong(d.estimatedDelivery)}</td>
           </tr>` : ""}
         </table>
       `)}
@@ -1151,7 +1153,7 @@ export function orderRefundEmail(opts: {
     </p>
 
     <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:${C.navy};">
-      [Order #${opts.orderNumber}] (${new Date(opts.orderDate).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})})
+      [Order #${opts.orderNumber}] (${formatDateLong(opts.orderDate)})
     </p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:8px;overflow:hidden;margin-bottom:24px;border-collapse:collapse;">
@@ -1296,7 +1298,7 @@ export function shipmentTrackingEmail(opts: {
     ${opts.estimatedDelivery ? `
     <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:10px;padding:14px 20px;margin-bottom:24px;text-align:center;">
       <p style="margin:0 0 2px;font-size:11px;font-weight:600;color:#047857;text-transform:uppercase;letter-spacing:0.08em;">Estimated Delivery</p>
-      <p style="margin:0;font-size:16px;font-weight:700;color:#047857;">${new Date(opts.estimatedDelivery).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}</p>
+      <p style="margin:0;font-size:16px;font-weight:700;color:#047857;">${formatDateLong(opts.estimatedDelivery, { weekday: "long" })}</p>
     </div>` : ""}
 
     <!-- Items + order summary -->
