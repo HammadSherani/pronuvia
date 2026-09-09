@@ -42,7 +42,7 @@ export async function forgotPassword(
       data: { passwordResetToken: token, passwordResetExpiry: expiry },
     });
     const { subject, html } = forgotPasswordEmail({ firstName: physician.firstName, resetLink });
-    await sendMail({ to: physician.email, subject, html });
+    await sendMail({ to: physician.email, subject, html, type: "Password Reset", relatedId: physician.id });
     return { success: true };
   }
 
@@ -58,7 +58,7 @@ export async function forgotPassword(
         data: { passwordResetToken: token, passwordResetExpiry: expiry },
       });
       const { subject, html } = forgotPasswordEmail({ firstName: salesRep.firstName, resetLink });
-      await sendMail({ to: salesRep.email, subject, html });
+      await sendMail({ to: salesRep.email, subject, html, type: "Password Reset", relatedId: salesRep.id });
       return { success: true };
     }
   }

@@ -165,7 +165,7 @@ export async function payWithWallet(
         customerPhone:   customerPhone   || null,
       });
       const bcc = rep?.email && rep.email !== customerEmail ? [rep.email] : [];
-      await sendMail({ to: customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
+      await sendMail({ to: customerEmail, bcc: bcc.length ? bcc : undefined, subject, html, type: "Order Confirmation", relatedId: orderNumber });
     } catch (err) {
       console.error("[sales-rep wallet] confirmation email failed:", err);
     }

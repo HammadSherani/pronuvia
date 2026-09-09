@@ -97,6 +97,8 @@ export async function approvePhysician(id: string): Promise<ApprovalActionState>
       subject:     setupEmail.subject,
       html:        setupEmail.html,
       attachments: welcomeEmailAttachments,
+      type:        "Welcome Email",
+      relatedId:   physician.id,
     });
   } catch (err) {
     console.error("[email] physicianApprovalEmail failed:", err);

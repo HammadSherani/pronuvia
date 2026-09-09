@@ -67,7 +67,7 @@ export async function adminSendResetLink(
       data:  { passwordResetToken: token, passwordResetExpiry: expiry },
     });
     const { subject, html } = forgotPasswordEmail({ firstName: p.firstName, resetLink });
-    await sendMail({ to: p.email, subject, html });
+    await sendMail({ to: p.email, subject, html, type: "Password Reset", relatedId: userId });
     return { success: true, message: `Reset link sent to ${p.email}.` };
   } else {
     const r = await prisma.salesRepresentative.findUnique({
@@ -80,7 +80,7 @@ export async function adminSendResetLink(
       data:  { passwordResetToken: token, passwordResetExpiry: expiry },
     });
     const { subject, html } = forgotPasswordEmail({ firstName: r.firstName, resetLink });
-    await sendMail({ to: r.email, subject, html });
+    await sendMail({ to: r.email, subject, html, type: "Password Reset", relatedId: userId });
     return { success: true, message: `Reset link sent to ${r.email}.` };
   }
 }

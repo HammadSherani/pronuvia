@@ -422,3 +422,29 @@ model ShippingRate {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 }
+
+enum EmailLogStatus {
+  QUEUED
+  SENT
+  FAILED
+  BOUNCED
+}
+
+model EmailLog {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  recipientEmail  String
+  subject         String
+  // Human-readable category, e.g. "Order Confirmation", "Welcome Email",
+  // "Password Reset" — null when the send site didn't classify itself.
+  type            String?
+  // Free-form pointer back to the record this email is about, e.g. an
+  // order number or a user id — null when not applicable.
+  relatedId       String?
+  status          EmailLogStatus @default(QUEUED)
+  // "sendgrid" | "smtp" — which transport ultimately handled (or attempted) the send.
+  provider        String?
+  errorMessage    String?
+  responsePayload Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}

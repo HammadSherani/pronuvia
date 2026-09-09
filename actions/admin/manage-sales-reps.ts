@@ -77,8 +77,9 @@ export async function createSalesRep(
   const hashed      = await hashPassword(placeholder);
   const { token, expiry } = generateResetToken();
 
+  let createdRepId: string;
   try {
-    await prisma.salesRepresentative.create({
+    const created = await prisma.salesRepresentative.create({
       data: {
         ...data,
         name:               `${data.firstName} ${data.lastName}`,
@@ -88,6 +89,7 @@ export async function createSalesRep(
         passwordResetExpiry: expiry,
       },
     });
+    createdRepId = created.id;
   } catch (err) {
     const field = duplicateKeyField(err);
     if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] } };
@@ -106,7 +108,7 @@ export async function createSalesRep(
   // function freezes right after this action returns (Vercel), even though
   // it always finishes fine on a long-running local dev server.
   try {
-    await sendMail({ to: data.email, subject, html });
+    await sendMail({ to: data.email, subject, html, type: "Welcome Email", relatedId: createdRepId });
   } catch (err) {
     console.error("[email] salesRepSetupPassword failed:", err);
   }

@@ -84,7 +84,7 @@ export async function confirmBehalfCardOrder(
 
   const physician = await prisma.partneringPhysician.findUnique({
     where:  { id: payload.physicianId },
-    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true },
+    select: { commission: true, uplineCommission: true, salesRepId: true, email: true, firstName: true, lastName: true },
   });
   const physicianCommissionRate   = physician?.commission ?? 0;
   const physicianCommissionAmount = parseFloat(((commissionBase * physicianCommissionRate) / 100).toFixed(2));
@@ -151,23 +151,32 @@ export async function confirmBehalfCardOrder(
     try {
       const { subject, html } = orderConfirmationEmail({
         orderNumber,
-        firstName:      physician?.firstName ?? "Doctor",
-        total:          payload.total,
-        status:         "PAID",
-        isPatientEmail: true,
-        items:          items.map((i) => ({
+        firstName:       physician?.firstName ?? "Doctor",
+        total:           payload.total,
+        status:          "PAID",
+        isPatientEmail:  true,
+        items:           items.map((i) => ({
           title:       i.title,
           variantSize: i.variantSize,
           quantity:    i.quantity,
           unitPrice:   i.unitPrice,
           lineTotal:   i.lineTotal,
         })),
-        couponCode:     payload.couponCode     || null,
-        discountAmount: payload.discountAmount || 0,
-        customerPhone: payload.customerPhone || null,
+        shippingCost:    payload.shippingRate,
+        couponCode:      payload.couponCode     || null,
+        discountAmount:  payload.discountAmount || 0,
+        paymentMethod:   "CARD",
+        billingAddress:  payload.billingAddress  || null,
+        shippingAddress: payload.shippingAddress || null,
+        notes:           payload.notes           || null,
+        orderDate:       new Date(),
+        email:           payload.customerEmail   || null,
+        customerPhone:   payload.customerPhone   || null,
+        doctorFirstName: physician?.firstName    || null,
+        doctorLastName:  physician?.lastName      || null,
       });
       const bcc = physician?.email && physician.email !== payload.customerEmail ? [physician.email] : [];
-      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html, type: "Order Confirmation", relatedId: orderNumber });
     } catch (err) {
       console.error("[behalf order] confirmation email failed:", err);
     }

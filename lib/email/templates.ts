@@ -567,6 +567,12 @@ export type OrderEmailData = {
   orderDate?:         Date;
   email?:             string | null;
   customerPhone?:     string | null;
+  // Fallback greeting name when no shipping/billing name is present (e.g.
+  // shipped straight to the doctor's own practice address with no patient
+  // name on file) — renders as "Hello Dr. [First] [Last]," instead of a
+  // bare "Hello,".
+  doctorFirstName?:   string | null;
+  doctorLastName?:    string | null;
 };
 
 function renderAddr(raw: string | null | undefined): string {
@@ -603,11 +609,20 @@ const orderTableHeader = `
 // Order confirmation email
 // ─────────────────────────────────────────────
 export function orderConfirmationEmail(d: OrderEmailData) {
-  const name = d.isPatientEmail ? recipientFirstName(d) : null;
+  // Greeting name fallback chain: shipping/billing name on file, then the
+  // doctor's own name (e.g. shipped straight to the practice with no patient
+  // name entered), then a plain "Hello," / "Hi there," — never a name-less
+  // "Hello ," or "Hi ,".
+  const addressName = recipientFirstName(d);
+  const doctorName  = d.doctorFirstName
+    ? `Dr. ${d.doctorFirstName}${d.doctorLastName ? ` ${d.doctorLastName}` : ""}`
+    : null;
+  const name = addressName || doctorName;
   const greeting = d.isPatientEmail
     ? (name ? `Hello ${name},` : "Hello,")
-    : `Hi ${d.firstName},`;
+    : (d.firstName ? `Hi ${d.firstName},` : "Hi there,");
   const dateStr  = formatDateLong(d.orderDate ?? new Date());
+  const orderStatusLink = `${getAppUrl()}/login`;
   const subtotal  = d.items.reduce((s, i) => s + i.lineTotal, 0);
   const shipping  = d.shippingCost ?? 0;
   const discount  = d.discountAmount ?? 0;
@@ -701,7 +716,41 @@ export function orderConfirmationEmail(d: OrderEmailData) {
         </tr>
       </table>` : ""}
 
-      <p style="margin:0;font-size:14px;color:${C.textSoft};">Thanks!</p>
+      ${sectionLabel("Shipping & Tracking")}
+      ${infoBox(
+        d.trackingNumber
+          ? `<p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};line-height:1.6;">
+               <strong style="color:${C.text};">Carrier:</strong> ${d.shippingCarrier ?? "—"}
+             </p>
+             <p style="margin:0 0 4px;font-size:13px;color:${C.textSoft};line-height:1.6;">
+               <strong style="color:${C.text};">Tracking number:</strong> ${d.trackingNumber}
+             </p>
+             ${d.estimatedDelivery ? `<p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.6;">
+               <strong style="color:${C.text};">Estimated delivery:</strong> ${formatDateLong(d.estimatedDelivery)}
+             </p>` : ""}`
+          : `<p style="margin:0;font-size:13px;color:${C.muted};line-height:1.6;">
+               Your order is being prepared. Tracking information will be added here and emailed to you as soon as it ships.
+             </p>`
+      )}
+
+      ${btn(orderStatusLink, "View Order Status")}
+
+      ${sectionLabel("Need Help?")}
+      <p style="margin:0 0 24px;font-size:13px;color:${C.textSoft};line-height:1.7;">
+        Our support team is here for any questions about this order.<br/>
+        <strong style="color:${C.text};">Phone:</strong> 800-568-2982 &nbsp;·&nbsp;
+        <strong style="color:${C.text};">Email:</strong>
+        <a href="mailto:contact@pronuvia.com" style="color:${C.teal};">contact@pronuvia.com</a>
+      </p>
+
+      <div style="border-top:1px solid ${C.border};margin-top:8px;padding-top:20px;text-align:center;">
+        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">Pronuvia, Inc.</p>
+        <p style="margin:0 0 12px;font-size:12px;color:${C.muted};">Thank you for choosing Pronuvia AIC Therapy.</p>
+        <p style="margin:0;font-size:11px;color:${C.dimmed};">
+          This is an automated message regarding order #${d.orderNumber}. Please do not reply directly to this email —
+          contact us at <a href="mailto:contact@pronuvia.com" style="color:${C.dimmed};">contact@pronuvia.com</a> instead.
+        </p>
+      </div>
     `),
   };
 }

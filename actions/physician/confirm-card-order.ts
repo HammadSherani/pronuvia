@@ -170,10 +170,12 @@ export async function confirmPhysicianCardOrder(
         notes:           payload.notes           || null,
         orderDate:       new Date(),
         customerPhone:   payload.customerPhone   || null,
+        doctorFirstName: physician?.firstName    || null,
+        doctorLastName:  physician?.lastName      || null,
       });
       const bcc = physician?.email && physician.email !== payload.customerEmail ? [physician.email] : [];
       console.log("[physician order] sending confirmation email to:", payload.customerEmail, "| bcc:", bcc);
-      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html, type: "Order Confirmation", relatedId: orderNumber });
       console.log("[physician order] confirmation email sent successfully");
     } catch (err) {
       console.error("[physician order] confirmation email FAILED:", err);

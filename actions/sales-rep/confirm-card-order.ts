@@ -168,7 +168,7 @@ export async function confirmCardOrder(
         customerPhone:   payload.customerPhone   || null,
       });
       const bcc = rep?.email && rep.email !== payload.customerEmail ? [rep.email] : [];
-      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
+      await sendMail({ to: payload.customerEmail, bcc: bcc.length ? bcc : undefined, subject, html, type: "Order Confirmation", relatedId: orderNumber });
     } catch (err) {
       console.error("[sales-rep order] confirmation email failed:", err);
     }

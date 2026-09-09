@@ -179,9 +179,11 @@ export async function payWithPhysicianWallet(
         notes:           notes           || null,
         orderDate:       new Date(),
         customerPhone:   customerPhone   || null,
+        doctorFirstName: physician.firstName || null,
+        doctorLastName:  physician.lastName  || null,
       });
       const bcc = physician.email !== customerEmail ? [physician.email] : [];
-      await sendMail({ to: customerEmail, bcc: bcc.length ? bcc : undefined, subject, html });
+      await sendMail({ to: customerEmail, bcc: bcc.length ? bcc : undefined, subject, html, type: "Order Confirmation", relatedId: orderNumber });
     } catch (err) {
       console.error("[physician wallet] confirmation email failed:", err);
     }

@@ -69,6 +69,7 @@ function buildNav(role: Role): NavItem[] {
           { label: "Blog Posts", href: "/admin/blogs" },
         ],
       },
+      { label: "Email Logs", href: "/admin/email-logs" },
       {
         label: "My Account",
         children: [

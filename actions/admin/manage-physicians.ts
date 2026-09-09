@@ -117,8 +117,9 @@ export async function adminCreatePhysician(
     ? generateResetToken()
     : { token: null, expiry: null };
 
+  let createdPhysicianId: string;
   try {
-    await prisma.partneringPhysician.create({
+    const created = await prisma.partneringPhysician.create({
       data: {
         ...rest,
         salesRepId:          salesRepId ?? null,
@@ -132,6 +133,7 @@ export async function adminCreatePhysician(
         passwordResetExpiry: expiry,
       },
     });
+    createdPhysicianId = created.id;
   } catch (err) {
     const field = duplicateKeyField(err);
     if (field === "loginId") return { errors: { loginId: ["This Login ID is already in use."] }, values: strValues };
@@ -163,7 +165,7 @@ export async function adminCreatePhysician(
       hasCustomPassword: true,
     });
     try {
-      await sendMail({ to: rest.email, from: WELCOME_EMAIL_FROM, subject: drEmail.subject, html: drEmail.html });
+      await sendMail({ to: rest.email, from: WELCOME_EMAIL_FROM, subject: drEmail.subject, html: drEmail.html, type: "Welcome Email", relatedId: createdPhysicianId });
     } catch (err) {
       console.error("[email] physicianApprovalEmail failed:", err);
     }
