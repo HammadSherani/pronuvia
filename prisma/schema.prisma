@@ -127,6 +127,12 @@ model PartneringPhysician {
   email               String         @unique
   loginId             String?        @unique
   password            String
+  // True when the physician (or whoever created the account on their behalf)
+  // explicitly set this password at creation, rather than it being an
+  // unknown placeholder — drives the welcome email's dynamic Login Info
+  // password line. Always true for accounts created after this field
+  // shipped; false/missing for older records.
+  hasCustomPassword   Boolean        @default(false)
   aictherapy          String?
   license             String?
   websiteLink         String?

@@ -67,9 +67,6 @@ const sectionLabel = (text: string) =>
 const infoBox = (inner: string) =>
   `<div style="background:${C.surface};border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:24px;">${inner}</div>`;
 
-const accentBar = (inner: string) =>
-  `<div style="background:#f0fdf9;border-left:3px solid ${C.teal};border-radius:0 8px 8px 0;padding:14px 20px;margin-bottom:20px;">${inner}</div>`;
-
 const addrLabel = (text: string) =>
   `<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${C.navy};">${text}</p>`;
 
@@ -173,9 +170,12 @@ export function physicianApprovalEmail(opts: {
   email:     string;
   loginId:   string;
   resetToken: string;
+  /** True when the physician (or whoever created the account) explicitly set
+   * a password at sign-up — drives which Login Info password line renders. */
+  hasCustomPassword: boolean;
 }) {
   const resetLink = `${getAppUrl()}/reset-password/${opts.resetToken}`;
-  const subject   = "Welcome to Pronuvia — Your Account is Approved";
+  const subject   = `PRONUVIA WELCOME ABOARD – Dr. ${opts.firstName} ${opts.lastName}`;
 
   const row = (label: string, value: string) =>
     `<tr>
@@ -183,19 +183,19 @@ export function physicianApprovalEmail(opts: {
       <td style="padding:7px 0 7px 12px;font-size:13px;color:${C.text};font-weight:600;word-break:break-all;">${value}</td>
     </tr>`;
 
+  // Option A: a real password was already chosen at sign-up — no reset needed.
+  // Option B (legacy accounts only): no known password — point to the reset flow.
+  const passwordRow = opts.hasCustomPassword
+    ? row("Password:", "Use the password you created during sign-up")
+    : row("Password:", `Click <a href="${resetLink}" style="color:${C.teal};font-weight:600;">&ldquo;Forgot Your Password?&rdquo;</a> to set your password`);
+
   const html = base(`
     <p style="margin:0 0 6px;font-size:15px;color:${C.text};line-height:1.6;">Dear ${opts.firstName} ${opts.lastName},</p>
     <p style="margin:0 0 18px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       I am Jason from Pronuvia and am glad to welcome you as a participating physician for AIC Therapy.
     </p>
-    <p style="margin:0 0 18px;font-size:14px;color:${C.textSoft};line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       Your application to set up an account with us is now <strong style="color:${C.navy};">approved</strong>. Congratulations.
-    </p>
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
-      We also sent you a Welcome Aboard email with links and information on AIC Therapy for your study and reference.
-      If you did not receive it yet, please check your email's Promotion or Spam folder to locate it.
-    </p>
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       I am certain that you are excited to try out our new ionic calcium therapy for your patients, and we are equally
       excited to come alongside to provide all the needed support. However, let's get all the required legal documentation
       taken care of first so that we can move forward with full steam.
@@ -207,10 +207,47 @@ export function physicianApprovalEmail(opts: {
         ${row("Website:", "www.pronuvia.com")}
         ${row("Username (Login ID):", opts.loginId)}
         ${row("Email:", opts.email)}
-        ${row("Password:", "Click &ldquo;Forgot Your Password?&rdquo; to set your password")}
+        ${passwordRow}
       </table>
     `)}
-    ${btn(resetLink, "Set My Password")}
+    ${!opts.hasCustomPassword ? btn(resetLink, "Set My Password") : ""}
+
+    ${sectionLabel("AIC Calcium Resources")}
+    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
+      AIC calcium is the world's first ionized calcium treatment that re-establishes calcium homeostasis
+      by reversing cellular to systemic calcification, resulting in restored optimal cell signaling,
+      reduced oxidative stress, and rejuvenated mitochondrial functions. AIC triggers our body's natural
+      healing mechanisms to reverse many difficult chronic degenerative diseases that had no real hope.
+      Please read through the attached resources below for your study and reference.
+    </p>
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC for Calcium Signaling (Book)</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
+        More technical information on AIC can be found from the book <em>"AIC for Calcium Signaling"</em>
+        written by the inventor of AIC, Paul Lee.
+      </p>
+    </div>
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Therapy Dosing Protocol</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
+        The dosage protocol guideline provides participating physicians with suggestions on how Pronuvia's
+        AIC-applied products can be utilized effectively in treating communicable and degenerative diseases.
+        This dosing protocol is only for doctors.
+      </p>
+    </div>
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">Introduction to AIC Therapy (Booklet)</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
+        The booklet introduces the underlying technology of AIC and the principles behind the new and safe
+        therapy based on AIC technology. This booklet can be shared with patients.
+      </p>
+    </div>
+    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Brochure</p>
+      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
+        This simple brochure provides a good summary of AIC therapy.
+      </p>
+    </div>
 
     ${sectionLabel("B2B Order Process")}
     <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
@@ -276,12 +313,6 @@ export function physicianApprovalEmail(opts: {
       Alternatively, you may fill out the attached W-9 form with your signature and send us back the scanned file.
     </p>
 
-    ${sectionLabel("AIC Therapy Booklet and Dosing Protocol")}
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.7;">
-      Please read through the attached Pronuvia AIC Therapy Booklet and Dosing Protocol files. Not only the dosing
-      protocol, but it will also provide a fundamental guideline for the doctor's practice.
-    </p>
-
     ${sectionLabel("Website Content Policy for Pronuvia Products")}
     <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.7;">
       We suggest doctors market AIC as a therapy under a generic treatment name (e.g. AIC calcium therapy or ionic
@@ -302,13 +333,21 @@ export function physicianApprovalEmail(opts: {
 
     <div style="border-top:1px solid ${C.border};margin-top:24px;padding-top:20px;">
       <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:${C.dimmed};letter-spacing:0.08em;text-transform:uppercase;">Disclaimer</p>
-      <p style="margin:0;font-size:11px;color:${C.dimmed};line-height:1.7;">
+      <p style="margin:0 0 12px;font-size:11px;color:${C.dimmed};line-height:1.7;">
         Pronuvia thanks participating doctors, clinics, and health care practitioners for making AIC therapy available
         to consenting patients. Please note that Pronuvia hereby makes no medical claims to treat or cure any diseases.
         AIC products are registered as dietary supplements. AIC therapy is a nutritional therapy based on ionic calcium.
         Utilizing physiological reactions in treating diseases is solely at the discretion of participating physicians.
         Pronuvia distributes AIC applied products only through licensed physicians, clinics, and health care practitioners.
         Pronuvia, as a company, does not treat patients directly nor offer any health advice.
+      </p>
+      <p style="margin:0;font-size:11px;color:${C.dimmed};line-height:1.7;">
+        The information in this email has not been evaluated by the Food &amp; Drug Administration or any other
+        medical body. We do not aim to diagnose, treat, cure, or prevent any illness or disease. The information
+        shared here is for educational purposes only. You must consult your doctor or healthcare professional
+        before acting on any content, especially if you are pregnant, nursing, taking medication, or have a
+        medical condition. This email is not intended to replace a one-on-one relationship with a qualified
+        health care professional and is not intended as medical advice.
       </p>
     </div>
   `);
@@ -993,111 +1032,6 @@ export function doctorRegistrationEmail(opts: {
       <p style="margin:0;font-size:14px;color:${C.textSoft};line-height:1.75;">
         Best Regards,<br/>
         <strong style="color:${C.text};">Pronuvia</strong>
-      </p>
-    </div>
-  `);
-  return { subject, html };
-}
-
-// ─────────────────────────────────────────────
-// Welcome Aboard email
-// ─────────────────────────────────────────────
-export function welcomeAboardEmail(opts: {
-  firstName: string;
-  lastName:  string;
-}) {
-  const subject = "Welcome Aboard! – Pronuvia AIC Therapy";
-  const html = base(`
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${C.ink};">Welcome Aboard!</h1>
-    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      Dear ${opts.firstName} ${opts.lastName},
-    </p>
-    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      Thank you for your interest in AIC (Anti-orbital Ionic Calcium) Therapy. Welcome aboard!
-    </p>
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      Your application to set up an account with us is approved.
-    </p>
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      We send you some information about AIC as follows.
-    </p>
-
-    ${accentBar(`<p style="margin:0;font-size:12px;font-weight:700;color:${C.navy};letter-spacing:0.08em;text-transform:uppercase;">AIC Calcium Resources</p>`)}
-
-    <p style="margin:0 0 16px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      AIC calcium is the world's first ionized calcium treatment that re-establishes calcium homeostasis
-      by reversing cellular to systemic calcification, resulting in restored optimal cell signaling,
-      reduced oxidative stress, and rejuvenated mitochondrial functions. AIC triggers our body's natural
-      healing mechanisms to reverse many difficult chronic degenerative diseases that had no real hope.
-    </p>
-
-    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC for Calcium Signaling (Book)</p>
-      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
-        More technical information on AIC can be found from the book <em>"AIC for Calcium Signaling"</em>
-        written by the inventor of AIC, Paul Lee.
-      </p>
-    </div>
-
-    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Therapy Dosing Protocol</p>
-      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
-        The dosage protocol guideline provides participating physicians with suggestions on how Pronuvia's
-        AIC-applied products can be utilized effectively in treating communicable and degenerative diseases.
-        This dosing protocol is only for doctors.
-      </p>
-    </div>
-
-    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">Introduction to AIC Therapy (Booklet)</p>
-      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
-        The booklet introduces the underlying technology of AIC and the principles behind the new and safe
-        therapy based on AIC technology. This booklet can be shared with patients.
-      </p>
-    </div>
-
-    <div style="border:1px solid ${C.border};border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.text};">AIC Brochure</p>
-      <p style="margin:0;font-size:13px;color:${C.textSoft};line-height:1.65;">
-        This simple brochure provides a good summary of AIC therapy.
-      </p>
-    </div>
-
-    ${accentBar(`<p style="margin:0;font-size:12px;font-weight:700;color:${C.navy};letter-spacing:0.08em;text-transform:uppercase;">Free Consultation</p>`)}
-    <p style="margin:0 0 10px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      To help new doctors get started, we provide a 30-minute personal free consultation.
-    </p>
-    <p style="margin:0 0 24px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      You can book a free consultation at<br/>
-      <a href="https://www.aictherapy.com/book-a-consultation" style="color:${C.teal};font-weight:600;">
-        https://www.aictherapy.com/book-a-consultation
-      </a>
-    </p>
-
-    <p style="margin:0 0 8px;font-size:14px;color:${C.textSoft};line-height:1.75;">
-      If you have any questions, please contact us at <strong>800-568-2982</strong> or
-      <a href="mailto:contact@pronuvia.com" style="color:${C.teal};">contact@pronuvia.com</a>.
-    </p>
-
-    <div style="border-top:1px solid ${C.border};margin-top:24px;padding-top:20px;">
-      <p style="margin:0 0 4px;font-size:14px;color:${C.textSoft};">Thank you.</p>
-      <p style="margin:0 0 2px;font-size:14px;color:${C.textSoft};">Sincerely,</p>
-      <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:${C.text};">Pronuvia Physician Support</p>
-      <p style="margin:0 0 2px;font-size:13px;color:${C.muted};">Pronuvia, Inc.</p>
-      <p style="margin:0;font-size:13px;color:${C.muted};">New York, NY USA</p>
-    </div>
-
-    <div style="border-top:1px solid ${C.border};margin-top:20px;padding-top:16px;">
-      <p style="margin:0 0 4px;font-size:10px;font-weight:700;color:${C.dimmed};letter-spacing:0.08em;text-transform:uppercase;">Disclaimer</p>
-      <p style="margin:0;font-size:11px;color:${C.dimmed};line-height:1.7;">
-        The information in this email has not been evaluated by the Food &amp; Drug Administration or any other
-        medical body. We do not aim to diagnose, treat, cure, or prevent any illness or disease. The information
-        shared here is for educational purposes only. You must consult your doctor or healthcare professional
-        before acting on any content, especially if you are pregnant, nursing, taking medication, or have a
-        medical condition. Individual articles are based upon the opinions of the respective author. This email
-        is not intended to replace a one-on-one relationship with a qualified health care professional and is
-        not intended as medical advice. Pronuvia encourages you to make your own health care decisions based
-        upon your research and in partnership with a qualified health care professional.
       </p>
     </div>
   `);

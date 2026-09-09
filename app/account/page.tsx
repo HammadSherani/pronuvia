@@ -127,7 +127,7 @@ export default async function AccountPage() {
                 <Row label="License Number"    value={physician.license} />
                 <Row label="Years in Practice" value={physician.yearsInPractice} />
                 <Row label="Website"           value={physician.websiteLink} />
-                <Row label="SAC Therapy"       value={physician.aictherapy} />
+                <Row label="How did you hear about AIC Therapy?" value={physician.aictherapy} />
                 <Row label="Specialties"       value={physician.fieldsOfSpeciality?.join(", ")} />
                 <Row label="Address"           value={fullAddress || null} />
               </Section>

@@ -16,6 +16,10 @@ function parseFromAddress(raw: string): { email: string; name?: string } {
 
 export type MailAttachment = { filename: string; path?: string; content?: Buffer; type?: string };
 
+// Verified-domain sender for the physician welcome email specifically —
+// configurable via env so the address can change without a code deploy.
+export const WELCOME_EMAIL_FROM = process.env.WELCOME_EMAIL_FROM || "Pronuvia <info@pronuvia.com>";
+
 export async function sendMail(opts: {
   to:           string;
   cc?:          string | string[];
@@ -23,8 +27,13 @@ export async function sendMail(opts: {
   subject:      string;
   html:         string;
   attachments?: MailAttachment[];
+  /** Per-send sender override, e.g. `"Pronuvia" <info@pronuvia.com>` — falls
+   * back to SMTP_FROM/SMTP_USER when omitted. Only use a verified-in-SendGrid
+   * address here; an unverified sender identity can cause the send to be
+   * rejected or land in spam. */
+  from?:        string;
 }) {
-  const rawFrom = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "sales1.pronuvia@gmail.com";
+  const rawFrom = opts.from || process.env.SMTP_FROM || process.env.SMTP_USER || "sales1.pronuvia@gmail.com";
   const replyTo = "sales1.pronuvia@gmail.com";
 
   // Normalise CC: remove blanks and duplicates of `to`

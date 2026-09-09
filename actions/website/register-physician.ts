@@ -147,6 +147,7 @@ export async function registerPhysician(
       data: {
         ...rest,
         password:          hashed,
+        hasCustomPassword: true,
         fieldsOfSpeciality,
         isApproved:        ApprovalStatus.PENDING,
         addedByRole:       Role.PHYSICIAN,

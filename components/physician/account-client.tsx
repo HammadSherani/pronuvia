@@ -139,7 +139,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="Years in Practice" value={p.yearsInPractice} />
         <InfoRow label="Credential"        value={p.credential} />
         <InfoRow label="Patients Seen Per Month" value={p.patientsPerMonth} />
-        <InfoRow label="SAC Therapy"       value={p.aictherapy} />
+        <InfoRow label="How did you hear about AIC Therapy?" value={p.aictherapy} />
         <InfoRow label="Website"           value={p.websiteLink} />
         <InfoRow label="Specialties"       value={p.fieldsOfSpeciality?.join(", ")} />
         <InfoRow label="Address"           value={fullAddress || null} />

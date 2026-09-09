@@ -8,7 +8,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { generateResetToken } from "@/lib/auth/reset-token";
 import { CreatePhysicianSchema, UpdatePhysicianSchema } from "@/lib/validations/physician";
 import { Role, ApprovalStatus } from "@/generated/prisma/enums";
-import { sendMail } from "@/lib/email/mailer";
+import { sendMail, WELCOME_EMAIL_FROM } from "@/lib/email/mailer";
 import { physicianApprovalEmail, salesRepPhysicianAssignedEmail } from "@/lib/email/templates";
 import { doctorRegistrationEmail } from "@/lib/email/templates";
 import { isLoginIdTaken } from "@/lib/auth/physician-lookup";
@@ -123,6 +123,7 @@ export async function adminCreatePhysician(
         ...rest,
         salesRepId:          salesRepId ?? null,
         password:            hashed,
+        hasCustomPassword:   true,
         isApproved,
         addedByRole:         Role.ADMIN,
         addedByAdminId:      session.userId,
@@ -154,14 +155,15 @@ export async function adminCreatePhysician(
   // Send approval welcome email only when approving immediately
   if (isApproved === ApprovalStatus.APPROVED && token) {
     const drEmail = physicianApprovalEmail({
-      firstName:  rest.firstName,
-      lastName:   rest.lastName,
-      email:      rest.email,
-      loginId:    rest.loginId,
-      resetToken: token,
+      firstName:         rest.firstName,
+      lastName:          rest.lastName,
+      email:             rest.email,
+      loginId:           rest.loginId,
+      resetToken:        token,
+      hasCustomPassword: true,
     });
     try {
-      await sendMail({ to: rest.email, subject: drEmail.subject, html: drEmail.html });
+      await sendMail({ to: rest.email, from: WELCOME_EMAIL_FROM, subject: drEmail.subject, html: drEmail.html });
     } catch (err) {
       console.error("[email] physicianApprovalEmail failed:", err);
     }

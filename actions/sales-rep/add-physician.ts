@@ -117,7 +117,8 @@ export async function salesRepAddPhysician(
     await prisma.partneringPhysician.create({
       data: {
         ...rest,
-        password:    hashed,
+        password:          hashed,
+        hasCustomPassword: true,
         salesRepNote,
         isApproved:  ApprovalStatus.PENDING,
         addedByRole: Role.SALES_REP,
