@@ -53,9 +53,9 @@ async function applyWithdrawDecision(
       if (request.userRole === "SALES_REP") {
         const rep = await tx.salesRepresentative.findUnique({
           where: { id: request.userId },
-          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
+          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true, bankAccountType: true, bankOwnershipType: true },
         });
-        if (!rep?.bankName || !rep.bankAccountNumber || !rep.bankAccountName) {
+        if (!rep?.bankName || !rep.bankAccountNumber || !rep.bankAccountName || !rep.bankAccountType || !rep.bankOwnershipType) {
           throw new Error("User has incomplete bank account details.");
         }
         const updated = await tx.salesRepresentative.updateMany({
@@ -70,9 +70,9 @@ async function applyWithdrawDecision(
       } else {
         const physician = await tx.partneringPhysician.findUnique({
           where: { id: request.userId },
-          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true },
+          select: { walletBalance: true, bankName: true, bankAccountNumber: true, bankAccountName: true, bankAccountType: true, bankOwnershipType: true },
         });
-        if (!physician?.bankName || !physician.bankAccountNumber || !physician.bankAccountName) {
+        if (!physician?.bankName || !physician.bankAccountNumber || !physician.bankAccountName || !physician.bankAccountType || !physician.bankOwnershipType) {
           throw new Error("User has incomplete bank account details.");
         }
         const updated = await tx.partneringPhysician.updateMany({

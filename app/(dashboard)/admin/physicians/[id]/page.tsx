@@ -174,7 +174,7 @@ export default async function PhysicianViewPage({ params }: Props) {
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
           <InfoRow label="Bank Name"       value={p.bankName} />
           <InfoRow label="Account Name"    value={p.bankAccountName} />
-          <InfoRow label="Swift Code"      value={p.swiftCode} />
+          <InfoRow label="SWIFT (for International)" value={p.swiftCode} />
           <InfoRow label="Routing Number"  value={p.routingNumber} />
           <div className="col-span-2">
             <InfoRow label="Account Number" value={p.bankAccountNumber} />

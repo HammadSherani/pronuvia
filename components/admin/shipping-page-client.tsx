@@ -38,11 +38,25 @@ interface Props {
   subtotal:       number;
   shippingRate:   number;
   shippingCarrier: string | null;
+  // The option the customer selected at checkout, e.g. "FedEx 2Day Shipping"
+  // — distinct from shippingCarrier, which is only set once a label is
+  // actually bought. Used to steer the admin toward the matching rate.
+  shippingMethod?: string | null;
   testModeCarriers?: { ups: boolean; fedex: boolean; usps: boolean };
   // "return" pre-configures the form for a return label: warehouse/customer
   // addresses swap, FedEx is excluded, and a successful purchase does not
   // mark the order SHIPPED or touch inventory.
   mode?: ShipmentDirection;
+}
+
+function isExpeditedMethod(method: string | null | undefined): boolean {
+  return !!method && method.includes("FedEx 2Day");
+}
+
+// Matches the live rate that corresponds to the customer's checkout choice —
+// FedEx's "2Day" service in whatever casing/spacing the carrier API returns.
+function findMatchingRate(rates: RateResult[]): RateResult | undefined {
+  return rates.find((r) => r.carrier === "fedex" && /2\s*day/i.test(r.service));
 }
 
 // ── Static carrier package data ───────────────────────────────────────────────
@@ -401,15 +415,16 @@ function ShipmentDetail({ s, index, shipFrom, shipTo, items, subtotal, orderNumb
 
 type PkgTab = "custom" | "carrier" | "saved";
 
-function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier, testModeCarriers, mode = "outbound" }: {
+function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderValue, subtotal, shippingRate, shippingCarrier, shippingMethod, testModeCarriers, mode = "outbound" }: {
   orderId: string; orderNumber: string; items: OrderItem[]; orderValue: number; subtotal: number;
-  shippingRate: number; shippingCarrier: string | null;
+  shippingRate: number; shippingCarrier: string | null; shippingMethod?: string | null;
   shipTo: Props["shipTo"]; shipFrom: Props["shipFrom"];
   testModeCarriers?: Props["testModeCarriers"];
   mode?: ShipmentDirection;
 }) {
   const router = useRouter();
   const isReturn = mode === "return";
+  const expedited = !isReturn && isExpeditedMethod(shippingMethod);
   // FedEx return labels aren't supported — keep it out of the carrier picker
   // entirely in return mode so it can't even be selected.
   const CARRIER_OPTIONS: CarrierCode[] = isReturn ? ["ups", "usps"] : ["fedex", "ups", "usps"];
@@ -540,7 +555,14 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
       try {
         const res = await getShippingRates(orderId, pkg, selectedCarriers, undefined, mode);
         if (res.error) setRateError(res.error);
-        if (res.rates.length > 0) { setRates(res.rates); setSelectedRate(res.rates[0]); }
+        if (res.rates.length > 0) {
+          setRates(res.rates);
+          // If the customer paid for FedEx 2Day at checkout, default to that
+          // rate instead of the cheapest one so the admin doesn't have to
+          // remember to hunt for it in the list.
+          const matched = expedited ? findMatchingRate(res.rates) : undefined;
+          setSelectedRate(matched ?? res.rates[0]);
+        }
         else if (!res.error) setRateError("No rates returned. Check credentials and package details.");
       } catch (e) {
         setRateError(e instanceof Error ? e.message : "Failed to get rates. Check server logs.");
@@ -691,6 +713,25 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
               Rate quotes work, but label purchase may fail or return test tracking numbers that cannot be used for real shipments.
               To go live, update <code className="font-mono bg-amber-100 px-1 rounded">UPS_API_URL</code> / <code className="font-mono bg-amber-100 px-1 rounded">FEDEX_API_URL</code> in <code className="font-mono bg-amber-100 px-1 rounded">.env</code> to the production endpoints and supply production credentials.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Customer's checkout selection ── */}
+      {shippingMethod && (
+        <div className={`xl:col-span-2 rounded-xl border px-4 py-3 flex items-center gap-2.5 ${
+          expedited ? "bg-orange-50 border-orange-300" : "bg-gray-50 border-gray-200"
+        }`}>
+          <svg className={`w-4 h-4 shrink-0 ${expedited ? "text-orange-600" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <div>
+            <p className={`text-sm font-bold ${expedited ? "text-orange-700" : "text-gray-700"}`}>
+              Customer selected: {shippingMethod}
+            </p>
+            {expedited && (
+              <p className="text-xs text-orange-600 mt-0.5">Buy the matching FedEx 2Day label below — it&apos;s pre-selected once rates load.</p>
+            )}
           </div>
         </div>
       )}
@@ -1038,12 +1079,13 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
             <div className="space-y-2">
               {rates.map((r, i) => {
                 const active = selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier;
+                const matchesChoice = expedited && r.carrier === "fedex" && /2\s*day/i.test(r.service);
                 const sigAddOn = active && selectedSignatureCode != null
                   ? (r.signatureOptions?.find(o => o.code === selectedSignatureCode)?.price ?? 0)
                   : 0;
                 return (
                   <div key={i} className={`rounded-xl border-2 transition-all ${
-                    active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 bg-white"}`}>
+                    active ? "border-gray-900 bg-gray-900/5" : matchesChoice ? "border-orange-200" : "border-gray-100 bg-white"}`}>
 
                     {/* Rate header row */}
                     <button type="button"
@@ -1057,6 +1099,11 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
                           <div className="flex items-center gap-2 flex-wrap">
                             <CarrierBadge carrier={r.carrier} />
                             <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+                            {matchesChoice && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700">
+                                Customer&apos;s choice
+                              </span>
+                            )}
                           </div>
                           {r.deliveryDays != null && (
                             <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
@@ -1152,6 +1199,7 @@ function AddShipmentForm({ orderId, orderNumber, items, shipTo, shipFrom, orderV
             <div className="border-t border-gray-200 pt-2.5 space-y-2">
               <Row label="Number of items" value={String(items.length)} />
               <Row label="Order value"     value={fmt(orderValue)} bold />
+              {shippingMethod && <Row label="Customer selected" value={shippingMethod} />}
               {shippingCarrier && <Row label="Shipping type" value={shippingCarrier} />}
               <Row label="Shipping cost"   value={fmt(shippingRate)} />
             </div>
@@ -1288,6 +1336,7 @@ export function ShippingPageClient(props: Props) {
                 subtotal={props.subtotal}
                 shippingRate={props.shippingRate}
                 shippingCarrier={props.shippingCarrier}
+                shippingMethod={props.shippingMethod}
                 testModeCarriers={props.testModeCarriers}
                 mode={props.mode}
               />}

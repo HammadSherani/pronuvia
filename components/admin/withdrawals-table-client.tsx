@@ -23,6 +23,8 @@ type Request = {
     bankName:          string | null;
     bankAccountNumber: string | null;
     bankAccountName:   string | null;
+    bankAccountType:   string | null;
+    bankOwnershipType: string | null;
     walletBalance:     number | null;
   };
 };
@@ -198,6 +200,7 @@ export function WithdrawalsTableClient({ requests }: { requests: Request[] }) {
                     <div>
                       <p className="text-xs font-semibold text-gray-800 truncate">{r.salesRep.bankAccountName}</p>
                       <p className="text-[11px] text-gray-500 truncate">{r.salesRep.bankName}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{r.salesRep.bankAccountType} · {r.salesRep.bankOwnershipType}</p>
                       {r.salesRep.bankAccountNumber && (
                         <p className="text-[11px] font-mono text-gray-600 truncate">{r.salesRep.bankAccountNumber}</p>
                       )}

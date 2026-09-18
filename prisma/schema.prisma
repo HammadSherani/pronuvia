@@ -20,6 +20,16 @@ enum ApprovalStatus {
   REJECTED
 }
 
+enum BankAccountType {
+  CHECKING
+  SAVINGS
+}
+
+enum BankOwnershipType {
+  PERSONAL
+  BUSINESS
+}
+
 model Admin {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
@@ -46,6 +56,8 @@ model SalesRepresentative {
   bankName              String?
   bankAccountNumber     String?
   bankAccountName       String?
+  bankAccountType       BankAccountType?
+  bankOwnershipType     BankOwnershipType?
   swiftCode             String?
   routingNumber         String?
   bankNotifyRequested   Boolean  @default(false)
@@ -158,6 +170,8 @@ model PartneringPhysician {
   bankName              String?
   bankAccountNumber     String?
   bankAccountName       String?
+  bankAccountType       BankAccountType?
+  bankOwnershipType     BankOwnershipType?
   swiftCode             String?
   routingNumber         String?
   bankNotifyRequested   Boolean        @default(false)
@@ -219,6 +233,11 @@ model Order {
   billingAddress            String?
   shippingAddress           String?
   shippingRate              Float                @default(0)
+  // The shipping option the customer selected at checkout (e.g. "Shipping
+  // United States Flat Rate" or "FedEx 2Day Shipping") — distinct from
+  // shippingCarrier, which only gets set once an admin actually buys a
+  // label. Lets the admin know to buy an expedited label for this order.
+  shippingMethod            String?
   shippingCarrier           String?
   trackingNumber            String?
   estimatedDelivery         DateTime?
@@ -406,6 +425,7 @@ enum ShippingMethod {
   FLAT
   FREE
   LOCAL_PICKUP
+  FEDEX_2DAY
 }
 
 model ShippingRate {

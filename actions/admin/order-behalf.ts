@@ -29,6 +29,7 @@ export type ConfirmBehalfOrderPayload = {
   shippingAddress: string;
   notes:           string;
   shippingRate:    number;
+  shippingMethod?: string;
   total:           number;
   customerEmail?:  string;
   customerPhone?:  string;
@@ -120,6 +121,7 @@ export async function confirmBehalfCardOrder(
         billingAddress:        payload.billingAddress  || undefined,
         shippingAddress:       payload.shippingAddress || undefined,
         shippingRate:          payload.shippingRate,
+        shippingMethod:        payload.shippingMethod  || undefined,
         estimatedDelivery:     estimatedDeliveryDate(7),
         paymentMethod:         "CARD",
         paymentStatus:         "PAID",
@@ -163,6 +165,7 @@ export async function confirmBehalfCardOrder(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    payload.shippingRate,
+        shippingMethod:  payload.shippingMethod  || null,
         couponCode:      payload.couponCode     || null,
         discountAmount:  payload.discountAmount || 0,
         paymentMethod:   "CARD",

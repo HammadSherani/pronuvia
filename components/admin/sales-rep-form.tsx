@@ -266,7 +266,7 @@ export function SalesRepForm({ action, submitLabel, backHref, successRedirect, i
             <input name="bankName" className={icls()} placeholder="e.g. Chase Bank" defaultValue={defaults?.bankName} />
           </div>
           <div>
-            <label className={lbl}>Swift Code</label>
+            <label className={lbl}>SWIFT (for International)</label>
             <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33" defaultValue={defaults?.swiftCode} />
           </div>
         </div>

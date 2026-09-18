@@ -498,7 +498,7 @@ export function PhysicianForm({
               value={bankName} onChange={(e) => setBankName(e.target.value)} />
           </div>
           <div>
-            <label className={lbl}>Swift Code</label>
+            <label className={lbl}>SWIFT (for International)</label>
             <input name="swiftCode" className={icls()} placeholder="e.g. CHASUS33"
               value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} />
           </div>

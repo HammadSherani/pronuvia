@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { updatePhysicianProfile, type UpdateProfileState } from "@/actions/physician/update-profile";
 import { AddressFields, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
@@ -24,7 +25,8 @@ type Physician = {
   addressOne: string | null; addressTwo: string | null;
   city: string | null; state: string | null; zipCode: string | null;
   bankName: string | null; bankAccountName: string | null;
-  bankAccountNumber: string | null; swiftCode: string | null; routingNumber: string | null;
+  bankAccountNumber: string | null; bankAccountType: string | null; bankOwnershipType: string | null;
+  swiftCode: string | null; routingNumber: string | null;
   commission: number; uplineCommission: number;
   isApproved: "APPROVED" | "PENDING" | "REJECTED";
   createdAt: Date;
@@ -149,7 +151,9 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
         <InfoRow label="Bank Name"       value={p.bankName} />
         <InfoRow label="Account Name"    value={p.bankAccountName} />
         <InfoRow label="Account Number"  value={p.bankAccountNumber} />
-        <InfoRow label="SWIFT CODE"    value={p.swiftCode} />
+        <InfoRow label="Account Type"    value={p.bankAccountType} />
+        <InfoRow label="Personal / Business" value={p.bankOwnershipType} />
+        <InfoRow label="SWIFT (for International)" value={p.swiftCode} />
         <InfoRow label="Routing Number"  value={p.routingNumber} />
       </Section>
 
@@ -166,6 +170,7 @@ function ViewMode({ p, onEdit }: { p: Physician; onEdit: () => void }) {
 
 function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
   const [state, action, pending] = useActionState<UpdateProfileState, FormData>(updatePhysicianProfile, undefined);
+  const router = useRouter();
   const [specialties, setSpecialties] = useState<string[]>(p.fieldsOfSpeciality ?? []);
   const [accountNumber, setAccountNumber]         = useState(p.bankAccountNumber ?? "");
   const [confirmAccountNumber, setConfirmAccountNumber] = useState(p.bankAccountNumber ?? "");
@@ -193,13 +198,15 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
     if (!state) return;
     if (state.success) {
       toast.success(state.message ?? "Profile updated successfully.");
+      onCancel();
+      router.refresh();
     } else if (state.errors) {
       const firstError = Object.values(state.errors).flat()[0];
       if (firstError) toast.error(firstError);
     } else if (state.message) {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, onCancel, router]);
 
   const e = state?.errors ?? {};
 
@@ -395,7 +402,24 @@ function EditMode({ p, onCancel }: { p: Physician; onCancel: () => void }) {
           />
         </Field>
 
-        <Field label="SWIFT">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Account Type *" error={e.bankAccountType?.[0]}>
+            <select name="bankAccountType" required defaultValue={p.bankAccountType ?? ""} className={e.bankAccountType ? inpErr : inp}>
+              <option value="">Select checking or savings</option>
+              <option value="CHECKING">Checking</option>
+              <option value="SAVINGS">Savings</option>
+            </select>
+          </Field>
+          <Field label="Personal or Business *" error={e.bankOwnershipType?.[0]}>
+            <select name="bankOwnershipType" required defaultValue={p.bankOwnershipType ?? ""} className={e.bankOwnershipType ? inpErr : inp}>
+              <option value="">Select personal or business</option>
+              <option value="PERSONAL">Personal</option>
+              <option value="BUSINESS">Business</option>
+            </select>
+          </Field>
+        </div>
+
+        <Field label="SWIFT (for International)">
           <input name="swiftCode" defaultValue={p.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
         </Field>
 

@@ -103,7 +103,24 @@ export function BankNotifyGate({ role }: { role: "PHYSICIAN" | "SALES_REP" }) {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="SWIFT">
+            <Field label="Account Type *" error={e.bankAccountType?.[0]}>
+              <select name="bankAccountType" required className={e.bankAccountType ? inpErr : inp} defaultValue="">
+                <option value="">Select type</option>
+                <option value="CHECKING">Checking</option>
+                <option value="SAVINGS">Savings</option>
+              </select>
+            </Field>
+            <Field label="Personal or Business *" error={e.bankOwnershipType?.[0]}>
+              <select name="bankOwnershipType" required className={e.bankOwnershipType ? inpErr : inp} defaultValue="">
+                <option value="">Select type</option>
+                <option value="PERSONAL">Personal</option>
+                <option value="BUSINESS">Business</option>
+              </select>
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="SWIFT (for International)">
               <input name="swiftCode" placeholder="e.g. CHASUS33" className={inp} />
             </Field>
             <Field label="Routing Number">

@@ -60,8 +60,14 @@ type StripeFormProps = {
   itemsJson:        string;
   shippingAddress:  string;
   billingAddress?:  string;
+  // The structured (not serialized) address used for billing — passed
+  // straight to Stripe as payment_method_data.billing_details so the card
+  // form's own address/country/ZIP fields (which we hide) match what the
+  // customer actually picked in our own form, instead of Stripe's default.
+  billingAddressData: AddressData;
   notes:            string;
   shippingRate:     number;
+  shippingMethod?:  string;
   total:            number;
   couponId?:        string;
   couponCode?:      string;
@@ -76,7 +82,7 @@ type StripeFormProps = {
 
 const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
   function StripeInnerForm(
-    { itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, customerEmail, customerPhone, onSuccess, onProcessing, onError, onStripeReady },
+    { itemsJson, shippingAddress, billingAddress, billingAddressData, notes, shippingRate, shippingMethod, total, couponId, couponCode, discountAmount, customerEmail, customerPhone, onSuccess, onProcessing, onError, onStripeReady },
     ref
   ) {
     const stripe   = useStripe();
@@ -120,15 +126,36 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
       }
 
       sessionStorage.setItem("sr_order", JSON.stringify({
-        itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount, customerEmail, customerPhone,
+        itemsJson, shippingAddress, billingAddress, notes, shippingRate, shippingMethod, total, couponId, couponCode, discountAmount, customerEmail, customerPhone,
       }));
 
-      // Step 3: confirm with the real clientSecret
+      // Step 3: confirm with the real clientSecret — billing_details is passed
+      // explicitly here (rather than left for Stripe's own, hidden address
+      // fields) so the charge's country/postal code match what the customer
+      // actually selected in our own address form, not Stripe's US default.
+      const billingName = [billingAddressData.firstName, billingAddressData.lastName].filter(Boolean).join(" ");
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
         redirect: "if_required",
-        confirmParams: { return_url: `${window.location.origin}${window.location.pathname}` },
+        confirmParams: {
+          return_url: `${window.location.origin}${window.location.pathname}`,
+          payment_method_data: {
+            billing_details: {
+              name:    billingName || undefined,
+              email:   customerEmail || undefined,
+              phone:   billingAddressData.phone || undefined,
+              address: {
+                line1:       billingAddressData.address1 || undefined,
+                line2:       billingAddressData.address2 || undefined,
+                city:        billingAddressData.city      || undefined,
+                state:       billingAddressData.state     || undefined,
+                postal_code: billingAddressData.zip       || undefined,
+                country:     billingAddressData.country   || undefined,
+              },
+            },
+          },
+        },
       });
 
       if (stripeError) {
@@ -142,7 +169,7 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
         sessionStorage.removeItem("sr_order");
         const result = await confirmCardOrder({
           paymentIntentId: paymentIntent.id,
-          itemsJson, shippingAddress, billingAddress, notes, shippingRate, total, couponId, couponCode, discountAmount,
+          itemsJson, shippingAddress, billingAddress, notes, shippingRate, shippingMethod, total, couponId, couponCode, discountAmount,
           customerEmail: customerEmail || undefined,
           customerPhone: customerPhone || undefined,
         });
@@ -173,6 +200,10 @@ const StripeInnerForm = forwardRef<StripeHandle, StripeFormProps>(
             layout: "tabs",
             wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
             terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
+            // We already collect a full billing address in our own form
+            // above — don't make the customer enter it a second time inside
+            // the card element, and don't let Stripe default it to US.
+            fields:  { billingDetails: { address: "never" } },
           }}
         />
         {!elementsReady && (
@@ -323,7 +354,7 @@ export function CheckoutClient({
     if (!saved) return;
     const data = JSON.parse(saved) as {
       itemsJson: string; shippingAddress: string; notes: string;
-      shippingRate: number; total: number;
+      shippingRate: number; shippingMethod?: string; total: number;
       couponId?: string; couponCode?: string; discountAmount?: number;
       customerEmail?: string; customerPhone?: string;
     };
@@ -566,8 +597,10 @@ export function CheckoutClient({
                             itemsJson={itemsJson}
                             shippingAddress={shipStr}
                             billingAddress={billStr}
+                            billingAddressData={sameAsBilling ? shipping : billing}
                             notes={notes}
                             shippingRate={shippingCost}
+                            shippingMethod={selectedShipping?.label}
                             total={total}
                             couponId={appliedCoupon?.couponId}
                             couponCode={appliedCoupon?.code}
@@ -646,6 +679,7 @@ export function CheckoutClient({
             <input type="hidden" name="shippingAddress" value={shipStr} />
             <input type="hidden" name="billingAddress"  value={billStr} />
             <input type="hidden" name="shippingRate"    value={shippingCost} />
+            <input type="hidden" name="shippingMethod"  value={selectedShipping?.label ?? ""} />
             <input type="hidden" name="total"           value={total} />
             <input type="hidden" name="notes"           value={notes} />
             <input type="hidden" name="couponCode"      value={appliedCoupon?.code      ?? ""} />

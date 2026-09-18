@@ -23,6 +23,8 @@ type Request = {
     bankName:          string | null;
     bankAccountNumber: string | null;
     bankAccountName:   string | null;
+    bankAccountType:   string | null;
+    bankOwnershipType: string | null;
     walletBalance:     number;
   };
 };
@@ -155,6 +157,7 @@ export function PhysicianWithdrawalsTableClient({ requests }: { requests: Reques
                     <div>
                       <p className="text-xs font-semibold text-gray-800 truncate">{r.physician.bankAccountName}</p>
                       <p className="text-[11px] text-gray-500 truncate">{r.physician.bankName}</p>
+                      <p className="text-[11px] text-gray-500 truncate">{r.physician.bankAccountType} · {r.physician.bankOwnershipType}</p>
                       {r.physician.bankAccountNumber && (
                         <p className="text-[11px] font-mono text-gray-600 truncate">{r.physician.bankAccountNumber}</p>
                       )}

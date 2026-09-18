@@ -52,13 +52,18 @@ const METHOD_LABELS: Record<ShippingMethod, string> = {
   FLAT:         "Flat Shipping",
   FREE:         "Free Shipping",
   LOCAL_PICKUP: "Local Pickup",
+  FEDEX_2DAY:   "FedEx 2Day (Expedited)",
 };
 
 const METHOD_BADGE: Record<ShippingMethod, string> = {
   FLAT:         "bg-blue-50 text-blue-700 border-blue-200",
   FREE:         "bg-emerald-50 text-emerald-700 border-emerald-200",
   LOCAL_PICKUP: "bg-violet-50 text-violet-700 border-violet-200",
+  FEDEX_2DAY:   "bg-orange-50 text-orange-700 border-orange-200",
 };
+
+// Methods with a real customer-facing price — LOCAL_PICKUP and FREE are always $0.
+const PRICED_METHODS: ShippingMethod[] = [ShippingMethod.FLAT, ShippingMethod.FEDEX_2DAY];
 
 type FormState = {
   continent:      string;
@@ -195,7 +200,8 @@ function ShippingRateForm({
   }
 
   function handleMethodChange(method: ShippingMethod | "") {
-    setForm({ ...form, method, cost: method !== "FLAT" ? "0" : form.cost });
+    const priced = method !== "" && PRICED_METHODS.includes(method);
+    setForm({ ...form, method, cost: priced ? form.cost : "0" });
   }
 
   return (
@@ -311,8 +317,8 @@ function ShippingRateForm({
         {state?.errors?.method && <p className="text-xs text-red-600 mt-1">{state.errors.method[0]}</p>}
       </div>
 
-      {/* Cost — FLAT only */}
-      {form.method === "FLAT" && (
+      {/* Cost — FLAT and FEDEX_2DAY only (FREE / LOCAL_PICKUP are always $0) */}
+      {form.method !== "" && PRICED_METHODS.includes(form.method) && (
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Shipping Cost (USD)</label>
           <div className="relative">

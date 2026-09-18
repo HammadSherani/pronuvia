@@ -37,6 +37,7 @@ export async function payWithPhysicianWallet(
   const shippingAddress = (formData.get("shippingAddress") as string) || undefined;
   const billingAddress  = (formData.get("billingAddress")  as string) || undefined;
   const shippingRate    = parseFloat((formData.get("shippingRate")    as string) || "0");
+  const shippingMethod  = (formData.get("shippingMethod")  as string) || undefined;
   const total           = parseFloat((formData.get("total")           as string) || "0");
   const notes           = (formData.get("notes")           as string) || undefined;
   const couponCode      = (formData.get("couponCode")      as string) || undefined;
@@ -115,6 +116,7 @@ export async function payWithPhysicianWallet(
         shippingAddress,
         billingAddress,
         shippingRate,
+        shippingMethod,
         estimatedDelivery: deliveryDate,
         paymentMethod:  "WALLET",
         paymentStatus:  "PAID",
@@ -171,6 +173,7 @@ export async function payWithPhysicianWallet(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    shippingRate,
+        shippingMethod:  shippingMethod  || null,
         couponCode:      couponCode      || null,
         discountAmount:  discountAmount  || 0,
         paymentMethod:   "WALLET",

@@ -92,6 +92,22 @@ export default async function AdminPackingListPage({ params }: Props) {
           {/* Body */}
           <div id="pack-body" className="px-8 py-6 space-y-6">
 
+            {/* Shipping method — always shown so warehouse staff know how this ships */}
+            {order.shippingMethod && (
+              <div className={`rounded-xl border px-4 py-3 flex items-center gap-2 ${
+                order.shippingMethod.includes("FedEx 2Day")
+                  ? "bg-orange-50 border-orange-300"
+                  : "bg-gray-50 border-gray-200"
+              }`}>
+                <svg className={`w-4 h-4 shrink-0 ${order.shippingMethod.includes("FedEx 2Day") ? "text-orange-600" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className={`text-sm font-bold ${order.shippingMethod.includes("FedEx 2Day") ? "text-orange-700" : "text-gray-700"}`}>
+                  {order.shippingMethod}
+                </p>
+              </div>
+            )}
+
             {/* From / Ship To */}
             <div className="grid grid-cols-2 gap-6">
               <div>

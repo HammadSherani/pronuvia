@@ -28,6 +28,7 @@ export type ConfirmPhysicianCardOrderPayload = {
   shippingAddress: string;
   notes:           string;
   shippingRate:    number;
+  shippingMethod?: string;
   total:           number;
   customerEmail:   string;
   customerPhone?:  string;
@@ -119,6 +120,7 @@ export async function confirmPhysicianCardOrder(
         billingAddress:        payload.billingAddress  || undefined,
         shippingAddress:       payload.shippingAddress || undefined,
         shippingRate:          payload.shippingRate,
+        shippingMethod:        payload.shippingMethod  || undefined,
         estimatedDelivery:     estimatedDeliveryDate(7),
         paymentMethod:         "CARD",
         paymentStatus:         "PAID",
@@ -162,6 +164,7 @@ export async function confirmPhysicianCardOrder(
           lineTotal:   i.lineTotal,
         })),
         shippingCost:    payload.shippingRate,
+        shippingMethod:  payload.shippingMethod  || null,
         couponCode:      payload.couponCode     || null,
         discountAmount:  payload.discountAmount || 0,
         paymentMethod:   "CARD",

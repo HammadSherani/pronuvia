@@ -50,6 +50,7 @@ export default async function OrderShipmentPage({ params, searchParams }: Props)
       subtotal={order.subtotal}
       shippingRate={order.shippingRate}
       shippingCarrier={order.shippingCarrier ?? null}
+      shippingMethod={order.shippingMethod ?? null}
       testModeCarriers={{
         ups:   (process.env.UPS_API_URL   ?? "").includes("wwwcie"),
         fedex: (process.env.FEDEX_API_URL ?? "").includes("sandbox"),

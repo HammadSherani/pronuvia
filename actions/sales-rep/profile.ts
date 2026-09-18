@@ -16,6 +16,8 @@ const ProfileSchema = z.object({
   bankName:          z.string().optional(),
   bankAccountName:   z.string().optional(),
   bankAccountNumber: z.string().optional(),
+  bankAccountType:   z.enum(["CHECKING", "SAVINGS"]).optional(),
+  bankOwnershipType: z.enum(["PERSONAL", "BUSINESS"]).optional(),
   swiftCode:         z.string().optional(),
   routingNumber:     z.string().optional(),
 });
@@ -53,6 +55,8 @@ export async function updateSalesRepProfile(
     bankName:          formData.get("bankName") || undefined,
     bankAccountName:   formData.get("bankAccountName") || undefined,
     bankAccountNumber: formData.get("bankAccountNumber") || undefined,
+    bankAccountType:   formData.get("bankAccountType") || undefined,
+    bankOwnershipType: formData.get("bankOwnershipType") || undefined,
     swiftCode:         formData.get("swiftCode") || undefined,
     routingNumber:     formData.get("routingNumber") || undefined,
   };
@@ -89,6 +93,8 @@ const BankOnlySchema = z.object({
   bankName:          z.string().min(1, "Bank name is required"),
   bankAccountName:   z.string().min(1, "Account holder name is required"),
   bankAccountNumber: z.string().min(1, "Account number is required"),
+  bankAccountType:   z.enum(["CHECKING", "SAVINGS"], { message: "Select checking or savings" }),
+  bankOwnershipType: z.enum(["PERSONAL", "BUSINESS"], { message: "Select personal or business" }),
   swiftCode:         z.string().optional(),
   routingNumber:     z.string().optional(),
 });
@@ -103,6 +109,8 @@ export async function updateSalesRepBankDetails(
     bankName:          (formData.get("bankName") as string)?.trim(),
     bankAccountName:   (formData.get("bankAccountName") as string)?.trim(),
     bankAccountNumber: (formData.get("bankAccountNumber") as string)?.trim(),
+    bankAccountType:   (formData.get("bankAccountType") as string)?.trim(),
+    bankOwnershipType: (formData.get("bankOwnershipType") as string)?.trim(),
     swiftCode:         (formData.get("swiftCode") as string)?.trim() || undefined,
     routingNumber:     (formData.get("routingNumber") as string)?.trim() || undefined,
   };

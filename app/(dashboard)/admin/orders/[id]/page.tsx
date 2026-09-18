@@ -603,7 +603,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         const display = stored > 0 ? stored : implied > 0 ? implied : 0;
                         return (
                           <div className="flex justify-between text-sm text-gray-500">
-                            <span>{getShippingLabel(order.shippingAddress, display)}</span>
+                            <span>{order.shippingMethod || getShippingLabel(order.shippingAddress, display)}</span>
                             <span>
                               {display === 0
                                 ? <span className="text-[#3DBFA4] font-medium">Free</span>
@@ -773,6 +773,18 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 <h3 className="text-sm font-semibold text-gray-700">Shipment Tracking</h3>
               </div>
               <div className="p-4">
+                {order.shippingMethod && (
+                  <div className={`flex items-center gap-2 rounded-lg px-3 py-2 mb-3 text-xs font-medium ${
+                    order.shippingMethod.includes("FedEx 2Day")
+                      ? "bg-orange-50 text-orange-700 border border-orange-200"
+                      : "bg-gray-50 text-gray-600 border border-gray-200"
+                  }`}>
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Customer selected: {order.shippingMethod}
+                  </div>
+                )}
                 {order.trackingNumber ? (
                   <div className="space-y-3">
                     <p className="text-sm font-semibold text-gray-700">

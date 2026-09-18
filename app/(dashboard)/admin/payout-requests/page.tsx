@@ -28,13 +28,13 @@ export default async function PayoutRequestsPage() {
     repIds.length
       ? prisma.salesRepresentative.findMany({
           where:  { id: { in: repIds } },
-          select: { id: true, firstName: true, lastName: true, email: true, bankName: true, bankAccountNumber: true, bankAccountName: true, walletBalance: true },
+          select: { id: true, firstName: true, lastName: true, email: true, bankName: true, bankAccountNumber: true, bankAccountName: true, bankAccountType: true, bankOwnershipType: true, walletBalance: true },
         })
       : [],
     docIds.length
       ? prisma.partneringPhysician.findMany({
           where:  { id: { in: docIds } },
-          select: { id: true, firstName: true, lastName: true, email: true, bankName: true, bankAccountNumber: true, bankAccountName: true, walletBalance: true },
+          select: { id: true, firstName: true, lastName: true, email: true, bankName: true, bankAccountNumber: true, bankAccountName: true, bankAccountType: true, bankOwnershipType: true, walletBalance: true },
         })
       : [],
   ]);
@@ -50,7 +50,7 @@ export default async function PayoutRequestsPage() {
       salesRepId: r.userId,
       salesRep: {
         firstName: rep.firstName, lastName: rep.lastName, email: rep.email,
-        bankName: rep.bankName, bankAccountNumber: rep.bankAccountNumber, bankAccountName: rep.bankAccountName,
+        bankName: rep.bankName, bankAccountNumber: rep.bankAccountNumber, bankAccountName: rep.bankAccountName, bankAccountType: rep.bankAccountType, bankOwnershipType: rep.bankOwnershipType,
         walletBalance: rep.walletBalance,
       },
     }];
@@ -64,7 +64,7 @@ export default async function PayoutRequestsPage() {
       physicianId: r.userId,
       physician: {
         firstName: doc.firstName, lastName: doc.lastName, email: doc.email,
-        bankName: doc.bankName, bankAccountNumber: doc.bankAccountNumber, bankAccountName: doc.bankAccountName,
+        bankName: doc.bankName, bankAccountNumber: doc.bankAccountNumber, bankAccountType: doc.bankAccountType, bankOwnershipType: doc.bankOwnershipType, bankAccountName: doc.bankAccountName,
         walletBalance: doc.walletBalance,
       },
     }];

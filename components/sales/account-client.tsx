@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useActionState, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { updateSalesRepProfile, type ProfileState } from "@/actions/sales-rep/profile";
 import { AddressFields, migrateAddressData, type AddressData, EMPTY_ADDRESS } from "@/components/shared/address-fields";
 import { formatDateLong } from "@/lib/utils/timezone";
@@ -11,7 +13,8 @@ type Rep = {
   commission: number; walletBalance: number; ordersCount: number;
   billingAddress: string | null; shippingAddress: string | null;
   bankName: string | null; bankAccountName: string | null;
-  bankAccountNumber: string | null; swiftCode: string | null; routingNumber: string | null;
+  bankAccountNumber: string | null; bankAccountType: string | null; bankOwnershipType: string | null;
+  swiftCode: string | null; routingNumber: string | null;
   createdAt: Date;
   _count: { physicians: number };
 };
@@ -148,7 +151,9 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
         <InfoRow label="Bank Name"      value={r.bankName} />
         <InfoRow label="Account Name"   value={r.bankAccountName} />
         <InfoRow label="Account Number" value={r.bankAccountNumber} />
-        <InfoRow label="SWIFT CODE"   value={r.swiftCode} />
+        <InfoRow label="Account Type" value={r.bankAccountType} />
+        <InfoRow label="Personal / Business" value={r.bankOwnershipType} />
+        <InfoRow label="SWIFT (for International)" value={r.swiftCode} />
         <InfoRow label="Routing Number" value={r.routingNumber} />
       </Section>
     </div>
@@ -159,6 +164,7 @@ function ViewMode({ r, onEdit }: { r: Rep; onEdit: () => void }) {
 
 function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(updateSalesRepProfile, undefined);
+  const router = useRouter();
 
   const [accNum,       setAccNum]       = useState(r.bankAccountNumber ?? "");
   const [confirm,      setConfirm]      = useState(r.bankAccountNumber ?? "");
@@ -180,6 +186,13 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
   }
 
   const errs = state?.errors ?? {};
+
+  useEffect(() => {
+    if (state?.success) {
+      onCancel();
+      router.refresh();
+    }
+  }, [state, onCancel, router]);
 
   return (
     <form action={action} className="space-y-8">
@@ -266,7 +279,7 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
           <Field label="Bank Name">
             <input name="bankName" defaultValue={r.bankName ?? ""} placeholder="e.g. Chase Bank" className={inp} />
           </Field>
-          <Field label="SWIFT CODE">
+          <Field label="SWIFT (for International)">
             <input name="swiftCode" defaultValue={r.swiftCode ?? ""} placeholder="e.g. CHASUS33" className={inp} />
           </Field>
           <div className="col-span-2">
@@ -290,6 +303,20 @@ function EditMode({ r, onCancel }: { r: Rep; onCancel: () => void }) {
               placeholder="Re-enter account number"
               className={mismatch ? inpErr : inp}
             />
+          </Field>
+          <Field label="Account Type *">
+            <select name="bankAccountType" required defaultValue={r.bankAccountType ?? ""} className={inp}>
+              <option value="">Select checking or savings</option>
+              <option value="CHECKING">Checking</option>
+              <option value="SAVINGS">Savings</option>
+            </select>
+          </Field>
+          <Field label="Personal or Business *">
+            <select name="bankOwnershipType" required defaultValue={r.bankOwnershipType ?? ""} className={inp}>
+              <option value="">Select personal or business</option>
+              <option value="PERSONAL">Personal</option>
+              <option value="BUSINESS">Business</option>
+            </select>
           </Field>
           <div className="col-span-2">
             <Field label="Routing Number">

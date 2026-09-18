@@ -31,10 +31,14 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   physicianId:     string;
   itemsJson:       string;
   billingAddress:  string;
+  // Structured billing address, passed to Stripe as payment_method_data so
+  // the card form's country/ZIP match our own form instead of defaulting to US.
+  billingAddressData: AddressData;
   shippingAddress: string;
   notes:           string;
   total:           number;
   shippingRate:    number;
+  shippingMethod?: string;
   customerEmail?:  string;
   customerPhone?:  string;
   couponId?:       string;
@@ -44,7 +48,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
   onProcessing:    (v: boolean) => void;
   onError:         (msg: string) => void;
   onStripeReady:   () => void;
-}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, shippingAddress, notes, total, shippingRate, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError, onStripeReady }, ref) {
+}>(function StripeInnerForm({ physicianId, itemsJson, billingAddress, billingAddressData, shippingAddress, notes, total, shippingRate, shippingMethod, customerEmail, customerPhone, couponId, couponCode, discountAmount, onSuccess, onProcessing, onError, onStripeReady }, ref) {
   const stripe   = useStripe();
   const elements = useElements();
   const [elementsReady, setElementsReady] = useState(false);
@@ -87,15 +91,36 @@ const StripeInnerForm = forwardRef<StripeHandle, {
 
     sessionStorage.setItem("ab_order", JSON.stringify({
       physicianId, itemsJson, billingAddress, shippingAddress,
-      notes, shippingRate, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
+      notes, shippingRate, shippingMethod, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
     }));
 
-    // Step 3: confirm with the real clientSecret
+    // Step 3: confirm with the real clientSecret — billing_details is passed
+    // explicitly here (rather than left for Stripe's own, hidden address
+    // fields) so the charge's country/postal code match what was selected
+    // in our own address form, not Stripe's US default.
+    const billingName = [billingAddressData.firstName, billingAddressData.lastName].filter(Boolean).join(" ");
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements,
       clientSecret,
       redirect: "if_required",
-      confirmParams: { return_url: `${window.location.origin}${window.location.pathname}` },
+      confirmParams: {
+        return_url: `${window.location.origin}${window.location.pathname}`,
+        payment_method_data: {
+          billing_details: {
+            name:    billingName || undefined,
+            email:   customerEmail || undefined,
+            phone:   billingAddressData.phone || undefined,
+            address: {
+              line1:       billingAddressData.address1 || undefined,
+              line2:       billingAddressData.address2 || undefined,
+              city:        billingAddressData.city      || undefined,
+              state:       billingAddressData.state     || undefined,
+              postal_code: billingAddressData.zip       || undefined,
+              country:     billingAddressData.country   || undefined,
+            },
+          },
+        },
+      },
     });
 
     if (stripeError) {
@@ -109,7 +134,7 @@ const StripeInnerForm = forwardRef<StripeHandle, {
       const result = await confirmBehalfCardOrder({
         physicianId, paymentIntentId: paymentIntent.id,
         itemsJson, billingAddress, shippingAddress, notes,
-        shippingRate, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
+        shippingRate, shippingMethod, total, customerEmail, customerPhone, couponId, couponCode, discountAmount,
       });
       if (result.success && result.orderNumber) {
         onSuccess(result.orderNumber);
@@ -137,6 +162,10 @@ const StripeInnerForm = forwardRef<StripeHandle, {
           layout: "tabs",
           wallets: { applePay: "auto", googlePay: "auto", link: "never" } as Record<string, string>,
           terms:   { card: "never", usBankAccount: "never", auBecsDebit: "never", bancontact: "never", ideal: "never", sepaDebit: "never", sofort: "never" },
+          // We already collect a full billing address in our own form
+          // above — don't make the admin enter it a second time inside the
+          // card element, and don't let Stripe default it to US.
+          fields:  { billingDetails: { address: "never" } },
         }}
       />
       {!elementsReady && (
@@ -240,7 +269,7 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
     if (!saved) return;
     const data = JSON.parse(saved) as {
       physicianId: string; itemsJson: string; billingAddress: string;
-      shippingAddress: string; notes: string; shippingRate: number; total: number;
+      shippingAddress: string; notes: string; shippingRate: number; shippingMethod?: string; total: number;
       customerEmail?: string; customerPhone?: string;
       couponId?: string; couponCode?: string; discountAmount?: number;
     };
@@ -418,10 +447,12 @@ export function BehalfCheckoutClient({ physicianId, physicianName, physicianEmai
                       physicianId={physicianId}
                       itemsJson={itemsJson}
                       billingAddress={billStr}
+                      billingAddressData={effectiveBilling}
                       shippingAddress={shipStr}
                       notes={notes}
                       total={total}
                       shippingRate={shippingCost}
+                      shippingMethod={selectedShipping?.label}
                       customerEmail={email || undefined}
                       customerPhone={shipping.phone || undefined}
                       couponId={appliedCoupon?.couponId}

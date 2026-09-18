@@ -26,6 +26,19 @@ interface Props {
   physician: { firstName: string; lastName: string; city: string | null; state: string | null } | null;
   itemCount: number;
   orderValue: number;
+  // The option the customer selected at checkout, e.g. "FedEx 2Day Shipping"
+  // — used to steer the admin toward buying the matching label.
+  shippingMethod?: string | null;
+}
+
+function isExpeditedMethod(method: string | null | undefined): boolean {
+  return !!method && method.includes("FedEx 2Day");
+}
+
+// Matches the live rate that corresponds to the customer's checkout choice —
+// FedEx's "2Day" service in whatever casing/spacing the carrier API returns.
+function findMatchingRate(rates: RateResult[]): RateResult | undefined {
+  return rates.find((r) => r.carrier === "fedex" && /2\s*day/i.test(r.service));
 }
 
 const CARRIERS: { code: CarrierCode; label: string; color: string }[] = [
@@ -139,9 +152,10 @@ function ShipmentDetail({ s, index }: { s: Shipment; index: number }) {
 
 // ── Add Shipment form ─────────────────────────────────────────────────────────
 function AddShipmentForm({
-  orderId, orderValue, itemCount, physician,
-}: { orderId: string; orderValue: number; itemCount: number; physician: Props["physician"] }) {
+  orderId, orderValue, itemCount, physician, shippingMethod,
+}: { orderId: string; orderValue: number; itemCount: number; physician: Props["physician"]; shippingMethod?: string | null }) {
   const router = useRouter();
+  const expedited = isExpeditedMethod(shippingMethod);
 
   const [selectedCarriers,   setSelectedCarriers]   = useState<CarrierCode[]>(["fedex", "ups", "usps"]);
   const [weightLbs,          setWeightLbs]          = useState("0.5");
@@ -183,7 +197,11 @@ function AddShipmentForm({
         if (res.error) setRateError(res.error);
         if (res.rates.length > 0) {
           setRates(res.rates);
-          setSelectedRate(res.rates[0]);
+          // If the customer paid for FedEx 2Day at checkout, default to that
+          // rate instead of the cheapest one so the admin doesn't have to
+          // remember to hunt for it in the list.
+          const matched = expedited ? findMatchingRate(res.rates) : undefined;
+          setSelectedRate(matched ?? res.rates[0]);
           setSelectedSignatureCode(null);
         } else if (!res.error) {
           setRateError("No rates returned. Check package details and carrier credentials.");
@@ -260,6 +278,25 @@ function AddShipmentForm({
 
       {/* ── LEFT ── */}
       <div className="space-y-6">
+
+        {/* Customer's checkout selection */}
+        {shippingMethod && (
+          <div className={`rounded-xl border px-4 py-3 flex items-center gap-2.5 ${
+            expedited ? "bg-orange-50 border-orange-300" : "bg-gray-50 border-gray-200"
+          }`}>
+            <svg className={`w-4 h-4 shrink-0 ${expedited ? "text-orange-600" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <div>
+              <p className={`text-sm font-bold ${expedited ? "text-orange-700" : "text-gray-700"}`}>
+                Customer selected: {shippingMethod}
+              </p>
+              {expedited && (
+                <p className="text-xs text-orange-600 mt-0.5">Buy the matching FedEx 2Day label below — it&apos;s pre-selected once rates load.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Carrier selection */}
         <div>
@@ -350,11 +387,12 @@ function AddShipmentForm({
             <div className="space-y-2">
               {rates.map((r, i) => {
                 const active = selectedRate?.serviceCode === r.serviceCode && selectedRate?.carrier === r.carrier;
+                const matchesChoice = expedited && r.carrier === "fedex" && /2\s*day/i.test(r.service);
                 const sigAddOn = active && selectedSignatureCode
                   ? (r.signatureOptions?.find(o => o.code === selectedSignatureCode)?.price ?? 0)
                   : 0;
                 return (
-                  <div key={i} className={`rounded-xl border-2 transition-all ${active ? "border-gray-900 bg-gray-900/5" : "border-gray-100 bg-white"}`}>
+                  <div key={i} className={`rounded-xl border-2 transition-all ${active ? "border-gray-900 bg-gray-900/5" : matchesChoice ? "border-orange-200" : "border-gray-100 bg-white"}`}>
                     <button
                       type="button"
                       onClick={() => { setSelectedRate(r); setSelectedSignatureCode(null); }}
@@ -368,6 +406,11 @@ function AddShipmentForm({
                           <div className="flex items-center gap-2">
                             <CarrierLogo carrier={r.carrier} />
                             <span className="text-sm font-semibold text-gray-800">{r.service}</span>
+                            {matchesChoice && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700">
+                                Customer&apos;s choice
+                              </span>
+                            )}
                           </div>
                           {r.deliveryDays && (
                             <p className="text-xs text-gray-400 mt-0.5">{r.deliveryDays} business day{r.deliveryDays !== 1 ? "s" : ""}</p>
@@ -584,6 +627,7 @@ export function ShippingPanel(props: Props) {
                   orderValue={props.orderValue}
                   itemCount={props.itemCount}
                   physician={props.physician}
+                  shippingMethod={props.shippingMethod}
                 />
               )}
             </div>

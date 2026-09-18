@@ -558,6 +558,9 @@ export type OrderEmailData = {
   estimatedDelivery?: Date | null;
   isPatientEmail?:    boolean;
   shippingCost?:      number;
+  // The option selected at checkout, e.g. "FedEx 2Day Shipping" — distinct
+  // from shippingCarrier, which is only set once a label is actually bought.
+  shippingMethod?:    string | null;
   couponCode?:        string | null;
   discountAmount?:    number;
   paymentMethod?:     string | null;
@@ -673,7 +676,7 @@ export function orderConfirmationEmail(d: OrderEmailData) {
           </tr>` : ""}
           ${shipping > 0 ? `
           <tr>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">Shipping:</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:${C.textSoft};border-top:1px solid #f3f4f6;">${d.shippingMethod ? d.shippingMethod : "Shipping"}:</td>
             <td style="border-top:1px solid #f3f4f6;"></td>
             <td style="padding:10px 12px;font-size:13px;color:${C.textSoft};text-align:right;border-top:1px solid #f3f4f6;">$${shipping.toFixed(2)}</td>
           </tr>` : ""}

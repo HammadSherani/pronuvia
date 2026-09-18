@@ -243,7 +243,7 @@ export function SalesProfileForm({ rep }: { rep: Rep }) {
         </p>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Bank Name"    name="bankName"        defaultValue={rep.bankName}        placeholder="e.g. Chase Bank" />
-          <Field label="Swift Code"   name="swiftCode"       defaultValue={rep.swiftCode}       placeholder="e.g. CHASUS33" />
+          <Field label="SWIFT (for International)" name="swiftCode" defaultValue={rep.swiftCode} placeholder="e.g. CHASUS33" />
           <div className="col-span-2">
             <Field label="Account Name" name="bankAccountName" defaultValue={rep.bankAccountName} placeholder="Name on account" />
           </div>

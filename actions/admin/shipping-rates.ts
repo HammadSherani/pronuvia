@@ -27,6 +27,9 @@ function revalidate() {
   revalidatePath("/admin/shipping-rates");
 }
 
+// Methods with a real customer-facing price — LOCAL_PICKUP and FREE are always $0.
+const PRICED_METHODS: ShippingMethod[] = [ShippingMethod.FLAT, ShippingMethod.FEDEX_2DAY];
+
 /** Check if a duplicate rule already exists (same country + same states set + same method). */
 async function findDuplicate(
   country: string,
@@ -90,7 +93,7 @@ export async function createShippingRate(
     states,
     stateNames,
     method,
-    cost:        method === "FLAT" ? parseFloat((formData.get("cost") as string) || "0") : 0,
+    cost:        PRICED_METHODS.includes(method as ShippingMethod) ? parseFloat((formData.get("cost") as string) || "0") : 0,
     isActive:    true,
   };
 
@@ -101,8 +104,8 @@ export async function createShippingRate(
 
   const { continent, country, countryName, method: m, cost } = validated.data;
 
-  if (m === ShippingMethod.FLAT && (!cost || cost <= 0)) {
-    return { errors: { cost: ["Shipping cost is required for Flat Shipping"] } };
+  if (PRICED_METHODS.includes(m) && (!cost || cost <= 0)) {
+    return { errors: { cost: [`Shipping cost is required for ${m === ShippingMethod.FLAT ? "Flat Shipping" : "FedEx 2Day"}`] } };
   }
 
   const duplicate = await findDuplicate(country, states, m as ShippingMethod);
@@ -142,7 +145,7 @@ export async function updateShippingRate(
     states,
     stateNames,
     method,
-    cost:        method === "FLAT" ? parseFloat((formData.get("cost") as string) || "0") : 0,
+    cost:        PRICED_METHODS.includes(method as ShippingMethod) ? parseFloat((formData.get("cost") as string) || "0") : 0,
     isActive:    formData.get("isActive") === "true",
   };
 
@@ -153,8 +156,8 @@ export async function updateShippingRate(
 
   const { continent, country, countryName, method: m, cost, isActive } = validated.data;
 
-  if (m === ShippingMethod.FLAT && (!cost || cost <= 0)) {
-    return { errors: { cost: ["Shipping cost is required for Flat Shipping"] } };
+  if (PRICED_METHODS.includes(m) && (!cost || cost <= 0)) {
+    return { errors: { cost: [`Shipping cost is required for ${m === ShippingMethod.FLAT ? "Flat Shipping" : "FedEx 2Day"}`] } };
   }
 
   const duplicate = await findDuplicate(country, states, m as ShippingMethod, id);

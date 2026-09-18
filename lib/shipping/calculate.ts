@@ -19,6 +19,7 @@ function methodLabel(method: ShippingMethod, countryCode: string): string {
   }
   if (method === ShippingMethod.FREE)         return "Free Shipping";
   if (method === ShippingMethod.LOCAL_PICKUP) return "Local Pickup";
+  if (method === ShippingMethod.FEDEX_2DAY)   return "FedEx 2Day Shipping";
   return method;
 }
 
@@ -40,7 +41,7 @@ export async function getShippingOptionsForCountry(
 
   const allRates = await prisma.shippingRate.findMany({
     where:   { country: countryCode, isActive: true },
-    orderBy: { method: "asc" },
+    orderBy: { cost: "asc" },
     select:  { id: true, method: true, cost: true, states: true },
   });
 

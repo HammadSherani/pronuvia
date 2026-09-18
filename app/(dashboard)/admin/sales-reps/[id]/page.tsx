@@ -132,7 +132,7 @@ export default async function SalesRepViewPage({ params }: Props) {
 
       <Card title="Payout / Bank Details">
         <InfoRow label="Bank Name" value={rep.bankName} />
-        <InfoRow label="SWIFT CODE" value={rep.swiftCode} />
+        <InfoRow label="SWIFT (for International)" value={rep.swiftCode} />
         <InfoRow label="Account Name" value={rep.bankAccountName} />
         <InfoRow label="Routing Number" value={rep.routingNumber} />
         <div className="col-span-2">
