@@ -123,8 +123,10 @@ export function PhysicianRegisterForm() {
   }
 
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
-    if (!terms) {
+    const submittedTerms = new FormData(ev.currentTarget).get("termsAccepted") === "true";
+    if (!submittedTerms) {
       ev.preventDefault();
+      setTerms(false);
       toast.error("You must agree to the Terms and Conditions");
     } else if (!password || !confirmPassword) {
       ev.preventDefault();
@@ -363,7 +365,7 @@ export function PhysicianRegisterForm() {
 
       {/* Terms */}
       <label className="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" name="termsAccepted" value="true" checked={terms} onChange={(ev) => setTerms(ev.target.checked)}
+        <input type="checkbox" name="termsAccepted" value="true" required checked={terms} onChange={(ev) => setTerms(ev.target.checked)}
           className="mt-0.5 w-4 h-4 accent-[#1b3b6f] cursor-pointer" />
         <span className="text-sm text-gray-600">
           I agree to the{" "}
@@ -373,7 +375,7 @@ export function PhysicianRegisterForm() {
       {e.termsAccepted?.[0] && <p className="text-xs text-red-500 -mt-4">{e.termsAccepted[0]}</p>}
 
       <button type="submit" disabled={pending || !terms}
-        className="w-full py-3 bg-[#1b3b6f] hover:bg-[#162f5c] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+        className="w-full py-3 bg-[#1b3b6f] hover:bg-[#162f5c] disabled:bg-gray-400 disabled:opacity-100 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
         {pending && <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
         {pending ? "Submitting…" : "Submit Registration"}
       </button>
