@@ -30,6 +30,8 @@ export function PhysicianRegisterForm() {
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [customSpecialty, setCustomSpecialty] = useState("");
   const [terms, setTerms] = useState(false);
+  console.log("terms", terms);
+  
   const [email, setEmail] = useState(state?.values?.email ?? "");
   const [emailTouched, setEmailTouched] = useState(false);
   const [countryIso, setCountryIso] = useState("US");
@@ -101,9 +103,6 @@ export function PhysicianRegisterForm() {
     if (state?.values?.state !== undefined) {
       setSelectedState(state.values.state);
     }
-    if (state?.values?.termsAccepted !== undefined) {
-      setTerms(state.values.termsAccepted === "true");
-    }
   }, [state]);
 
   if (state?.success) {
@@ -124,7 +123,7 @@ export function PhysicianRegisterForm() {
 
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
     const submittedTerms = new FormData(ev.currentTarget).get("termsAccepted") === "true";
-    if (!submittedTerms) {
+    if (!terms || !submittedTerms) {
       ev.preventDefault();
       setTerms(false);
       toast.error("You must agree to the Terms and Conditions");
@@ -136,6 +135,9 @@ export function PhysicianRegisterForm() {
       setPasswordError("Passwords do not match");
     } else {
       setPasswordError("");
+      // Require the terms agreement again if the server returns a validation
+      // error, and keep the submit button disabled while that request runs.
+      setTerms(false);
     }
   }
 
