@@ -15,6 +15,7 @@ const BaseSchema = z.object({
   loginId:             LoginIdSchema,
   password:            z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword:     z.string().min(1, "Please confirm your password"),
+  termsAccepted:       z.boolean().refine((accepted) => accepted, "You must agree to the Terms and Conditions"),
   firstName:           z.string().min(1, "First name is required"),
   lastName:            z.string().min(1, "Last name is required"),
   aictherapy:          z.string().min(1, "This field is required"),
@@ -82,6 +83,7 @@ export async function registerPhysician(
     loginId:             (formData.get("loginId") as string)?.trim(),
     password:            (formData.get("password") as string) ?? "",
     confirmPassword:     (formData.get("confirmPassword") as string) ?? "",
+    termsAccepted:       formData.get("termsAccepted") === "true",
     firstName:           (formData.get("firstName") as string)?.trim(),
     lastName:            (formData.get("lastName") as string)?.trim(),
     aictherapy:          (formData.get("aictherapy") as string)?.trim(),
@@ -112,6 +114,11 @@ export async function registerPhysician(
     return { errors: z.flattenError(validated.error).fieldErrors, values: strValues };
   }
 
+  const { termsAccepted, ...validatedProfile } = validated.data;
+  if (!termsAccepted) {
+    return { message: "You must agree to the Terms and Conditions.", values: strValues };
+  }
+
   const specialtiesRaw = formData.get("fieldsOfSpeciality") as string;
   const fieldsOfSpeciality: string[] = specialtiesRaw ? JSON.parse(specialtiesRaw) : [];
 
@@ -139,7 +146,7 @@ export async function registerPhysician(
 
   // Password is set directly from the form so the physician can log in with
   // it immediately once approved — no separate "set your password" step required.
-  const { password, confirmPassword: _confirmPassword, ...rest } = validated.data;
+  const { password, confirmPassword: _confirmPassword, ...rest } = validatedProfile;
   const hashed = await hashPassword(password);
 
   try {

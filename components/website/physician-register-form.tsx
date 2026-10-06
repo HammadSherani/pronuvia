@@ -30,11 +30,15 @@ export function PhysicianRegisterForm() {
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [customSpecialty, setCustomSpecialty] = useState("");
   const [terms, setTerms] = useState(false);
+  const [email, setEmail] = useState(state?.values?.email ?? "");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [countryIso, setCountryIso] = useState("US");
   const [selectedState, setSelectedState] = useState<string>("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const states = useMemo(() => State.getStatesOfCountry(countryIso), [countryIso]);
   const countryName = useMemo(
@@ -43,6 +47,13 @@ export function PhysicianRegisterForm() {
   );
 
   const e = state?.errors ?? {};
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const serverEmailError = e.email?.[0];
+  const emailError = serverEmailError && serverEmailError !== "Valid email is required"
+    ? serverEmailError
+    : (emailTouched || !!serverEmailError) && !emailIsValid
+      ? "Valid email is required"
+      : undefined;
 
   function toggleSpecialty(s: string) {
     setSpecialties((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s]);
@@ -64,11 +75,15 @@ export function PhysicianRegisterForm() {
 
   function onPasswordChange(val: string) {
     setPassword(val);
-    if (confirmPassword) setPasswordError(val !== confirmPassword ? "Passwords do not match" : "");
+    if (!val) setPasswordError("Password is required");
+    else if (confirmPassword && val !== confirmPassword) setPasswordError("Passwords do not match");
+    else setPasswordError("");
   }
   function onConfirmPasswordChange(val: string) {
     setConfirmPassword(val);
-    setPasswordError(val !== password ? "Passwords do not match" : "");
+    if (!val) setPasswordError("Please confirm your password");
+    else if (val !== password) setPasswordError("Passwords do not match");
+    else setPasswordError("");
   }
 
   useEffect(() => {
@@ -85,6 +100,9 @@ export function PhysicianRegisterForm() {
     }
     if (state?.values?.state !== undefined) {
       setSelectedState(state.values.state);
+    }
+    if (state?.values?.termsAccepted !== undefined) {
+      setTerms(state.values.termsAccepted === "true");
     }
   }, [state]);
 
@@ -105,9 +123,17 @@ export function PhysicianRegisterForm() {
   }
 
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
-    if (password !== confirmPassword) {
+    if (!terms) {
+      ev.preventDefault();
+      toast.error("You must agree to the Terms and Conditions");
+    } else if (!password || !confirmPassword) {
+      ev.preventDefault();
+      setPasswordError(!password ? "Password is required" : "Please confirm your password");
+    } else if (password !== confirmPassword) {
       ev.preventDefault();
       setPasswordError("Passwords do not match");
+    } else {
+      setPasswordError("");
     }
   }
 
@@ -123,8 +149,11 @@ export function PhysicianRegisterForm() {
 
       {/* Email + Login ID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Email" error={e.email?.[0]}>
-          <input required name="email" type="email" placeholder="doctor@clinic.com" defaultValue={state?.values?.email} className={e.email ? inpErr : inp} />
+        <Field label="Email" error={emailError}>
+          <input required name="email" type="email" placeholder="doctor@clinic.com"
+            value={email}
+            onChange={(ev) => { setEmail(ev.target.value); setEmailTouched(true); }}
+            className={emailError ? inpErr : inp} />
         </Field>
         <Field label="Login ID / Username" error={e.loginId?.[0]}>
           <input required name="loginId" type="text" autoComplete="username" placeholder="e.g. dr.jane.doe" defaultValue={state?.values?.loginId} className={e.loginId ? inpErr : inp} />
@@ -135,12 +164,42 @@ export function PhysicianRegisterForm() {
       {/* Password + Confirm Password */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Password" error={e.password?.[0] || passwordError}>
-          <input required name="password" type="password" autoComplete="new-password" placeholder="At least 8 characters"
-            value={password} onChange={(ev) => onPasswordChange(ev.target.value)} className={e.password || passwordError ? inpErr : inp} />
+          <div className="relative">
+            <input required name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="At least 8 characters"
+              value={password} onChange={(ev) => onPasswordChange(ev.target.value)} className={`${e.password || passwordError ? inpErr : inp} pr-11`} />
+            <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700">
+              {showPassword ? (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.3 9.5 7-.4 1.2-1.3 2.5-2.5 3.6M6.2 6.2C3.9 7.6 2.8 9.8 2.5 12c1 2.7 4.5 7 9.5 7 1.5 0 2.8-.4 4-1" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
         </Field>
         <Field label="Confirm Password" error={e.confirmPassword?.[0] || passwordError}>
-          <input required type="password" autoComplete="new-password" placeholder="Re-enter password"
-            value={confirmPassword} onChange={(ev) => onConfirmPasswordChange(ev.target.value)} className={e.confirmPassword || passwordError ? inpErr : inp} />
+          <div className="relative">
+            <input required name="confirmPassword" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" placeholder="Re-enter password"
+              value={confirmPassword} onChange={(ev) => onConfirmPasswordChange(ev.target.value)} className={`${e.confirmPassword || passwordError ? inpErr : inp} pr-11`} />
+            <button type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700">
+              {showConfirmPassword ? (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.3 9.5 7-.4 1.2-1.3 2.5-2.5 3.6M6.2 6.2C3.9 7.6 2.8 9.8 2.5 12c1 2.7 4.5 7 9.5 7 1.5 0 2.8-.4 4-1" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
         </Field>
       </div>
 
@@ -304,13 +363,14 @@ export function PhysicianRegisterForm() {
 
       {/* Terms */}
       <label className="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" checked={terms} onChange={(ev) => setTerms(ev.target.checked)}
+        <input type="checkbox" name="termsAccepted" value="true" checked={terms} onChange={(ev) => setTerms(ev.target.checked)}
           className="mt-0.5 w-4 h-4 accent-[#1b3b6f] cursor-pointer" />
         <span className="text-sm text-gray-600">
           I agree to the{" "}
           <a href="/terms" target="_blank" className="text-[#1b3b6f] hover:underline">Terms and Conditions</a>
         </span>
       </label>
+      {e.termsAccepted?.[0] && <p className="text-xs text-red-500 -mt-4">{e.termsAccepted[0]}</p>}
 
       <button type="submit" disabled={pending || !terms}
         className="w-full py-3 bg-[#1b3b6f] hover:bg-[#162f5c] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
